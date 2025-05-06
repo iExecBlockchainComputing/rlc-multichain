@@ -4,10 +4,12 @@ out = "out"
 libs = ["lib"]
 
 remappings = [
+    '@layerzerolabs/oft-evm-upgradeable/=lib/devtools/packages/oft-evm-upgradeable/',
     '@layerzerolabs/oft-evm/=lib/devtools/packages/oft-evm/',
+    '@layerzerolabs/oapp-evm-upgradeable/=lib/devtools/packages/oapp-evm-upgradeable/',
     '@layerzerolabs/oapp-evm/=lib/devtools/packages/oapp-evm/',
     '@layerzerolabs/lz-evm-protocol-v2/=lib/layerzero-v2/packages/layerzero-v2/evm/protocol',
-    '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
+    '@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/',
 ]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
