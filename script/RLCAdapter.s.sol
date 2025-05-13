@@ -24,4 +24,4 @@ contract DeployRLCAdapter is Script {
     }
 }
 
-// 0x607F4C5BB672230e8672085532f7e901544a7375 => mainnet 
+// 0x607F4C5BB672230e8672085532f7e901544a7375 => mainnet
