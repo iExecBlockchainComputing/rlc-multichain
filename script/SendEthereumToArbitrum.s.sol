@@ -29,7 +29,6 @@ contract SendEthereumToArbitrum is Script {
         uint16 destinationChainId = 40231; // Arbitrum Sepolia
         address recipientAddress = 0x316A389d7f0Ac46B19FCbE7076f125566f09CEBc; // Recipient on Arbitrum (your address)
         uint256 amount = 10000 * 10 ** 9; //  RLC tokens (adjust the amount as needed)
-        address refundAddress = 0x316A389d7f0Ac46B19FCbE7076f125566f09CEBc; // Your address for refunds
         address zroPaymentAddress = address(0); // Usually zero address
 
         // First, approve the adapter to spend your tokens

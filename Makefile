@@ -1,12 +1,7 @@
 # Makefile for RLC OFT Project
 -include .env
-# Configuration
-NETWORK ?= sepolia
-RPC_URL_SEPOLIA ?="https://lb.drpc.org/ogrpc?network=sepolia&dkey=<>"
-RPC_URL_ARBITRUM_SEPOLIA ?= "https://lb.drpc.org/ogrpc?network=arbitrum-sepolia&dkey=<>"
-ETHERSCAN_API_KEY ?= <>
-ACCOUNT ?= iexec-gabriel-mm-dev
 
+.PHONY: deploy-test
 # Default target
 help:
 	@echo "Available commands:"
@@ -22,11 +17,11 @@ help:
 	@echo "  make test                   - Run tests"
 	@echo "  make clean                  - Clean artifacts"
 	@echo ""
-	@echo "Usage: make COMMAND [NETWORK=sepolia|arbitrum_sepolia] [ACCOUNT=...] [...]"
+	@echo "Usage: make COMMAND [ACCOUNT=...] [...]"
 
 # Deployment targets
 deploy-adapter:
-	@echo "Deploying RLCAdapter on $(NETWORK)..."
+	@echo "Deploying RLCAdapter on SEPOLIA..."
 	forge script script/RLCAdapter.s.sol:DeployRLCAdapter \
 	--rpc-url $(RPC_URL_SEPOLIA) \
 	--account $(ACCOUNT) \
@@ -34,7 +29,7 @@ deploy-adapter:
 	-vvv 
 
 deploy-oft:
-	@echo "Deploying RLCOFT on $(NETWORK)..."
+	@echo "Deploying RLCOFT on Arbitrum SEPOLIA..."
 	forge script script/RLCOFT.s.sol:DeployRLCOFT \
 		--rpc-url $(RPC_URL_ARBITRUM_SEPOLIA) \
 		--account $(ACCOUNT) \
@@ -42,14 +37,14 @@ deploy-oft:
 		-vvv \
 
 conf-adapter:
-	@echo "Configuring RLCAdapter on $(NETWORK)..."
+	@echo "Configuring RLCAdapter on SEPOLIA..."
 	forge script script/ConfigureRLCAdapter.s.sol:ConfigureRLCAdapter \
 		--rpc-url $(RPC_URL_SEPOLIA) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 conf-oft:
-	@echo "Configuring RLCOFT on $(NETWORK)..."
+	@echo "Configuring RLCOFT on Arbitrum SEPOLIA..."
 	forge script script/ConfigureRLCOFT.s.sol:ConfigureRLCOFT \
 		--rpc-url $(RPC_URL_ARBITRUM_SEPOLIA) \
 		--account $(ACCOUNT) \
@@ -57,9 +52,76 @@ conf-oft:
 		-vvv
 
 send-tokens:
-	@echo "Sending tokens cross-chain..."
+	@echo "Sending tokens cross-chain... from SEPOLIA to Arbitrum SEPOLIA"
 	forge script script/SendEthereumToArbitrum.s.sol:SendEthereumToArbitrum \
 		--rpc-url $(RPC_URL_SEPOLIA) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
+
+.PHONY: send-tokens-arbitrum-sepolia
+send-tokens-arbitrum-sepolia:
+	@echo "Sending tokens cross-chain... from Arbitrum SEPOLIA to SEPOLIA"
+	@source .env && forge script script/SendArbitrumToEthereum.s.sol:SendArbitrumToEthereum \
+		--rpc-url $(RPC_URL_ARBITRUM_SEPOLIA) \
+		--account $(ACCOUNT) \
+        --broadcast \
+        -vvv
+# set-receive-handler:
+# 	@echo "Setting receive handler..."
+# 	forge script script/SetReceiveHandler.s.sol:SetReceiveHandlerScript \
+# 		--rpc-url SEPOLIA \
+# 		--account $(ACCOUNT) \
+# 		--broadcast \
+# 		-vvv
+# # Verification targets
+# .PHONY: verify-adapter
+# verify-adapter:
+# 	@echo "Verifying RLCAdapter on SEPOLIA..."
+# 	forge verify-contract \
+# 		--chain-id $(shell forge chain-id --rpc-url SEPOLIA) \
+# 		--compiler-version v0.8.22 \
+# 		--constructor-args $(shell cast abi-encode "constructor(address,address,address)" $(TOKEN_ADDRESS) $(ENDPOINT_ADDRESS_SEPOLIA) $(DELEGATE_ADDRESS)) \
+# 		--etherscan-api-key $(ETHERSCAN_API_KEY) \
+# 		$(ADAPTER_ADDRESS) \
+# 		src/RLCAdapter.sol:RLCAdapter
+
+# .PHONY: verify-oft
+# verify-oft:
+# 	@echo "Verifying RLCOFT on SEPOLIA..."
+# 	forge verify-contract \
+# 		--chain-id $(shell forge chain-id --rpc-url SEPOLIA) \
+# 		--compiler-version v0.8.22 \
+# 		--constructor-args $(shell cast abi-encode "constructor(string,string,address,address)" $(TOKEN_NAME) $(TOKEN_SYMBOL) $(ENDPOINT_ADDRESS_SEPOLIA) $(DELEGATE_ADDRESS)) \
+# 		--etherscan-api-key $(ETHERSCAN_API_KEY) \
+# 		$(OFT_ADDRESS) \
+# 		src/RLCOFT.sol:RLCOFT
+
+# Interaction targets
+
+
+estimate-fee:
+	@echo "Estimating fee for cross-chain transfer..."
+	forge script script/EstimateFee.s.sol:EstimateFeeScript \
+		--rpc-url SEPOLIA \
+		--account $(ACCOUNT) \
+		-vvv
+
+
+
+burn:
+	@echo "Burning tokens..."
+	forge script script/BurnTokens.s.sol:BurnTokensScript \
+		--rpc-url SEPOLIA \
+		--account $(ACCOUNT) \
+		--broadcast \
+		-vvv
+
+# Test and utility targets
+test:
+	@echo "Running tests..."
+	forge test -vvv
+
+clean:
+	@echo "Cleaning artifacts..."
+	forge clean
