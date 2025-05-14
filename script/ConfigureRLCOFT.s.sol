@@ -15,7 +15,7 @@ contract ConfigureRLCOFT is Script {
 
         // RLCAdapter on Ethereum Sepolia
         address adapterAddress = vm.envAddress("SEPOLIA_ADAPTER_ADDRESS");// Add your RLCAdapter address here
-        uint16 ethereumSepoliaChainId = vm.envUint("SEPOLIA_CHAIN_ID"); // LayerZero chain ID for Ethereum Sepolia
+        uint16 ethereumSepoliaChainId = uint16(vm.envUint("SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Ethereum Sepolia
 
         // Set trusted remote
         oft.setPeer(ethereumSepoliaChainId, bytes32(uint256(uint160(adapterAddress))));
