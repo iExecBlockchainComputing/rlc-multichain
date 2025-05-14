@@ -23,7 +23,7 @@ help:
 deploy-adapter:
 	@echo "Deploying RLCAdapter on SEPOLIA..."
 	forge script script/RLCAdapter.s.sol:DeployRLCAdapter \
-	--rpc-url $(RPC_URL_SEPOLIA) \
+	--rpc-url $(SEPOLIA_RPC_URL) \
 	--account $(ACCOUNT) \
 	--broadcast \
 	-vvv 
@@ -31,7 +31,7 @@ deploy-adapter:
 deploy-oft:
 	@echo "Deploying RLCOFT on Arbitrum SEPOLIA..."
 	forge script script/RLCOFT.s.sol:DeployRLCOFT \
-		--rpc-url $(RPC_URL_ARBITRUM_SEPOLIA) \
+		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv \
@@ -39,14 +39,14 @@ deploy-oft:
 conf-adapter:
 	@echo "Configuring RLCAdapter on SEPOLIA..."
 	forge script script/ConfigureRLCAdapter.s.sol:ConfigureRLCAdapter \
-		--rpc-url $(RPC_URL_SEPOLIA) \
+		--rpc-url $(SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 conf-oft:
 	@echo "Configuring RLCOFT on Arbitrum SEPOLIA..."
 	forge script script/ConfigureRLCOFT.s.sol:ConfigureRLCOFT \
-		--rpc-url $(RPC_URL_ARBITRUM_SEPOLIA) \
+		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
@@ -54,7 +54,7 @@ conf-oft:
 send-tokens:
 	@echo "Sending tokens cross-chain... from SEPOLIA to Arbitrum SEPOLIA"
 	forge script script/SendEthereumToArbitrum.s.sol:SendEthereumToArbitrum \
-		--rpc-url $(RPC_URL_SEPOLIA) \
+		--rpc-url $(SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
@@ -63,7 +63,7 @@ send-tokens:
 send-tokens-arbitrum-sepolia:
 	@echo "Sending tokens cross-chain... from Arbitrum SEPOLIA to SEPOLIA"
 	@source .env && forge script script/SendArbitrumToEthereum.s.sol:SendArbitrumToEthereum \
-		--rpc-url $(RPC_URL_ARBITRUM_SEPOLIA) \
+		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
         --broadcast \
         -vvv
@@ -81,9 +81,9 @@ send-tokens-arbitrum-sepolia:
 # 	forge verify-contract \
 # 		--chain-id $(shell forge chain-id --rpc-url SEPOLIA) \
 # 		--compiler-version v0.8.22 \
-# 		--constructor-args $(shell cast abi-encode "constructor(address,address,address)" $(TOKEN_ADDRESS) $(ENDPOINT_ADDRESS_SEPOLIA) $(DELEGATE_ADDRESS)) \
-# 		--etherscan-api-key $(ETHERSCAN_API_KEY) \
-# 		$(ADAPTER_ADDRESS) \
+# 		--constructor-args $(shell cast abi-encode "constructor(address,address,address)" $(RLC_SEPOLIA_ADDRESS) $(SEPOLIA_ENDPOINT_ADDRESS) $(DELEGATE_ADDRESS)) \
+# 		--etherscan-api-key $(BLOCKSCAN_API_KEY) \
+# 		$(SEPOLIA_ADAPTER_ADDRESS) \
 # 		src/RLCAdapter.sol:RLCAdapter
 
 # .PHONY: verify-oft
@@ -92,9 +92,9 @@ send-tokens-arbitrum-sepolia:
 # 	forge verify-contract \
 # 		--chain-id $(shell forge chain-id --rpc-url SEPOLIA) \
 # 		--compiler-version v0.8.22 \
-# 		--constructor-args $(shell cast abi-encode "constructor(string,string,address,address)" $(TOKEN_NAME) $(TOKEN_SYMBOL) $(ENDPOINT_ADDRESS_SEPOLIA) $(DELEGATE_ADDRESS)) \
-# 		--etherscan-api-key $(ETHERSCAN_API_KEY) \
-# 		$(OFT_ADDRESS) \
+# 		--constructor-args $(shell cast abi-encode "constructor(string,string,address,address)" $(TOKEN_NAME) $(TOKEN_SYMBOL) $(SEPOLIA_ENDPOINT_ADDRESS) $(DELEGATE_ADDRESS)) \
+# 		--etherscan-api-key $(BLOCKSCAN_API_KEY) \
+# 		$(ARBITRUM_SEPOLIA_OFT_ADDRESS) \
 # 		src/RLCOFT.sol:RLCOFT
 
 # Interaction targets

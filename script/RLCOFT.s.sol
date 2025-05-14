@@ -12,11 +12,11 @@ contract DeployRLCOFT is Script {
     function run() external {
         vm.startBroadcast();
 
-        string memory name = "iEx.ec Network Token";
-        string memory symbol = "RLC";
-        address lzEndpoint = 0x6EDCE65403992e310A62460808c4b910D972f10f;
-        address delegate = 0x316A389d7f0Ac46B19FCbE7076f125566f09CEBc; // Your actual wallet address
-        console.log("Delegate/owner address:", delegate);
+        string memory name = vm.envString("TOKEN_NAME");
+        string memory symbol = vm.envString("TOKEN_SYMBOL");
+        address lzEndpoint = vm.envAddress("ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
+        address delegate = vm.envAddress("DELEGATE_ADDRESS");
+        
         rlcOFT = new RLCOFT(name, symbol, lzEndpoint, delegate);
         console.log("rlcAOFT deployed at:", address(rlcOFT));
 

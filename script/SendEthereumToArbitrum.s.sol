@@ -22,12 +22,12 @@ contract SendEthereumToArbitrum is Script {
         vm.startBroadcast();
 
         // Contract addresses
-        address adapterAddress = 0x2F8b13A6882e4c4ea52d6588510fB7DFbD09E4E5; // Your RLCAdapter address
-        address rlcTokenAddress = 0x26A738b6D33EF4D94FF084D3552961b8f00639Cd; // RLC token on Sepolia
+        address adapterAddress = vm.envAddress("SEPOLIA_ADAPTER_ADDRESS");// Your RLCAdapter address
+        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
 
         // Transfer parameters
-        uint16 destinationChainId = 40231; // Arbitrum Sepolia
-        address recipientAddress = 0x316A389d7f0Ac46B19FCbE7076f125566f09CEBc; // Recipient on Arbitrum (your address)
+        uint16 destinationChainId = vm.envUint("ARBITRUM_SEPOLIA_CHAIN_ID");  // LayerZero chain ID for Arbitrum Sepolia
+        address recipientAddress = vm.envAddress("RECEIVER_ADDRESS"); // Recipient on Arbitrum (your address)
         uint256 amount = 10000 * 10 ** 9; //  RLC tokens (adjust the amount as needed)
         address zroPaymentAddress = address(0); // Usually zero address
 
