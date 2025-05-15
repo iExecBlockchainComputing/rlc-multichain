@@ -12,6 +12,14 @@ contract RLCOFT is Ownable, OFT {
         Ownable(_delegate)
     {}
 
+    /**
+     * @dev Override the decimals function to return 9 instead of the default 18
+     * @return The number of decimals used in the token
+     */
+    function decimals() public pure override returns (uint8) {
+        return 9;
+    }
+
     function burn(uint256 _value) external returns (bool) {
         _burn(msg.sender, _value);
         return true;
