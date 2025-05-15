@@ -48,6 +48,31 @@ send-tokens-arbitrum-sepolia:
 		--account $(ACCOUNT) \
         --broadcast \
         -vvv
+
+# Verification targets
+verify-adapter:
+	@echo "Verifying RLCAdapter on Sepolia Etherscan..."
+	forge verify-contract \
+		--chain-id 11155111 \
+		--watch \
+		--constructor-args $(shell cast abi-encode "constructor(address,address,address)" $(RLC_SEPOLIA_ADDRESS) $(SEPOLIA_ENDPOINT_ADDRESS) $(DELEGATE_ADDRESS)) \
+		--etherscan-api-key $(ETHERSCAN_API_KEY) \
+		$(SEPOLIA_ADAPTER_ADDRESS) \
+		src/RLCAdapter.sol:RLCAdapter
+
+verify-oft:
+	@echo "Verifying RLCOFT on Arbitrum Sepolia Etherscan..."
+	forge verify-contract \
+		--chain-id 421614 \
+		--watch \
+		--constructor-args $(shell cast abi-encode "constructor(string,string,address,address)" $(TOKEN_NAME) $(TOKEN_SYMBOL) $(ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS) $(DELEGATE_ADDRESS)) \
+		--etherscan-api-key $(ARBISCAN_API_KEY) \
+		$(ARBITRUM_SEPOLIA_OFT_ADDRESS) \
+		src/RLCOFT.sol:RLCOFT
+
+# Combined verification target
+verify-all: verify-adapter verify-oft
+
 # Test and utility targets
 test:
 	@echo "Running tests..."
