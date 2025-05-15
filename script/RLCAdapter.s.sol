@@ -3,6 +3,7 @@ pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
+import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract DeployRLCAdapter is Script {
     RLCAdapter public rlcAdapter;
@@ -20,7 +21,7 @@ contract DeployRLCAdapter is Script {
         console.log("RLCAdapter deployed at:", address(rlcAdapter));
 
         vm.stopBroadcast();
+        
+        EnvUtils.updateEnvVariable("SEPOLIA_ADAPTER_ADDRESS", address(rlcAdapter));
     }
 }
-
-// 0x607F4C5BB672230e8672085532f7e901544a7375 => mainnet

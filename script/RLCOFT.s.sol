@@ -3,6 +3,7 @@ pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
+import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract DeployRLCOFT is Script {
     RLCOFT public rlcOFT;
@@ -18,8 +19,10 @@ contract DeployRLCOFT is Script {
         address delegate = vm.envAddress("DELEGATE_ADDRESS");
         
         rlcOFT = new RLCOFT(name, symbol, lzEndpoint, delegate);
-        console.log("rlcAOFT deployed at:", address(rlcOFT));
+        console.log("rlcOFT deployed at:", address(rlcOFT));
 
         vm.stopBroadcast();
+        
+        EnvUtils.updateEnvVariable("ARBITRUM_SEPOLIA_OFT_ADDRESS", address(rlcOFT));
     }
 }
