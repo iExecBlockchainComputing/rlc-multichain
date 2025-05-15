@@ -1,286 +1,211 @@
-## Foundry
+# RLC Layer Zero Bridge
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This project implements a cross-chain token bridge for the RLC token between Ethereum and Arbitrum using LayerZero's OFT (Omnichain Fungible Token) protocol. It enables seamless token transfers between Ethereum Sepolia and Arbitrum Sepolia testnets.
 
-Foundry consists of:
+## Architecture
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+The system consists of two main components:
 
-## Documentation
+1. **RLCAdapter (on Ethereum **Sepolia**)**: Wraps the existing RLC ERC-20 token to make it compatible with LayerZero's cross-chain messaging.
+2. **RLCOFT (on Arbitrum Sepolia)**: A new token that's minted when RLC tokens are locked in the adapter on Ethereum, and burned when tokens are sent back.
 
-https://book.getfoundry.sh/
+[![Architecture Diagram](https://mermaid.ink/img/pako:eNqNVNtO4zAQ_RXLvAY2F3JpQEhpLrsPRUhQXqBoZRKXRjh2ZCdouf372nHSEhrYddV2MjnHZ-ZM4leYswLDED5wVG_AMllRIJdo73ViBdNmgzluK3CFa0ZKtIIaotblIr6VX7Bkj5ju0qflWXoZ2-bpj_LsbpeOClQ3mCtGH44oF9myT3_iLW5-p8tftwv0jPkN5gyktKhZSZseg2mhg73aI35fNny6dimnKpF_E-XL7H4R0eX8v4u4Fph3VasAMAoGG-_A4eHZmwWiuubsCQvQKHHxBkaWDPQObIMYESKAkBqfcP1FB3PAguWPuw1lc_ugY2kFLQSosBDoAb_15mqgjjucC2LOhDjMN6ikI7R0YYuWcYf2QIJJ-YT5h42lhRqnHFYgH5xLu3b1dT0qTweLhmnd7Rk56EQjJ_YU5mDecrpT2APEE91P9ZN82f2UV-lE919OKQPXlPx7Tj_BkiMq1mrTkWHbAvRvTpAQCV4DPLym65KQ8CD24izzDdFwSQ4PnMQ1576RM8J4eE9Q_njyiY-GV0Xz51bqZNmWb0eBnQXf8Vs1RM3NssSOzC03y4LANL_jkpeembjqs6u6WxPMD3xlnzE4N5jwUaAb_tDd6Mbgp7F9xlQTI4iestE_GuTlBBqwwrxCZSHPzFcFXUEpWuEVDGVY4DVqSaPOmXcJRW3Drp5pDkMpjg3Y1gVqcFIieUBVMFwjImS2RvSGsWoAyUsYvsI_MAysI8_yfNuZeY7tuUFgwGcYWjP3yLdN1_Jl5PiBab8b8KXbwDyaufbMOnYs27OsIPA8A3LWPmy2WrgoG8bP9ZnfHf2GPPpVN1qcy_cD85i1tJFKlj3UnHY8jXr_C5RA8AI?type=png)](https://mermaid.live/edit#pako:eNqNVNtO4zAQ_RXLvAY2F3JpQEhpLrsPRUhQXqBoZRKXRjh2ZCdouf372nHSEhrYddV2MjnHZ-ZM4leYswLDED5wVG_AMllRIJdo73ViBdNmgzluK3CFa0ZKtIIaotblIr6VX7Bkj5ju0qflWXoZ2-bpj_LsbpeOClQ3mCtGH44oF9myT3_iLW5-p8tftwv0jPkN5gyktKhZSZseg2mhg73aI35fNny6dimnKpF_E-XL7H4R0eX8v4u4Fph3VasAMAoGG-_A4eHZmwWiuubsCQvQKHHxBkaWDPQObIMYESKAkBqfcP1FB3PAguWPuw1lc_ugY2kFLQSosBDoAb_15mqgjjucC2LOhDjMN6ikI7R0YYuWcYf2QIJJ-YT5h42lhRqnHFYgH5xLu3b1dT0qTweLhmnd7Rk56EQjJ_YU5mDecrpT2APEE91P9ZN82f2UV-lE919OKQPXlPx7Tj_BkiMq1mrTkWHbAvRvTpAQCV4DPLym65KQ8CD24izzDdFwSQ4PnMQ1576RM8J4eE9Q_njyiY-GV0Xz51bqZNmWb0eBnQXf8Vs1RM3NssSOzC03y4LANL_jkpeembjqs6u6WxPMD3xlnzE4N5jwUaAb_tDd6Mbgp7F9xlQTI4iestE_GuTlBBqwwrxCZSHPzFcFXUEpWuEVDGVY4DVqSaPOmXcJRW3Drp5pDkMpjg3Y1gVqcFIieUBVMFwjImS2RvSGsWoAyUsYvsI_MAysI8_yfNuZeY7tuUFgwGcYWjP3yLdN1_Jl5PiBab8b8KXbwDyaufbMOnYs27OsIPA8A3LWPmy2WrgoG8bP9ZnfHf2GPPpVN1qcy_cD85i1tJFKlj3UnHY8jXr_C5RA8AI)
+
+## Prerequisites
+
+- [Foundry](https://book.getfoundry.sh/getting-started/installation.html) for contract compilation and deployment
+- Ethereum wallet with Sepolia ETH and Arbitrum Sepolia ETH for gas
+- RLC tokens on Sepolia testnet for bridge testing
+
+## Setup
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/rlc-layerzero-bridge.git
+   cd rlc-layerzero-bridge
+   ```
+
+2. Install dependencies
+   ```bash
+   forge install
+   ```
+
+3. Create a `.env` file with the following variables:
+   ```
+   # Network RPC endpoints
+   SEPOLIA_RPC_URL=https://ethereum-sepolia.publicnode.com
+   ARBITRUM_SEPOLIA_RPC_URL=https://arbitrum-sepolia.publicnode.com
+   
+   # Account for deployment/transactions
+   ACCOUNT=your-foundry-account-alias
+   
+   # Contract parameters
+   TOKEN_NAME=iEx.ec Network Token
+   TOKEN_SYMBOL=RLC
+   
+   # Addresses
+   DELEGATE_ADDRESS=0xYourAddressHere
+   RECEIVER_ADDRESS=0xYourAddressHere
+   
+   # DEPLOYED CONTRACT ADDRESSES
+   SEPOLIA_ADAPTER_ADDRESS=0xYourDeployedAdapterAddress
+   ARBITRUM_SEPOLIA_OFT_ADDRESS=0xYourDeployedOFTAddress
+   RLC_SEPOLIA_ADDRESS=0xRLCTokenAddressOnSepolia
+   
+   # LayerZero Endpoints
+   SEPOLIA_ENDPOINT_ADDRESS=0x6EDCE65403992e310A62460808c4b910D972f10f
+   ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS=0x6EDCE65403992e310A62460808c4b910D972f10f
+   
+   # LayerZero Chain IDs
+   SEPOLIA_CHAIN_ID=10161
+   ARBITRUM_SEPOLIA_CHAIN_ID=40231
+   ```
+
+## Deployment
+
+The deployment process involves four steps:
+
+1. Deploy the RLCAdapter on Ethereum Sepolia:
+   ```bash
+   make deploy-adapter
+   ```
+
+2. Deploy the RLCOFT on Arbitrum Sepolia:
+   ```bash
+   make deploy-oft
+   ```
+
+3. Configure the RLCAdapter to trust the RLCOFT contract:
+   ```bash
+   make conf-adapter
+   ```
+
+4. Configure the RLCOFT to trust the RLCAdapter contract:
+   ```bash
+   make conf-oft
+   ```
+
+After deployment, update your `.env` file with the deployed contract addresses.
 
 ## Usage
 
-### Build
+### Bridge RLC from Ethereum to Arbitrum
 
-```shell
-$ forge build
+To send RLC tokens from Ethereum Sepolia to Arbitrum Sepolia:
+
+```bash
+make send-tokens
 ```
 
-### Test
+This will:
+1. Approve the RLCAdapter to spend your RLC tokens
+2. Initiate the cross-chain transfer through LayerZero
+3. Lock tokens in the adapter and mint equivalent tokens on Arbitrum
 
-```shell
-$ forge test
+### Bridge RLC from Arbitrum to Ethereum
+
+To send RLC tokens from Arbitrum Sepolia back to Ethereum Sepolia:
+
+```bash
+make send-tokens-arbitrum-sepolia
 ```
 
-### Format
+This will:
+1. Burn RLCOFT tokens on Arbitrum
+2. Send a cross-chain message to the adapter
+3. Release the original RLC tokens on Ethereum
 
-```shell
-$ forge fmt
+## Contract Architecture
+
+### RLCAdapter.sol
+
+An adapter that wraps the existing RLC token to make it compatible with LayerZero's OFT protocol. It extends:
+- `OFTAdapter`: Handles the OFT cross-chain logic
+- `Ownable`: Provides ownership control for administrative functions
+
+```solidity
+contract RLCAdapter is Ownable, OFTAdapter {
+    constructor(address _token, address _lzEndpoint, address _owner)
+        OFTAdapter(_token, _lzEndpoint, _owner)
+        Ownable(_owner)
+    {}
+}
 ```
 
-### Gas Snapshots
+### RLCOFT.sol
 
-```shell
-$ forge snapshot
+A new token on the destination chain (Arbitrum) that's minted when RLC tokens are locked in the adapter. It extends:
+- `OFT`: Implements the OFT cross-chain logic
+- `Ownable`: Provides ownership control for administrative functions
+
+```solidity
+contract RLCOFT is Ownable, OFT {
+    constructor(string memory _name, string memory _symbol, address _lzEndpoint, address _delegate)
+        OFT(_name, _symbol, _lzEndpoint, _delegate)
+        Ownable(_delegate)
+    {}
+
+    function burn(uint256 _value) external returns (bool) {
+        _burn(msg.sender, _value);
+        return true;
+    }
+
+    function approveAndCall(address _spender, uint256 _value, bytes calldata _extraData) public returns (bool) {
+        TokenSpender spender = TokenSpender(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, address(this), _extraData);
+            return true;
+        }
+        return false;
+    }
+}
 ```
 
-### Anvil
+## How It Works
 
-```shell
-$ anvil
+1. **Ethereum → Arbitrum:**
+   - User approves RLCAdapter to spend RLC tokens
+   - RLCAdapter locks the RLC tokens
+   - LayerZero delivers a message to RLCOFT
+   - RLCOFT mints equivalent tokens to the recipient on Arbitrum
+
+2. **Arbitrum → Ethereum:**
+   - User initiates transfer from RLCOFT
+   - RLCOFT burns the tokens
+   - LayerZero delivers a message to RLCAdapter
+   - RLCAdapter unlocks the original RLC tokens to the recipient on Ethereum
+
+## Security Considerations
+
+- The bridge security relies on LayerZero's security model
+- Administrative functions are protected by the Ownable pattern
+- Use caution when setting trusted remotes to prevent unauthorized cross-chain interactions
+
+## Gas Costs and Fees
+
+LayerZero transactions require fees to cover:
+1. Gas on the source chain
+2. Gas on the destination chain (prepaid)
+3. LayerZero relayer fees
+
+The scripts automatically calculate these fees and include them in the transaction.
+
+## Testing
+
+Testing with Foundry tests is recommended before mainnet deployments.
+
+```bash
+forge test
 ```
 
-### Deploy
+## Troubleshooting
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-forge script script/RLCAdapter.s.sol --rpc-url "https://lb.drpc.org/ogrpc?network=sepolia&dkey=AhEPbH3buE5zjj_dDMs3E2hIUihFGTAR8J88ThukG97E" --broadcast --account iexec-gabriel-mm-dev --verify -vvvv
+Common issues:
+- Insufficient gas: Ensure you have enough ETH on both networks
+- Missing environment variables: Check your .env file is properly loaded
+- Chain ID mismatch: Verify LayerZero chain IDs are correct
 
-forge script script/RLCOFT.s.sol --rpc-url "https://lb.drpc.org/ogrpc?network=arbitrum-sepolia&dkey=AhEPbH3buE5zjj_dDMs3E2hIUihFGTAR8J88ThukG97E" --broadcast --account iexec-gabriel-mm-dev --verify -vvvv
+## References
 
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
-
-
-forge script script/RLCAdapter.s.sol --rpc-url "https://lb.drpc.org/ogrpc?network=sepolia&dkey=AhEPbH3buE5zjj_dDMs3E2hIUihFGTAR8J88ThukG97E" --broadcast --account iexec-gabriel-mm-dev
-Warning: This is a nightly build of Foundry. It is recommended to use the latest stable version. Visit https://book.getfoundry.sh/announcements for more information. 
-To mute this warning set `FOUNDRY_DISABLE_NIGHTLY_WARNING` in your environment. 
-
-[⠊] Compiling...
-[⠒] Compiling 62 files with Solc 0.8.25
-[⠢] Solc 0.8.25 finished in 1.08s
-Compiler run successful!
-Enter keystore password:
-Script ran successfully.
-
-## Setting up 1 EVM.
-
-==========================
-
-Chain 11155111
-
-Estimated gas price: 0.001000044 gwei
-
-Estimated total gas used for script: 5146876
-
-Estimated amount required: 0.000005147102462544 ETH
-
-==========================
-
-##### sepolia
-✅  [Success] Hash: 0x8866979e7ccd74306201da7e3816bfc6ef5788ffe2afd01dc1aeaed488418908
-Contract Address: 0x3092c6B927d19B98967913756153Ea86B65774dC
-Block: 8290001
-Paid: 0.000003959227060128 ETH (3959136 gas * 0.001000023 gwei)
-
-✅ Sequence #1 on sepolia | Total Paid: 0.000003959227060128 ETH (3959136 gas * avg 0.001000023 gwei)
-                                                                                                                                                                                                                                                     
-
-==========================
-
-ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
-
-Transactions saved to: /Users/gabriel/Documents/iexec/RLC-multichain/broadcast/RLCAdapter.s.sol/11155111/run-latest.json
-
-Sensitive values saved to: /Users/gabriel/Documents/iexec/RLC-multichain/cache/RLCAdapter.s.sol/11155111/run-latest.json
-
-
-forge script script/RLCOFT.s.sol --rpc-url "https://lb.drpc.org/ogrpc?network=arbitrum-sepolia&dkey=AhEPbH3buE5zjj_dDMs3E2hIUihFGTAR8J88ThukG97E" --broadcast --account iexec-gabriel-mm-dev --verify -vvvv
-Warning: This is a nightly build of Foundry. It is recommended to use the latest stable version. Visit https://book.getfoundry.sh/announcements for more information. 
-To mute this warning set `FOUNDRY_DISABLE_NIGHTLY_WARNING` in your environment. 
-
-[⠊] Compiling...
-[⠃] Compiling 1 files with Solc 0.8.25
-[⠒] Solc 0.8.25 finished in 890.04ms
-Compiler run successful!
-Enter keystore password:
-Traces:
-  [4402550] DeployRLCOFT::run()
-    ├─ [0] VM::startBroadcast()
-    │   └─ ← [Return]
-    ├─ [4353607] → new RLCOFT@0x15160ac50442CB2360A3917766e577fFeaE2FD23
-    │   ├─ emit OwnershipTransferred(previousOwner: 0x0000000000000000000000000000000000000000, newOwner: DefaultSender: [0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38])
-    │   ├─ [23959] 0x6EDCE65403992e310A62460808c4b910D972f10f::setDelegate(DefaultSender: [0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38])
-    │   │   ├─ emit DelegateSet(sender: RLCOFT: [0x15160ac50442CB2360A3917766e577fFeaE2FD23], delegate: DefaultSender: [0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38])
-    │   │   └─ ← [Stop]
-    │   └─ ← [Return] 21246 bytes of code
-    ├─ [0] VM::stopBroadcast()
-    │   └─ ← [Return]
-    └─ ← [Stop]
-
-
-Script ran successfully.
-
-## Setting up 1 EVM.
-==========================
-Simulated On-chain Traces:
-
-  [4353607] → new RLCOFT@0x15160ac50442CB2360A3917766e577fFeaE2FD23
-    ├─ emit OwnershipTransferred(previousOwner: 0x0000000000000000000000000000000000000000, newOwner: DefaultSender: [0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38])
-    ├─ [23959] 0x6EDCE65403992e310A62460808c4b910D972f10f::setDelegate(DefaultSender: [0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38])
-    │   ├─ emit DelegateSet(sender: RLCOFT: [0x15160ac50442CB2360A3917766e577fFeaE2FD23], delegate: DefaultSender: [0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38])
-    │   └─ ← [Stop]
-    └─ ← [Return] 21246 bytes of code
-
-
-==========================
-
-Chain 421614
-
-Estimated gas price: 0.200000001 gwei
-
-Estimated total gas used for script: 6260835
-
-Estimated amount required: 0.001252167006260835 ETH
-
-==========================
-
-##### arbitrum-sepolia
-✅  [Success] Hash: 0x23eaffd0ded6595787198c9d3fb14645082366c8856642d21d344b3c68056dc5
-Contract Address: 0x15160ac50442CB2360A3917766e577fFeaE2FD23
-Block: 151160367
-Paid: 0.0004776947 ETH (4776947 gas * 0.1 gwei)
-
-✅ Sequence #1 on arbitrum-sepolia | Total Paid: 0.0004776947 ETH (4776947 gas * avg 0.1 gwei)
-                                                                                                                                                                                                                                                     
-
-==========================
-
-ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
-##
-Start verification for (1) contracts
-Start verifying contract ****`0x15160ac50442CB2360A3917766e577fFeaE2FD23`**** deployed on arbitrum-sepolia
-Compiler version: 0.8.25
-Constructor args: 000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000006edce65403992e310a62460808c4b910d972f10f0000000000000000000000001804c8ab1f12e6bbf3894d4083f33e07309d1f3800000000000000000000000000000000000000000000000000000000000000146945782e6563204e6574776f726b20546f6b656e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000003524c430000000000000000000000000000000000000000000000000000000000
-Attempting to verify on Sourcify, pass the --etherscan-api-key <API_KEY> to verify on Etherscan OR use the --verifier flag to verify on any other provider
-
-Submitting verification for [RLCOFT] "0x15160ac50442CB2360A3917766e577fFeaE2FD23".
-Contract successfully verified
-All (1) contracts were verified!
-
-Transactions saved to: /Users/gabriel/Documents/iexec/RLC-multichain/broadcast/RLCOFT.s.sol/421614/run-latest.json
-
-Sensitive values saved to: /Users/gabriel/Documents/iexec/RLC-multichain/cache/RLCOFT.s.sol/421614/run-latest.json
-
-
-
-
-RLC => 0x26A738b6D33EF4D94FF084D3552961b8f00639Cd
-Sepolia => 0x83784F1233bA5c883F4a74ccB6b71991Cb442192 => adapter 
-RLCAdapter deployed at: 0x83784F1233bA5c883F4a74ccB6b71991Cb442192
-
-Sepolia ARBITRUM => 0x39BAeafdF85Ec5bBf3D00F7c27F0bc2F8e22ecD2 oft 
-  RLCAdapter deployed at: 0x39BAeafdF85Ec5bBf3D00F7c27F0bc2F8e22ecD2
-
-
-  forge script script/ConfigureRLCAdapter.s.sol --rpc-url "https://lb.drpc.org/ogrpc?network=sepolia&dkey=AhEPbH3buE5zjj_dDMs3E2hIUihFGTAR8J88ThukG97E" --broadcast --account iexec-gabriel-mm-dev
-
-Warning: This is a nightly build of Foundry. It is recommended to use the latest stable version. Visit https://book.getfoundry.sh/announcements for more information. 
-To mute this warning set `FOUNDRY_DISABLE_NIGHTLY_WARNING` in your environment. 
-
-[⠊] Compiling...
-[⠒] Compiling 1 files with Solc 0.8.25
-[⠑] Solc 0.8.25 finished in 564.63ms
-Compiler run successful!
-Enter keystore password:
-Script ran successfully.
-
-## Setting up 1 EVM.
-
-==========================
-
-Chain 11155111
-
-Estimated gas price: 0.001083598 gwei
-
-Estimated total gas used for script: 66729
-
-Estimated amount required: 0.000000072307410942 ETH
-
-==========================
-
-##### sepolia
-✅  [Success] Hash: 0x2168df42fc4cee32cee8868ca1a24ab49f77e4e808fbad196caa0f8864933d60
-Block: 8290509
-Paid: 0.00000005234641783 ETH (48311 gas * 0.00108353 gwei)
-
-✅ Sequence #1 on sepolia | Total Paid: 0.00000005234641783 ETH (48311 gas * avg 0.00108353 gwei)
-                                                                                                                                                                                                                                                     
-
-==========================
-
-ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
-
-Transactions saved to: /Users/gabriel/Documents/iexec/RLC-multichain/broadcast/ConfigureRLCAdapter.s.sol/11155111/run-latest.json
-
-Sensitive values saved to: /Users/gabriel/Documents/iexec/RLC-multichain/cache/ConfigureRLCAdapter.s.sol/11155111/run-latest.json
-
-
-forge script script/ConfigureRLCOFT.s.sol --rpc-url "https://lb.drpc.org/ogrpc?network=arbitrum-sepolia&dkey=AhEPbH3buE5zjj_dDMs3E2hIUihFGTAR8J88ThukG97E" --broadcast --account iexec-gabriel-mm-dev
-
-Warning: This is a nightly build of Foundry. It is recommended to use the latest stable version. Visit https://book.getfoundry.sh/announcements for more information. 
-To mute this warning set `FOUNDRY_DISABLE_NIGHTLY_WARNING` in your environment. 
-
-[⠊] Compiling...
-[⠑] Compiling 1 files with Solc 0.8.25
-[⠘] Solc 0.8.25 finished in 635.67ms
-Compiler run successful!
-Enter keystore password:
-Script ran successfully.
-
-## Setting up 1 EVM.
-
-==========================
-
-Chain 421614
-
-Estimated gas price: 0.200000001 gwei
-
-Estimated total gas used for script: 63248
-
-Estimated amount required: 0.000012649600063248 ETH
-
-==========================
-
-##### arbitrum-sepolia
-✅  [Success] Hash: 0x07b959cbaf66d7333245676857832784396bc32264e5933b9e401342eb2ed36b
-Block: 151182502
-Paid: 0.0000048267 ETH (48267 gas * 0.1 gwei)
-
-✅ Sequence #1 on arbitrum-sepolia | Total Paid: 0.0000048267 ETH (48267 gas * avg 0.1 gwei)
-                                                                                                                                                                                                                                                     
-
-==========================
-
-ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
-
-Transactions saved to: /Users/gabriel/Documents/iexec/RLC-multichain/broadcast/ConfigureRLCOFT.s.sol/421614/run-latest.json
-
-Sensitive values saved to: /Users/gabriel/Documents/iexec/RLC-multichain/cache/ConfigureRLCOFT.s.sol/421614/run-latest.json
+- [LayerZero Documentation](https://layerzero.gitbook.io/docs/)
+- [OFT Contracts](https://github.com/LayerZero-Labs/solidity-examples/tree/main/contracts/token/oft)
