@@ -30,36 +30,7 @@ The system consists of two main components:
    forge install
    ```
 
-3. Create a `.env` file with the following variables:
-   ```
-   # Network RPC endpoints
-   SEPOLIA_RPC_URL=https://ethereum-sepolia.publicnode.com
-   ARBITRUM_SEPOLIA_RPC_URL=https://arbitrum-sepolia.publicnode.com
-   
-   # Account for deployment/transactions
-   ACCOUNT=your-foundry-account-alias
-   
-   # Contract parameters
-   TOKEN_NAME=iEx.ec Network Token
-   TOKEN_SYMBOL=RLC
-   
-   # Addresses
-   DELEGATE_ADDRESS=0xYourAddressHere
-   RECEIVER_ADDRESS=0xYourAddressHere
-   
-   # DEPLOYED CONTRACT ADDRESSES
-   SEPOLIA_ADAPTER_ADDRESS=0xYourDeployedAdapterAddress
-   ARBITRUM_SEPOLIA_OFT_ADDRESS=0xYourDeployedOFTAddress
-   RLC_SEPOLIA_ADDRESS=0xRLCTokenAddressOnSepolia
-   
-   # LayerZero Endpoints
-   SEPOLIA_ENDPOINT_ADDRESS=0x6EDCE65403992e310A62460808c4b910D972f10f
-   ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS=0x6EDCE65403992e310A62460808c4b910D972f10f
-   
-   # LayerZero Chain IDs
-   SEPOLIA_CHAIN_ID=10161
-   ARBITRUM_SEPOLIA_CHAIN_ID=40231
-   ```
+3. Create a `.env` file
 
 ## Deployment
 
