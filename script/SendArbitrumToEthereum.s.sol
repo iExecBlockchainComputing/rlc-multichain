@@ -22,9 +22,9 @@ contract SendArbitrumToEthereum is Script {
 
         // Contract addresses
         address oftAddress = vm.envAddress("ARBITRUM_SEPOLIA_RLC_OFT_ADDRESS"); // Your RLCOFT address on Arbitrum Sepolia
-        
+
         // Transfer parameters
-        uint16 destinationChainId = uint16(vm.envUint("LAYER_ZERO_SEPOLIA_CHAIN_ID"));  // LayerZero chain ID for Ethereum Sepolia
+        uint16 destinationChainId = uint16(vm.envUint("LAYER_ZERO_SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Ethereum Sepolia
         address recipientAddress = vm.envAddress("SENDER_ADDRESS"); // Recipient on Ethereum Sepolia
         console.log("Recipient: %s", recipientAddress);
 
@@ -37,7 +37,7 @@ contract SendArbitrumToEthereum is Script {
         // Estimate gas for the OFT endpoint
         bytes memory _extraOptions =
             abi.encodePacked(uint16(3), uint8(1), uint16(33), uint8(1), uint128(65000), uint128(0));
-            
+
         SendParam memory sendParam = SendParam(
             destinationChainId,
             addressToBytes32(recipientAddress),

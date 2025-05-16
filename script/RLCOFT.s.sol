@@ -16,12 +16,12 @@ contract Deploy is Script {
         string memory symbol = vm.envString("RLC_TOKEN_SYMBOL");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address delegate = vm.envAddress("SENDER_ADDRESS");
-        
+
         RLCOFT rlcOFT = new RLCOFT(name, symbol, lzEndpoint, delegate);
         console.log("rlcOFT deployed at:", address(rlcOFT));
 
         vm.stopBroadcast();
-        
+
         EnvUtils.updateEnvVariable("ARBITRUM_SEPOLIA_RLC_OFT_ADDRESS", address(rlcOFT));
     }
 }

@@ -20,7 +20,7 @@ contract Deploy is Script {
         console.log("RLCAdapter deployed at:", address(rlcAdapter));
 
         vm.stopBroadcast();
-        
+
         EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", address(rlcAdapter));
     }
 }
