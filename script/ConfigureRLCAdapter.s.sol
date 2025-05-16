@@ -1,5 +1,5 @@
-// script/ConfigureRLCAdapter.s.sol
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-FileCopyrightText: 2025 IEXEC BLOCKCHAIN TECH <contact@iex.ec>
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
