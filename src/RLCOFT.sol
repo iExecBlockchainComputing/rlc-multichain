@@ -8,8 +8,8 @@ import {TokenSpender} from "src/TokenSpender.sol";
 /// @notice OFT is an ERC-20 token that extends the OFTCore contract.
 contract RLCOFT is Ownable, OFT {
     constructor(string memory _name, string memory _symbol, address _lzEndpoint, address _delegate)
-        OFT(_name, _symbol, _lzEndpoint, _delegate)
         Ownable(_delegate)
+        OFT(_name, _symbol, _lzEndpoint, _delegate)
     {}
 
     /**
