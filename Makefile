@@ -53,7 +53,7 @@ send-tokens-to-arbitrum-sepolia:
 .PHONY: send-tokens-arbitrum-sepolia
 send-tokens-to-sepolia:
 	@echo "Sending tokens cross-chain... from Arbitrum SEPOLIA to SEPOLIA"
-	@source .env && forge script script/SendArbitrumToEthereum.s.sol:SendArbitrumToEthereum \
+	forge script script/SendArbitrumToEthereum.s.sol:SendArbitrumToEthereum \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
         --broadcast \
