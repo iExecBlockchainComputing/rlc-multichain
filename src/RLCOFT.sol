@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {OFT} from "@layerzerolabs/oft-evm/contracts/OFT.sol";
-import {TokenSpender} from "src/TokenSpender.sol";
+import {ITokenSpender} from "src/ITokenSpender.sol";
 
 /// @notice OFT is an ERC-20 token that extends the OFTCore contract.
 contract RLCOFT is Ownable, OFT {
@@ -30,7 +30,7 @@ contract RLCOFT is Ownable, OFT {
      * Approve and then call the approved contract in a single tx
      */
     function approveAndCall(address _spender, uint256 _value, bytes calldata _extraData) public returns (bool) {
-        TokenSpender spender = TokenSpender(_spender);
+        ITokenSpender spender = ITokenSpender(_spender);
         if (approve(_spender, _value)) {
             spender.receiveApproval(msg.sender, _value, address(this), _extraData);
             return true;
