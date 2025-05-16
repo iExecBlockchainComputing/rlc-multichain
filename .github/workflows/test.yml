@@ -36,8 +36,8 @@ jobs:
         run: |
           forge build --sizes
         id: build
-
-      - name: Run Forge tests
-        run: |
-          forge test -vvv
-        id: test
+      #TDO: Uncomment when tests are available
+      # - name: Run Forge tests
+      #   run: |
+      #     forge test -vvv
+      #   id: test
