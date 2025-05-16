@@ -7,8 +7,6 @@ import {RLCOFT} from "../src/RLCOFT.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract Deploy is Script {
-    RLCOFT public rlcOFT;
-
     function setUp() public {}
 
     function run() external {
@@ -19,7 +17,7 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address delegate = vm.envAddress("SENDER_ADDRESS");
         
-        rlcOFT = new RLCOFT(name, symbol, lzEndpoint, delegate);
+        RLCOFT rlcOFT = new RLCOFT(name, symbol, lzEndpoint, delegate);
         console.log("rlcOFT deployed at:", address(rlcOFT));
 
         vm.stopBroadcast();

@@ -7,8 +7,6 @@ import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract Deploy is Script {
-    RLCAdapter public rlcAdapter;
-
     function setUp() public {}
 
     function run() external {
@@ -18,7 +16,7 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS"); // LayerZero sepolia endpoint
         address delegate = vm.envAddress("SENDER_ADDRESS"); // Your actual wallet address
 
-        rlcAdapter = new RLCAdapter(rlcToken, lzEndpoint, delegate);
+        RLCAdapter rlcAdapter = new RLCAdapter(rlcToken, lzEndpoint, delegate);
         console.log("RLCAdapter deployed at:", address(rlcAdapter));
 
         vm.stopBroadcast();
