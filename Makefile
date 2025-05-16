@@ -27,14 +27,14 @@ deploy-oft:
 		--broadcast \
 		-vvv \
 
-conf-adapter:
+configure-adapter:
 	@echo "Configuring RLCAdapter on SEPOLIA..."
 	forge script script/ConfigureRLCAdapter.s.sol:ConfigureRLCAdapter \
 		--rpc-url $(SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
-conf-oft:
+configure-oft:
 	@echo "Configuring RLCOFT on Arbitrum SEPOLIA..."
 	forge script script/ConfigureRLCOFT.s.sol:ConfigureRLCOFT \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
@@ -42,7 +42,7 @@ conf-oft:
 		--broadcast \
 		-vvv
 
-send-tokens:
+send-tokens-to-arbitrum-sepolia:
 	@echo "Sending tokens cross-chain... from SEPOLIA to Arbitrum SEPOLIA"
 	forge script script/SendEthereumToArbitrum.s.sol:SendEthereumToArbitrum \
 		--rpc-url $(SEPOLIA_RPC_URL) \
@@ -51,7 +51,7 @@ send-tokens:
 		-vvv
 
 .PHONY: send-tokens-arbitrum-sepolia
-send-tokens-arbitrum-sepolia:
+send-tokens-to-sepolia:
 	@echo "Sending tokens cross-chain... from Arbitrum SEPOLIA to SEPOLIA"
 	@source .env && forge script script/SendArbitrumToEthereum.s.sol:SendArbitrumToEthereum \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
