@@ -7,7 +7,7 @@ import {RLCOFT} from "../src/RLCOFT.sol";
 import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 
-contract SendArbitrumToEthereum is Script {
+contract SendTokensToSepolia is Script {
     /**
      * @dev Converts an address to bytes32.
      * @param _addr The address to convert.

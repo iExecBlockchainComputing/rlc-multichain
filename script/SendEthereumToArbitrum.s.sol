@@ -9,7 +9,7 @@ import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 // import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 
-contract SendEthereumToArbitrum is Script {
+contract SendTokensToArbitrumSepolia is Script {
     /**
      * @dev Converts an address to bytes32.
      * @param _addr The address to convert.

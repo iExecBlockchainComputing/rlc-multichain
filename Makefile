@@ -44,7 +44,7 @@ configure-oft:
 
 send-tokens-to-arbitrum-sepolia:
 	@echo "Sending tokens cross-chain... from SEPOLIA to Arbitrum SEPOLIA"
-	forge script script/SendEthereumToArbitrum.s.sol:SendEthereumToArbitrum \
+	forge script script/SendEthereumToArbitrum.s.sol:SendTokensToArbitrumSepolia \
 		--rpc-url $(SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
@@ -52,7 +52,7 @@ send-tokens-to-arbitrum-sepolia:
 
 send-tokens-to-sepolia:
 	@echo "Sending tokens cross-chain... from Arbitrum SEPOLIA to SEPOLIA"
-	forge script script/SendArbitrumToEthereum.s.sol:SendArbitrumToEthereum \
+	forge script script/SendArbitrumToEthereum.s.sol:SendTokensToSepolia \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
         --broadcast \

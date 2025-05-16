@@ -58,12 +58,12 @@ The deployment process involves four steps:
 
 3. Configure the RLCAdapter to trust the RLCOFT contract:
    ```bash
-   make conf-adapter
+   make configure-adapter
    ```
 
 4. Configure the RLCOFT to trust the RLCAdapter contract:
    ```bash
-   make conf-oft
+   make configure-oft
    ```
 
 After deployment, update your `.env` file with the deployed contract addresses.
