@@ -70,9 +70,9 @@ After deployment, update your `.env` file with the deployed contract addresses.
 
 ## Usage
 
-### Bridge RLC from Ethereum to Arbitrum
+### Bridge RLC
 
-To send RLC tokens from Ethereum Sepolia to Arbitrum Sepolia:
+A. To send RLC tokens from Ethereum Sepolia to Arbitrum Sepolia:
 
 ```bash
 make send-tokens-to-arbitrum-sepolia
@@ -83,9 +83,7 @@ This will:
 2. Initiate the cross-chain transfer through LayerZero
 3. Lock tokens in the adapter and mint equivalent tokens on Arbitrum
 
-### Bridge RLC from Arbitrum to Ethereum
-
-To send RLC tokens from Arbitrum Sepolia back to Ethereum Sepolia:
+B. To send RLC tokens from Arbitrum Sepolia back to Ethereum Sepolia:
 
 ```bash
 make send-tokens-to-sepolia
