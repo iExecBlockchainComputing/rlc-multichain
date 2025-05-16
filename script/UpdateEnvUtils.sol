@@ -16,7 +16,7 @@ library EnvUtils {
         // Check if file exists
         if (!vm.exists(envPath)) {
             console.log(".env file not found");
-            return;
+            revert("File not found");
         }
 
         // Read the entire file
