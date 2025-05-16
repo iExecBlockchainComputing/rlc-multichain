@@ -6,7 +6,7 @@ import {Script, console} from "forge-std/Script.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
-contract DeployRLCOFT is Script {
+contract Deploy is Script {
     RLCOFT public rlcOFT;
 
     function setUp() public {}

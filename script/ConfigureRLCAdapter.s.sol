@@ -5,7 +5,7 @@ pragma solidity ^0.8.22;
 import {Script, console} from "forge-std/Script.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
 
-contract ConfigureRLCAdapter is Script {
+contract Configure is Script {
     function run() external {
         vm.startBroadcast();
 

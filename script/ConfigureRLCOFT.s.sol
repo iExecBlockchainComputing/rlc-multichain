@@ -5,7 +5,7 @@ pragma solidity ^0.8.22;
 import {Script, console} from "forge-std/Script.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 
-contract ConfigureRLCOFT is Script {
+contract Configure is Script {
     function run() external {
         vm.startBroadcast();
 

@@ -13,7 +13,7 @@ clean:
 # Deployment targets
 deploy-adapter:
 	@echo "Deploying RLCAdapter on SEPOLIA..."
-	forge script script/RLCAdapter.s.sol:DeployRLCAdapter \
+	forge script script/RLCAdapter.s.sol:Deploy \
 	--rpc-url $(SEPOLIA_RPC_URL) \
 	--account $(ACCOUNT) \
 	--broadcast \
@@ -21,7 +21,7 @@ deploy-adapter:
 
 deploy-oft:
 	@echo "Deploying RLCOFT on Arbitrum SEPOLIA..."
-	forge script script/RLCOFT.s.sol:DeployRLCOFT \
+	forge script script/RLCOFT.s.sol:Deploy \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
@@ -29,14 +29,14 @@ deploy-oft:
 
 configure-adapter:
 	@echo "Configuring RLCAdapter on SEPOLIA..."
-	forge script script/ConfigureRLCAdapter.s.sol:ConfigureRLCAdapter \
+	forge script script/ConfigureRLCAdapter.s.sol:Configure \
 		--rpc-url $(SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 configure-oft:
 	@echo "Configuring RLCOFT on Arbitrum SEPOLIA..."
-	forge script script/ConfigureRLCOFT.s.sol:ConfigureRLCOFT \
+	forge script script/ConfigureRLCOFT.s.sol:Configure \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \

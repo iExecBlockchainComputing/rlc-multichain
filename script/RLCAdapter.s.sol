@@ -6,7 +6,7 @@ import {Script, console} from "forge-std/Script.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
-contract DeployRLCAdapter is Script {
+contract Deploy is Script {
     RLCAdapter public rlcAdapter;
 
     function setUp() public {}
