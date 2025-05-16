@@ -22,6 +22,6 @@ contract DeployRLCAdapter is Script {
 
         vm.stopBroadcast();
         
-        EnvUtils.updateEnvVariable("SEPOLIA_ADAPTER_ADDRESS", address(rlcAdapter));
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", address(rlcAdapter));
     }
 }

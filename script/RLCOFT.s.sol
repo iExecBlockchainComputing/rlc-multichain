@@ -23,6 +23,6 @@ contract DeployRLCOFT is Script {
 
         vm.stopBroadcast();
         
-        EnvUtils.updateEnvVariable("ARBITRUM_SEPOLIA_OFT_ADDRESS", address(rlcOFT));
+        EnvUtils.updateEnvVariable("ARBITRUM_SEPOLIA_RLC_OFT_ADDRESS", address(rlcOFT));
     }
 }

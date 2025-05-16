@@ -22,7 +22,7 @@ contract SendEthereumToArbitrum is Script {
         vm.startBroadcast();
 
         // Contract addresses
-        address adapterAddress = vm.envAddress("SEPOLIA_ADAPTER_ADDRESS");// Your RLCAdapter address
+        address adapterAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS");// Your RLCAdapter address
         address rlcTokenAddress = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
 
         // Transfer parameters

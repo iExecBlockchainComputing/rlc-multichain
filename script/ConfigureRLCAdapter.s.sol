@@ -10,11 +10,11 @@ contract ConfigureRLCAdapter is Script {
         vm.startBroadcast();
 
         // RLCAdapter on Ethereum Sepolia
-        address adapterAddress = vm.envAddress("SEPOLIA_ADAPTER_ADDRESS"); // Add your RLCAdapter address here
+        address adapterAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS"); // Add your RLCAdapter address here
         RLCAdapter adapter = RLCAdapter(adapterAddress);
 
         // RLCOFT on Arbitrum Sepolia
-        address oftAddress = vm.envAddress("ARBITRUM_SEPOLIA_OFT_ADDRESS");
+        address oftAddress = vm.envAddress("ARBITRUM_SEPOLIA_RLC_OFT_ADDRESS");
         uint16 arbitrumSepoliaChainId = uint16(vm.envUint("LAYER_ZERO_ARBITRUM_SEPOLIA_CHAIN_ID")); 
 
         // Set trusted remote
