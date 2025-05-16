@@ -35,6 +35,7 @@ contract SendTokensToSepolia is Script {
         console.log("Sending %s RLC to Ethereum Sepolia", amount / 10 ** 9);
 
         // Estimate gas for the OFT endpoint
+        // TODO extract in function and document
         bytes memory _extraOptions =
             abi.encodePacked(uint16(3), uint8(1), uint16(33), uint8(1), uint128(65000), uint128(0));
 
