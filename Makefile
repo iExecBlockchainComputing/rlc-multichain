@@ -50,7 +50,6 @@ send-tokens-to-arbitrum-sepolia:
 		--broadcast \
 		-vvv
 
-.PHONY: send-tokens-arbitrum-sepolia
 send-tokens-to-sepolia:
 	@echo "Sending tokens cross-chain... from Arbitrum SEPOLIA to SEPOLIA"
 	forge script script/SendArbitrumToEthereum.s.sol:SendArbitrumToEthereum \
