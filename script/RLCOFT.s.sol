@@ -15,7 +15,7 @@ contract DeployRLCOFT is Script {
 
         string memory name = vm.envString("TOKEN_NAME");
         string memory symbol = vm.envString("TOKEN_SYMBOL");
-        address lzEndpoint = vm.envAddress("ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
+        address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address delegate = vm.envAddress("DELEGATE_ADDRESS");
         
         rlcOFT = new RLCOFT(name, symbol, lzEndpoint, delegate);

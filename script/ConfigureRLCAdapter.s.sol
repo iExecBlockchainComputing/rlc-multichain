@@ -15,7 +15,7 @@ contract ConfigureRLCAdapter is Script {
 
         // RLCOFT on Arbitrum Sepolia
         address oftAddress = vm.envAddress("ARBITRUM_SEPOLIA_OFT_ADDRESS");
-        uint16 arbitrumSepoliaChainId = uint16(vm.envUint("ARBITRUM_SEPOLIA_CHAIN_ID")); 
+        uint16 arbitrumSepoliaChainId = uint16(vm.envUint("LAYER_ZERO_ARBITRUM_SEPOLIA_CHAIN_ID")); 
 
         // Set trusted remote
         adapter.setPeer(arbitrumSepoliaChainId, bytes32(uint256(uint160(oftAddress))));
