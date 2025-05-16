@@ -16,7 +16,7 @@ contract Deploy is Script {
 
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS"); // LayerZero sepolia endpoint
-        address delegate = vm.envAddress("DELEGATE_ADDRESS"); // Your actual wallet address
+        address delegate = vm.envAddress("SENDER_ADDRESS"); // Your actual wallet address
 
         rlcAdapter = new RLCAdapter(rlcToken, lzEndpoint, delegate);
         console.log("RLCAdapter deployed at:", address(rlcAdapter));
