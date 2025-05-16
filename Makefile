@@ -1,5 +1,15 @@
 # Makefile for RLC OFT Project
 -include .env
+
+# Test and utility targets
+test:
+	@echo "Running tests..."
+	forge test -vvv
+
+clean:
+	@echo "Cleaning artifacts..."
+	forge clean
+
 # Deployment targets
 deploy-adapter:
 	@echo "Deploying RLCAdapter on SEPOLIA..."
@@ -73,11 +83,3 @@ verify-oft:
 # Combined verification target
 verify-all: verify-adapter verify-oft
 
-# Test and utility targets
-test:
-	@echo "Running tests..."
-	forge test -vvv
-
-clean:
-	@echo "Cleaning artifacts..."
-	forge clean
