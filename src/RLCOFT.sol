@@ -26,7 +26,9 @@ contract RLCOFT is Ownable, OFT {
         return true;
     }
 
-    /* Approve and then communicate the approved contract in a single tx */
+    /**
+     * Approve and then call the approved contract in a single tx
+     */
     function approveAndCall(address _spender, uint256 _value, bytes calldata _extraData) public returns (bool) {
         TokenSpender spender = TokenSpender(_spender);
         if (approve(_spender, _value)) {
