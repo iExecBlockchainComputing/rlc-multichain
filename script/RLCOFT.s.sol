@@ -13,8 +13,8 @@ contract DeployRLCOFT is Script {
     function run() external {
         vm.startBroadcast();
 
-        string memory name = vm.envString("TOKEN_NAME");
-        string memory symbol = vm.envString("TOKEN_SYMBOL");
+        string memory name = vm.envString("RLC_OFT_TOKEN_NAME");
+        string memory symbol = vm.envString("RLC_TOKEN_SYMBOL");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address delegate = vm.envAddress("DELEGATE_ADDRESS");
         

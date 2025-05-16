@@ -65,7 +65,7 @@ verify-oft:
 	forge verify-contract \
 		--chain-id 421614 \
 		--watch \
-		--constructor-args $(shell cast abi-encode "constructor(string,string,address,address)" $(TOKEN_NAME) $(TOKEN_SYMBOL) $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS) $(DELEGATE_ADDRESS)) \
+		--constructor-args $(shell cast abi-encode "constructor(string,string,address,address)" $(RLC_OFT_TOKEN_NAME) $(RLC_TOKEN_SYMBOL) $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS) $(DELEGATE_ADDRESS)) \
 		--etherscan-api-key $(ARBISCAN_API_KEY) \
 		$(ARBITRUM_SEPOLIA_RLC_OFT_ADDRESS) \
 		src/RLCOFT.sol:RLCOFT
