@@ -21,8 +21,8 @@ The system consists of two main components:
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/rlc-layerzero-bridge.git
-   cd rlc-layerzero-bridge
+   git clone https://github.com/iExecBlockchainComputing/rlc-multichain.git
+   cd rlc-multichain
    ```
 
 2. Install dependencies
