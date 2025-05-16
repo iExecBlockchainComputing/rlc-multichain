@@ -31,6 +31,9 @@ The system consists of two main components:
    ```
 
 3. Create a `.env` file
+    ```sh
+    cp .env.template .env # and edit .env content
+    ```
 
 ## Deployment
 
