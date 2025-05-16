@@ -21,7 +21,7 @@ contract SendArbitrumToEthereum is Script {
         vm.startBroadcast();
 
         // Contract addresses
-        address oftAddress = vm.envAddress("ARBITRUM_SEPOLIA_RLC_OFT_ADDRESS"); // Your RLCOFT address on Arbitrum Sepolia
+        address oftAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS"); // Your RLCOFT address on Arbitrum Sepolia
 
         // Transfer parameters
         uint16 destinationChainId = uint16(vm.envUint("LAYER_ZERO_SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Ethereum Sepolia

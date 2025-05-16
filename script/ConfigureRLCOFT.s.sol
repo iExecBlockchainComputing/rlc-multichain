@@ -10,7 +10,7 @@ contract Configure is Script {
         vm.startBroadcast();
 
         // RLCOFT on Arbitrum Sepolia
-        address oftAddress = vm.envAddress("ARBITRUM_SEPOLIA_RLC_OFT_ADDRESS");
+        address oftAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
         RLCOFT oft = RLCOFT(oftAddress);
 
         // RLCAdapter on Ethereum Sepolia

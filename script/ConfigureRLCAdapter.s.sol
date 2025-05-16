@@ -14,7 +14,7 @@ contract Configure is Script {
         RLCAdapter adapter = RLCAdapter(adapterAddress);
 
         // RLCOFT on Arbitrum Sepolia
-        address oftAddress = vm.envAddress("ARBITRUM_SEPOLIA_RLC_OFT_ADDRESS");
+        address oftAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
         uint16 arbitrumSepoliaChainId = uint16(vm.envUint("LAYER_ZERO_ARBITRUM_SEPOLIA_CHAIN_ID"));
 
         // Set trusted remote
