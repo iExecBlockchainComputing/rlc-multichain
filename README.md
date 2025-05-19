@@ -20,17 +20,20 @@ The system consists of two main components:
 ## Installation
 
 1. Clone the repository
+
    ```bash
    git clone https://github.com/iExecBlockchainComputing/rlc-multichain.git
    cd rlc-multichain
    ```
 
 2. Install dependencies
+
    ```bash
    forge install
    ```
 
 3. Create a `.env` file
+
     ```sh
     cp .env.template .env # and edit .env content
     ```
@@ -47,21 +50,25 @@ Instead of duplicating code that may become outdated, here are links to the key 
 The deployment process involves four steps:
 
 1. Deploy the RLCAdapter on Ethereum Sepolia:
+
    ```bash
    make deploy-adapter
    ```
 
 2. Deploy the RLCOFT on Arbitrum Sepolia:
+
    ```bash
    make deploy-oft
    ```
 
 3. Configure the RLCAdapter to trust the RLCOFT contract:
+
    ```bash
    make configure-adapter
    ```
 
 4. Configure the RLCOFT to trust the RLCAdapter contract:
+
    ```bash
    make configure-oft
    ```
@@ -79,6 +86,7 @@ make send-tokens-to-arbitrum-sepolia
 ```
 
 This will:
+
 1. Approve the RLCAdapter to spend your RLC tokens
 2. Initiate the cross-chain transfer through LayerZero
 3. Lock tokens in the adapter and mint equivalent tokens on Arbitrum
@@ -90,6 +98,7 @@ make send-tokens-to-sepolia
 ```
 
 This will:
+
 1. Burn RLCOFT tokens on Arbitrum
 2. Send a cross-chain message to the adapter
 3. Release the original RLC tokens on Ethereum
@@ -118,6 +127,7 @@ This will:
 ## Gas Costs and Fees
 
 LayerZero transactions require fees to cover:
+
 1. Gas on the source chain
 2. Gas on the destination chain (prepaid)
 3. LayerZero relayer fees
@@ -125,7 +135,6 @@ LayerZero transactions require fees to cover:
 The scripts automatically calculate these fees and include them in the transaction.
 
 ## Troubleshooting
-
 
 ## References
 
