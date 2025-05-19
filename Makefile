@@ -64,7 +64,7 @@ verify-adapter:
 	forge verify-contract \
 		--chain-id 11155111 \
 		--watch \
-		--constructor-args $(shell cast abi-encode "constructor(address,address,address)" $(RLC_SEPOLIA_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS) $(SENDER_ADDRESS)) \
+		--constructor-args $(shell cast abi-encode "constructor(address,address,address)" $(RLC_SEPOLIA_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS) $(OWNER_ADDRESS)) \
 		--etherscan-api-key $(ETHERSCAN_API_KEY) \
 		$(RLC_SEPOLIA_ADAPTER_ADDRESS) \
 		src/RLCAdapter.sol:RLCAdapter
@@ -74,7 +74,7 @@ verify-oft:
 	forge verify-contract \
 		--chain-id 421614 \
 		--watch \
-		--constructor-args $(shell cast abi-encode "constructor(string,string,address,address)" $(RLC_OFT_TOKEN_NAME) $(RLC_TOKEN_SYMBOL) $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS) $(SENDER_ADDRESS)) \
+		--constructor-args $(shell cast abi-encode "constructor(string,string,address,address)" $(RLC_OFT_TOKEN_NAME) $(RLC_TOKEN_SYMBOL) $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS) $(OWNER_ADDRESS)) \
 		--etherscan-api-key $(ARBISCAN_API_KEY) \
 		$(RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS) \
 		src/RLCOFT.sol:RLCOFT

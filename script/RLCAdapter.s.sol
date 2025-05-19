@@ -13,12 +13,12 @@ contract Deploy is Script {
 
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS"); // LayerZero sepolia endpoint
-        address delegate = vm.envAddress("SENDER_ADDRESS"); // Your actual wallet address
+        address ownerAddress = vm.envAddress("OWNER_ADDRESS"); // Your actual wallet address
 
         Options memory options;
         options.constructorData = abi.encode(rlcToken, lzEndpoint);
         address rlcAdapterProxy =
-            Upgrades.deployUUPSProxy("RLCOFT.sol", abi.encodeCall(RLCAdapter.initialize, (delegate)), options);
+            Upgrades.deployUUPSProxy("RLCOFT.sol", abi.encodeCall(RLCAdapter.initialize, (ownerAddress)), options);
         console.log("RLCAdapterProxy deployed at:", rlcAdapterProxy);
 
         vm.stopBroadcast();

@@ -14,7 +14,7 @@ contract Deploy is Script {
         string memory name = vm.envString("RLC_OFT_TOKEN_NAME");
         string memory symbol = vm.envString("RLC_TOKEN_SYMBOL");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
-        address delegate = vm.envAddress("SENDER_ADDRESS");
+        address delegate = vm.envAddress("OWNER_ADDRESS");
 
         Options memory options;
         options.constructorData = abi.encode(lzEndpoint);
