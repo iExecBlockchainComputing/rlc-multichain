@@ -29,14 +29,14 @@ deploy-oft:
 
 configure-adapter:
 	@echo "Configuring RLCAdapter on SEPOLIA..."
-	forge script script/ConfigureRLCAdapter.s.sol:Configure \
+	forge script script/RLCAdapter.s.sol:Configure \
 		--rpc-url $(SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 configure-oft:
 	@echo "Configuring RLCOFT on Arbitrum SEPOLIA..."
-	forge script script/ConfigureRLCOFT.s.sol:Configure \
+	forge script script/RLCOFT.s.sol:Configure \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
