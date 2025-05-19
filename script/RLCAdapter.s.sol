@@ -7,8 +7,6 @@ import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract Deploy is Script {
-    function setUp() public {}
-
     function run() external {
         vm.startBroadcast();
 
