@@ -24,13 +24,13 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     /// @notice Initializes the contract
     /// @param _name Name of the token
     /// @param _symbol Symbol of the token
-    /// @param _delegate Address of the contract owner
-    function initialize(string memory _name, string memory _symbol, address _delegate) public initializer {
-        __OFT_init(_name, _symbol, _delegate);
-        __Ownable_init(_delegate);
+    /// @param _owner Address of the contract owner
+    function initialize(string memory _name, string memory _symbol, address _owner) public initializer {
+        __OFT_init(_name, _symbol, _owner);
+        __Ownable_init(_owner);
         __UUPSUpgradeable_init();
-        __AccessControlDefaultAdminRules_init(0, _delegate);
-        _grantRole(UPGRADER_ROLE, _delegate);
+        __AccessControlDefaultAdminRules_init(0, _owner);
+        _grantRole(UPGRADER_ROLE, _owner);
     }
 
     /// @notice Authorizes an upgrade to a new implementation
