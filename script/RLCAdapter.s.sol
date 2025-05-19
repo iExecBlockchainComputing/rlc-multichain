@@ -17,11 +17,8 @@ contract Deploy is Script {
 
         Options memory options;
         options.constructorData = abi.encode(rlcToken, lzEndpoint);
-        address rlcAdapterProxy = Upgrades.deployUUPSProxy(
-            "RLCOFT.sol",
-            abi.encodeCall(RLCAdapter.initialize, (delegate)),
-            options
-        );
+        address rlcAdapterProxy =
+            Upgrades.deployUUPSProxy("RLCOFT.sol", abi.encodeCall(RLCAdapter.initialize, (delegate)), options);
         console.log("RLCAdapterProxy deployed at:", rlcAdapterProxy);
 
         vm.stopBroadcast();

@@ -4,7 +4,8 @@ pragma solidity ^0.8.22;
 
 import {OFTUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {AccessControlDefaultAdminRulesUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
+import {AccessControlDefaultAdminRulesUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {ITokenSpender} from "src/ITokenSpender.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
@@ -35,9 +36,7 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     /// @notice Authorizes an upgrade to a new implementation
     /// @dev Can only be called by the owner
     /// @param newImplementation Address of the new implementation
-    function _authorizeUpgrade(
-        address newImplementation
-    ) internal override onlyRole(UPGRADER_ROLE) {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     /**
      * @dev Override the decimals function to return 9 instead of the default 18
@@ -52,7 +51,12 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
         return true;
     }
 
-    function owner() public view override(OwnableUpgradeable, AccessControlDefaultAdminRulesUpgradeable) returns (address) {
+    function owner()
+        public
+        view
+        override(OwnableUpgradeable, AccessControlDefaultAdminRulesUpgradeable)
+        returns (address)
+    {
         return AccessControlDefaultAdminRulesUpgradeable.owner();
     }
 
