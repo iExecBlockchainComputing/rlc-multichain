@@ -3,6 +3,7 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
+import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
@@ -14,11 +15,17 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS"); // LayerZero sepolia endpoint
         address delegate = vm.envAddress("SENDER_ADDRESS"); // Your actual wallet address
 
-        RLCAdapter rlcAdapter = new RLCAdapter(rlcToken, lzEndpoint, delegate);
-        console.log("RLCAdapter deployed at:", address(rlcAdapter));
+        Options memory options;
+        options.constructorData = abi.encode(rlcToken, lzEndpoint);
+        address rlcAdapterProxy = Upgrades.deployUUPSProxy(
+            "RLCOFT.sol",
+            abi.encodeCall(RLCAdapter.initialize, (delegate)),
+            options
+        );
+        console.log("RLCAdapterProxy deployed at:", rlcAdapterProxy);
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", address(rlcAdapter));
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy);
     }
 }

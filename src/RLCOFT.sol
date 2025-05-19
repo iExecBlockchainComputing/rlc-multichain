@@ -6,6 +6,7 @@ import {OFTUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/O
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlDefaultAdminRulesUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {ITokenSpender} from "src/ITokenSpender.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @notice OFT is an ERC-20 token that extends the OFTCore contract.
 contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable {
@@ -49,6 +50,10 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     function burn(uint256 _value) external returns (bool) {
         _burn(msg.sender, _value);
         return true;
+    }
+
+    function owner() public view override(OwnableUpgradeable, AccessControlDefaultAdminRulesUpgradeable) returns (address) {
+        return AccessControlDefaultAdminRulesUpgradeable.owner();
     }
 
     /**

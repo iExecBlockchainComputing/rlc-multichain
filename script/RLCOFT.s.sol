@@ -3,6 +3,7 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
+import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
@@ -15,11 +16,17 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address delegate = vm.envAddress("SENDER_ADDRESS");
 
-        RLCOFT rlcOFT = new RLCOFT(name, symbol, lzEndpoint, delegate);
-        console.log("rlcOFT deployed at:", address(rlcOFT));
+        Options memory options;
+        options.constructorData = abi.encode(lzEndpoint);
+        address rlcOFTProxy = Upgrades.deployUUPSProxy(
+            "RLCAdapter.sol",
+            abi.encodeCall(RLCOFT.initialize, (name, symbol, delegate)),
+            options
+        );
+        console.log("rlcOFTProxy deployed at:", rlcOFTProxy);
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", address(rlcOFT));
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxy);
     }
 }
