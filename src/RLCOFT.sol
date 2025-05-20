@@ -26,8 +26,8 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     /// @param _symbol Symbol of the token
     /// @param _owner Address of the contract owner
     function initialize(string memory _name, string memory _symbol, address _owner) public initializer {
-        __OFT_init(_name, _symbol, _owner);
         __Ownable_init(_owner);
+        __OFT_init(_name, _symbol, _owner);
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, _owner);
         _grantRole(UPGRADER_ROLE, _owner);

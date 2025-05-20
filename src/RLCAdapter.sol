@@ -26,8 +26,8 @@ contract RLCAdapter is OFTAdapterUpgradeable, UUPSUpgradeable, AccessControlDefa
     /// @notice Initializes the contract
     /// @param _owner Address of the contract owner
     function initialize(address _owner) public initializer {
-        __OFTAdapter_init(_owner);
         __Ownable_init(_owner);
+        __OFTAdapter_init(_owner);
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, _owner);
         _grantRole(UPGRADER_ROLE, _owner);
