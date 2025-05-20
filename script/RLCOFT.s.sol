@@ -19,7 +19,7 @@ contract Deploy is Script {
         Options memory options;
         options.constructorData = abi.encode(lzEndpoint);
 
-        string memory unsafeAllow = "constructor,state-variable-immutable"; // comma-separated if multiple allowed
+        string memory unsafeAllow = "constructor,state-variable-immutable,missing-initializer-call"; // comma-separated if multiple allowed
         options.unsafeAllow = unsafeAllow;
 
         address rlcOFTProxy = Upgrades.deployUUPSProxy(
