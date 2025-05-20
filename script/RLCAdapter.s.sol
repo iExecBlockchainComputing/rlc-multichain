@@ -17,8 +17,13 @@ contract Deploy is Script {
 
         Options memory options;
         options.constructorData = abi.encode(rlcToken, lzEndpoint);
+
+        // Ignorer explicitement les vérifications non contournables
+        string memory unsafeAllow = "constructor,state-variable-immutable"; // comma-separated if multiple allowed
+        options.unsafeAllow = unsafeAllow;
+
         address rlcAdapterProxy =
-            Upgrades.deployUUPSProxy("RLCOFT.sol", abi.encodeCall(RLCAdapter.initialize, (ownerAddress)), options);
+            Upgrades.deployUUPSProxy("RLCAdapter.sol", abi.encodeCall(RLCAdapter.initialize, (ownerAddress)), options);
         console.log("RLCAdapterProxy deployed at:", rlcAdapterProxy);
 
         vm.stopBroadcast();

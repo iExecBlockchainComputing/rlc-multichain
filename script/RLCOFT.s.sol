@@ -18,8 +18,12 @@ contract Deploy is Script {
 
         Options memory options;
         options.constructorData = abi.encode(lzEndpoint);
+
+        string memory unsafeAllow = "constructor,state-variable-immutable"; // comma-separated if multiple allowed
+        options.unsafeAllow = unsafeAllow;
+
         address rlcOFTProxy = Upgrades.deployUUPSProxy(
-            "RLCAdapter.sol", abi.encodeCall(RLCOFT.initialize, (name, symbol, delegate)), options
+            "RLCOFT.sol", abi.encodeCall(RLCOFT.initialize, (name, symbol, delegate)), options
         );
         console.log("rlcOFTProxy deployed at:", rlcOFTProxy);
 
