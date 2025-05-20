@@ -16,7 +16,6 @@ deploy-adapter:
 	forge script script/RLCAdapter.s.sol:Deploy \
 	--rpc-url $(SEPOLIA_RPC_URL) \
 	--account $(ACCOUNT) \
-	--ffi \
 	--broadcast \
 	-vvv 
 
@@ -25,7 +24,6 @@ deploy-oft:
 	forge script script/RLCOFT.s.sol:Deploy \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
-		--ffi \
 		--broadcast \
 		-vvv \
 
