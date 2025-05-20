@@ -3,7 +3,8 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {Upgrades, Options} from "@openzeppelin-foundry/contracts/Upgrades.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
@@ -15,19 +16,20 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS"); // LayerZero sepolia endpoint
         address ownerAddress = vm.envAddress("OWNER_ADDRESS"); // Your actual wallet address
 
-        Options memory options;
-        options.constructorData = abi.encode(rlcToken, lzEndpoint);
+        // Deploy the RLCAdapter contract
+        RLCAdapter rlcAdapterImplementation = new RLCAdapter(rlcToken, lzEndpoint);
+        console.log("RLCAdapter implementation deployed at:", address(rlcAdapterImplementation));
 
-        string memory unsafeAllow = "constructor,state-variable-immutable,missing-initializer-call"; // comma-separated if multiple allowed
-        options.unsafeAllow = unsafeAllow;
-
-        address rlcAdapterProxy =
-            Upgrades.deployUUPSProxy("RLCAdapter.sol", abi.encodeCall(RLCAdapter.initialize, (ownerAddress)), options);
-        console.log("RLCAdapterProxy deployed at:", rlcAdapterProxy);
+        // Deploy the proxy contract
+        ERC1967Proxy rlcAdapterProxy = new ERC1967Proxy(
+            address(rlcAdapterImplementation),
+            abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, ownerAddress)
+        );
+        console.log("RLCAdapter proxy deployed at:", address(rlcAdapterProxy));
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy);
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", address(rlcAdapterProxy));
     }
 }
 

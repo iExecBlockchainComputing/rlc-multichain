@@ -6,6 +6,7 @@ import {Script, console} from "forge-std/Script.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract Deploy is Script {
     function run() external {
@@ -16,20 +17,19 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address delegate = vm.envAddress("OWNER_ADDRESS");
 
-        Options memory options;
-        options.constructorData = abi.encode(lzEndpoint);
+        RLCOFT rlcOFTImplementation = new RLCOFT(lzEndpoint);
+        console.log("RLCOFT implementation deployed at:", address(rlcOFTImplementation));
 
-        string memory unsafeAllow = "constructor,state-variable-immutable,missing-initializer-call"; // comma-separated if multiple allowed
-        options.unsafeAllow = unsafeAllow;
-
-        address rlcOFTProxy = Upgrades.deployUUPSProxy(
-            "RLCOFT.sol", abi.encodeCall(RLCOFT.initialize, (name, symbol, delegate)), options
+        // Deploy the proxy contract
+        ERC1967Proxy rlcOFTProxy = new ERC1967Proxy(
+            address(rlcOFTImplementation),
+            abi.encodeWithSelector(rlcOFTImplementation.initialize.selector, name, symbol, delegate)
         );
-        console.log("rlcOFTProxy deployed at:", rlcOFTProxy);
+        console.log("RLCOFT proxy deployed at:", address(rlcOFTProxy));
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxy);
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", address(rlcOFTProxy));
     }
 }
 
