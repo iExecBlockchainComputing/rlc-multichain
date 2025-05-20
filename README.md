@@ -38,6 +38,14 @@ The system consists of two main components:
     cp .env.template .env # and edit .env content
     ```
 
+**Note:** To run scripts, you must save a wallet in the Foundry keystore. Use the following command to import a wallet with a raw private key:
+
+```bash
+cast wallet import --private-key <RAW_PRIVATE_KEY> <ACCOUNT_NAME>
+```
+
+Alternatively, you can use a mnemonic by specifying the `--mnemonic-path` option. Remember the `<ACCOUNT_NAME>` you choose, and set it in your `.env` file under the `ACCOUNT` field.
+
 ## Contract Overview
 
 Instead of duplicating code that may become outdated, here are links to the key contracts in the repository:
