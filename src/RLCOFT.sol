@@ -57,7 +57,7 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
         override(OwnableUpgradeable, AccessControlDefaultAdminRulesUpgradeable)
         returns (address)
     {
-        return AccessControlDefaultAdminRulesUpgradeable.owner();
+        return OwnableUpgradeable.owner();
     }
 
     /**
