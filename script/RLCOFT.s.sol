@@ -15,7 +15,7 @@ contract Deploy is Script {
         string memory name = vm.envString("RLC_OFT_TOKEN_NAME");
         string memory symbol = vm.envString("RLC_TOKEN_SYMBOL");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
-        address delegate = vm.envAddress("OWNER_ADDRESS");
+        address owner = vm.envAddress("OWNER_ADDRESS");
 
         RLCOFT rlcOFTImplementation = new RLCOFT(lzEndpoint);
         console.log("RLCOFT implementation deployed at:", address(rlcOFTImplementation));
@@ -23,7 +23,7 @@ contract Deploy is Script {
         // Deploy the proxy contract
         ERC1967Proxy rlcOFTProxy = new ERC1967Proxy(
             address(rlcOFTImplementation),
-            abi.encodeWithSelector(rlcOFTImplementation.initialize.selector, name, symbol, delegate)
+            abi.encodeWithSelector(rlcOFTImplementation.initialize.selector, name, symbol, owner)
         );
         console.log("RLCOFT proxy deployed at:", address(rlcOFTProxy));
 
