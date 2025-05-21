@@ -9,7 +9,7 @@ import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract Deploy is Script {
-    function run() external {
+    function run() external returns (address) {
         vm.startBroadcast();
 
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
@@ -21,15 +21,17 @@ contract Deploy is Script {
         console.log("RLCAdapter implementation deployed at:", address(rlcAdapterImplementation));
 
         // Deploy the proxy contract
-        ERC1967Proxy rlcAdapterProxy = new ERC1967Proxy(
-            address(rlcAdapterImplementation),
-            abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, ownerAddress)
+        address rlcAdapterProxy = address(
+            new ERC1967Proxy(
+                address(rlcAdapterImplementation),
+                abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, ownerAddress)
+            )
         );
-        console.log("RLCAdapter proxy deployed at:", address(rlcAdapterProxy));
-
+        console.log("RLCAdapter proxy deployed at:", rlcAdapterProxy);
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", address(rlcAdapterProxy));
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy);
+        return rlcAdapterProxy;
     }
 }
 
