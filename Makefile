@@ -40,12 +40,14 @@ deploy-adapter:
 	@echo "Deploying RLCAdapter on: $(RPC_URL)"
 	forge script script/RLCAdapter.s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
+		--broadcast \
 		-vvv
 
 deploy-oft:
 	@echo "Deploying RLCOFT on on: $(RPC_URL)"
 	forge script script/RLCOFT.s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
+		--broadcast \
 		-vvv \
 
 configure-adapter:
