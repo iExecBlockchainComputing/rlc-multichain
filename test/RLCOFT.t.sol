@@ -3,15 +3,14 @@ pragma solidity ^0.8.13;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Test, console} from "forge-std/Test.sol";
-import {Deploy as RLCOFTDeploy, Configure as RLCOFTConfigure} from "../script/RLCOFT.s.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
+import {RLCOFTTestSetup} from "./utils/RLCOFTTestSetup.sol";
 
-contract RLCOFTTest is Test, Initializable {
+contract RLCOFTTest is RLCOFTTestSetup, Initializable {
     RLCOFT public rlcOft;
 
     function setUp() public {
-        vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
-        rlcOft = RLCOFT(new RLCOFTDeploy().run());
+        rlcOft = RLCOFT(_forkArbitrumTestnetAndDeploy());
     }
 
     function test_RevertWhenInitializingTwoTimes() public {
