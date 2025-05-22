@@ -15,10 +15,9 @@ fork-arbitrum-sepolia:
 	anvil --fork-url $(ARBITRUM_SEPOLIA_RPC_URL) --port 8546
 
 utest:
-	@forge test --fork-url $(SEPOLIA_RPC_URL) -vvv
+	forge test -vvv
 
 clean:
-	@echo "Cleaning artifacts..."
 	forge clean
 
 #

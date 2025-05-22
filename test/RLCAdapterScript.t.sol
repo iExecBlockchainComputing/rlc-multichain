@@ -9,6 +9,7 @@ contract RLCAdapterScriptTest is Test {
     RLCAdapter public rlcAdapter;
 
     function setUp() public {
+        vm.createSelectFork(vm.envString("SEPOLIA_RPC_URL"));
         rlcAdapter = RLCAdapter(new RLCAdapterDeploy().run());
     }
 

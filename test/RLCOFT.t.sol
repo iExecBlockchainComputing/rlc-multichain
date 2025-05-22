@@ -10,6 +10,7 @@ contract RLCOFTTest is Test, Initializable {
     RLCOFT public rlcOft;
 
     function setUp() public {
+        vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
         rlcOft = RLCOFT(new RLCOFTDeploy().run());
     }
 
