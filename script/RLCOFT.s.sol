@@ -7,6 +7,7 @@ import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {ICreateX} from "@createx/contracts/ICreateX.sol";
 
 contract Deploy is Script {
     function run() external {
@@ -20,16 +21,19 @@ contract Deploy is Script {
         RLCOFT rlcOFTImplementation = new RLCOFT(lzEndpoint);
         console.log("RLCOFT implementation deployed at:", address(rlcOFTImplementation));
 
-        // Deploy the proxy contract
-        ERC1967Proxy rlcOFTProxy = new ERC1967Proxy(
-            address(rlcOFTImplementation),
-            abi.encodeWithSelector(rlcOFTImplementation.initialize.selector, name, symbol, owner)
+        // Use CreateX Factory to deploy the proxy contract
+        ICreateX createX = ICreateX(vm.envAddress("CREATE_X_FACTORY_ADDRESS"));
+        address rlcOFTProxy = createX.deployCreate2AndInit(
+            vm.envBytes32("SALT"), // salt
+            abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(address(rlcOFTImplementation), "")), // initCode
+            abi.encodeWithSelector(rlcOFTImplementation.initialize.selector, name, symbol, owner), // data for initialize
+            ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
         );
-        console.log("RLCOFT proxy deployed at:", address(rlcOFTProxy));
+        console.log("RLCOFT proxy deployed at:", rlcOFTProxy);
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", address(rlcOFTProxy));
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxy);
     }
 }
 

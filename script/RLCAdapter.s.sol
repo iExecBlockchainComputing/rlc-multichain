@@ -7,6 +7,7 @@ import {Upgrades, Options} from "@openzeppelin-foundry/contracts/Upgrades.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
+import {ICreateX} from "@createx/contracts/ICreateX.sol";
 
 contract Deploy is Script {
     function run() external {
@@ -21,9 +22,12 @@ contract Deploy is Script {
         console.log("RLCAdapter implementation deployed at:", address(rlcAdapterImplementation));
 
         // Deploy the proxy contract
-        ERC1967Proxy rlcAdapterProxy = new ERC1967Proxy(
-            address(rlcAdapterImplementation),
-            abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, ownerAddress)
+        ICreateX createX = ICreateX(vm.envAddress("CREATE_X_FACTORY_ADDRESS"));
+        address rlcAdapterProxy = createX.deployCreate2AndInit(
+            vm.envBytes32("SALT"), // salt
+            abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(address(rlcAdapterImplementation), "")), // initCode
+            abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, ownerAddress), // data for initialize
+            ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
         );
         console.log("RLCAdapter proxy deployed at:", address(rlcAdapterProxy));
 
