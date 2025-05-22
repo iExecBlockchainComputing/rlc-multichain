@@ -9,7 +9,7 @@ import {EnvUtils} from "./UpdateEnvUtils.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract Deploy is Script {
-    function run()  external returns (address) {
+    function run() external returns (address) {
         vm.startBroadcast();
 
         string memory name = vm.envString("RLC_OFT_TOKEN_NAME");

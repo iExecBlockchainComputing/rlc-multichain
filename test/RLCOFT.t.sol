@@ -8,22 +8,22 @@ import {ITokenSpender} from "../src/ITokenSpender.sol";
 
 contract RLCOFTTest is Test {
     RLCOFT public rlcOft;
-    
+
     address public owner;
     address public bridge;
     address public pauser;
     address public user1;
     address public user2;
-    
+
     // Events to test
     event Paused(address account);
     event Unpaused(address account);
     event Transfer(address indexed from, address indexed to, uint256 value);
-    
+
     // Custom errors from OpenZeppelin
     error EnforcedPause();
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-    
+
     function setUp() public {
         vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
 
@@ -34,27 +34,24 @@ contract RLCOFTTest is Test {
         user1 = makeAddr("user1");
         user2 = makeAddr("user2");
 
-        
         // Set up environment variables for the deployment
         vm.setEnv("RLC_OFT_TOKEN_NAME", "RLC OFT Test");
         vm.setEnv("RLC_TOKEN_SYMBOL", "RLCT");
         vm.setEnv("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS", "0x6EDCE65403992e310A62460808c4b910D972f10f");
         vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
         vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
-        
+
         // Deploy the contract using the deployment script
         rlcOft = RLCOFT(new RLCOFTDeploy().run());
 
-
-        vm.startPrank(owner);// We can't use vm.prank here as the first call will be rlcOft.BRIDGE_ROLE() before doing the grantRole
+        vm.startPrank(owner); // We can't use vm.prank here as the first call will be rlcOft.BRIDGE_ROLE() before doing the grantRole
         rlcOft.grantRole(rlcOft.BRIDGE_ROLE(), bridge);
         vm.stopPrank();
-        
-        vm.startPrank(bridge);
-        rlcOft.mint(user1, 1000 * 10**9);
-        rlcOft.mint(user2, 500 * 10**9);
-        vm.stopPrank();
 
+        vm.startPrank(bridge);
+        rlcOft.mint(user1, 1000 * 10 ** 9);
+        rlcOft.mint(user2, 500 * 10 ** 9);
+        vm.stopPrank();
     }
 
     // ============ Deployment Tests ============
@@ -62,109 +59,109 @@ contract RLCOFTTest is Test {
         assertEq(rlcOft.name(), "RLC OFT Test");
         assertEq(rlcOft.symbol(), "RLCT");
         assertEq(rlcOft.decimals(), 9);
-        assertEq(rlcOft.totalSupply(), 1500 * 10**9); // 1000 + 500
+        assertEq(rlcOft.totalSupply(), 1500 * 10 ** 9); // 1000 + 500
     }
 
     // ============ Pausable Tests ============
     function testPauseByPauser() public {
         vm.expectEmit(true, false, false, false);
         emit Paused(pauser);
-        
+
         vm.prank(pauser);
         rlcOft.pause();
-        
+
         assertTrue(rlcOft.paused());
     }
-    
+
     function testPauseUnauthorized() public {
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, user1, rlcOft.PAUSER_ROLE()));
         vm.prank(user1);
         rlcOft.pause();
     }
-    
+
     function testUnpauseByPauser() public {
         // First pause
         vm.prank(pauser);
         rlcOft.pause();
         assertTrue(rlcOft.paused());
-        
+
         // Then unpause
         vm.expectEmit(true, false, false, false);
         emit Unpaused(pauser);
-        
+
         vm.prank(pauser);
         rlcOft.unpause();
-        
+
         assertFalse(rlcOft.paused());
     }
-    
+
     function testUnpauseUnauthorized() public {
         vm.prank(pauser);
         rlcOft.pause();
-        
+
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, user1, rlcOft.PAUSER_ROLE()));
         vm.prank(user1);
         rlcOft.unpause();
     }
-    
+
     function testTransferWhenPaused() public {
         // Pause the contract
         vm.prank(pauser);
         rlcOft.pause();
-        
+
         vm.expectRevert(EnforcedPause.selector);
         vm.prank(user1);
-        rlcOft.transfer(user2, 100 * 10**9);
+        rlcOft.transfer(user2, 100 * 10 ** 9);
     }
-    
+
     function testTransferFromWhenPaused() public {
         // First approve
         vm.prank(user1);
-        rlcOft.approve(user2, 100 * 10**9);
-        
+        rlcOft.approve(user2, 100 * 10 ** 9);
+
         // Pause the contract
         vm.prank(pauser);
         rlcOft.pause();
-        
+
         // Try to transferFrom - should fail with EnforcedPause() custom error
         vm.expectRevert(EnforcedPause.selector);
         vm.prank(user2);
-        rlcOft.transferFrom(user1, user2, 100 * 10**9);
+        rlcOft.transferFrom(user1, user2, 100 * 10 ** 9);
     }
-    
+
     function testMintWhenPaused() public {
         // Pause the contract
         vm.prank(pauser);
         rlcOft.pause();
-        
+
         // Try to mint - should fail with EnforcedPause() custom error
         vm.expectRevert(EnforcedPause.selector);
         vm.prank(bridge);
-        rlcOft.mint(user1, 100 * 10**9);
+        rlcOft.mint(user1, 100 * 10 ** 9);
     }
-    
+
     function testBurnWhenPaused() public {
         // Pause the contract
         vm.prank(pauser);
         rlcOft.pause();
-        
+
         // Try to burn - should fail with EnforcedPause() custom error
         vm.expectRevert(EnforcedPause.selector);
         vm.prank(bridge);
-        rlcOft.burn(100 * 10**9);
+        rlcOft.burn(100 * 10 ** 9);
     }
-    
+
     function testTransferWhenNotPaused() public {
-        uint256 transferAmount = 100 * 10**9;
+        uint256 transferAmount = 100 * 10 ** 9;
         uint256 initialBalance1 = rlcOft.balanceOf(user1);
         uint256 initialBalance2 = rlcOft.balanceOf(user2);
-        
+
         vm.expectEmit(true, true, false, true);
         emit Transfer(user1, user2, transferAmount);
-        
+
         vm.prank(user1);
         bool success = rlcOft.transfer(user2, transferAmount);
-        
+
         assertTrue(success);
         assertEq(rlcOft.balanceOf(user1), initialBalance1 - transferAmount);
         assertEq(rlcOft.balanceOf(user2), initialBalance2 + transferAmount);
