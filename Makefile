@@ -14,9 +14,8 @@ fork-sepolia:
 fork-arbitrum-sepolia:
 	anvil --fork-url $(ARBITRUM_SEPOLIA_RPC_URL) --port 8546
 
-test:
-	@echo "Running tests..."
-	forge test -vvv
+utest:
+	forge test --fork-url $(SEPOLIA_RPC_URL)
 
 clean:
 	@echo "Cleaning artifacts..."
