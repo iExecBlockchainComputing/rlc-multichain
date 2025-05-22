@@ -39,12 +39,20 @@ contract RLCOFTTest is Test {
         // Deploy the contract using the deployment script
         rlcOft = RLCOFT(new RLCOFTDeploy().run());
 
-        // Mint some tokens for testing
-        vm.prank(owner);
-        rlcOft.mint(user1, 1000 * 10**9); // 1000 tokens with 9 decimals
-        
-        vm.prank(owner);
-        rlcOft.mint(user2, 500 * 10**9); // 500 tokens with 9 decimals
+
+        vm.startPrank(owner);
+        rlcOft.grantRole(rlcOft.BRIDGE_ROLE(), owner);
+        rlcOft.mint(user1, 1000 * 10**9);
+        rlcOft.mint(user2, 500 * 10**9);
+        vm.stopPrank();
+    }
+
+    // ============ Deployment Tests ============
+    function testDeployment() public {
+        assertEq(rlcOft.name(), "RLC OFT Test");
+        assertEq(rlcOft.symbol(), "RLCT");
+        assertEq(rlcOft.decimals(), 9);
+        assertEq(rlcOft.totalSupply(), 1500 * 10**9); // 1000 + 500
     }
 
     // ============ Pausable Tests ============
