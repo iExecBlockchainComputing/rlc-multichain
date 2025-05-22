@@ -6,6 +6,10 @@ on:
 env:
   FOUNDRY_PROFILE: ci
 
+concurrency:
+  group: ${{ github.ref }}-ci
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     name: Build and test
