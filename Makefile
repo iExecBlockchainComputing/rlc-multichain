@@ -15,7 +15,7 @@ fork-arbitrum-sepolia:
 	anvil --fork-url $(ARBITRUM_SEPOLIA_RPC_URL) --port 8546
 
 utest:
-	forge test --fork-url $(SEPOLIA_RPC_URL)
+	@forge test --fork-url $(SEPOLIA_RPC_URL) -vvv
 
 clean:
 	@echo "Cleaning artifacts..."
@@ -41,16 +41,12 @@ deploy-adapter:
 	@echo "Deploying RLCAdapter on: $(RPC_URL)"
 	forge script script/RLCAdapter.s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
-		--broadcast \
 		-vvv
 
 deploy-oft:
 	@echo "Deploying RLCOFT on on: $(RPC_URL)"
 	forge script script/RLCOFT.s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
-		--broadcast \
 		-vvv \
 
 configure-adapter:
@@ -64,7 +60,6 @@ configure-oft:
 	@echo "Configuring RLCOFT on on: $(RPC_URL)"
 	forge script script/RLCOFT.s.sol:Configure \
 		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 
