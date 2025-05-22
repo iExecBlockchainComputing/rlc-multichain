@@ -20,7 +20,7 @@ contract RLCOFTTest is Test {
     event Transfer(address indexed from, address indexed to, uint256 value);
     
     function setUp() public {
-        vm.createSelectFork("https://arbitrum-sepolia.gateway.tenderly.com");
+        vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
 
         // Create addresses using makeAddr
         owner = makeAddr("owner");
@@ -32,14 +32,12 @@ contract RLCOFTTest is Test {
         // Set up environment variables for the deployment
         vm.setEnv("RLC_OFT_TOKEN_NAME", "RLC OFT Test");
         vm.setEnv("RLC_TOKEN_SYMBOL", "RLCT");
-        vm.setEnv("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS", vm.toString('LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS'));
+        vm.setEnv("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS", "0x6EDCE65403992e310A62460808c4b910D972f10f");
         vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
         vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
         
         // Deploy the contract using the deployment script
-        RLCOFTDeploy deployer = new RLCOFTDeploy();
-        address deployedAddress = deployer.run();
-        rlcOft = RLCOFT(deployedAddress);
+        rlcOft = RLCOFT(new RLCOFTDeploy().run());
 
         // Mint some tokens for testing
         vm.prank(owner);
