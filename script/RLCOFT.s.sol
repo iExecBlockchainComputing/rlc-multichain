@@ -10,7 +10,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
 
 contract Deploy is Script {
-    function run() external {
+    function run() external returns (address) {
         vm.startBroadcast();
 
         string memory name = vm.envString("RLC_OFT_TOKEN_NAME");
@@ -34,6 +34,7 @@ contract Deploy is Script {
         vm.stopBroadcast();
 
         EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxy);
+        return rlcOFTProxy;
     }
 }
 

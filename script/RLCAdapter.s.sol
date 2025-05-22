@@ -10,7 +10,7 @@ import {EnvUtils} from "./UpdateEnvUtils.sol";
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
 
 contract Deploy is Script {
-    function run() external {
+    function run() external returns (address) {
         vm.startBroadcast();
 
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
@@ -29,11 +29,12 @@ contract Deploy is Script {
             abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, ownerAddress), // data for initialize
             ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
         );
-        console.log("RLCAdapter proxy deployed at:", address(rlcAdapterProxy));
+        console.log("RLCAdapter proxy deployed at:", rlcAdapterProxy);
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", address(rlcAdapterProxy));
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy);
+        return rlcAdapterProxy;
     }
 }
 

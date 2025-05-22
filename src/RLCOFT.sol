@@ -46,9 +46,12 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
         return 9;
     }
 
-    function burn(uint256 _value) external returns (bool) {
+    function mint(address to, uint256 amount) external onlyRole(BRIDGE_ROLE) {
+        _mint(to, amount);
+    }
+
+    function burn(uint256 _value) external onlyRole(BRIDGE_ROLE) {
         _burn(msg.sender, _value);
-        return true;
     }
 
     function owner()
