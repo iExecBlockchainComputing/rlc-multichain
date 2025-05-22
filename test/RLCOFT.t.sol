@@ -10,6 +10,7 @@ contract RLCOFTTest is Test {
     RLCOFT public rlcOft;
     
     address public owner;
+    address public bridge;
     address public pauser;
     address public user1;
     address public user2;
@@ -19,11 +20,16 @@ contract RLCOFTTest is Test {
     event Unpaused(address account);
     event Transfer(address indexed from, address indexed to, uint256 value);
     
+    // Custom errors from OpenZeppelin
+    error EnforcedPause();
+    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
+    
     function setUp() public {
         vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
 
         // Create addresses using makeAddr
         owner = makeAddr("owner");
+        bridge = makeAddr("bridge");
         pauser = makeAddr("pauser");
         user1 = makeAddr("user1");
         user2 = makeAddr("user2");
@@ -40,11 +46,15 @@ contract RLCOFTTest is Test {
         rlcOft = RLCOFT(new RLCOFTDeploy().run());
 
 
-        vm.startPrank(owner);
-        rlcOft.grantRole(rlcOft.BRIDGE_ROLE(), owner);
+        vm.startPrank(owner);// We can't use vm.prank here as the first call will be rlcOft.BRIDGE_ROLE() before doing the grantRole
+        rlcOft.grantRole(rlcOft.BRIDGE_ROLE(), bridge);
+        vm.stopPrank();
+        
+        vm.startPrank(bridge);
         rlcOft.mint(user1, 1000 * 10**9);
         rlcOft.mint(user2, 500 * 10**9);
         vm.stopPrank();
+
     }
 
     // ============ Deployment Tests ============
@@ -67,7 +77,7 @@ contract RLCOFTTest is Test {
     }
     
     function testPauseUnauthorized() public {
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, user1, rlcOft.PAUSER_ROLE()));
         vm.prank(user1);
         rlcOft.pause();
     }
@@ -92,7 +102,7 @@ contract RLCOFTTest is Test {
         vm.prank(pauser);
         rlcOft.pause();
         
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, user1, rlcOft.PAUSER_ROLE()));
         vm.prank(user1);
         rlcOft.unpause();
     }
@@ -102,8 +112,7 @@ contract RLCOFTTest is Test {
         vm.prank(pauser);
         rlcOft.pause();
         
-        // Try to transfer - should fail
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(EnforcedPause.selector);
         vm.prank(user1);
         rlcOft.transfer(user2, 100 * 10**9);
     }
@@ -117,8 +126,8 @@ contract RLCOFTTest is Test {
         vm.prank(pauser);
         rlcOft.pause();
         
-        // Try to transferFrom - should fail
-        vm.expectRevert("Pausable: paused");
+        // Try to transferFrom - should fail with EnforcedPause() custom error
+        vm.expectRevert(EnforcedPause.selector);
         vm.prank(user2);
         rlcOft.transferFrom(user1, user2, 100 * 10**9);
     }
@@ -128,9 +137,9 @@ contract RLCOFTTest is Test {
         vm.prank(pauser);
         rlcOft.pause();
         
-        // Try to mint - should fail
-        vm.expectRevert("Pausable: paused");
-        vm.prank(owner);
+        // Try to mint - should fail with EnforcedPause() custom error
+        vm.expectRevert(EnforcedPause.selector);
+        vm.prank(bridge);
         rlcOft.mint(user1, 100 * 10**9);
     }
     
@@ -139,9 +148,9 @@ contract RLCOFTTest is Test {
         vm.prank(pauser);
         rlcOft.pause();
         
-        // Try to burn - should fail
-        vm.expectRevert("Pausable: paused");
-        vm.prank(user1);
+        // Try to burn - should fail with EnforcedPause() custom error
+        vm.expectRevert(EnforcedPause.selector);
+        vm.prank(bridge);
         rlcOft.burn(100 * 10**9);
     }
     
