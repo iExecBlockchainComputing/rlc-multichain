@@ -21,17 +21,17 @@ contract Deploy is Script {
         console.log("RLCAdapter implementation deployed at:", address(rlcAdapterImplementation));
 
         // Deploy the proxy contract
-        address rlcAdapterProxy = address(
+        address rlcAdapterProxyAddress = address(
             new ERC1967Proxy(
                 address(rlcAdapterImplementation),
                 abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, ownerAddress)
             )
         );
-        console.log("RLCAdapter proxy deployed at:", rlcAdapterProxy);
+        console.log("RLCAdapter proxy deployed at:", rlcAdapterProxyAddress);
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy);
-        return rlcAdapterProxy;
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxyAddress);
+        return rlcAdapterProxyAddress;
     }
 }
 

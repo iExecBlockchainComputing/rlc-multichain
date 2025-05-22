@@ -9,7 +9,7 @@ import {EnvUtils} from "./UpdateEnvUtils.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract Deploy is Script {
-    function run() external {
+    function run() external returns (address) {
         vm.startBroadcast();
 
         string memory name = vm.envString("RLC_OFT_TOKEN_NAME");
@@ -21,15 +21,18 @@ contract Deploy is Script {
         console.log("RLCOFT implementation deployed at:", address(rlcOFTImplementation));
 
         // Deploy the proxy contract
-        ERC1967Proxy rlcOFTProxy = new ERC1967Proxy(
-            address(rlcOFTImplementation),
-            abi.encodeWithSelector(rlcOFTImplementation.initialize.selector, name, symbol, delegate)
+        address rlcOFTProxyAddress = address(
+            new ERC1967Proxy(
+                address(rlcOFTImplementation),
+                abi.encodeWithSelector(rlcOFTImplementation.initialize.selector, name, symbol, delegate)
+            )
         );
-        console.log("RLCOFT proxy deployed at:", address(rlcOFTProxy));
+        console.log("RLCOFT proxy deployed at:", rlcOFTProxyAddress);
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", address(rlcOFTProxy));
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxyAddress);
+        return rlcOFTProxyAddress;
     }
 }
 
