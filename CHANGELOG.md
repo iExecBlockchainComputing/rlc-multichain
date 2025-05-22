@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.0 (2025-05-22)
+
+
+### 🚀 Features
+
+* add forge-std submodule ([4ed744e](https://github.com/iExecBlockchainComputing/RLC-multichain/commit/4ed744ee8407ad3f76cf9d90887904549a55ca6c))
+
+
+### 🐞 Bug Fixes
+
+* update submodule path for forge-std and add .gitignore ([fa65f4d](https://github.com/iExecBlockchainComputing/RLC-multichain/commit/fa65f4d0ed33fea681720cf67179e9b1de690cde))
+
+
+### 🧰 Other
+
+* forge init ([7cf1645](https://github.com/iExecBlockchainComputing/RLC-multichain/commit/7cf1645f51592f88b7f7e5b06d7acec69f2c9949))
+
+## Changelog
+
 ## vNEXT
 
 ### Added
