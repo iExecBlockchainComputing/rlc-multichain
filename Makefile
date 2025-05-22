@@ -1,7 +1,19 @@
 # Makefile for RLC OFT Project
+
+MAKEFLAGS += --no-print-directory
+
 -include .env
 
+#
 # Test and utility targets
+#
+
+fork-sepolia:
+	anvil --fork-url $(SEPOLIA_RPC_URL) --port 8545
+
+fork-arbitrum-sepolia:
+	anvil --fork-url $(ARBITRUM_SEPOLIA_RPC_URL) --port 8546
+
 test:
 	@echo "Running tests..."
 	forge test -vvv
@@ -10,7 +22,10 @@ clean:
 	@echo "Cleaning artifacts..."
 	forge clean
 
+#
 # Deployment targets
+#
+
 deploy-adapter:
 	@echo "Deploying RLCAdapter on SEPOLIA..."
 	forge script script/RLCAdapter.s.sol:Deploy \
@@ -42,6 +57,10 @@ configure-oft:
 		--broadcast \
 		-vvv
 
+#
+# Bridge operations.
+#
+
 send-tokens-to-arbitrum-sepolia:
 	@echo "Sending tokens cross-chain... from SEPOLIA to Arbitrum SEPOLIA"
 	forge script script/SendEthereumToArbitrum.s.sol:SendTokensToArbitrumSepolia \
@@ -55,8 +74,8 @@ send-tokens-to-sepolia:
 	forge script script/SendArbitrumToEthereum.s.sol:SendTokensToSepolia \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
-        --broadcast \
-        -vvv
+		--broadcast \
+		-vvv
 
 # Verification targets
 verify-adapter:
