@@ -147,3 +147,6 @@ The scripts automatically calculate these fees and include them in the transacti
 - [LayerZero Documentation](https://layerzero.gitbook.io/docs/)
 - [OFT Contracts](https://github.com/LayerZero-Labs/solidity-examples/tree/main/contracts/token/oft)
 - [iExec Platform Documentation](https://docs.iex.ec/)
+
+## TODO:
+- Use an entreprise RPC URL for `secrets.SEPOLIA_RPC_URL` in Github environment `ci`.
