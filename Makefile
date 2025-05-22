@@ -57,9 +57,9 @@ configure-adapter:
 	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
 	forge script script/RLCAdapter.s.sol:Configure \
 		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
+
 configure-oft:
 	@echo "Configuring RLCOFT on on: $(RPC_URL)"
 	forge script script/RLCOFT.s.sol:Configure \
