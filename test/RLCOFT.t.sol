@@ -55,7 +55,7 @@ contract RLCOFTTest is Test {
     }
 
     // ============ Deployment Tests ============
-    function testDeployment() public {
+    function test_Deployment() public {
         assertEq(rlcOft.name(), "RLC OFT Test");
         assertEq(rlcOft.symbol(), "RLCT");
         assertEq(rlcOft.decimals(), 9);
@@ -79,7 +79,7 @@ contract RLCOFTTest is Test {
         rlcOft.pause();
     }
 
-    function testUnpauseByPauser() public {
+    function test_UnpauseByPauser() public {
         // First pause
         vm.prank(pauser);
         rlcOft.pause();
@@ -95,7 +95,7 @@ contract RLCOFTTest is Test {
         assertFalse(rlcOft.paused());
     }
 
-    function testUnpauseUnauthorized() public {
+    function test_UnpauseUnauthorized() public {
         vm.prank(pauser);
         rlcOft.pause();
 
@@ -114,7 +114,7 @@ contract RLCOFTTest is Test {
         rlcOft.transfer(user2, 100 * 10 ** 9);
     }
 
-    function testTransferFromWhenPaused() public {
+    function test_TransferFromWhenPaused() public {
         // First approve
         vm.prank(user1);
         rlcOft.approve(user2, 100 * 10 ** 9);
@@ -129,7 +129,7 @@ contract RLCOFTTest is Test {
         rlcOft.transferFrom(user1, user2, 100 * 10 ** 9);
     }
 
-    function testMintWhenPaused() public {
+    function test_MintWhenPaused() public {
         // Pause the contract
         vm.prank(pauser);
         rlcOft.pause();
@@ -140,7 +140,7 @@ contract RLCOFTTest is Test {
         rlcOft.mint(user1, 100 * 10 ** 9);
     }
 
-    function testBurnWhenPaused() public {
+    function test_BurnWhenPaused() public {
         // Pause the contract
         vm.prank(pauser);
         rlcOft.pause();
@@ -151,7 +151,7 @@ contract RLCOFTTest is Test {
         rlcOft.burn(100 * 10 ** 9);
     }
 
-    function testTransferWhenNotPaused() public {
+    function test_TransferWhenNotPaused() public {
         uint256 transferAmount = 100 * 10 ** 9;
         uint256 initialBalance1 = rlcOft.balanceOf(user1);
         uint256 initialBalance2 = rlcOft.balanceOf(user2);
