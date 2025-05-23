@@ -73,7 +73,7 @@ contract RLCOFTTest is Test {
         assertTrue(rlcOft.paused());
     }
 
-    function testPauseUnauthorized() public {
+    function test_RevertwhenPausedByUnauthorizedSender() public {
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, user1, rlcOft.PAUSER_ROLE()));
         vm.prank(user1);
         rlcOft.pause();
