@@ -55,33 +55,31 @@ Instead of duplicating code that may become outdated, here are links to the key 
 
 ## Deployment
 
-The deployment process involves four steps:
+### Local deployment
 
-1. Deploy the RLCAdapter on Ethereum Sepolia:
-
-   ```bash
-   make deploy-adapter
-   ```
-
-2. Deploy the RLCOFT on Arbitrum Sepolia:
+1. Start a local Anvil fork of Sepolia:
 
    ```bash
-   make deploy-oft
+   make fork-sepolia
    ```
 
-3. Configure the RLCAdapter to trust the RLCOFT contract:
+2. Start a local fork of Arbitrum Sepolia:
 
    ```bash
-   make configure-adapter
+   make fork-arbitrum-sepolia
    ```
 
-4. Configure the RLCOFT to trust the RLCAdapter contract:
+3. Deploy all contracts:
 
    ```bash
-   make configure-oft
+   make deploy-on-anvil
    ```
 
-After deployment, update your `.env` file with the deployed contract addresses.
+### Live network deployment
+
+   ```bash
+   make deploy-on-testnets
+   ```
 
 ## Usage
 
@@ -149,3 +147,6 @@ The scripts automatically calculate these fees and include them in the transacti
 - [LayerZero Documentation](https://layerzero.gitbook.io/docs/)
 - [OFT Contracts](https://github.com/LayerZero-Labs/solidity-examples/tree/main/contracts/token/oft)
 - [iExec Platform Documentation](https://docs.iex.ec/)
+
+## TODO:
+- Use an entreprise RPC URL for `secrets.SEPOLIA_RPC_URL` in Github environment `ci`.

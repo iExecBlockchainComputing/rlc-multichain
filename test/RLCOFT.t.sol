@@ -5,8 +5,9 @@ import {Test, console} from "forge-std/Test.sol";
 import {Deploy as RLCOFTDeploy, Configure as RLCOFTConfigure} from "../script/RLCOFT.s.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 import {ITokenSpender} from "../src/ITokenSpender.sol";
+import {RLCOFTTestSetup} from "./utils/RLCOFTTestSetup.sol";
 
-contract RLCOFTTest is Test {
+contract RLCOFTTest is RLCOFTTestSetup {
     RLCOFT public rlcOft;
 
     address public owner;
@@ -25,8 +26,6 @@ contract RLCOFTTest is Test {
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
     function setUp() public {
-        vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
-
         // Create addresses using makeAddr
         owner = makeAddr("owner");
         bridge = makeAddr("bridge");
@@ -35,14 +34,14 @@ contract RLCOFTTest is Test {
         user2 = makeAddr("user2");
 
         // Set up environment variables for the deployment
+        vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
+        vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
         vm.setEnv("RLC_OFT_TOKEN_NAME", "RLC OFT Test");
         vm.setEnv("RLC_TOKEN_SYMBOL", "RLCT");
         vm.setEnv("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS", "0x6EDCE65403992e310A62460808c4b910D972f10f");
-        vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
-        vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
-
+        
         // Deploy the contract using the deployment script
-        rlcOft = RLCOFT(new RLCOFTDeploy().run());
+        rlcOft = RLCOFT(_forkArbitrumTestnetAndDeploy());
 
         vm.startPrank(owner);
         rlcOft.grantRole(rlcOft.BRIDGE_ROLE(), bridge);
@@ -55,7 +54,7 @@ contract RLCOFTTest is Test {
     }
 
     // ============ Deployment Tests ============
-    function test_Deployment() public {
+    function test_Deployment() public view {
         assertEq(rlcOft.name(), "RLC OFT Test");
         assertEq(rlcOft.symbol(), "RLCT");
         assertEq(rlcOft.decimals(), 9);

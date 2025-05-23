@@ -42,5 +42,5 @@ contract RLCAdapter is OFTAdapterUpgradeable, UUPSUpgradeable, AccessControlDefa
         return OwnableUpgradeable.owner();
     }
 
-    function _authorizeUpgrade(address newImplementation) internal virtual override {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }

@@ -22,16 +22,18 @@ contract Deploy is Script {
         console.log("RLCOFT implementation deployed at:", address(rlcOFTImplementation));
 
         // Deploy the proxy contract
-        ERC1967Proxy rlcOFTProxy = new ERC1967Proxy(
-            address(rlcOFTImplementation),
-            abi.encodeWithSelector(rlcOFTImplementation.initialize.selector, name, symbol, owner, pauser)
+        address rlcOFTProxyAddress = address(
+            new ERC1967Proxy(
+                address(rlcOFTImplementation),
+                abi.encodeWithSelector(rlcOFTImplementation.initialize.selector, name, symbol, owner, pauser)
+            )
         );
-        console.log("RLCOFT proxy deployed at:", address(rlcOFTProxy));
+        console.log("RLCOFT proxy deployed at:", rlcOFTProxyAddress);
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", address(rlcOFTProxy));
-        return address(rlcOFTProxy);
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxyAddress);
+        return rlcOFTProxyAddress;
     }
 }
 
