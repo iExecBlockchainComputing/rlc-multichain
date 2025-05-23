@@ -104,7 +104,7 @@ contract RLCOFTTest is Test {
         rlcOft.unpause();
     }
 
-    function testTransferWhenPaused() public {
+    function test_RevertWhenTransferDuringPause() public {
         // Pause the contract
         vm.prank(pauser);
         rlcOft.pause();
