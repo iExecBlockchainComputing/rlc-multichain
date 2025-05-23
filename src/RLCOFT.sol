@@ -36,7 +36,6 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
         __AccessControlDefaultAdminRules_init(0, _owner);
         _grantRole(UPGRADER_ROLE, _owner);
         _grantRole(PAUSER_ROLE, pauser);
-
         __Pausable_init();
     }
 
