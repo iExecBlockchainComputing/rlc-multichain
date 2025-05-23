@@ -11,11 +11,7 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
 import {ITokenSpender} from "src/ITokenSpender.sol";
 
 /// @notice OFT is an ERC-20 token that extends the OFTCore contract.
-contract RLCOFT is OFTUpgradeable,
-    UUPSUpgradeable,
-    AccessControlDefaultAdminRulesUpgradeable,
-    PausableUpgradeable
-{
+contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, PausableUpgradeable {
     //AccessControl Roles
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant BRIDGE_ROLE = keccak256("BRIDGE_ROLE");
