@@ -30,7 +30,8 @@ contract RLCOFT is OFTUpgradeable,
     /// @param _name Name of the token
     /// @param _symbol Symbol of the token
     /// @param _owner Address of the contract owner
-    function initialize(string memory _name, string memory _symbol, address _owner, address pauser)
+    // @param _pauser Address of the contract pauser
+    function initialize(string memory _name, string memory _symbol, address _owner, address _pauser)
         public
         initializer
     {
@@ -39,7 +40,7 @@ contract RLCOFT is OFTUpgradeable,
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, _owner);
         _grantRole(UPGRADER_ROLE, _owner);
-        _grantRole(PAUSER_ROLE, pauser);
+        _grantRole(PAUSER_ROLE, _pauser);
         __Pausable_init();
     }
 
