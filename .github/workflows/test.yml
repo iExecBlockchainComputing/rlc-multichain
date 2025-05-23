@@ -41,3 +41,22 @@ jobs:
       #   run: |
       #     forge test -vvv
       #   id: test
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: iExecBlockchainComputing/RLC-multichain
+
+      - name: Run static analysis with slither
+        uses: crytic/slither-action@v0.4.0
+        with:
+          target: "contracts/"
+          slither-args: --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+          fail-on: none
+          sarif: results.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
