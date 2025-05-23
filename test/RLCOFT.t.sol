@@ -44,7 +44,7 @@ contract RLCOFTTest is Test {
         // Deploy the contract using the deployment script
         rlcOft = RLCOFT(new RLCOFTDeploy().run());
 
-        vm.startPrank(owner); // We can't use vm.prank here as the first call will be rlcOft.BRIDGE_ROLE() before doing the grantRole
+        vm.startPrank(owner);
         rlcOft.grantRole(rlcOft.BRIDGE_ROLE(), bridge);
         vm.stopPrank();
 
