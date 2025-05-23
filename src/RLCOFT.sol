@@ -51,18 +51,13 @@ contract RLCOFT is OFTUpgradeable,
         _unpause();
     }
 
-    /**
-     * @dev * @dev See {ERC20-_update}.
-     * The following functions are overrides required by Solidity.
-     */
-    function _update(address from, address to, uint256 value) internal virtual override whenNotPaused {
-        super._update(from, to, value);
+    function mint(address to, uint256 amount) external onlyRole(BRIDGE_ROLE) {
+        _mint(to, amount);
     }
 
-    /// @notice Authorizes an upgrade to a new implementation
-    /// @dev Can only be called by the owner
-    /// @param newImplementation Address of the new implementation
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+    function burn(uint256 _value) external onlyRole(BRIDGE_ROLE) {
+        _burn(msg.sender, _value);
+    }
 
     /**
      * @dev Override the decimals function to return 9 instead of the default 18
@@ -70,14 +65,6 @@ contract RLCOFT is OFTUpgradeable,
      */
     function decimals() public pure override returns (uint8) {
         return 9;
-    }
-
-    function mint(address to, uint256 amount) external onlyRole(BRIDGE_ROLE) {
-        _mint(to, amount);
-    }
-
-    function burn(uint256 _value) external onlyRole(BRIDGE_ROLE) {
-        _burn(msg.sender, _value);
     }
 
     function owner()
@@ -100,4 +87,17 @@ contract RLCOFT is OFTUpgradeable,
         }
         return false;
     }
+
+    /**
+     * @dev * @dev See {ERC20-_update}.
+     * The following functions are overrides required by Solidity.
+     */
+    function _update(address from, address to, uint256 value) internal virtual override whenNotPaused {
+        super._update(from, to, value);
+    }
+
+    /// @notice Authorizes an upgrade to a new implementation
+    /// @dev Can only be called by the owner
+    /// @param newImplementation Address of the new implementation
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }
