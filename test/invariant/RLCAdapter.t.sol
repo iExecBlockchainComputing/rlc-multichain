@@ -55,8 +55,5 @@ contract RLCOFTTest is Test {
     }
 
     // ============ Deployment Tests ============
-    function testDeployment() public {
-
-    }
-
+    function testDeployment() public {}
 }
