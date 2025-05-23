@@ -17,3 +17,5 @@ docs/
 # Dotenv file
 .env
 .last_deploy.json
+
+.idea
