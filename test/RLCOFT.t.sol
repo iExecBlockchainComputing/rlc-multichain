@@ -63,7 +63,7 @@ contract RLCOFTTest is Test {
     }
 
     // ============ Pausable Tests ============
-    function testPauseByPauser() public {
+    function test_PauseByPauser() public {
         vm.expectEmit(true, false, false, false);
         emit Paused(pauser);
 
