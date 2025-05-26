@@ -26,7 +26,7 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     /// @param _name Name of the token
     /// @param _symbol Symbol of the token
     /// @param _owner Address of the contract owner
-    // @param _pauser Address of the contract pauser
+    /// @param _pauser Address of the contract pauser
     function initialize(string memory _name, string memory _symbol, address _owner, address _pauser)
         public
         initializer
