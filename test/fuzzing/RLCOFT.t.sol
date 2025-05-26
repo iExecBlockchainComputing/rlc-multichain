@@ -16,7 +16,7 @@ contract RLCOFTInvariant is Test {
 
         address owner = makeAddr("owner");
         address pauser = makeAddr("pauser");
-        
+
         // Set up environment variables for the deployment
         vm.setEnv("RLC_OFT_TOKEN_NAME", "RLC OFT Test");
         vm.setEnv("RLC_TOKEN_SYMBOL", "RLCT");
