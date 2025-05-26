@@ -6,7 +6,7 @@ import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
 
 contract RLCAdapterTestSetup is Test {
     function _forkSepoliaAndDeploy() internal returns (address) {
-        vm.createSelectFork(vm.envString("SEPOLIA_RPC_URL"));
+        vm.createSelectFork("https://ethereum-sepolia-rpc.publicnode.com"); // use public nde
         return new RLCAdapterDeploy().run();
     }
 }

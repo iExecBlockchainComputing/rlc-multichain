@@ -6,7 +6,7 @@ import {Deploy as RLCOFTDeploy} from "../../script/RLCOFT.s.sol";
 
 contract RLCOFTTestSetup is Test {
     function _forkArbitrumTestnetAndDeploy() internal returns (address) {
-        vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
+        vm.createSelectFork("https://arbitrum-sepolia-rpc.publicnode.com"); // use public ndde
         return new RLCOFTDeploy().run();
     }
 }
