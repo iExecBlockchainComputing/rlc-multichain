@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
+import {Deploy as RLCAdapterDeploy} from "../../../script/RLCAdapter.s.sol";
 
 contract RLCAdapterTestSetup is Test {
     function _forkSepoliaAndDeploy() internal returns (address) {

@@ -61,24 +61,6 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     }
 
     /**
-     * @dev Override the send function to make it pausable
-     * @param _sendParam The parameters for the send operation
-     * @param _fee The calculated fee for the send() operation
-     * @param _refundAddress The address to receive any excess funds
-     * @return msgReceipt The receipt for the send operation
-     * @return oftReceipt The OFT receipt information
-     */
-    // function send(SendParam calldata _sendParam, MessagingFee calldata _fee, address _refundAddress)
-    //     external
-    //     payable
-    //     override
-    //     whenNotPaused
-    //     returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
-    // {
-    //     return super.send(_sendParam, _fee, _refundAddress);
-    // }
-
-    /**
      * @dev Override the _lzReceive function to make it pausable
      * @param _origin The origin information
      * @param _guid The unique identifier for the received LayerZero message

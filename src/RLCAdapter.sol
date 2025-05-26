@@ -44,16 +44,6 @@ contract RLCAdapter is
         __Pausable_init();
     }
 
-    function send(SendParam calldata _sendParam, MessagingFee calldata _fee, address _refundAddress)
-        external
-        payable
-        override
-        whenNotPaused
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
-    {
-        return super.send(_sendParam, _fee, _refundAddress);
-    }
-
     /**
      * @dev Override the _lzReceive function to make it pausable
      * @param _origin The origin information
