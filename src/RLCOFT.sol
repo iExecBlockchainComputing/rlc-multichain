@@ -86,7 +86,7 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     }
 
     /**
-     * @dev * @dev See {ERC20-_update}.
+     * @dev See {ERC20-_update}.
      * The following functions are overrides required by Solidity.
      */
     function _update(address from, address to, uint256 value) internal virtual override whenNotPaused {
