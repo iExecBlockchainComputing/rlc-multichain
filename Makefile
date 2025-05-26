@@ -1,46 +1,72 @@
 # Makefile for RLC OFT Project
+
+MAKEFLAGS += --no-print-directory
+
 -include .env
 
+#
 # Test and utility targets
-test:
-	@echo "Running tests..."
+#
+
+fork-sepolia:
+	anvil --fork-url $(SEPOLIA_RPC_URL) --port 8545
+
+fork-arbitrum-sepolia:
+	anvil --fork-url $(ARBITRUM_SEPOLIA_RPC_URL) --port 8546
+
+utest:
 	forge test -vvv
 
 clean:
-	@echo "Cleaning artifacts..."
 	forge clean
 
+#
 # Deployment targets
+#
+
+deploy-on-anvil:
+	$(MAKE) deploy-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
+	$(MAKE) deploy-oft RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) configure-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
+	$(MAKE) configure-oft RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+
+deploy-on-testnets:
+	$(MAKE) deploy-adapter RPC_URL=$(SEPOLIA_RPC_URL)
+	$(MAKE) deploy-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) configure-adapter RPC_URL=$(SEPOLIA_RPC_URL)
+	$(MAKE) configure-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+
 deploy-adapter:
-	@echo "Deploying RLCAdapter on SEPOLIA..."
+	@echo "Deploying RLCAdapter on: $(RPC_URL)"
 	forge script script/RLCAdapter.s.sol:Deploy \
-	--rpc-url $(SEPOLIA_RPC_URL) \
-	--account $(ACCOUNT) \
-	--broadcast \
-	-vvv 
+		--rpc-url $(RPC_URL) \
+		--broadcast \
+		-vvv
 
 deploy-oft:
-	@echo "Deploying RLCOFT on Arbitrum SEPOLIA..."
+	@echo "Deploying RLCOFT on on: $(RPC_URL)"
 	forge script script/RLCOFT.s.sol:Deploy \
-		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
-		--account $(ACCOUNT) \
+		--rpc-url $(RPC_URL) \
 		--broadcast \
 		-vvv \
 
 configure-adapter:
-	@echo "Configuring RLCAdapter on SEPOLIA..."
+	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
 	forge script script/RLCAdapter.s.sol:Configure \
-		--rpc-url $(SEPOLIA_RPC_URL) \
-		--account $(ACCOUNT) \
+		--rpc-url $(RPC_URL) \
 		--broadcast \
 		-vvv
+
 configure-oft:
-	@echo "Configuring RLCOFT on Arbitrum SEPOLIA..."
+	@echo "Configuring RLCOFT on on: $(RPC_URL)"
 	forge script script/RLCOFT.s.sol:Configure \
-		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
-		--account $(ACCOUNT) \
+		--rpc-url $(RPC_URL) \
 		--broadcast \
 		-vvv
+
+#
+# Bridge operations.
+#
 
 send-tokens-to-arbitrum-sepolia:
 	@echo "Sending tokens cross-chain... from SEPOLIA to Arbitrum SEPOLIA"
@@ -55,8 +81,8 @@ send-tokens-to-sepolia:
 	forge script script/SendArbitrumToEthereum.s.sol:SendTokensToSepolia \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
-        --broadcast \
-        -vvv
+		--broadcast \
+		-vvv
 
 # Verification targets
 verify-adapter:
