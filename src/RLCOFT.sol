@@ -3,6 +3,10 @@
 pragma solidity ^0.8.22;
 
 import {OFTUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTUpgradeable.sol";
+import {
+    SendParam, MessagingFee, MessagingReceipt, OFTReceipt
+} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
+import {Origin} from "@layerzerolabs/oapp-evm-upgradeable/contracts/oapp/OAppUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
@@ -54,6 +58,42 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
 
     function burn(uint256 _value) external onlyRole(BRIDGE_ROLE) {
         _burn(msg.sender, _value);
+    }
+
+    /**
+     * @dev Override the send function to make it pausable
+     * @param _sendParam The parameters for the send operation
+     * @param _fee The calculated fee for the send() operation
+     * @param _refundAddress The address to receive any excess funds
+     * @return msgReceipt The receipt for the send operation
+     * @return oftReceipt The OFT receipt information
+     */
+    // function send(SendParam calldata _sendParam, MessagingFee calldata _fee, address _refundAddress)
+    //     external
+    //     payable
+    //     override
+    //     whenNotPaused
+    //     returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+    // {
+    //     return super.send(_sendParam, _fee, _refundAddress);
+    // }
+
+    /**
+     * @dev Override the _lzReceive function to make it pausable
+     * @param _origin The origin information
+     * @param _guid The unique identifier for the received LayerZero message
+     * @param _message The encoded message
+     * @param _executor The address of the executor
+     * @param _extraData Additional data
+     */
+    function _lzReceive(
+        Origin calldata _origin,
+        bytes32 _guid,
+        bytes calldata _message,
+        address _executor,
+        bytes calldata _extraData
+    ) internal override whenNotPaused {
+        super._lzReceive(_origin, _guid, _message, _executor, _extraData);
     }
 
     /**

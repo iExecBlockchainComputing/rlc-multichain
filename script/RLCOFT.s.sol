@@ -3,10 +3,10 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {Upgrades, Options} from "@openzeppelin/foundry-upgrades/src/Upgrades.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract Deploy is Script {
     function run() external returns (address) {
