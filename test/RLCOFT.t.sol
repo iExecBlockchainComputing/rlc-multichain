@@ -10,11 +10,11 @@ import {RLCOFTTestSetup} from "./utils/RLCOFTTestSetup.sol";
 contract RLCOFTTest is RLCOFTTestSetup {
     RLCOFT public rlcOft;
 
-    address public owner;
-    address public bridge;
-    address public pauser;
-    address public user1;
-    address public user2;
+    address public owner = makeAddr("owner");
+    address public bridge = makeAddr("bridge");
+    address public pauser = makeAddr("pauser");
+    address public user1 = makeAddr("user1");
+    address public user2 = makeAddr("user2");
 
     // Events to test
     event Paused(address account);
@@ -26,13 +26,6 @@ contract RLCOFTTest is RLCOFTTestSetup {
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
     function setUp() public {
-        // Create addresses using makeAddr
-        owner = makeAddr("owner");
-        bridge = makeAddr("bridge");
-        pauser = makeAddr("pauser");
-        user1 = makeAddr("user1");
-        user2 = makeAddr("user2");
-
         // Set up environment variables for the deployment
         vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
         vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
