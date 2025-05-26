@@ -2,12 +2,12 @@
 pragma solidity ^0.8.22;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Deploy as RLCOFTDeploy} from "../../script/RLCOFT.s.sol";
-import {RLCOFT} from "../../src/RLCOFT.sol";
+import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
+import {RLCAdapter} from "../../src/RLCAdapter.sol";
 import {ITokenSpender} from "../../src/ITokenSpender.sol";
 
-contract RLCOFTTest is Test {
-    RLCOFT public rlcOft;
+contract RLCAdapterScriptTest is Test {
+    RLCAdapter public rlcAdapter;
 
     address public owner;
     address public bridge;
@@ -42,16 +42,7 @@ contract RLCOFTTest is Test {
         vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
 
         // Deploy the contract using the deployment script
-        rlcOft = RLCOFT(new RLCOFTDeploy().run());
-
-        vm.startPrank(owner); // We can't use vm.prank here as the first call will be rlcOft.BRIDGE_ROLE() before doing the grantRole
-        rlcOft.grantRole(rlcOft.BRIDGE_ROLE(), bridge);
-        vm.stopPrank();
-
-        vm.startPrank(bridge);
-        rlcOft.mint(user1, 1000 * 10 ** 9);
-        rlcOft.mint(user2, 500 * 10 ** 9);
-        vm.stopPrank();
+        rlcAdapter = RLCAdapter(new RLCAdapterDeploy().run());
     }
 
     // ============ Deployment Tests ============

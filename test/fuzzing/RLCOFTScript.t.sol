@@ -5,7 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {Deploy as RLCOFTDeploy} from "../../script/RLCOFT.s.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
 
-contract RLCOFTInvariant is Test {
+contract RLCOFTScriptTest is Test {
     mapping(bytes32 => address) public deployed;
 
     // CreateX factory address (should be the same across networks)
