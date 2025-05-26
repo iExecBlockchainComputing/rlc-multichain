@@ -39,7 +39,7 @@ contract RLCOFTTest is RLCOFTTestSetup {
         vm.setEnv("RLC_OFT_TOKEN_NAME", "RLC OFT Test");
         vm.setEnv("RLC_TOKEN_SYMBOL", "RLCT");
         vm.setEnv("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS", "0x6EDCE65403992e310A62460808c4b910D972f10f");
-        
+
         // Deploy the contract using the deployment script
         rlcOft = RLCOFT(_forkArbitrumTestnetAndDeploy());
 
