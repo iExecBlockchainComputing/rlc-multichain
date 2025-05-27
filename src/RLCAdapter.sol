@@ -23,10 +23,10 @@ contract RLCAdapter is
     AccessControlDefaultAdminRulesUpgradeable,
     PausableUpgradeable
 {
-    // Upgrader Role RLCAdapter contracts.
+    //AccessControl Roles
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    // Bridge Minter Role required for minting RLC Token
     bytes32 public constant BRIDGE_ROLE = keccak256("BRIDGE_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(address _token, address _lzEndpoint) OFTAdapterUpgradeable(_token, _lzEndpoint) {
@@ -35,13 +35,23 @@ contract RLCAdapter is
 
     /// @notice Initializes the contract
     /// @param _owner Address of the contract owner
-    function initialize(address _owner) public initializer {
+    /// @param _pauser Address of the contract pauser
+    function initialize(address _owner, address _pauser) public initializer {
         __Ownable_init(_owner);
         __OFTAdapter_init(_owner);
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, _owner);
         _grantRole(UPGRADER_ROLE, _owner);
+        _grantRole(PAUSER_ROLE, _pauser);
         __Pausable_init();
+    }
+
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
     }
 
     /**

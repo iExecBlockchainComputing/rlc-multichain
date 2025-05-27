@@ -31,15 +31,10 @@ contract RLCOFTTest is RLCOFTTestSetup {
     event Paused(address account);
     event Unpaused(address account);
     event Transfer(address indexed from, address indexed to, uint256 value);
-    event OFTSent(
-        bytes32 indexed guid, uint32 dstEid, address indexed fromAddress, uint256 amountSentLD, uint256 amountReceivedLD
-    );
-    event OFTReceived(bytes32 indexed guid, uint32 srcEid, address indexed toAddress, uint256 amountReceivedLD);
 
     // Custom errors from OpenZeppelin and LayerZero
     error EnforcedPause();
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-    error SlippageExceeded(uint256 amountLD, uint256 minAmountLD);
 
     function setUp() public {
         // Set up environment variables for the deployment
@@ -151,7 +146,6 @@ contract RLCOFTTest is RLCOFTTestSetup {
     }
 
     // ============ OFT Pausable Tests ============
-
     function test_LzReceiveWhenPaused() public {
         // Set up the peer to avoid NoPeer revert
         vm.prank(owner);

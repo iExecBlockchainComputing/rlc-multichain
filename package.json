@@ -25,5 +25,8 @@
     "@openzeppelin/contracts-upgradeable": "^5.0.2",
     "@openzeppelin/foundry-upgrades": "^0.4.0",
     "rlc-faucet-contract": "^1.0.10"
+  },
+  "engines": {
+    "node": ">=22.0.0 <23.0.0"
   }
 }
