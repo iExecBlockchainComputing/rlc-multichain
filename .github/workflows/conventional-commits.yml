@@ -1,12 +1,14 @@
-name: Conventional Commits
+name: Lint PR Title
 
-on: [pull_request]
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - reopened
 
 jobs:
-  build:
-    name: Conventional Commits
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: webiny/action-conventional-commits@v1.3.0
+  lint-pr-title:
+    uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/conventional-commits.yaml@conventional-commits-v1.0.0
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
