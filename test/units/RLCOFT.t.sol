@@ -5,9 +5,9 @@ import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/Option
 import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {ERC20Mock} from "@layerzerolabs/oft-evm/test/mocks/ERC20Mock.sol";
 import {RLCOFTMock, Deploy as RLCOFTDeploy} from "../units/mocks/RLCOFTMock.sol";
 import {Deploy as RLCAdapterDeploy} from "../units/mocks/RLCAdapterMock.sol";
+import {RLCMock} from "../units/mocks/RLCMock.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
 
@@ -16,7 +16,7 @@ contract RLCOFTE2ETest is TestHelperOz5 {
 
     RLCOFTMock internal sourceOFT;
     RLCAdapter internal destAdapter;
-    ERC20Mock internal rlcToken;
+    RLCMock internal rlcToken;
 
     uint32 internal constant SOURCE_EID = 1;
     uint32 internal constant DEST_EID = 2;
@@ -35,7 +35,7 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
 
         // Deploy RLC token mock
-        rlcToken = new ERC20Mock("RLC OFT Test", "RLCT");
+        rlcToken = new RLCMock("RLC OFT Test", "RLCT");
 
         // Set up endpoints for the deployment
         address lzEndpointOFT = address(endpoints[SOURCE_EID]);
@@ -78,8 +78,8 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         SendParam memory sendParam = SendParam({
             dstEid: DEST_EID,
             to: addressToBytes32(user2),
-            amountLD: TRANSFER_AMOUNT / 1e9,
-            minAmountLD: TRANSFER_AMOUNT / 1e9,
+            amountLD: TRANSFER_AMOUNT,
+            minAmountLD: TRANSFER_AMOUNT,
             extraOptions: options,
             composeMsg: "",
             oftCmd: ""
@@ -97,7 +97,7 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         this.verifyPackets(DEST_EID, addressToBytes32(address(destAdapter)));
 
         // Verify source state - tokens should be locked in adapter
-        // assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT); // TODO: Fix bug here, due to sharedDecimals 6
+        assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
 
         // Verify destination state - tokens should be minted to user2
         assertEq(rlcToken.balanceOf(address(destAdapter)), INITIAL_BALANCE - TRANSFER_AMOUNT);
@@ -114,8 +114,8 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         SendParam memory sendParam = SendParam({
             dstEid: DEST_EID,
             to: addressToBytes32(user2),
-            amountLD: TRANSFER_AMOUNT / 1e9,
-            minAmountLD: TRANSFER_AMOUNT / 1e9,
+            amountLD: TRANSFER_AMOUNT,
+            minAmountLD: TRANSFER_AMOUNT,
             extraOptions: options,
             composeMsg: "",
             oftCmd: ""
@@ -136,7 +136,7 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         }
 
         // Verify source state - tokens should be locked in adapter
-        // assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT); // TODO: Fix bug here, due to sharedDecimals 6
+        assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE);
 
         // Verify destination state - tokens should be minted to user2
         assertEq(rlcToken.balanceOf(address(destAdapter)), INITIAL_BALANCE);
@@ -155,8 +155,8 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         SendParam memory sendParam = SendParam({
             dstEid: DEST_EID,
             to: addressToBytes32(user2),
-            amountLD: TRANSFER_AMOUNT / 1e9,
-            minAmountLD: TRANSFER_AMOUNT / 1e9,
+            amountLD: TRANSFER_AMOUNT,
+            minAmountLD: TRANSFER_AMOUNT,
             extraOptions: options,
             composeMsg: "",
             oftCmd: ""
@@ -174,7 +174,7 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         this.verifyPackets(DEST_EID, addressToBytes32(address(destAdapter)));
 
         // Verify source state - tokens should be locked in adapter
-        // assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT); // TODO: Fix bug here, due to sharedDecimals 6
+        assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
 
         // Verify destination state - tokens should be minted to user2
         assertEq(rlcToken.balanceOf(address(destAdapter)), INITIAL_BALANCE - TRANSFER_AMOUNT);
@@ -182,4 +182,5 @@ contract RLCOFTE2ETest is TestHelperOz5 {
     }
 
     //TODO: Add more tests when destination adapter is paused/unpaused
+    //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
 }

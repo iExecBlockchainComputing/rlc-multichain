@@ -19,7 +19,7 @@ contract RLCOFTScriptTest is Test {
         vm.setEnv("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS", "0x6EDCE65403992e310A62460808c4b910D972f10f");
         vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
         vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
-        
+
         rlcOft = RLCOFT(new RLCOFTDeploy().run());
     }
 
