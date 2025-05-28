@@ -49,6 +49,18 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     }
 
     /**
+     * Approve and then call the approved contract in a single tx
+     */
+    function approveAndCall(address _spender, uint256 _value, bytes calldata _extraData) external returns (bool) {
+        ITokenSpender spender = ITokenSpender(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, address(this), _extraData);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @dev Override the decimals function to return 9 instead of the default 18
      * @return The number of decimals used in the token
      */
@@ -63,18 +75,6 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
         returns (address)
     {
         return OwnableUpgradeable.owner();
-    }
-
-    /**
-     * Approve and then call the approved contract in a single tx
-     */
-    function approveAndCall(address _spender, uint256 _value, bytes calldata _extraData) public returns (bool) {
-        ITokenSpender spender = ITokenSpender(_spender);
-        if (approve(_spender, _value)) {
-            spender.receiveApproval(msg.sender, _value, address(this), _extraData);
-            return true;
-        }
-        return false;
     }
 
     /**
