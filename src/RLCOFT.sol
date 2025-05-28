@@ -86,7 +86,7 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     }
 
     /// @notice Authorizes an upgrade to a new implementation
-    /// @dev Can only be called by the owner
+    /// @dev Can only be called by the upgrader.
     /// @param newImplementation Address of the new implementation
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }
