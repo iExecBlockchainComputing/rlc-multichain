@@ -3,13 +3,13 @@ pragma solidity ^0.8.13;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {ERC20Mock} from "@layerzerolabs/oft-evm/test/mocks/ERC20Mock.sol";
+import {RLCMock} from "../units/mocks/RLCMock.sol";
 import {Deploy as RLCAdapterDeploy} from "../units/mocks/RLCAdapterMock.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
 
 contract RLCAdapterTest is TestHelperOz5, Initializable {
     RLCAdapter public rlcAdapter;
-    ERC20Mock internal rlcToken;
+    RLCMock internal rlcToken;
 
     uint32 internal constant SOURCE_EID = 1;
     uint32 internal constant DEST_EID = 2;
@@ -22,7 +22,7 @@ contract RLCAdapterTest is TestHelperOz5, Initializable {
         setUpEndpoints(2, LibraryType.UltraLightNode);
 
         // Deploy RLC token mock
-        rlcToken = new ERC20Mock("RLC OFT Test", "RLCT");
+        rlcToken = new RLCMock("RLC OFT Test", "RLCT");
 
         // Set up endpoints for the deployment
         address lzEndpointAdapter = address(endpoints[SOURCE_EID]);
