@@ -2,15 +2,32 @@
 pragma solidity ^0.8.13;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {Test, console} from "forge-std/Test.sol";
-import {RLCAdapterTestSetup} from "./utils/RLCAdapterTestSetup.sol";
+import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
+import {ERC20Mock} from "@layerzerolabs/oft-evm/test/mocks/ERC20Mock.sol";
+import {Deploy as RLCAdapterDeploy} from "../units/mocks/RLCAdapterMock.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
 
-contract RLCAdapterTest is RLCAdapterTestSetup, Initializable {
+contract RLCAdapterTest is TestHelperOz5, Initializable {
     RLCAdapter public rlcAdapter;
+    ERC20Mock internal rlcToken;
 
-    function setUp() public {
-        rlcAdapter = RLCAdapter(_forkSepoliaAndDeploy());
+    uint32 internal constant SOURCE_EID = 1;
+    uint32 internal constant DEST_EID = 2;
+
+    address owner = makeAddr("OWNER_ADDRESS");
+    address pauser = makeAddr("PAUSER_ADDRESS");
+
+    function setUp() public virtual override {
+        super.setUp();
+        setUpEndpoints(2, LibraryType.UltraLightNode);
+
+        // Deploy RLC token mock
+        rlcToken = new ERC20Mock("RLC OFT Test", "RLCT");
+
+        // Set up endpoints for the deployment
+        address lzEndpointAdapter = address(endpoints[SOURCE_EID]);
+
+        rlcAdapter = RLCAdapter(new RLCAdapterDeploy().run(address(rlcToken), lzEndpointAdapter, owner, pauser));
     }
 
     function test_RevertWhenInitializingTwoTimes() public {
