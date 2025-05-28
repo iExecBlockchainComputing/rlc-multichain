@@ -79,14 +79,14 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
 
     /**
      * @dev See {ERC20-_update}.
-     * The following functions are overrides required by Solidity.
+     * Override this functions to prevent its execution when the contract is paused.
      */
     function _update(address from, address to, uint256 value) internal virtual override whenNotPaused {
         super._update(from, to, value);
     }
 
     /// @notice Authorizes an upgrade to a new implementation
-    /// @dev Can only be called by the owner
+    /// @dev Can only be called by the upgrader.
     /// @param newImplementation Address of the new implementation
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }
