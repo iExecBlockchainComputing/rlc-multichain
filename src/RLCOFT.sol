@@ -52,32 +52,6 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
         _unpause();
     }
 
-    function mint(address to, uint256 amount) external onlyRole(BRIDGE_ROLE) {
-        _mint(to, amount);
-    }
-
-    function burn(uint256 _value) external onlyRole(BRIDGE_ROLE) {
-        _burn(msg.sender, _value);
-    }
-
-    /**
-     * @dev Override the _lzReceive function to make it pausable
-     * @param _origin The origin information
-     * @param _guid The unique identifier for the received LayerZero message
-     * @param _message The encoded message
-     * @param _executor The address of the executor
-     * @param _extraData Additional data
-     */
-    function _lzReceive(
-        Origin calldata _origin,
-        bytes32 _guid,
-        bytes calldata _message,
-        address _executor,
-        bytes calldata _extraData
-    ) internal override whenNotPaused {
-        super._lzReceive(_origin, _guid, _message, _executor, _extraData);
-    }
-
     /**
      * @dev Override the decimals function to return 9 instead of the default 18
      * @return The number of decimals used in the token

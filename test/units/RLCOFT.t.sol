@@ -2,18 +2,15 @@
 pragma solidity ^0.8.22;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Deploy as RLCOFTDeploy, Configure as RLCOFTConfigure} from "../../script/RLCOFT.s.sol";
-import {RLCOFT} from "../../src/RLCOFT.sol";
-import {ITokenSpender} from "../../src/ITokenSpender.sol";
-import {RLCOFTTestSetup} from "./utils/RLCOFTTestSetup.sol";
 import {
     SendParam, MessagingFee, MessagingReceipt, OFTReceipt
 } from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {Origin} from "@layerzerolabs/oapp-evm-upgradeable/contracts/oapp/OAppUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
+import {RLCOFTMock, Deploy as RLCOFTDeploy} from "./mocks/RLCOFTMock.sol";
 
-contract RLCOFTTest is RLCOFTTestSetup {
-    RLCOFT public rlcOft;
+contract RLCOFTTest is Test {
+    RLCOFTMock public rlcOft;
 
     address public owner = makeAddr("owner");
     address public bridge = makeAddr("bridge");
@@ -37,15 +34,11 @@ contract RLCOFTTest is RLCOFTTestSetup {
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
     function setUp() public {
-        // Set up environment variables for the deployment
-        vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
-        vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
-        vm.setEnv("RLC_OFT_TOKEN_NAME", "RLC OFT Test");
-        vm.setEnv("RLC_TOKEN_SYMBOL", "RLCT");
-        vm.setEnv("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS", "0x6EDCE65403992e310A62460808c4b910D972f10f");
+        // Set up endpoints for the deployment
+        address lzEndointOFT = 0x6EDCE65403992e310A62460808c4b910D972f10f;
 
-        // Deploy the contract using the deployment script
-        rlcOft = RLCOFT(_forkArbitrumTestnetAndDeploy());
+        // Deploy RLCOFT
+        rlcOft = RLCOFTMock(new RLCOFTDeploy().run(lzEndointOFT, owner, pauser));
 
         vm.startPrank(owner);
         rlcOft.grantRole(rlcOft.BRIDGE_ROLE(), bridge);
