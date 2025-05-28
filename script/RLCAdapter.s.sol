@@ -14,7 +14,6 @@ contract Deploy is Script {
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS"); // LayerZero sepolia endpoint
         address owner = vm.envAddress("OWNER_ADDRESS"); // Your actual wallet address
-        address pauser = vm.envAddress("PAUSER_ADDRESS");
 
         // Deploy the RLCAdapter contract
         RLCAdapter rlcAdapterImplementation = new RLCAdapter(rlcToken, lzEndpoint);
@@ -24,7 +23,7 @@ contract Deploy is Script {
         address rlcAdapterProxyAddress = address(
             new ERC1967Proxy(
                 address(rlcAdapterImplementation),
-                abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, owner, pauser)
+                abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, owner)
             )
         );
         console.log("RLCAdapter proxy deployed at:", rlcAdapterProxyAddress);
