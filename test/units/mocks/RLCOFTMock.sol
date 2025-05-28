@@ -19,13 +19,6 @@ contract RLCOFTMock is RLCOFT {
     function mint(address _to, uint256 _amount) public onlyRole(BRIDGE_ROLE) {
         _mint(_to, _amount);
     }
-
-    /// @notice Burns tokens from a specified address
-    /// @dev Can only be called by addresses with BRIDGE_ROLE
-    /// @param _amount Amount of tokens to burn
-    function burn(uint256 _amount) public onlyRole(BRIDGE_ROLE) {
-        _burn(msg.sender, _amount);
-    }
 }
 
 contract Deploy is Test {
