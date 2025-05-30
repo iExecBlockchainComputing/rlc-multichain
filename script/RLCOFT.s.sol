@@ -9,18 +9,26 @@ import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract Deploy is Script {
     function run() external returns (address) {
-        vm.startBroadcast();
-
         string memory name = vm.envString("RLC_OFT_TOKEN_NAME");
         string memory symbol = vm.envString("RLC_TOKEN_SYMBOL");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
+        return runWithParams(name, symbol, lzEndpoint, owner, pauser);
+    }
 
+    function runWithParams(
+        string memory name,
+        string memory symbol,
+        address lzEndpoint,
+        address owner,
+        address pauser
+    ) public returns (address){
+        vm.startBroadcast();
+        // Deploy the implementation contract.
         RLCOFT rlcOFTImplementation = new RLCOFT(lzEndpoint);
         console.log("RLCOFT implementation deployed at:", address(rlcOFTImplementation));
-
-        // Deploy the proxy contract
+        // Deploy the proxy contract.
         address rlcOFTProxyAddress = address(
             new ERC1967Proxy(
                 address(rlcOFTImplementation),
@@ -28,9 +36,8 @@ contract Deploy is Script {
             )
         );
         console.log("RLCOFT proxy deployed at:", rlcOFTProxyAddress);
-
         vm.stopBroadcast();
-
+        // Save the proxy address to .env file.
         EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxyAddress);
         return rlcOFTProxyAddress;
     }
