@@ -17,18 +17,16 @@ remappings = [
     # Use for src contracts
     '@layerzerolabs/oft-evm-upgradeable/=lib/devtools/packages/oft-evm-upgradeable/',
     '@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/',
-    
     # Use for testing & scripts
     '@layerzerolabs/test-devtools-evm-foundry/=lib/devtools/packages/test-devtools-evm-foundry/',
     '@openzeppelin/foundry-upgrades/=lib/openzeppelin-foundry-upgrades/src/',
     '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
-
     # Used internally by contracts within library dependencies
     '@layerzerolabs/lz-evm-protocol-v2/=lib/layerzero-v2/packages/layerzero-v2/evm/protocol/',
     '@layerzerolabs/lz-evm-messagelib-v2/=lib/layerzero-v2/packages/layerzero-v2/evm/messagelib/',
     '@layerzerolabs/oapp-evm-upgradeable/=lib/devtools/packages/oapp-evm-upgradeable/',
     '@layerzerolabs/oapp-evm/=lib/devtools/packages/oapp-evm/',
     '@layerzerolabs/oft-evm/=lib/devtools/packages/oft-evm/',
-    '@layerzerolabs/lz-evm-v1-0.7/=lib/layerzero-v1/',
+    '@layerzerolabs/lz-evm-v1-0.7/=lib/LayerZero-v1/',
     'solidity-bytes-utils/=lib/solidity-bytes-utils'
 ]
