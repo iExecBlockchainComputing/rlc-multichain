@@ -7,17 +7,21 @@ import {console} from "forge-std/console.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {RLCAdapter} from "../../../src/RLCAdapter.sol";
 
+contract RLCAdapterMock is RLCAdapter {
+    constructor(address _token, address _lzEndpoint) RLCAdapter(_token, _lzEndpoint) {}
+}
+
 contract Deploy is Test {
     function run(address rlcToken, address lzEndpoint, address owner, address pauser) external returns (address) {
         // Deploy the RLCAdapter contract
-        RLCAdapter rlcAdapterImplementation = new RLCAdapter(rlcToken, lzEndpoint);
-        console.log("RLCAdapter implementation deployed at:", address(rlcAdapterImplementation));
+        RLCAdapterMock rlcAdapterMockImplementation = new RLCAdapterMock(rlcToken, lzEndpoint);
+        console.log("RLCAdapterMock implementation deployed at:", address(rlcAdapterMockImplementation));
 
         // Deploy the proxy contract
         address rlcAdapterProxyAddress = address(
             new ERC1967Proxy(
-                address(rlcAdapterImplementation),
-                abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, owner, pauser)
+                address(rlcAdapterMockImplementation),
+                abi.encodeWithSelector(rlcAdapterMockImplementation.initialize.selector, owner, pauser)
             )
         );
         console.log("RLCAdapter proxy deployed at:", rlcAdapterProxyAddress);
