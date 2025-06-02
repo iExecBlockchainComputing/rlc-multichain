@@ -7,7 +7,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {RLCOFTMock, Deploy as RLCOFTDeploy} from "../units/mocks/RLCOFTMock.sol";
 import {Deploy as RLCAdapterDeploy} from "./mocks/RLCAdapterMock.sol";
-import {RLCAdapterMock} from "./mocks/RLCAdapterMock.sol";
+import {RLCAdapter} from "../../src/RLCAdapter.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
 
@@ -15,7 +15,7 @@ contract RLCOFTE2ETest is TestHelperOz5 {
     using OptionsBuilder for bytes;
 
     RLCOFTMock internal sourceOFT;
-    RLCAdapterMock internal destAdapter;
+    RLCAdapter internal destAdapterMock;
     RLCMock internal rlcToken;
 
     uint32 internal constant SOURCE_EID = 1;
@@ -43,13 +43,13 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         sourceOFT = RLCOFTMock(new RLCOFTDeploy().run(lzEndpointOFT, owner, pauser));
 
         // Deploy destination RLCAdapter
-        destAdapter =
-            RLCAdapterMock(new RLCAdapterDeploy().run(address(rlcToken), address(endpoints[DEST_EID]), owner, pauser));
+        destAdapterMock =
+            RLCAdapter(new RLCAdapterDeploy().run(address(rlcToken), address(endpoints[DEST_EID]), owner, pauser));
 
         // Wire the contracts
         address[] memory contracts = new address[](2);
         contracts[0] = address(sourceOFT);
-        contracts[1] = address(destAdapter);
+        contracts[1] = address(destAdapterMock);
         vm.startPrank(owner);
         wireOApps(contracts);
         vm.stopPrank();

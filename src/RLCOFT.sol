@@ -45,7 +45,7 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
-    
+
     /// @notice Unpauses the contract
     /// @dev Can only be called by the account with the PAUSER_ROLE
     /// @dev When the contract is unpaused, token transfers are allowed again
