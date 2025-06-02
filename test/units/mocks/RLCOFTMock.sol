@@ -13,10 +13,9 @@ contract RLCOFTMock is RLCOFT {
     constructor(address _lzEndpoint) RLCOFT(_lzEndpoint) {}
 
     /// @notice Mints tokens to a specified address
-    /// @dev Can only be called by addresses with BRIDGE_ROLE
     /// @param _to Address to mint tokens to
     /// @param _amount Amount of tokens to mint
-    function mint(address _to, uint256 _amount) public onlyRole(BRIDGE_ROLE) {
+    function mint(address _to, uint256 _amount) public {
         _mint(_to, _amount);
     }
 }

@@ -22,7 +22,6 @@ contract RLCOFTE2ETest is TestHelperOz5 {
     uint32 internal constant DEST_EID = 2;
 
     address public owner = makeAddr("owner");
-    address public bridge = makeAddr("bridge");
     address public pauser = makeAddr("pauser");
     address public user1 = makeAddr("user1");
     address public user2 = makeAddr("user2");
@@ -55,20 +54,14 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         wireOApps(contracts);
         vm.stopPrank();
 
-        vm.startPrank(owner);
-        sourceOFT.grantRole(sourceOFT.BRIDGE_ROLE(), bridge);
-        vm.stopPrank();
-
         // Mint OFT tokens to user1
-        vm.startPrank(bridge);
         sourceOFT.mint(user1, INITIAL_BALANCE);
-        vm.stopPrank();
 
         // Mint underlying RLC tokens to destination adapter for withdrawal
         rlcToken.mint(address(destAdapter), INITIAL_BALANCE);
     }
 
-    function test_CrossChainTransfer() public {
+    function test_sendToken() public {
         // Check initial balances
         assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE);
         assertEq(rlcToken.balanceOf(user2), 0);

@@ -15,7 +15,6 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 contract RLCAdapter is OFTAdapterUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable {
     //AccessControl Roles
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    bytes32 public constant BRIDGE_ROLE = keccak256("BRIDGE_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(address _token, address _lzEndpoint) OFTAdapterUpgradeable(_token, _lzEndpoint) {
