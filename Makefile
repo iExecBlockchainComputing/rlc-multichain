@@ -15,7 +15,7 @@ fork-arbitrum-sepolia:
 	anvil --fork-url $(ARBITRUM_SEPOLIA_RPC_URL) --port 8546
 
 utest:
-	forge test -vvv
+	FOUNDRY_PROFILE=test forge test -vvv
 
 clean:
 	forge clean
