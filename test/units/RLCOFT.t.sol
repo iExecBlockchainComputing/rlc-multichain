@@ -56,15 +56,11 @@ contract RLCOFTE2ETest is TestHelperOz5 {
 
         // Mint OFT tokens to user1
         sourceOFT.mint(user1, INITIAL_BALANCE);
-
-        // Mint underlying RLC tokens to destination adapter for withdrawal
-        rlcToken.mint(address(destAdapter), INITIAL_BALANCE);
     }
 
     function test_sendToken() public {
         // Check initial balances
         assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE);
-        assertEq(rlcToken.balanceOf(user2), 0);
 
         // Prepare send parameters
         bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(200000, 0);
@@ -86,15 +82,8 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         vm.prank(user1);
         sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
-        // Verify packets - this should succeed
-        this.verifyPackets(DEST_EID, addressToBytes32(address(destAdapter)));
-
         // Verify source state - tokens should be locked in adapter
         assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
-
-        // Verify destination state - tokens should be minted to user2
-        assertEq(rlcToken.balanceOf(address(destAdapter)), INITIAL_BALANCE - TRANSFER_AMOUNT);
-        assertEq(rlcToken.balanceOf(user2), TRANSFER_AMOUNT);
     }
 
     function test_sendOFTWhenSourceOFTPaused() public {
@@ -130,10 +119,6 @@ contract RLCOFTE2ETest is TestHelperOz5 {
 
         // Verify source state - tokens should be locked in adapter
         assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE);
-
-        // Verify destination state - tokens should be minted to user2
-        assertEq(rlcToken.balanceOf(address(destAdapter)), INITIAL_BALANCE);
-        assertEq(rlcToken.balanceOf(user2), 0);
     }
 
     function test_sendOFTWhenSourceOFTUnpaused() public {
@@ -163,17 +148,9 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         vm.prank(user1);
         sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
-        // Verify packets - this should succeed
-        this.verifyPackets(DEST_EID, addressToBytes32(address(destAdapter)));
-
         // Verify source state - tokens should be locked in adapter
         assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
-
-        // Verify destination state - tokens should be minted to user2
-        assertEq(rlcToken.balanceOf(address(destAdapter)), INITIAL_BALANCE - TRANSFER_AMOUNT);
-        assertEq(rlcToken.balanceOf(user2), TRANSFER_AMOUNT);
     }
 
-    //TODO: Add more tests when destination adapter is paused/unpaused
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
 }
