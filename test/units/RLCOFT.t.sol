@@ -12,7 +12,7 @@ import {RLCMock} from "./mocks/RLCMock.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 
-contract RLCOFTE2ETest is TestHelperOz5 {
+contract RLCOFTTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;
 

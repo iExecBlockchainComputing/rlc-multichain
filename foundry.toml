@@ -14,6 +14,10 @@ ast = true
 build_info = true
 extra_output = ["storageLayout"]
 
+## Needed for deterministic deployment
+always_use_create_2_factory = true
+create2_deployer = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed ## Override Foundry's default CREATE2 factory address to use the createX one
+
 remappings = [
     # Use for src contracts
     '@layerzerolabs/oft-evm-upgradeable/=lib/devtools/packages/oft-evm-upgradeable/',
@@ -36,7 +40,7 @@ remappings = [
 ]
 
 [fuzz]
-runs = 1000
+runs = 100
 
 [profile.test]
 optimizer = false

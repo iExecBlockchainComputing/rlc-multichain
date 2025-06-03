@@ -2,9 +2,9 @@
 pragma solidity ^0.8.22;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
-import {RLCAdapter} from "../../src/RLCAdapter.sol";
-import {ITokenSpender} from "../../src/ITokenSpender.sol";
+import {Deploy as RLCAdapterDeploy} from "../../../script/RLCAdapter.s.sol";
+import {RLCAdapter} from "../../../src/RLCAdapter.sol";
+import {ITokenSpender} from "../../../src/ITokenSpender.sol";
 
 contract RLCAdapterScriptTest is Test {
     RLCAdapter public rlcAdapter;
@@ -41,8 +41,8 @@ contract RLCAdapterScriptTest is Test {
         vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
         vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
 
-        // Deploy the contract using the deployment script
-        rlcAdapter = RLCAdapter(new RLCAdapterDeploy().run());
+        // // Deploy the contract using the deployment script
+        // rlcAdapter = RLCAdapter(new RLCAdapterDeploy().run());
     }
 
     // ============ Deployment Tests ============

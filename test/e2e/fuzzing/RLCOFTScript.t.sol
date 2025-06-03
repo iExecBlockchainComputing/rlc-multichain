@@ -2,8 +2,8 @@
 pragma solidity ^0.8.22;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Deploy as RLCOFTDeploy} from "../../script/RLCOFT.s.sol";
-import {RLCOFT} from "../../src/RLCOFT.sol";
+import {Deploy as RLCOFTDeploy} from "../../../script/RLCOFT.s.sol";
+import {RLCOFT} from "../../../src/RLCOFT.sol";
 
 contract RLCOFTScriptTest is Test {
     mapping(bytes32 => address) public deployed;
