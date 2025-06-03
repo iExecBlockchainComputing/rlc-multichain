@@ -3,7 +3,7 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
@@ -15,21 +15,28 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS"); // LayerZero sepolia endpoint
         address owner = vm.envAddress("OWNER_ADDRESS"); // Your actual wallet address
 
-        // Deploy the RLCAdapter contract
-        RLCAdapter rlcAdapterImplementation = new RLCAdapter(rlcToken, lzEndpoint);
-        console.log("RLCAdapter implementation deployed at:", address(rlcAdapterImplementation));
+        Options memory opts;
+        opts.constructorData = abi.encode(rlcToken, lzEndpoint);
 
-        // Deploy the proxy contract
-        address rlcAdapterProxyAddress = address(
-            new ERC1967Proxy(
-                address(rlcAdapterImplementation),
-                abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, owner)
-            )
+        // Prepare initialization data
+        bytes memory initData = abi.encodeWithSelector(
+            RLCAdapter.initialize.selector,
+            owner
+        );
+        // Deploy the UUPS proxy using OpenZeppelin Upgrades
+        address rlcAdapterProxyAddress = Upgrades.deployUUPSProxy(
+            "RLCAdapter.sol:RLCAdapter",
+            initData,
+            opts
         );
         console.log("RLCAdapter proxy deployed at:", rlcAdapterProxyAddress);
+        address implementationAddress = Upgrades.getImplementationAddress(rlcAdapterProxyAddress);
+        console.log("RLCAdapter implementation deployed at:", implementationAddress);
+
         vm.stopBroadcast();
 
         EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxyAddress);
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS", implementationAddress);
         return rlcAdapterProxyAddress;
     }
 }

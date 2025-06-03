@@ -3,7 +3,7 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
@@ -17,21 +17,31 @@ contract Deploy is Script {
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
 
-        RLCOFT rlcOFTImplementation = new RLCOFT(lzEndpoint);
-        console.log("RLCOFT implementation deployed at:", address(rlcOFTImplementation));
-
-        // Deploy the proxy contract
-        address rlcOFTProxyAddress = address(
-            new ERC1967Proxy(
-                address(rlcOFTImplementation),
-                abi.encodeWithSelector(rlcOFTImplementation.initialize.selector, name, symbol, owner, pauser)
-            )
+        // Set up deployment options
+        Options memory opts;
+        opts.constructorData = abi.encode(lzEndpoint);
+        // Prepare initialization data
+        bytes memory initData = abi.encodeWithSelector(
+            RLCOFT.initialize.selector,
+            name,
+            symbol,
+            owner,
+            pauser
+        );
+        // Deploy the UUPS proxy using OpenZeppelin Upgrades
+        address rlcOFTProxyAddress = Upgrades.deployUUPSProxy(
+            "RLCOFT.sol:RLCOFT",
+            initData,
+            opts
         );
         console.log("RLCOFT proxy deployed at:", rlcOFTProxyAddress);
+        address implementationAddress = Upgrades.getImplementationAddress(rlcOFTProxyAddress);
+        console.log("RLCOFT implementation deployed at:", implementationAddress);
 
         vm.stopBroadcast();
 
         EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxyAddress);
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS", implementationAddress);
         return rlcOFTProxyAddress;
     }
 }
