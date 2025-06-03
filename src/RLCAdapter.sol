@@ -10,13 +10,11 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @notice OFTAdapter uses a deployed ERC-20 token and safeERC20 to interact with the OFTCore contract.
-// There can only be one OFT Adapter deployed per chain. Multiple OFT Adapters break omnichain unified
-// liquidity by effectively creating token pools.
+/// There can only be one OFT Adapter deployed per chain. Multiple OFT Adapters break omnichain unified
+/// liquidity by effectively creating token pools.
 contract RLCAdapter is OFTAdapterUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable {
-    // Upgrader Role RLCAdapter contracts.
+    //AccessControl Roles
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    // Bridge Minter Role required for minting RLC Token
-    bytes32 public constant BRIDGE_ROLE = keccak256("BRIDGE_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(address _token, address _lzEndpoint) OFTAdapterUpgradeable(_token, _lzEndpoint) {

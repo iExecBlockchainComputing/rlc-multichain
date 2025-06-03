@@ -3,7 +3,6 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {Upgrades, Options} from "@openzeppelin-foundry/contracts/Upgrades.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
@@ -14,7 +13,7 @@ contract Deploy is Script {
 
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS"); // LayerZero sepolia endpoint
-        address ownerAddress = vm.envAddress("OWNER_ADDRESS"); // Your actual wallet address
+        address owner = vm.envAddress("OWNER_ADDRESS"); // Your actual wallet address
 
         // Deploy the RLCAdapter contract
         RLCAdapter rlcAdapterImplementation = new RLCAdapter(rlcToken, lzEndpoint);
@@ -24,7 +23,7 @@ contract Deploy is Script {
         address rlcAdapterProxyAddress = address(
             new ERC1967Proxy(
                 address(rlcAdapterImplementation),
-                abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, ownerAddress)
+                abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, owner)
             )
         );
         console.log("RLCAdapter proxy deployed at:", rlcAdapterProxyAddress);
