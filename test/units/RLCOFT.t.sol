@@ -10,9 +10,11 @@ import {Deploy as RLCAdapterDeploy} from "./mocks/RLCAdapterMock.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
+import {TestUtils} from "./utils/TestUtils.sol";
 
 contract RLCOFTE2ETest is TestHelperOz5 {
     using OptionsBuilder for bytes;
+    using TestUtils for *;
 
     RLCOFTMock internal sourceOFT;
     RLCAdapter internal destAdapterMock;
@@ -62,22 +64,11 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         // Check initial balances
         assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE);
 
-        // Prepare send parameters
-        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(200000, 0);
-        SendParam memory sendParam = SendParam({
-            dstEid: DEST_EID,
-            to: addressToBytes32(user2),
-            amountLD: TRANSFER_AMOUNT,
-            minAmountLD: TRANSFER_AMOUNT,
-            extraOptions: options,
-            composeMsg: "",
-            oftCmd: ""
-        });
+        // Prepare send parameters using utility
+        (SendParam memory sendParam, MessagingFee memory fee) =
+            TestUtils.prepareSend(sourceOFT, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
-        // Get quote for the transfer
-        MessagingFee memory fee = sourceOFT.quoteSend(sendParam, false);
-
-        // Perform the cross-chain transfer
+        // Send tokens
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
         sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
@@ -91,20 +82,9 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         vm.prank(pauser);
         sourceOFT.pause();
 
-        // Prepare send parameters
-        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(200000, 0);
-        SendParam memory sendParam = SendParam({
-            dstEid: DEST_EID,
-            to: addressToBytes32(user2),
-            amountLD: TRANSFER_AMOUNT,
-            minAmountLD: TRANSFER_AMOUNT,
-            extraOptions: options,
-            composeMsg: "",
-            oftCmd: ""
-        });
-
-        // Quote the send fee
-        MessagingFee memory fee = sourceOFT.quoteSend(sendParam, false);
+        // Prepare send parameters using utility
+        (SendParam memory sendParam, MessagingFee memory fee) =
+            TestUtils.prepareSend(sourceOFT, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens - this should succeed on source but fail on destination
         vm.deal(user1, fee.nativeFee);
@@ -123,25 +103,14 @@ contract RLCOFTE2ETest is TestHelperOz5 {
 
     function test_sendOFTWhenSourceOFTUnpaused() public {
         // Pause then unpause the destination adapter
-        vm.prank(pauser);
+        vm.startPrank(pauser);
         sourceOFT.pause();
-        vm.prank(pauser);
         sourceOFT.unpause();
+        vm.stopPrank();
 
-        // Prepare send parameters
-        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(200000, 0);
-        SendParam memory sendParam = SendParam({
-            dstEid: DEST_EID,
-            to: addressToBytes32(user2),
-            amountLD: TRANSFER_AMOUNT,
-            minAmountLD: TRANSFER_AMOUNT,
-            extraOptions: options,
-            composeMsg: "",
-            oftCmd: ""
-        });
-
-        // Quote the send fee
-        MessagingFee memory fee = sourceOFT.quoteSend(sendParam, false);
+        // Prepare send parameters using utility
+        (SendParam memory sendParam, MessagingFee memory fee) =
+            TestUtils.prepareSend(sourceOFT, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
