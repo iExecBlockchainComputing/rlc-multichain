@@ -3,7 +3,7 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
@@ -17,6 +17,7 @@ contract Deploy is Script {
         string memory symbol = vm.envString("RLC_TOKEN_SYMBOL");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
+        address pauser = vm.envAddress("PAUSER_ADDRESS");
 
         bytes32 salt = vm.envBytes32("SALT");
         // CreateX Factory address
@@ -32,7 +33,7 @@ contract Deploy is Script {
         address rlcOFTProxy = createX.deployCreate2AndInit(
             salt, // salt
             abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(address(rlcOFTImplementation), "")), // initCode
-            abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner), // data for initialize
+            abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser), // data for initialize
             ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
         );
         console.log("RLCOFT proxy deployed at:", rlcOFTProxy);

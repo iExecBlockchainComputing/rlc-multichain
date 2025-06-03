@@ -4,17 +4,17 @@ pragma solidity ^0.8.22;
 
 import {OFTUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {ITokenSpender} from "src/ITokenSpender.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @notice OFT is an ERC-20 token that extends the OFTCore contract.
-contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable {
-    // Upgrader Role RLCAdapter contracts.
+contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, PausableUpgradeable {
+    //AccessControl Roles
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    // Bridge Minter Role required for minting RLC Token
-    bytes32 public constant BRIDGE_ROLE = keccak256("BRIDGE_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(address _lzEndpoint) OFTUpgradeable(_lzEndpoint) {
@@ -25,18 +25,45 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     /// @param _name Name of the token
     /// @param _symbol Symbol of the token
     /// @param _owner Address of the contract owner
-    function initialize(string memory _name, string memory _symbol, address _owner) public initializer {
+    /// @param _pauser Address of the contract pauser
+    function initialize(string memory _name, string memory _symbol, address _owner, address _pauser)
+        public
+        initializer
+    {
         __Ownable_init(_owner);
         __OFT_init(_name, _symbol, _owner);
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, _owner);
+        __Pausable_init();
         _grantRole(UPGRADER_ROLE, _owner);
+        _grantRole(PAUSER_ROLE, _pauser);
     }
 
-    /// @notice Authorizes an upgrade to a new implementation
-    /// @dev Can only be called by the owner
-    /// @param newImplementation Address of the new implementation
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+    /// @notice Pauses the contract
+    /// @dev Can only be called by the account with the PAUSER_ROLE
+    /// @dev When the contract is paused, all token transfers are blocked
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    /// @notice Unpauses the contract
+    /// @dev Can only be called by the account with the PAUSER_ROLE
+    /// @dev When the contract is unpaused, token transfers are allowed again
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
+
+    /**
+     * Approve and then call the approved contract in a single tx
+     */
+    function approveAndCall(address _spender, uint256 _value, bytes calldata _extraData) external returns (bool) {
+        ITokenSpender spender = ITokenSpender(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, address(this), _extraData);
+            return true;
+        }
+        return false;
+    }
 
     /**
      * @dev Override the decimals function to return 9 instead of the default 18
@@ -44,14 +71,6 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
      */
     function decimals() public pure override returns (uint8) {
         return 9;
-    }
-
-    function mint(address to, uint256 amount) external onlyRole(BRIDGE_ROLE) {
-        _mint(to, amount);
-    }
-
-    function burn(uint256 _value) external onlyRole(BRIDGE_ROLE) {
-        _burn(msg.sender, _value);
     }
 
     function owner()
@@ -64,14 +83,15 @@ contract RLCOFT is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRul
     }
 
     /**
-     * Approve and then call the approved contract in a single tx
+     * @dev See {ERC20-_update}.
+     * Override this functions to prevent its execution when the contract is paused.
      */
-    function approveAndCall(address _spender, uint256 _value, bytes calldata _extraData) public returns (bool) {
-        ITokenSpender spender = ITokenSpender(_spender);
-        if (approve(_spender, _value)) {
-            spender.receiveApproval(msg.sender, _value, address(this), _extraData);
-            return true;
-        }
-        return false;
+    function _update(address from, address to, uint256 value) internal virtual override whenNotPaused {
+        super._update(from, to, value);
     }
+
+    /// @notice Authorizes an upgrade to a new implementation
+    /// @dev Can only be called by the upgrader.
+    /// @param newImplementation Address of the new implementation
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }
