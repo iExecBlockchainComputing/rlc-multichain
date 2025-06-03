@@ -77,7 +77,6 @@ contract RLCOFTE2ETest is TestHelperOz5 {
         // Get quote for the transfer
         MessagingFee memory fee = sourceOFT.quoteSend(sendParam, false);
 
-        // Perform the cross-chain transfer
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
         sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
