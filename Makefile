@@ -37,32 +37,70 @@ deploy-on-testnets:
 	$(MAKE) configure-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 
 deploy-adapter:
-	@echo "Deploying RLCAdapter on: $(RPC_URL)"
-	forge script script/RLCAdapter.s.sol:Deploy \
-		--rpc-url $(RPC_URL) \
-		--broadcast \
-		-vvv
+    @echo "Deploying RLCAdapter (UUPS Proxy) on: $(RPC_URL)"
+    forge script script/RLCAdapter.s.sol:Deploy \
+        --rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
 
 deploy-oft:
-	@echo "Deploying RLCOFT on on: $(RPC_URL)"
-	forge script script/RLCOFT.s.sol:Deploy \
-		--rpc-url $(RPC_URL) \
-		--broadcast \
-		-vvv \
+    @echo "Deploying RLCOFT (UUPS Proxy) on: $(RPC_URL)"
+    forge script script/RLCOFT.s.sol:Deploy \
+        --rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
 
 configure-adapter:
-	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
-	forge script script/RLCAdapter.s.sol:Configure \
-		--rpc-url $(RPC_URL) \
-		--broadcast \
-		-vvv
+    @echo "Configuring RLCAdapter on: $(RPC_URL)..."
+    forge script script/RLCAdapter.s.sol:Configure \
+        --rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
 
 configure-oft:
-	@echo "Configuring RLCOFT on on: $(RPC_URL)"
-	forge script script/RLCOFT.s.sol:Configure \
-		--rpc-url $(RPC_URL) \
-		--broadcast \
-		-vvv
+    @echo "Configuring RLCOFT on: $(RPC_URL)"
+    forge script script/RLCOFT.s.sol:Configure \
+        --rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
+
+#
+# Upgrade targets
+#
+
+validate-adapter-upgrade:
+    @echo "Validating RLCAdapter upgrade..."
+    forge script script/RLCAdapter.s.sol:ValidateUpgrade \
+        --rpc-url $(SEPOLIA_RPC_URL) \
+        -vvv
+
+validate-oft-upgrade:
+    @echo "Validating RLCOFT upgrade..."
+    forge script script/RLCOFT.s.sol:ValidateUpgrade \
+        --rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
+        -vvv
+
+upgrade-adapter:
+    @echo "Upgrading RLCAdapter on: $(SEPOLIA_RPC_URL)"
+    $(MAKE) validate-adapter-upgrade
+    forge script script/RLCAdapter.s.sol:Upgrade \
+        --rpc-url $(SEPOLIA_RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
+
+upgrade-oft:
+    @echo "Upgrading RLCOFT on: $(ARBITRUM_SEPOLIA_RPC_URL)"
+    $(MAKE) validate-oft-upgrade
+    forge script script/RLCOFT.s.sol:Upgrade \
+        --rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
 
 #
 # Bridge operations.
@@ -86,24 +124,24 @@ send-tokens-to-sepolia:
 
 # Verification targets
 verify-adapter:
-	@echo "Verifying RLCAdapter on Sepolia Etherscan..."
-	forge verify-contract \
-		--chain-id 11155111 \
-		--watch \
-		--constructor-args $(shell cast abi-encode "constructor(address,address,address)" $(RLC_SEPOLIA_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS) $(OWNER_ADDRESS)) \
-		--etherscan-api-key $(ETHERSCAN_API_KEY) \
-		$(RLC_SEPOLIA_ADAPTER_ADDRESS) \
-		src/RLCAdapter.sol:RLCAdapter
+    @echo "Verifying RLCAdapter Implementation on Sepolia Etherscan..."
+    forge verify-contract \
+        --chain-id 11155111 \
+        --watch \
+        --constructor-args $(shell cast abi-encode "constructor(address,address)" $(RLC_SEPOLIA_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS)) \
+        --etherscan-api-key $(ETHERSCAN_API_KEY) \
+        $(RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS) \
+        src/RLCAdapter.sol:RLCAdapter
 
 verify-oft:
-	@echo "Verifying RLCOFT on Arbitrum Sepolia Etherscan..."
-	forge verify-contract \
-		--chain-id 421614 \
-		--watch \
-		--constructor-args $(shell cast abi-encode "constructor(string,string,address,address)" $(RLC_OFT_TOKEN_NAME) $(RLC_TOKEN_SYMBOL) $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS) $(OWNER_ADDRESS)) \
-		--etherscan-api-key $(ARBISCAN_API_KEY) \
-		$(RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS) \
-		src/RLCOFT.sol:RLCOFT
+    @echo "Verifying RLCOFT Implementation on Arbitrum Sepolia Etherscan..."
+    forge verify-contract \
+        --chain-id 421614 \
+        --watch \
+        --constructor-args $(shell cast abi-encode "constructor(address)" $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS)) \
+        --etherscan-api-key $(ARBISCAN_API_KEY) \
+        $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) \
+        src/RLCOFT.sol:RLCOFT
 
 # Combined verification target
 verify-all: verify-adapter verify-oft
