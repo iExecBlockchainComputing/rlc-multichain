@@ -58,3 +58,49 @@ contract Configure is Script {
         vm.stopBroadcast();
     }
 }
+
+
+contract Upgrade is Script {
+    function run() external {
+        vm.startBroadcast();
+
+        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
+        address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
+        address proxyAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS");
+
+        // Set up upgrade options
+        Options memory opts;
+        opts.constructorData = abi.encode(rlcToken, lzEndpoint);
+
+        // Upgrade the proxy to a new implementation
+        Upgrades.upgradeProxy(
+            proxyAddress,
+            "RLCAdapter.sol:RLCAdapter",
+            "",
+            opts
+        );
+
+        // Log the new implementation address
+        address newImplementationAddress = Upgrades.getImplementationAddress(proxyAddress);
+        console.log("RLCAdapter upgraded to new implementation:", newImplementationAddress);
+        console.log("Proxy address remains:", proxyAddress);
+
+        vm.stopBroadcast();
+
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS", newImplementationAddress);
+    }
+}
+
+contract ValidateUpgrade is Script {
+    function run() external {
+        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
+        address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
+        
+        Options memory opts;
+        opts.constructorData = abi.encode(rlcToken, lzEndpoint);
+
+        // Validate that the upgrade is safe
+        Upgrades.validateUpgrade("RLCAdapter.sol:RLCAdapter", opts);
+        console.log("Upgrade validation passed for RLCAdapter");
+    }
+}

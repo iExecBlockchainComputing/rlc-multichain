@@ -64,3 +64,46 @@ contract Configure is Script {
         vm.stopBroadcast();
     }
 }
+
+contract Upgrade is Script {
+    function run() external {
+        vm.startBroadcast();
+
+        address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
+        address proxyAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
+
+        // Set up upgrade options
+        Options memory opts;
+        opts.constructorData = abi.encode(lzEndpoint);
+
+        // Upgrade the proxy to a new implementation
+        Upgrades.upgradeProxy(
+            proxyAddress,
+            "RLCOFT.sol:RLCOFT",
+            "",
+            opts
+        );
+
+        // Log the new implementation address
+        address newImplementationAddress = Upgrades.getImplementationAddress(proxyAddress);
+        console.log("RLCOFT upgraded to new implementation:", newImplementationAddress);
+        console.log("Proxy address remains:", proxyAddress);
+
+        vm.stopBroadcast();
+
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS", newImplementationAddress);
+    }
+}
+
+contract ValidateUpgrade is Script {
+    function run() external {  // Remove 'view' modifier
+        address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
+
+        Options memory opts;
+        opts.constructorData = abi.encode(lzEndpoint);
+
+        // Validate that the upgrade is safe
+        Upgrades.validateUpgrade("RLCOFT.sol:RLCOFT", opts);
+        console.log("Upgrade validation passed for RLCOFT");
+    }
+}
