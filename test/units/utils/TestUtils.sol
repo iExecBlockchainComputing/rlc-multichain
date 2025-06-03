@@ -10,35 +10,6 @@ import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/
 library TestUtils {
     using OptionsBuilder for bytes;
 
-    /// @notice Execute a complete OFT send operation with standard parameters
-    /// @param vm The Foundry VM instance for pranking and dealing ETH
-    /// @param oft The OFT contract to send from
-    /// @param from The address sending the tokens
-    /// @param to The destination address (as bytes32)
-    /// @param amount The amount to send
-    /// @param dstEid The destination endpoint ID
-    function executeSend(Vm vm, IOFT oft, address from, bytes32 to, uint256 amount, uint32 dstEid) internal {
-        // Prepare send parameters
-        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(200000, 0);
-        SendParam memory sendParam = SendParam({
-            dstEid: dstEid,
-            to: to,
-            amountLD: amount,
-            minAmountLD: amount,
-            extraOptions: options,
-            composeMsg: "",
-            oftCmd: ""
-        });
-
-        // Quote the send fee
-        MessagingFee memory fee = oft.quoteSend(sendParam, false);
-
-        // Execute the send
-        vm.deal(from, fee.nativeFee);
-        vm.prank(from);
-        oft.send{value: fee.nativeFee}(sendParam, fee, payable(from));
-    }
-
     /// @notice Prepare send parameters and quote fee without executing
     /// @param oft The OFT contract to send from
     /// @param to The destination address (as bytes32)

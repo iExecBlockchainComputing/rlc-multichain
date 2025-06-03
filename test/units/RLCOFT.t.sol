@@ -12,7 +12,7 @@ import {RLCMock} from "./mocks/RLCMock.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 
-contract RLCOFTTest is TestHelperOz5 {
+contract RLCOFTE2ETest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;
 
@@ -64,8 +64,14 @@ contract RLCOFTTest is TestHelperOz5 {
         // Check initial balances
         assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE);
 
-        // Execute send using helper
-        TestUtils.executeSend(vm, sourceOFT, user1, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+        // Prepare send parameters using utility
+        (SendParam memory sendParam, MessagingFee memory fee) =
+            TestUtils.prepareSend(sourceOFT, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+
+        // Send tokens
+        vm.deal(user1, fee.nativeFee);
+        vm.prank(user1);
+        sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
         assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
@@ -102,8 +108,14 @@ contract RLCOFTTest is TestHelperOz5 {
         sourceOFT.unpause();
         vm.stopPrank();
 
-        // Execute send using helper
-        TestUtils.executeSend(vm, sourceOFT, user1, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+        // Prepare send parameters using utility
+        (SendParam memory sendParam, MessagingFee memory fee) =
+            TestUtils.prepareSend(sourceOFT, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+
+        // Send tokens
+        vm.deal(user1, fee.nativeFee);
+        vm.prank(user1);
+        sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
         assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
