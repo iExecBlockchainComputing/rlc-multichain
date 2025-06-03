@@ -123,10 +123,10 @@ contract RLCOFTE2ETest is TestHelperOz5 {
 
     function test_sendOFTWhenSourceOFTUnpaused() public {
         // Pause then unpause the destination adapter
-        vm.prank(pauser);
+        vm.startPrank(pauser);
         sourceOFT.pause();
-        vm.prank(pauser);
         sourceOFT.unpause();
+        vm.stopPrank();
 
         // Prepare send parameters
         bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(200000, 0);
