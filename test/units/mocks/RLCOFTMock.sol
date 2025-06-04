@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {Test} from "forge-std/Test.sol";
-import {console} from "forge-std/console.sol";
+import {Test, console} from "forge-std/Test.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "../../../src/RLCOFT.sol";
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
+import "../../../src/RLCOFT.sol";
+import {RLCOFTDeployer} from "../../../script/lib/RLCOFTDeployer.sol";
 
 /// @notice Mock contract that extends RLCOFT with mint/burn functions for testing
 contract RLCOFTMock is RLCOFT {
@@ -29,24 +29,10 @@ contract Deploy is Test {
         address owner,
         address pauser,
         address createXFactory,
-        bytes32 salt 
+        bytes32 salt
     ) public returns (address) {
-        // CreateX Factory address
-        ICreateX createX = ICreateX(createXFactory);
-
-        // Deploy the implementation contract using CreateX Factory
-        address rlcOFTMockImplementation =
-            createX.deployCreate2(salt, abi.encodePacked(type(RLCOFTMock).creationCode, abi.encode(lzEndpoint)));
-        console.log("RLCOFTMock implementation deployed at:", rlcOFTMockImplementation);
-
-        // Deploy the proxy contract using CreateX Factory
-        // The proxy contract will be initialized with the implementation address and the constructor arguments
-        address rlcOFTProxy = createX.deployCreate2AndInit(
-            salt, // salt
-            abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(rlcOFTMockImplementation, "")), // initCode
-            abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser), // data for initialize
-            ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
+        return RLCOFTDeployer.deployRLCOFT(
+            type(RLCOFTMock).creationCode, lzEndpoint, name, symbol, owner, pauser, createXFactory, salt
         );
-        return rlcOFTProxy;
     }
 }

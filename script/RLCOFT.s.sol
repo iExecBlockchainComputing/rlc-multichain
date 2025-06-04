@@ -4,10 +4,11 @@ pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {RLCOFT} from "../src/RLCOFT.sol";
-import {EnvUtils} from "./UpdateEnvUtils.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
+import {RLCOFT} from "../src/RLCOFT.sol";
+import {RLCOFTDeployer} from "./lib/RLCOFTDeployer.sol";
+import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract Deploy is Script {
     function run() external returns (address) {
@@ -39,23 +40,9 @@ contract Deploy is Script {
         address createXFactory,
         bytes32 salt
     ) public returns (address) {
-        // CreateX Factory address
-        ICreateX createX = ICreateX(createXFactory);
-
-        // Deploy the implementation contract using CreateX Factory
-        address rlcOFTImplementation =
-            createX.deployCreate2(salt, abi.encodePacked(type(RLCOFT).creationCode, abi.encode(lzEndpoint)));
-        console.log("RLCOFT implementation deployed at:", rlcOFTImplementation);
-
-        // Deploy the proxy contract using CreateX Factory
-        // The proxy contract will be initialized with the implementation address and the constructor arguments
-        address rlcOFTProxy = createX.deployCreate2AndInit(
-            salt, // salt
-            abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(rlcOFTImplementation, "")), // initCode
-            abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser), // data for initialize
-            ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
+        return RLCOFTDeployer.deployRLCOFT(
+            type(RLCOFT).creationCode, lzEndpoint, name, symbol, owner, pauser, createXFactory, salt
         );
-        return rlcOFTProxy;
     }
 }
 

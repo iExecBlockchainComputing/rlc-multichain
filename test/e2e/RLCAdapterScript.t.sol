@@ -13,6 +13,7 @@ contract RLCAdapterScriptTest is Test {
     address constant createXFactory = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
 
     RLCAdapterDeploy public deployer;
+
     function setUp() public {
         vm.createSelectFork("https://ethereum-sepolia-rpc.publicnode.com"); // use public node
         deployer = new RLCAdapterDeploy();
