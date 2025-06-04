@@ -31,17 +31,21 @@ contract Deploy is Script {
     function deploy(address lzEndpoint, address owner, address createXFactory, bytes32 salt, address rlcToken)
         public
         returns (address)
-    {
+    {   // CreateX Factory instance
+        ICreateX createX = ICreateX(createXFactory);
+
         // Deploy the RLCAdapter contract
-        RLCAdapter rlcAdapterImplementation = new RLCAdapter(rlcToken, lzEndpoint);
-        console.log("RLCAdapter implementation deployed at:", address(rlcAdapterImplementation));
+        address rlcAdapterImplementation = createX.deployCreate2(
+            salt, // salt
+            abi.encodePacked(type(RLCAdapter).creationCode, abi.encode(rlcToken, lzEndpoint)) // initCode
+        );
+        console.log("Implementation deployed at:", rlcAdapterImplementation);
 
         // Deploy the proxy contract
-        ICreateX createX = ICreateX(createXFactory);
         address rlcAdapterProxy = createX.deployCreate2AndInit(
             salt, // salt
-            abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(address(rlcAdapterImplementation), "")), // initCode
-            abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, owner), // data for initialize
+            abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(rlcAdapterImplementation, "")), // initCode
+            abi.encodeWithSelector(RLCAdapter.initialize.selector, owner), // data for initialize
             ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
         );
         console.log("RLCAdapter proxy deployed at:", rlcAdapterProxy);
