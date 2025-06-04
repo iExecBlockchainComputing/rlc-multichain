@@ -19,23 +19,3 @@ contract RLCOFTMock is RLCOFT {
         _mint(_to, _amount);
     }
 }
-
-contract Deploy is Test {
-    function run(address lzEndpoint, address owner, address pauser) external returns (address) {
-        string memory name = "RLC_OFT_TOKEN_NAME";
-        string memory symbol = "RLC_TOKEN_SYMBOL";
-
-        RLCOFTMock rlcOFTMockImplementation = new RLCOFTMock(lzEndpoint);
-        console.log("RLCOFTMock implementation deployed at:", address(rlcOFTMockImplementation));
-
-        // Deploy the proxy contract
-        address rlcOFTProxyAddress = address(
-            new ERC1967Proxy(
-                address(rlcOFTMockImplementation),
-                abi.encodeWithSelector(rlcOFTMockImplementation.initialize.selector, name, symbol, owner, pauser)
-            )
-        );
-        console.log("RLCOFTMock proxy deployed at:", rlcOFTProxyAddress);
-        return rlcOFTProxyAddress;
-    }
-}

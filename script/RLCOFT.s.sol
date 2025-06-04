@@ -18,10 +18,29 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
+        address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
         bytes32 salt = vm.envBytes32("SALT");
 
+        address rlcOFTProxy = deploy(lzEndpoint, name, symbol, owner, pauser, createXFactory, salt);
+        console.log("RLCOFT proxy deployed at:", rlcOFTProxy);
+
+        vm.stopBroadcast();
+
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxy);
+        return rlcOFTProxy;
+    }
+
+    function deploy(
+        address lzEndpoint,
+        string memory name,
+        string memory symbol,
+        address owner,
+        address pauser,
+        address createXFactory,
+        bytes32 salt
+    ) public returns (address) {
         // CreateX Factory address
-        ICreateX createX = ICreateX(vm.envAddress("CREATE_X_FACTORY_ADDRESS"));
+        ICreateX createX = ICreateX(createXFactory);
 
         // Deploy the implementation contract using CreateX Factory
         address rlcOFTImplementation =
@@ -35,34 +54,6 @@ contract Deploy is Script {
             abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(rlcOFTImplementation, "")), // initCode
             abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser), // data for initialize
             ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
-        );
-        console.log("RLCOFT proxy deployed at:", rlcOFTProxy);
-
-        vm.stopBroadcast();
-
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxy);
-        return rlcOFTProxy;
-    }
-
-    function predictAddress() public view returns (address) {
-        address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
-        bytes32 salt = vm.envBytes32("SALT");
-
-        // CreateX Factory address
-        ICreateX createX = ICreateX(vm.envAddress("CREATE_X_FACTORY_ADDRESS"));
-
-        // Deploy the implementation contract using CreateX Factory
-        bytes32 _initCodeHashImpl = keccak256(abi.encodePacked(type(RLCOFT).creationCode, abi.encode(lzEndpoint)));
-        address rlcOFTImplementation = createX.computeCreate2Address(salt, _initCodeHashImpl);
-        console.log("Predicted RLCOFT implementation address:", rlcOFTImplementation);
-
-        // Deploy the proxy contract using CreateX Factory
-        // The proxy contract will be initialized with the implementation address and the constructor arguments
-        bytes32 _initCodeHashProxy =
-            keccak256(abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(rlcOFTImplementation, "")));
-        address rlcOFTProxy = createX.computeCreate2Address(
-            salt, // salt
-            _initCodeHashProxy
         );
         return rlcOFTProxy;
     }

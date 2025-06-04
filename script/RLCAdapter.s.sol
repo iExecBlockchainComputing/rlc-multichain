@@ -15,24 +15,36 @@ contract Deploy is Script {
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS"); // LayerZero sepolia endpoint
         address owner = vm.envAddress("OWNER_ADDRESS"); // Your actual wallet address
-
-        // Deploy the RLCAdapter contract
-        RLCAdapter rlcAdapterImplementation = new RLCAdapter(rlcToken, lzEndpoint);
-        console.log("RLCAdapter implementation deployed at:", address(rlcAdapterImplementation));
+        address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
+        bytes32 salt = vm.envBytes32("SALT");
 
         // Deploy the proxy contract
-        ICreateX createX = ICreateX(vm.envAddress("CREATE_X_FACTORY_ADDRESS"));
-        address rlcAdapterProxy = createX.deployCreate2AndInit(
-            vm.envBytes32("SALT"), // salt
-            abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(address(rlcAdapterImplementation), "")), // initCode
-            abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, owner), // data for initialize
-            ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
-        );
+        address rlcAdapterProxy = deploy(lzEndpoint, owner, createXFactory, salt, rlcToken);
         console.log("RLCAdapter proxy deployed at:", rlcAdapterProxy);
 
         vm.stopBroadcast();
 
         EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy);
+        return rlcAdapterProxy;
+    }
+
+    function deploy(address lzEndpoint, address owner, address createXFactory, bytes32 salt, address rlcToken)
+        public
+        returns (address)
+    {
+        // Deploy the RLCAdapter contract
+        RLCAdapter rlcAdapterImplementation = new RLCAdapter(rlcToken, lzEndpoint);
+        console.log("RLCAdapter implementation deployed at:", address(rlcAdapterImplementation));
+
+        // Deploy the proxy contract
+        ICreateX createX = ICreateX(createXFactory);
+        address rlcAdapterProxy = createX.deployCreate2AndInit(
+            salt, // salt
+            abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(address(rlcAdapterImplementation), "")), // initCode
+            abi.encodeWithSelector(rlcAdapterImplementation.initialize.selector, owner), // data for initialize
+            ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
+        );
+        console.log("RLCAdapter proxy deployed at:", rlcAdapterProxy);
         return rlcAdapterProxy;
     }
 }
