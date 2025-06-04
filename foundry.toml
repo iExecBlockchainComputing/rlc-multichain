@@ -23,6 +23,7 @@ remappings = [
     '@layerzerolabs/test-devtools-evm-foundry/=lib/devtools/packages/test-devtools-evm-foundry/',
     '@openzeppelin/foundry-upgrades/=lib/openzeppelin-foundry-upgrades/src/',
     '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
+    '@createx/contracts/=lib/createx/src/',
 
     # Used internally by contracts within library dependencies
     '@layerzerolabs/lz-evm-protocol-v2/=lib/layerzero-v2/packages/layerzero-v2/evm/protocol/',
@@ -31,8 +32,7 @@ remappings = [
     '@layerzerolabs/oapp-evm/=lib/devtools/packages/oapp-evm/',
     '@layerzerolabs/oft-evm/=lib/devtools/packages/oft-evm/',
     '@layerzerolabs/lz-evm-v1-0.7/=lib/layerzero-v1/',
-    'solidity-bytes-utils/=lib/solidity-bytes-utils',
-    '@createx/contracts/=lib/createx/src/'
+    'solidity-bytes-utils/=lib/solidity-bytes-utils'
 ]
 
 [profile.test]
