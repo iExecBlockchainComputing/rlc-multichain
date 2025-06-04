@@ -2,33 +2,31 @@
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
-import {Deploy as RLCAdapterDeploy, Configure as RLCAdapterConfigure} from "../../script/RLCAdapter.s.sol";
+import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
 
 contract RLCAdapterScriptTest is Test {
-    RLCAdapter public rlcAdapter;
-
+    // Instance unique du script de déploiement
+    address lzEndpoint = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
     address owner = makeAddr("OWNER_ADDRESS");
-    address pauser = makeAddr("PAUSER_ADDRESS");
+    address rlcToken = 0x26A738b6D33EF4D94FF084D3552961b8f00639Cd;
+    address constant createXFactory = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
 
+    RLCAdapterDeploy public deployer;
     function setUp() public {
         vm.createSelectFork("https://ethereum-sepolia-rpc.publicnode.com"); // use public node
-
-        vm.setEnv("RLC_OFT_TOKEN_NAME", "RLC OFT Token");
-        vm.setEnv("RLC_TOKEN_SYMBOL", "RLC");
-        vm.setEnv("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS", "0x6EDCE65403992e310A62460808c4b910D972f10f");
-        vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
-        vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
-
-        rlcAdapter = RLCAdapter(new RLCAdapterDeploy().run());
+        deployer = new RLCAdapterDeploy();
     }
 
     /**
      * Deployment
      */
-    function test_CheckDeployment() public view {
-        assertEq(rlcAdapter.owner(), vm.envAddress("OWNER_ADDRESS"));
-        assertEq(rlcAdapter.token(), vm.envAddress("RLC_SEPOLIA_ADDRESS"));
+    function test_CheckDeployment() public {
+        bytes32 salt = keccak256("RLCOFT_SALT");
+        RLCAdapter rlcAdapter = RLCAdapter(deployer.deploy(lzEndpoint, owner, createXFactory, salt, rlcToken));
+
+        assertEq(rlcAdapter.owner(), owner);
+        assertEq(rlcAdapter.token(), rlcToken);
         // TODO check roles
     }
 }

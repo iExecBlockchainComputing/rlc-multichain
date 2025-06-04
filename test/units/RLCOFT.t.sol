@@ -7,9 +7,9 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {RLCOFTMock} from "./mocks/RLCOFTMock.sol";
+import {Deploy as RLCOFTDeploy} from "./mocks/RLCOFTMock.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
-import {Deploy as RLCOFTDeploy} from "../../script/RLCOFT.s.sol";
 import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
@@ -23,8 +23,6 @@ contract RLCOFTTest is TestHelperOz5 {
 
     uint32 internal constant SOURCE_EID = 1;
     uint32 internal constant DEST_EID = 2;
-    address lzEndpointOFT = address(endpoints[SOURCE_EID]);
-    address lzEndpoint = address(endpoints[DEST_EID]);
 
     address public owner = makeAddr("owner");
     address public pauser = makeAddr("pauser");
@@ -43,6 +41,10 @@ contract RLCOFTTest is TestHelperOz5 {
 
         // Deploy RLC token mock
         address rlcToken = address(new RLCMock(name, symbol));
+
+        // Set up endpoints for the deployment
+        address lzEndpointOFT = address(endpoints[SOURCE_EID]);
+        address lzEndpoint = address(endpoints[DEST_EID]);
 
         // Deploy source RLCOFT
         bytes32 salt = keccak256("RLCOFT_SALT");
