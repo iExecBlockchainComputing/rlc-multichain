@@ -45,32 +45,32 @@ upgrade-on-testnets:
 	$(MAKE) upgrade-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 
 deploy-adapter:
-    @echo "Deploying RLCAdapter (UUPS Proxy) on: $(RPC_URL)"
-    forge script script/RLCAdapter.s.sol:Deploy \
+	@echo "Deploying RLCAdapter (UUPS Proxy) on: $(RPC_URL)"
+	forge script script/RLCAdapter.s.sol:Deploy \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
         -vvv
 
 deploy-oft:
-    @echo "Deploying RLCOFT (UUPS Proxy) on: $(RPC_URL)"
-    forge script script/RLCOFT.s.sol:Deploy \
+	@echo "Deploying RLCOFT (UUPS Proxy) on: $(RPC_URL)"
+	forge script script/RLCOFT.s.sol:Deploy \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
         -vvv
 
 configure-adapter:
-    @echo "Configuring RLCAdapter on: $(RPC_URL)..."
-    forge script script/RLCAdapter.s.sol:Configure \
+	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
+	forge script script/RLCAdapter.s.sol:Configure \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
         -vvv
 
 configure-oft:
-    @echo "Configuring RLCOFT on: $(RPC_URL)"
-    forge script script/RLCOFT.s.sol:Configure \
+	@echo "Configuring RLCOFT on: $(RPC_URL)"
+	forge script script/RLCOFT.s.sol:Configure \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -81,30 +81,30 @@ configure-oft:
 #
 
 validate-adapter-upgrade:
-    @echo "Validating RLCAdapter upgrade on: $(RPC_URL)"
-    forge script script/RLCAdapter.s.sol:ValidateUpgrade \
+	@echo "Validating RLCAdapter upgrade on: $(RPC_URL)"
+	forge script script/RLCAdapter.s.sol:ValidateUpgrade \
         --rpc-url $(RPC_URL) \
         -vvv
 
 validate-oft-upgrade:
-    @echo "Validating RLCOFT upgrade on: $(RPC_URL)"
-    forge script script/RLCOFT.s.sol:ValidateUpgrade \
+	@echo "Validating RLCOFT upgrade on: $(RPC_URL)"
+	forge script script/RLCOFT.s.sol:ValidateUpgrade \
         --rpc-url $(RPC_URL) \
         -vvv
 
 upgrade-adapter:
-    @echo "Upgrading RLCAdapter on: $(RPC_URL)"
-    $(MAKE) validate-adapter-upgrade
-    forge script script/RLCAdapter.s.sol:Upgrade \
+	@echo "Upgrading RLCAdapter on: $(RPC_URL)"
+	$(MAKE) validate-adapter-upgrade
+	forge script script/RLCAdapter.s.sol:Upgrade \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
         -vvv
 
 upgrade-oft:
-    @echo "Upgrading RLCOFT on: $(RPC_URL)"
-    $(MAKE) validate-oft-upgrade
-    forge script script/RLCOFT.s.sol:Upgrade \
+	@echo "Upgrading RLCOFT on: $(RPC_URL)"
+	$(MAKE) validate-oft-upgrade
+	forge script script/RLCOFT.s.sol:Upgrade \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -132,8 +132,8 @@ send-tokens-to-sepolia:
 
 # Verification targets
 verify-adapter:
-    @echo "Verifying RLCAdapter Implementation on Sepolia Etherscan..."
-    forge verify-contract \
+	@echo "Verifying RLCAdapter Implementation on Sepolia Etherscan..."
+	forge verify-contract \
         --chain-id 11155111 \
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address,address)" $(RLC_SEPOLIA_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS)) \
@@ -142,8 +142,8 @@ verify-adapter:
         src/RLCAdapter.sol:RLCAdapter
 
 verify-oft:
-    @echo "Verifying RLCOFT Implementation on Arbitrum Sepolia Etherscan..."
-    forge verify-contract \
+	@echo "Verifying RLCOFT Implementation on Arbitrum Sepolia Etherscan..."
+	forge verify-contract \
         --chain-id 421614 \
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address)" $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS)) \
