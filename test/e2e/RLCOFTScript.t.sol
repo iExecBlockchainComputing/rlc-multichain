@@ -40,10 +40,11 @@ contract RLCOFTScriptTest is Test {
     }
 
     function testForkFuzz_RevertIfSecondDeploymentWithSameSalt(bytes32 salt) public {
-        // Premier déploiement
+        // First deployment
         address addr = deployer.deploy(LAYERZERO_ENDPOINT, name, symbol, owner, pauser, CREATE_X_FACTORY, salt);
         assertTrue(addr != address(0), "First deployment should succeed");
 
+        // Attempt redeployment with the same salt
         try deployer.deploy(LAYERZERO_ENDPOINT, name, symbol, owner, pauser, CREATE_X_FACTORY, salt) returns (address) {
             revert("Expected revert on redeployment with same salt but no revert occurred");
         } catch {
