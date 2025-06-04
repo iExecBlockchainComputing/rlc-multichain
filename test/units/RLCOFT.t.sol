@@ -17,21 +17,21 @@ contract RLCOFTTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;
 
-    RLCOFTMock internal sourceOFT;
-    RLCAdapter internal destAdapterMock;
+    RLCOFTMock private sourceOFT;
+    RLCAdapter private destAdapterMock;
 
-    uint32 internal constant SOURCE_EID = 1;
-    uint32 internal constant DEST_EID = 2;
+    uint32 private constant SOURCE_EID = 1;
+    uint32 private constant DEST_EID = 2;
 
-    address public owner = makeAddr("owner");
-    address public pauser = makeAddr("pauser");
-    address public user1 = makeAddr("user1");
-    address public user2 = makeAddr("user2");
+    address private owner = makeAddr("owner");
+    address private pauser = makeAddr("pauser");
+    address private user1 = makeAddr("user1");
+    address private user2 = makeAddr("user2");
 
-    uint256 public constant INITIAL_BALANCE = 100 ether;
-    uint256 public constant TRANSFER_AMOUNT = 1 ether;
-    string name = "RLC OFT Token";
-    string symbol = "RLC";
+    uint256 private constant INITIAL_BALANCE = 100 ether;
+    uint256 private constant TRANSFER_AMOUNT = 1 ether;
+    string private name = "RLC OFT Token";
+    string private symbol = "RLC";
 
     function setUp() public virtual override {
         super.setUp();

@@ -31,7 +31,8 @@ contract Deploy is Script {
     function deploy(address lzEndpoint, address owner, address createXFactory, bytes32 salt, address rlcToken)
         public
         returns (address)
-    {   // CreateX Factory instance
+    {
+        // CreateX Factory instance
         ICreateX createX = ICreateX(createXFactory);
 
         // Deploy the RLCAdapter contract
