@@ -17,7 +17,7 @@ contract RLCOFTScriptTest is Test {
     RLCOFTDeploy public deployer;
 
     function setUp() public {
-        vm.createSelectFork("https://arbitrum-sepolia-rpc.publicnode.com"); // use public node
+        vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL")); // use public node
         deployer = new RLCOFTDeploy();
     }
 

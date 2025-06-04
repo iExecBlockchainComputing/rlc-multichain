@@ -15,28 +15,28 @@ contract RLCAdapterScriptTest is Test {
     RLCAdapterDeploy public deployer;
 
     function setUp() public {
-        vm.createSelectFork("https://ethereum-sepolia-rpc.publicnode.com"); // use public node
+        vm.createSelectFork(vm.envString("SEPOLIA_RPC_URL"));
         deployer = new RLCAdapterDeploy();
     }
 
     // ============ Deployment Tests ============
-    // function testFork_CheckDeployment() public {
-    //     bytes32 salt = keccak256("RLCOFT_SALT");
-    //     RLCAdapter rlcAdapter = RLCAdapter(deployer.deploy(lzEndpoint, owner, CREATEX_FACTORY, salt, RLC_TOKEN));
+    function testFork_CheckDeployment() public {
+        bytes32 salt = keccak256("RLCOFT_SALT");
+        RLCAdapter rlcAdapter = RLCAdapter(deployer.deploy(lzEndpoint, owner, CREATEX_FACTORY, salt, RLC_TOKEN));
 
-    //     assertEq(rlcAdapter.owner(), owner);
-    //     assertEq(rlcAdapter.token(), RLC_TOKEN);
-    //     //TODO: check roles
-    // }
+        assertEq(rlcAdapter.owner(), owner);
+        assertEq(rlcAdapter.token(), RLC_TOKEN);
+        //TODO: check roles
+    }
 
-    // function testForkFuzz_DifferentSaltsProduceDifferentAddresses(bytes32 salt1, bytes32 salt2) public {
-    //     vm.assume(salt1 != salt2); // ensure they are different
+    function testForkFuzz_DifferentSaltsProduceDifferentAddresses(bytes32 salt1, bytes32 salt2) public {
+        vm.assume(salt1 != salt2); // ensure they are different
 
-    //     address addr1 = deployer.deploy(lzEndpoint, owner, CREATEX_FACTORY, salt1, RLC_TOKEN);
-    //     address addr2 = deployer.deploy(lzEndpoint, owner, CREATEX_FACTORY, salt2, RLC_TOKEN);
+        address addr1 = deployer.deploy(lzEndpoint, owner, CREATEX_FACTORY, salt1, RLC_TOKEN);
+        address addr2 = deployer.deploy(lzEndpoint, owner, CREATEX_FACTORY, salt2, RLC_TOKEN);
 
-    //     assertTrue(addr1 != addr2, "Fuzz test failed: different salts produced same address");
-    // }
+        assertTrue(addr1 != addr2, "Fuzz test failed: different salts produced same address");
+    }
 
     function testForkFuzz_RevertIfSecondDeploymentWithSameSalt(bytes32 salt) public {
         // First deployment
