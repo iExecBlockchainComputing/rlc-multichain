@@ -23,6 +23,8 @@ contract RLCOFTTest is TestHelperOz5 {
 
     uint32 internal constant SOURCE_EID = 1;
     uint32 internal constant DEST_EID = 2;
+    address lzEndpointOFT = address(endpoints[SOURCE_EID]);
+    address lzEndpoint = address(endpoints[DEST_EID]);
 
     address public owner = makeAddr("owner");
     address public pauser = makeAddr("pauser");
@@ -31,6 +33,8 @@ contract RLCOFTTest is TestHelperOz5 {
 
     uint256 public constant INITIAL_BALANCE = 100 ether;
     uint256 public constant TRANSFER_AMOUNT = 1 ether;
+    string name = "RLC OFT Token";
+    string symbol = "RLC";
 
     function setUp() public virtual override {
         super.setUp();
@@ -38,13 +42,7 @@ contract RLCOFTTest is TestHelperOz5 {
         address createXFactory = address(new CreateX());
 
         // Deploy RLC token mock
-        string memory name = "RLC OFT Token";
-        string memory symbol = "RLC";
         address rlcToken = address(new RLCMock(name, symbol));
-
-        // Set up endpoints for the deployment
-        address lzEndpointOFT = address(endpoints[SOURCE_EID]);
-        address lzEndpoint = address(endpoints[DEST_EID]);
 
         // Deploy source RLCOFT
         bytes32 salt = keccak256("RLCOFT_SALT");
