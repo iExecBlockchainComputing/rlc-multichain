@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {Test, console} from "forge-std/Test.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {ICreateX} from "@createx/contracts/ICreateX.sol";
-import "../../../src/RLCOFT.sol";
+import {Test} from "forge-std/Test.sol";
+import {RLCOFT} from "../../../src/RLCOFT.sol";
 import {RLCOFTDeployer} from "../../../script/lib/RLCOFTDeployer.sol";
 
 /// @notice Mock contract that extends RLCOFT with mint/burn functions for testing

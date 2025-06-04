@@ -12,7 +12,6 @@ import {RLCMock} from "./mocks/RLCMock.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
-import {RLCOFT} from "../../src/RLCOFT.sol";
 
 contract RLCOFTTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
@@ -46,7 +45,7 @@ contract RLCOFTTest is TestHelperOz5 {
         address lzEndpointOFT = address(endpoints[SOURCE_EID]);
         address lzEndpoint = address(endpoints[DEST_EID]);
 
-        // Deploy source RLCOFT
+        // Deploy source RLCOFTMock
         bytes32 salt = keccak256("RLCOFT_SALT");
         sourceOFT =
             RLCOFTMock(new RLCOFTDeploy().deploy(lzEndpointOFT, name, symbol, owner, pauser, createXFactory, salt));
