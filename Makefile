@@ -30,11 +30,19 @@ deploy-on-anvil:
 	$(MAKE) configure-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
 	$(MAKE) configure-oft RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
+upgrade-on-anvil:
+	$(MAKE) upgrade-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
+	$(MAKE) upgrade-oft RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+
 deploy-on-testnets:
 	$(MAKE) deploy-adapter RPC_URL=$(SEPOLIA_RPC_URL)
 	$(MAKE) deploy-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 	$(MAKE) configure-adapter RPC_URL=$(SEPOLIA_RPC_URL)
 	$(MAKE) configure-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+
+upgrade-on-testnets:
+	$(MAKE) upgrade-adapter RPC_URL=$(SEPOLIA_RPC_URL)
+	$(MAKE) upgrade-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 
 deploy-adapter:
     @echo "Deploying RLCAdapter (UUPS Proxy) on: $(RPC_URL)"
@@ -73,31 +81,31 @@ configure-oft:
 #
 
 validate-adapter-upgrade:
-    @echo "Validating RLCAdapter upgrade..."
+    @echo "Validating RLCAdapter upgrade on: $(RPC_URL)"
     forge script script/RLCAdapter.s.sol:ValidateUpgrade \
-        --rpc-url $(SEPOLIA_RPC_URL) \
+        --rpc-url $(RPC_URL) \
         -vvv
 
 validate-oft-upgrade:
-    @echo "Validating RLCOFT upgrade..."
+    @echo "Validating RLCOFT upgrade on: $(RPC_URL)"
     forge script script/RLCOFT.s.sol:ValidateUpgrade \
-        --rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
+        --rpc-url $(RPC_URL) \
         -vvv
 
 upgrade-adapter:
-    @echo "Upgrading RLCAdapter on: $(SEPOLIA_RPC_URL)"
+    @echo "Upgrading RLCAdapter on: $(RPC_URL)"
     $(MAKE) validate-adapter-upgrade
     forge script script/RLCAdapter.s.sol:Upgrade \
-        --rpc-url $(SEPOLIA_RPC_URL) \
+        --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
         -vvv
 
 upgrade-oft:
-    @echo "Upgrading RLCOFT on: $(ARBITRUM_SEPOLIA_RPC_URL)"
+    @echo "Upgrading RLCOFT on: $(RPC_URL)"
     $(MAKE) validate-oft-upgrade
     forge script script/RLCOFT.s.sol:Upgrade \
-        --rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
+        --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
         -vvv
