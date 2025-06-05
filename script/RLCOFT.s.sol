@@ -23,7 +23,6 @@ contract Deploy is Script {
         bytes32 salt = vm.envBytes32("SALT");
 
         address rlcOFTProxy = deploy(lzEndpoint, name, symbol, owner, pauser, createXFactory, salt);
-        console.log("RLCOFT proxy deployed at:", rlcOFTProxy);
 
         vm.stopBroadcast();
 

@@ -20,7 +20,6 @@ contract Deploy is Script {
 
         // Deploy the proxy contract
         address rlcAdapterProxy = deploy(lzEndpoint, owner, createXFactory, salt, rlcToken);
-        console.log("RLCAdapter proxy deployed at:", rlcAdapterProxy);
 
         vm.stopBroadcast();
 

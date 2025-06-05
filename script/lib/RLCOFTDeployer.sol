@@ -45,6 +45,7 @@ library RLCOFTDeployer {
             abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser), // data for initialize
             ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
         );
+        console.log("OFT Proxy deployed at:", proxy);
 
         return proxy;
     }
