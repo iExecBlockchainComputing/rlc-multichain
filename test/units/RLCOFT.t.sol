@@ -51,7 +51,8 @@ contract RLCOFTTest is TestHelperOz5 {
             RLCOFTMock(new RLCOFTDeploy().deploy(lzEndpointOFT, name, symbol, owner, pauser, createXFactory, salt));
 
         // Deploy destination RLCAdapter
-        destAdapterMock = RLCAdapter(new RLCAdapterDeploy().deploy(lzEndpoint, owner, pauser, createXFactory, salt, rlcToken));
+        destAdapterMock =
+            RLCAdapter(new RLCAdapterDeploy().deploy(lzEndpoint, owner, pauser, createXFactory, salt, rlcToken));
 
         // Wire the contracts
         address[] memory contracts = new address[](2);

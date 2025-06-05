@@ -29,10 +29,14 @@ contract Deploy is Script {
         return rlcAdapterProxy;
     }
 
-    function deploy(address lzEndpoint, address owner, address pauser, address createXFactory, bytes32 salt, address rlcToken)
-        public
-        returns (address)
-    {
+    function deploy(
+        address lzEndpoint,
+        address owner,
+        address pauser,
+        address createXFactory,
+        bytes32 salt,
+        address rlcToken
+    ) public returns (address) {
         // CreateX Factory instance
         ICreateX createX = ICreateX(createXFactory);
 

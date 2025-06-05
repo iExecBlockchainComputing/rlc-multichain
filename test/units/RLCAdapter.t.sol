@@ -48,10 +48,13 @@ contract RLCAdapterTest is TestHelperOz5 {
 
         // Deploy source RLCOFTMock
         bytes32 salt = keccak256("RLCOFT_SALT");
-        sourceAdapter = RLCAdapter(new RLCAdapterDeploy().deploy(lzEndpoint, owner, pauser, createXFactory, salt, address(rlcToken)));
+        sourceAdapter = RLCAdapter(
+            new RLCAdapterDeploy().deploy(lzEndpoint, owner, pauser, createXFactory, salt, address(rlcToken))
+        );
 
         // Deploy destination RLCAdapter
-        destOFTMock = RLCOFTMock(new RLCOFTDeploy().deploy(lzEndpointOFT, name, symbol, owner, pauser, createXFactory, salt));
+        destOFTMock =
+            RLCOFTMock(new RLCOFTDeploy().deploy(lzEndpointOFT, name, symbol, owner, pauser, createXFactory, salt));
 
         // Wire the contracts
         address[] memory contracts = new address[](2);

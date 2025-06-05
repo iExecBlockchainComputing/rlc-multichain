@@ -13,7 +13,12 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 /// @notice OFTAdapter uses a deployed ERC-20 token and safeERC20 to interact with the OFTCore contract.
 /// There can only be one OFT Adapter deployed per chain. Multiple OFT Adapters break omnichain unified
 /// liquidity by effectively creating token pools.
-contract RLCAdapter is OFTAdapterUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, PausableUpgradeable {
+contract RLCAdapter is
+    OFTAdapterUpgradeable,
+    UUPSUpgradeable,
+    AccessControlDefaultAdminRulesUpgradeable,
+    PausableUpgradeable
+{
     //AccessControl Roles
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -58,20 +63,23 @@ contract RLCAdapter is OFTAdapterUpgradeable, UUPSUpgradeable, AccessControlDefa
         return OwnableUpgradeable.owner();
     }
 
-    function _debit(
-        address _from,
-        uint256 _amountLD,
-        uint256 _minAmountLD,
-        uint32 _dstEid
-    ) internal virtual override whenNotPaused returns (uint256 amountSentLD, uint256 amountReceivedLD) {
+    function _debit(address _from, uint256 _amountLD, uint256 _minAmountLD, uint32 _dstEid)
+        internal
+        virtual
+        override
+        whenNotPaused
+        returns (uint256 amountSentLD, uint256 amountReceivedLD)
+    {
         return super._debit(_from, _amountLD, _minAmountLD, _dstEid);
     }
 
-    function _credit(
-        address _to,
-        uint256 _amountLD,
-        uint32 _srcEid
-    ) internal virtual override whenNotPaused returns (uint256 amountReceivedLD) {
+    function _credit(address _to, uint256 _amountLD, uint32 _srcEid)
+        internal
+        virtual
+        override
+        whenNotPaused
+        returns (uint256 amountReceivedLD)
+    {
         return super._credit(_to, _amountLD, _srcEid);
     }
 
