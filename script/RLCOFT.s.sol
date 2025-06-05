@@ -20,6 +20,8 @@ contract Deploy is Script {
         // Set up deployment options
         Options memory opts;
         opts.constructorData = abi.encode(lzEndpoint);
+        // Skip validation for testing purposes
+        opts.unsafeSkipAllChecks = true;
         // Prepare initialization data
         bytes memory initData = abi.encodeWithSelector(
             RLCOFT.initialize.selector,

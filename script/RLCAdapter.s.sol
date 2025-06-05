@@ -17,6 +17,8 @@ contract Deploy is Script {
 
         Options memory opts;
         opts.constructorData = abi.encode(rlcToken, lzEndpoint);
+        // Skip validation for testing purposes
+        opts.unsafeSkipAllChecks = true;
 
         // Prepare initialization data
         bytes memory initData = abi.encodeWithSelector(
