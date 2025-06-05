@@ -6,7 +6,7 @@ import {Deploy as RLCOFTDeploy, Configure as RLCOFTConfigure} from "../../script
 import {RLCOFT} from "../../src/RLCOFT.sol";
 
 contract RLCOFTScriptTest is Test {
-    // Instance unique du script de déploiement
+    // Unique instance of the deployment script
     string name = "RLC OFT Token";
     string symbol = "RLC";
     address owner = makeAddr("OWNER_ADDRESS");
