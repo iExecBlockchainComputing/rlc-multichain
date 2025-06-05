@@ -13,12 +13,13 @@ import {TestUtils} from "./utils/TestUtils.sol";
 import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
 
-contract RLCOFTTest is TestHelperOz5 {
+contract RLCAdapterTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;
 
-    RLCOFTMock private sourceOFT;
-    RLCAdapter private destAdapterMock;
+    RLCAdapter private sourceAdapter;
+    RLCOFTMock private destOFTMock;
+    RLCMock private rlcToken;
 
     uint32 private constant SOURCE_EID = 1;
     uint32 private constant DEST_EID = 2;
@@ -39,62 +40,63 @@ contract RLCOFTTest is TestHelperOz5 {
         address createXFactory = address(new CreateX());
 
         // Deploy RLC token mock
-        address rlcToken = address(new RLCMock(name, symbol));
+        rlcToken = new RLCMock(name, symbol);
 
         // Set up endpoints for the deployment
-        address lzEndpointOFT = address(endpoints[SOURCE_EID]);
-        address lzEndpoint = address(endpoints[DEST_EID]);
+        address lzEndpoint = address(endpoints[SOURCE_EID]);
+        address lzEndpointOFT = address(endpoints[DEST_EID]);
 
         // Deploy source RLCOFTMock
         bytes32 salt = keccak256("RLCOFT_SALT");
-        sourceOFT =
-            RLCOFTMock(new RLCOFTDeploy().deploy(lzEndpointOFT, name, symbol, owner, pauser, createXFactory, salt));
+        sourceAdapter = RLCAdapter(new RLCAdapterDeploy().deploy(lzEndpoint, owner, pauser, createXFactory, salt, address(rlcToken)));
 
         // Deploy destination RLCAdapter
-        destAdapterMock = RLCAdapter(new RLCAdapterDeploy().deploy(lzEndpoint, owner, pauser, createXFactory, salt, rlcToken));
+        destOFTMock = RLCOFTMock(new RLCOFTDeploy().deploy(lzEndpointOFT, name, symbol, owner, pauser, createXFactory, salt));
 
         // Wire the contracts
         address[] memory contracts = new address[](2);
-        contracts[0] = address(sourceOFT);
-        contracts[1] = address(destAdapterMock);
+        contracts[0] = address(sourceAdapter);
+        contracts[1] = address(destOFTMock);
         vm.startPrank(owner);
         wireOApps(contracts);
         vm.stopPrank();
 
         // Mint OFT tokens to user1
-        sourceOFT.mint(user1, INITIAL_BALANCE);
+        rlcToken.mint(user1, INITIAL_BALANCE);
+        vm.prank(user1);
+        rlcToken.approve(address(sourceAdapter), INITIAL_BALANCE);
     }
 
     function test_sendToken() public {
         // Check initial balances
-        assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE);
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceOFT, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(sourceAdapter, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        sourceAdapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
+        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
-    function test_sendOFTWhenSourceOFTPaused() public {
+    function test_sendOFTWhenSourceAdapterPaused() public {
         // Pause the destination adapter
         vm.prank(pauser);
-        sourceOFT.pause();
+        sourceAdapter.pause();
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceOFT, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(sourceAdapter, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens - this should succeed on source but fail on destination
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        try sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1)) {
+        try sourceAdapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1)) {
             // If it succeeds, we expect it to revert
             assertTrue(false, "Expected send to revert when source OFT is paused");
         } catch (bytes memory error) {
@@ -103,27 +105,27 @@ contract RLCOFTTest is TestHelperOz5 {
         }
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
-    function test_sendOFTWhenSourceOFTUnpaused() public {
+    function test_sendOFTWhenSourceAdapterUnpaused() public {
         // Pause then unpause the destination adapter
         vm.startPrank(pauser);
-        sourceOFT.pause();
-        sourceOFT.unpause();
+        sourceAdapter.pause();
+        sourceAdapter.unpause();
         vm.stopPrank();
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceOFT, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(sourceAdapter, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        sourceAdapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
+        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues

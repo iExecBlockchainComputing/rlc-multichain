@@ -15,11 +15,12 @@ contract Deploy is Script {
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS"); // LayerZero sepolia endpoint
         address owner = vm.envAddress("OWNER_ADDRESS"); // Your actual wallet address
+        address pauser = vm.envAddress("PAUSER_ADDRESS");
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
         bytes32 salt = vm.envBytes32("SALT");
 
         // Deploy the proxy contract
-        address rlcAdapterProxy = deploy(lzEndpoint, owner, createXFactory, salt, rlcToken);
+        address rlcAdapterProxy = deploy(lzEndpoint, owner, pauser, createXFactory, salt, rlcToken);
         console.log("RLCAdapter proxy deployed at:", rlcAdapterProxy);
 
         vm.stopBroadcast();
@@ -28,7 +29,7 @@ contract Deploy is Script {
         return rlcAdapterProxy;
     }
 
-    function deploy(address lzEndpoint, address owner, address createXFactory, bytes32 salt, address rlcToken)
+    function deploy(address lzEndpoint, address owner, address pauser, address createXFactory, bytes32 salt, address rlcToken)
         public
         returns (address)
     {
@@ -46,7 +47,7 @@ contract Deploy is Script {
         address rlcAdapterProxy = createX.deployCreate2AndInit(
             salt, // salt
             abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(rlcAdapterImplementation, "")), // initCode
-            abi.encodeWithSelector(RLCAdapter.initialize.selector, owner), // data for initialize
+            abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser), // data for initialize
             ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
         );
         console.log("RLCAdapter proxy deployed at:", rlcAdapterProxy);
