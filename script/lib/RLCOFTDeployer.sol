@@ -8,18 +8,18 @@ import {ICreateX} from "@createx/contracts/ICreateX.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
 import {EnvUtils} from "../UpdateEnvUtils.sol";
 
-/// @notice Bibliothèque utilitaire pour le déploiement de contrats RLCOFT
+/// @notice Utility library for deploying RLCOFT-like contracts
 library RLCOFTDeployer {
-    /// @notice Déploie un contrat RLCOFT (ou sa variante) avec CreateX Factory
-    /// @param contractCreationCode Le bytecode de création du contrat à déployer
-    /// @param lzEndpoint L'adresse du endpoint LayerZero
-    /// @param name Le nom du token
-    /// @param symbol Le symbole du token
-    /// @param owner L'adresse du propriétaire
-    /// @param pauser L'adresse du pauseur
-    /// @param createXFactory L'adresse de la factory CreateX
-    /// @param salt Le salt pour le déploiement déterministe
-    /// @return L'adresse du proxy déployé
+    /// @notice Deploys an RLCOFT contract (or its variant) using the CreateX Factory
+    /// @param contractCreationCode The creation bytecode of the contract to deploy
+    /// @param lzEndpoint The address of the LayerZero endpoint
+    /// @param name The name of the token
+    /// @param symbol The symbol of the token
+    /// @param owner The address of the owner
+    /// @param pauser The address of the pauser
+    /// @param createXFactory The address of the CreateX factory
+    /// @param salt The salt for deterministic deployment
+    /// @return The address of the deployed proxy
     function deployRLCOFT(
         bytes memory contractCreationCode,
         address lzEndpoint,
