@@ -4,9 +4,10 @@ pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {ICreateX} from "@createx/contracts/ICreateX.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
-import {ICreateX} from "@createx/contracts/ICreateX.sol";
+import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 
 contract Deploy is Script {
     function run() external returns (address) {
@@ -31,25 +32,11 @@ contract Deploy is Script {
         public
         returns (address)
     {
-        // CreateX Factory instance
-        ICreateX createX = ICreateX(createXFactory);
-
-        // Deploy the RLCAdapter contract
-        address rlcAdapterImplementation = createX.deployCreate2(
-            salt, // salt
-            abi.encodePacked(type(RLCAdapter).creationCode, abi.encode(rlcToken, lzEndpoint)) // initCode
+        bytes memory constructorData = abi.encode(rlcToken, lzEndpoint);
+        bytes memory initializeData = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner);
+        return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+            "RLCAdapter", constructorData, initializeData, createXFactory, salt
         );
-        console.log("Implementation deployed at:", rlcAdapterImplementation);
-
-        // Deploy the proxy contract
-        address rlcAdapterProxy = createX.deployCreate2AndInit(
-            salt, // salt
-            abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(rlcAdapterImplementation, "")), // initCode
-            abi.encodeWithSelector(RLCAdapter.initialize.selector, owner), // data for initialize
-            ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
-        );
-        console.log("RLCAdapter proxy deployed at:", rlcAdapterProxy);
-        return rlcAdapterProxy;
     }
 }
 

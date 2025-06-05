@@ -4,7 +4,6 @@ pragma solidity ^0.8.22;
 
 import {Test} from "forge-std/Test.sol";
 import {RLCOFT} from "../../../src/RLCOFT.sol";
-import {RLCOFTDeployer} from "../../../script/lib/RLCOFTDeployer.sol";
 
 /// @notice Mock contract that extends RLCOFT with mint/burn functions for testing
 contract RLCOFTMock is RLCOFT {
@@ -16,21 +15,5 @@ contract RLCOFTMock is RLCOFT {
     /// @param _amount Amount of tokens to mint
     function mint(address _to, uint256 _amount) public {
         _mint(_to, _amount);
-    }
-}
-
-contract Deploy is Test {
-    function deploy(
-        address lzEndpoint,
-        string memory name,
-        string memory symbol,
-        address owner,
-        address pauser,
-        address createXFactory,
-        bytes32 salt
-    ) public returns (address) {
-        return RLCOFTDeployer.deployRLCOFT(
-            type(RLCOFTMock).creationCode, lzEndpoint, name, symbol, owner, pauser, createXFactory, salt
-        );
     }
 }

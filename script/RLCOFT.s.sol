@@ -7,7 +7,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
-import {RLCOFTDeployer} from "./lib/RLCOFTDeployer.sol";
+import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract Deploy is Script {
@@ -39,8 +39,10 @@ contract Deploy is Script {
         address createXFactory,
         bytes32 salt
     ) public returns (address) {
-        return RLCOFTDeployer.deployRLCOFT(
-            type(RLCOFT).creationCode, lzEndpoint, name, symbol, owner, pauser, createXFactory, salt
+        bytes memory constructorData = abi.encode(lzEndpoint);
+        bytes memory initializeData = abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
+        return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+            "RLCOFT", constructorData, initializeData, createXFactory, salt
         );
     }
 }
