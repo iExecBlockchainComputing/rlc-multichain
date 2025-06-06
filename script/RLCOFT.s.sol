@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {Script, console} from "forge-std/Script.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {Script} from "forge-std/Script.sol";
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";

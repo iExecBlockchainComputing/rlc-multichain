@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
-import {Deploy as RLCOFTDeploy, Configure as RLCOFTConfigure} from "../../script/RLCOFT.s.sol";
+import {Deploy as RLCOFTDeploy} from "../../script/RLCOFT.s.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
 
 contract RLCOFTScriptTest is Test {
