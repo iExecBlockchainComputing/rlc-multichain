@@ -38,6 +38,7 @@ contract RLCOFTTest is TestHelperOz5 {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
         address createXFactory = address(new CreateX());
+        vm.setEnv("CREATE_X_FACTORY", "0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed");
 
         // Deploy RLC token mock
         address rlcToken = address(new RLCMock(name, symbol));
@@ -57,7 +58,7 @@ contract RLCOFTTest is TestHelperOz5 {
         );
 
         // Deploy destination RLCAdapter
-        destAdapterMock = RLCAdapter(new RLCAdapterDeploy().deploy(lzEndpoint, owner, createXFactory, salt, rlcToken));
+        destAdapterMock = RLCAdapter(new RLCAdapterDeploy().deploy(lzEndpoint, owner, salt, rlcToken));
 
         // Wire the contracts
         address[] memory contracts = new address[](2);
