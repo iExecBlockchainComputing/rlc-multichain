@@ -7,6 +7,7 @@ import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
 import {RLCMock} from "../units/mocks/RLCMock.sol";
 import {RLCAdapterV2} from "../../src/mocks/RLCAdapterV2mock.sol";
+import {TestUtils} from "./../units/utils/TestUtils.sol";
 
 contract UpgradeRLCAdapterTest is Test {
     RLCAdapter public adapterV1;
@@ -14,35 +15,19 @@ contract UpgradeRLCAdapterTest is Test {
     RLCMock public rlcToken;
     address public mockEndpoint = makeAddr("mockEndpoint"); 
     address public owner = makeAddr("owner");
+    address private pauser = makeAddr("pauser");
     address public operator = makeAddr("operator");
     address public user = makeAddr("user");
+    string public constant TOKEN_NAME = "RLC OFT Test";
+    string public constant TOKEN_SYMBOL = "RLCOFT";
 
     address public proxyAddress;
 
     function setUp() public {
-        // Deploy mock RLC token
-        rlcToken = new RLCMock("RLC OFT Test", "RLCT");
-
-        // Deploy V1 using UUPS proxy
-        Options memory opts;
-        opts.constructorData = abi.encode(address(rlcToken), mockEndpoint);
-        // Skip validation for testing purposes
-        // TODO: check why and how to fix it
-        opts.unsafeSkipAllChecks = true;
-
-        // Prepare initialization data
-        bytes memory initData = abi.encodeWithSelector(
-            RLCAdapter.initialize.selector,
-            owner
-        );
-        // Deploy the UUPS proxy using OpenZeppelin Upgrades
-        proxyAddress = Upgrades.deployUUPSProxy(
-            "RLCAdapter.sol:RLCAdapter",
-            initData,
-            opts
-        );
-
-        adapterV1 = RLCAdapter(proxyAddress);
+        
+        (adapterV1, , ) =
+        TestUtils.setupDeployment(TOKEN_NAME, TOKEN_SYMBOL, mockEndpoint, mockEndpoint, owner, pauser);
+        proxyAddress = address(adapterV1);
     }
 
     function testV1DoesNotHaveV2Functions() public {

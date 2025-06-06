@@ -6,6 +6,8 @@ import {Test, console} from "forge-std/Test.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
 import {RLCOFTV2} from "../../src/mocks/RLCOFTV2Mock.sol";
+import {TestUtils} from "./../units/utils/TestUtils.sol";
+
 
 contract UpgradeRLCOFTTest is Test {
     RLCOFT public oftV1;
@@ -21,31 +23,9 @@ contract UpgradeRLCOFTTest is Test {
     string public constant TOKEN_SYMBOL = "RLCOFT";
 
     function setUp() public {
-        // Deploy V1 using UUPS proxy
-        Options memory opts;
-        opts.constructorData = abi.encode(mockEndpoint);
-        opts.unsafeSkipAllChecks = true;
-
-        bytes memory initData = abi.encodeWithSelector(
-            RLCOFT.initialize.selector,
-            TOKEN_NAME,
-            TOKEN_SYMBOL,
-            owner,
-            pauser
-        );
-
-        proxyAddress = Upgrades.deployUUPSProxy(
-            "RLCOFT.sol:RLCOFT",
-            initData,
-            opts
-        );
-
-        oftV1 = RLCOFT(proxyAddress);
-    }
-
-    function testV1InitialState() public view {
-        // Test V1 initial state
-
+        (, oftV1, ) =
+        TestUtils.setupDeployment(TOKEN_NAME, TOKEN_SYMBOL, mockEndpoint, mockEndpoint, owner, pauser);
+        proxyAddress = address(oftV1);
     }
 
     function testV1DoesNotHaveV2Functions() public {
