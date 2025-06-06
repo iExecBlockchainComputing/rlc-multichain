@@ -10,25 +10,17 @@ import {RLCOFTV2} from "../../src/mocks/RLCOFTV2Mock.sol";
 contract UpgradeRLCOFTTest is Test {
     RLCOFT public oftV1;
     RLCOFTV2 public oftV2;
-    address public mockEndpoint;
-    address public owner;
-    address public pauser;
-    address public minter;
-    address public burner;
-    address public user;
+    address public mockEndpoint = makeAddr("mockEndpoint"); 
+    address public owner = makeAddr("owner");
+    address public pauser = makeAddr("pauser");
+    address public minter = makeAddr("minter");
+    address public user = makeAddr("user");
 
     address public proxyAddress;
     string public constant TOKEN_NAME = "RLC OFT Test";
     string public constant TOKEN_SYMBOL = "RLCOFT";
 
     function setUp() public {
-        owner = makeAddr("owner");
-        pauser = makeAddr("pauser");
-        minter = makeAddr("minter");
-        burner = makeAddr("burner");
-        user = makeAddr("user");
-        mockEndpoint = makeAddr("mockEndpoint");
-
         // Deploy V1 using UUPS proxy
         Options memory opts;
         opts.constructorData = abi.encode(mockEndpoint);
@@ -77,9 +69,8 @@ contract UpgradeRLCOFTTest is Test {
 
         bytes memory initData = abi.encodeWithSelector(
             RLCOFTV2.initializeV2.selector,
-            minter,  // minter
-            burner,  // burner
-            100000 * 10**9  // 100K tokens daily mint limit (with 9 decimals)
+            minter,
+            100000 * 10**9
         );
 
         Upgrades.upgradeProxy(

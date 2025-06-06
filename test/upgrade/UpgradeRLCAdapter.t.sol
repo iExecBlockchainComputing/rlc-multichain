@@ -5,40 +5,37 @@ pragma solidity ^0.8.22;
 import {Test, console} from "forge-std/Test.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
+import {RLCMock} from "../units/mocks/RLCMock.sol";
 import {RLCAdapterV2} from "../../src/mocks/RLCAdapterV2mock.sol";
-import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 
 contract UpgradeRLCAdapterTest is Test {
     RLCAdapter public adapterV1;
     RLCAdapterV2 public adapterV2;
-    ERC20Mock public mockRLC;
-    address public mockEndpoint;
-    address public owner;
-    address public operator;
-    address public user;
+    RLCMock public rlcToken;
+    address public mockEndpoint = makeAddr("mockEndpoint"); 
+    address public owner = makeAddr("owner");
+    address public operator = makeAddr("operator");
+    address public user = makeAddr("user");
 
     address public proxyAddress;
 
     function setUp() public {
-        owner = makeAddr("owner");
-        operator = makeAddr("operator");
-        user = makeAddr("user");
-        mockEndpoint = makeAddr("mockEndpoint");
-
         // Deploy mock RLC token
-        vm.prank(owner);
-        mockRLC = new ERC20Mock();
+        rlcToken = new RLCMock("RLC OFT Test", "RLCT");
 
         // Deploy V1 using UUPS proxy
         Options memory opts;
-        opts.constructorData = abi.encode(address(mockRLC), mockEndpoint);
+        opts.constructorData = abi.encode(address(rlcToken), mockEndpoint);
+        // Skip validation for testing purposes
+        // TODO: check why and how to fix it
         opts.unsafeSkipAllChecks = true;
 
+        // Prepare initialization data
         bytes memory initData = abi.encodeWithSelector(
             RLCAdapter.initialize.selector,
             owner
         );
-
+        // Deploy the UUPS proxy using OpenZeppelin Upgrades
         proxyAddress = Upgrades.deployUUPSProxy(
             "RLCAdapter.sol:RLCAdapter",
             initData,
@@ -64,7 +61,7 @@ contract UpgradeRLCAdapterTest is Test {
         vm.startPrank(owner);
         
         Options memory opts;
-        opts.constructorData = abi.encode(address(mockRLC), mockEndpoint);
+        opts.constructorData = abi.encode(address(rlcToken), mockEndpoint);
         opts.unsafeSkipAllChecks = true;
 
         bytes memory initData = abi.encodeWithSelector(
@@ -75,7 +72,7 @@ contract UpgradeRLCAdapterTest is Test {
 
         Upgrades.upgradeProxy(
             proxyAddress,
-            "RLCAdapterV2.sol:RLCAdapterV2",
+            "RLCAdapterV2Mock.sol:RLCAdapterV2",
             initData,
             opts
         );
