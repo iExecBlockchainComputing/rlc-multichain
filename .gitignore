@@ -19,3 +19,4 @@ docs/
 .last_deploy.json
 
 .idea
+.DS_Store

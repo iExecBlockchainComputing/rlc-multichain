@@ -5,48 +5,60 @@ import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/Option
 import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {RLCOFTMock, Deploy as RLCOFTDeploy} from "../units/mocks/RLCOFTMock.sol";
-import {Deploy as RLCAdapterDeploy} from "./mocks/RLCAdapterMock.sol";
-import {RLCAdapter} from "../../src/RLCAdapter.sol";
+import {CreateX} from "@createx/contracts/CreateX.sol";
+import {RLCOFTMock} from "./mocks/RLCOFTMock.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
+import {UUPSProxyDeployer} from "../../script/lib/UUPSProxyDeployer.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
+import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
+import {RLCAdapter} from "../../src/RLCAdapter.sol";
 
-contract RLCOFTE2ETest is TestHelperOz5 {
+contract RLCOFTTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;
 
-    RLCOFTMock internal sourceOFT;
-    RLCAdapter internal destAdapterMock;
-    RLCMock internal rlcToken;
+    RLCOFTMock private sourceOFT;
+    RLCAdapter private destAdapterMock;
 
-    uint32 internal constant SOURCE_EID = 1;
-    uint32 internal constant DEST_EID = 2;
+    uint32 private constant SOURCE_EID = 1;
+    uint32 private constant DEST_EID = 2;
 
-    address public owner = makeAddr("owner");
-    address public pauser = makeAddr("pauser");
-    address public user1 = makeAddr("user1");
-    address public user2 = makeAddr("user2");
+    address private owner = makeAddr("owner");
+    address private pauser = makeAddr("pauser");
+    address private user1 = makeAddr("user1");
+    address private user2 = makeAddr("user2");
 
-    uint256 public constant INITIAL_BALANCE = 100 ether;
-    uint256 public constant TRANSFER_AMOUNT = 1 ether;
+    uint256 private constant INITIAL_BALANCE = 100 ether;
+    uint256 private constant TRANSFER_AMOUNT = 1 ether;
+    string private name = "RLC OFT Token";
+    string private symbol = "RLC";
 
     function setUp() public virtual override {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
+        address createXFactory = address(new CreateX());
 
         // Deploy RLC token mock
-        rlcToken = new RLCMock("RLC OFT Test", "RLCT");
+        address rlcToken = address(new RLCMock(name, symbol));
 
         // Set up endpoints for the deployment
         address lzEndpointOFT = address(endpoints[SOURCE_EID]);
+        address lzEndpoint = address(endpoints[DEST_EID]);
 
-        // Deploy source RLCOFT
-        sourceOFT = RLCOFTMock(new RLCOFTDeploy().run(lzEndpointOFT, owner, pauser));
+        // Deploy source RLCOFTMock
+        bytes32 salt = keccak256("RLCOFT_SALT");
+        bytes memory constructorData = abi.encode(lzEndpointOFT);
+        bytes memory initializeData = abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
+        sourceOFT = RLCOFTMock(
+            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+                "RLCOFTMock", constructorData, initializeData, createXFactory, salt
+            )
+        );
 
         // Deploy destination RLCAdapter
-        destAdapterMock =
-            RLCAdapter(new RLCAdapterDeploy().run(address(rlcToken), address(endpoints[DEST_EID]), owner, pauser));
+        vm.setEnv("CREATE_X_FACTORY_ADDRESS", vm.toString(createXFactory));
+        destAdapterMock = RLCAdapter(new RLCAdapterDeploy().deploy(lzEndpoint, owner, salt, rlcToken));
 
         // Wire the contracts
         address[] memory contracts = new address[](2);

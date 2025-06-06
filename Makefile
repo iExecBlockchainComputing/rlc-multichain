@@ -14,8 +14,11 @@ fork-sepolia:
 fork-arbitrum-sepolia:
 	anvil --fork-url $(ARBITRUM_SEPOLIA_RPC_URL) --port 8546
 
-utest:
-	FOUNDRY_PROFILE=test forge test -vvvv
+unit-test:
+	FOUNDRY_PROFILE=test forge test -vvvv --match-path "./test/units/**" --fail-fast
+
+e2e-test:
+	FOUNDRY_PROFILE=test forge test -vvvv --match-path "./test/e2e/**" --fail-fast
 
 clean:
 	forge clean

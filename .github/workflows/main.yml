@@ -10,6 +10,7 @@ concurrency:
 env:
   FOUNDRY_PROFILE: ci
   SEPOLIA_RPC_URL: secrets.SEPOLIA_RPC_URL
+  ARBITRUM_SEPOLIA_RPC_URL: secrets.ARBITRUM_SEPOLIA_RPC_URL
 
 jobs:
   build-and-test:
@@ -32,5 +33,8 @@ jobs:
       - name: Run Forge build
         run: forge build --sizes && cp .env.template .env
 
-      - name: Run Forge tests
-        run: make utest
+      - name: Run Forge unit tests
+        run: make unit-test
+
+      - name: Run Forge e2e tests
+        run: make e2e-test

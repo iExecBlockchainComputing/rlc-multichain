@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {Script, console} from "forge-std/Script.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {Script} from "forge-std/Script.sol";
+import {ICreateX} from "@createx/contracts/ICreateX.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
+import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract Deploy is Script {
@@ -16,23 +17,31 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
+        bytes32 salt = vm.envBytes32("SALT");
 
-        RLCOFT rlcOFTImplementation = new RLCOFT(lzEndpoint);
-        console.log("RLCOFT implementation deployed at:", address(rlcOFTImplementation));
-
-        // Deploy the proxy contract
-        address rlcOFTProxyAddress = address(
-            new ERC1967Proxy(
-                address(rlcOFTImplementation),
-                abi.encodeWithSelector(rlcOFTImplementation.initialize.selector, name, symbol, owner, pauser)
-            )
-        );
-        console.log("RLCOFT proxy deployed at:", rlcOFTProxyAddress);
+        address rlcOFTProxy = deploy(lzEndpoint, name, symbol, owner, pauser, salt);
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxyAddress);
-        return rlcOFTProxyAddress;
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxy);
+        return rlcOFTProxy;
+    }
+
+    function deploy(
+        address lzEndpoint,
+        string memory name,
+        string memory symbol,
+        address owner,
+        address pauser,
+        bytes32 salt
+    ) public returns (address) {
+        address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
+
+        bytes memory constructorData = abi.encode(lzEndpoint);
+        bytes memory initializeData = abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
+        return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+            "RLCOFT", constructorData, initializeData, createXFactory, salt
+        );
     }
 }
 
