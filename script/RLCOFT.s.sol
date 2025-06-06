@@ -2,12 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {Script, console} from "forge-std/Script.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {Script} from "forge-std/Script.sol";
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
-import {RLCOFTDeployer} from "./lib/RLCOFTDeployer.sol";
+import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract Deploy is Script {
@@ -19,11 +17,9 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
-        address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
         bytes32 salt = vm.envBytes32("SALT");
 
-        address rlcOFTProxy = deploy(lzEndpoint, name, symbol, owner, pauser, createXFactory, salt);
-        console.log("RLCOFT proxy deployed at:", rlcOFTProxy);
+        address rlcOFTProxy = deploy(lzEndpoint, name, symbol, owner, pauser, salt);
 
         vm.stopBroadcast();
 
@@ -37,11 +33,14 @@ contract Deploy is Script {
         string memory symbol,
         address owner,
         address pauser,
-        address createXFactory,
         bytes32 salt
     ) public returns (address) {
-        return RLCOFTDeployer.deployRLCOFT(
-            type(RLCOFT).creationCode, lzEndpoint, name, symbol, owner, pauser, createXFactory, salt
+        address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
+
+        bytes memory constructorData = abi.encode(lzEndpoint);
+        bytes memory initializeData = abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
+        return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+            "RLCOFT", constructorData, initializeData, createXFactory, salt
         );
     }
 }
