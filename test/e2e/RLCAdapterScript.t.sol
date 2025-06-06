@@ -9,6 +9,7 @@ contract RLCAdapterScriptTest is Test {
     // Unique instance of the deployment script
     address lzEndpoint = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
     address owner = makeAddr("OWNER_ADDRESS");
+    address pauser = makeAddr("PAUSER_ADDRESS");
     address RLC_TOKEN = 0x26A738b6D33EF4D94FF084D3552961b8f00639Cd;
 
     RLCAdapterDeploy public deployer;
@@ -22,7 +23,7 @@ contract RLCAdapterScriptTest is Test {
     // ============ Deployment Tests ============
     function testFork_CheckDeployment() public {
         bytes32 salt = keccak256("RLCOFT_SALT");
-        RLCAdapter rlcAdapter = RLCAdapter(deployer.deploy(lzEndpoint, owner, salt, RLC_TOKEN));
+        RLCAdapter rlcAdapter = RLCAdapter(deployer.deploy(lzEndpoint, owner, pauser, salt, RLC_TOKEN));
 
         assertEq(rlcAdapter.owner(), owner);
         assertEq(rlcAdapter.token(), RLC_TOKEN);
@@ -32,19 +33,19 @@ contract RLCAdapterScriptTest is Test {
     function testForkFuzz_DifferentSaltsProduceDifferentAddresses(bytes32 salt1, bytes32 salt2) public {
         vm.assume(salt1 != salt2); // ensure they are different
 
-        address addr1 = deployer.deploy(lzEndpoint, owner, salt1, RLC_TOKEN);
-        address addr2 = deployer.deploy(lzEndpoint, owner, salt2, RLC_TOKEN);
+        address addr1 = deployer.deploy(lzEndpoint, owner, pauser, salt1, RLC_TOKEN);
+        address addr2 = deployer.deploy(lzEndpoint, owner, pauser, salt2, RLC_TOKEN);
 
         assertTrue(addr1 != addr2, "Fuzz test failed: different salts produced same address");
     }
 
     function testForkFuzz_RevertIfSecondDeploymentWithSameSalt(bytes32 salt) public {
         // First deployment
-        address addr = deployer.deploy(lzEndpoint, owner, salt, RLC_TOKEN);
+        address addr = deployer.deploy(lzEndpoint, owner, pauser, salt, RLC_TOKEN);
         assertTrue(addr != address(0), "First deployment should succeed");
 
         // Attempt redeployment with the same salt
-        try deployer.deploy(lzEndpoint, owner, salt, RLC_TOKEN) returns (address) {
+        try deployer.deploy(lzEndpoint, owner, pauser, salt, RLC_TOKEN) returns (address) {
             revert("Expected revert on redeployment with same salt but no revert occurred");
         } catch {
             // Expected: revert due to CREATE2 address collision

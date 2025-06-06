@@ -12,13 +12,14 @@ contract Deploy is Script {
     function run() external returns (address) {
         vm.startBroadcast();
 
-        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
-        address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS"); // LayerZero sepolia endpoint
-        address owner = vm.envAddress("OWNER_ADDRESS"); // Your actual wallet address
+        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
+        address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
+        address owner = vm.envAddress("OWNER_ADDRESS");
+        address pauser = vm.envAddress("PAUSER_ADDRESS");
         bytes32 salt = vm.envBytes32("SALT");
 
         // Deploy the proxy contract
-        address rlcAdapterProxy = deploy(lzEndpoint, owner, salt, rlcToken);
+        address rlcAdapterProxy = deploy(lzEndpoint, owner, pauser, salt, rlcToken);
 
         vm.stopBroadcast();
 
@@ -26,10 +27,13 @@ contract Deploy is Script {
         return rlcAdapterProxy;
     }
 
-    function deploy(address lzEndpoint, address owner, bytes32 salt, address rlcToken) public returns (address) {
+    function deploy(address lzEndpoint, address owner, address pauser, bytes32 salt, address rlcToken)
+        public
+        returns (address)
+    {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
         bytes memory constructorData = abi.encode(rlcToken, lzEndpoint);
-        bytes memory initializeData = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner);
+        bytes memory initializeData = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "RLCAdapter", constructorData, initializeData, createXFactory, salt
         );
