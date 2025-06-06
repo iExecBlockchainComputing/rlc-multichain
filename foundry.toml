@@ -5,7 +5,8 @@ libs = ["lib"]
 fs_permissions = [{ access = "read-write", path = "./" }]
 optimizer = true
 optimizer_runs = 200
-via_ir = true
+optimizer_details = { yul = true }
+# TODO: Add via_ir = true and solve issues when building with it
 
 ## Needed by openzepplin upgrade plugin
 ffi = true
@@ -22,6 +23,7 @@ remappings = [
     '@layerzerolabs/test-devtools-evm-foundry/=lib/devtools/packages/test-devtools-evm-foundry/',
     '@openzeppelin/foundry-upgrades/=lib/openzeppelin-foundry-upgrades/src/',
     '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
+    '@createx/contracts/=lib/createx/src/',
 
     # Used internally by contracts within library dependencies
     '@layerzerolabs/lz-evm-protocol-v2/=lib/layerzero-v2/packages/layerzero-v2/evm/protocol/',
@@ -35,4 +37,3 @@ remappings = [
 
 [profile.test]
 optimizer = false
-via_ir = false

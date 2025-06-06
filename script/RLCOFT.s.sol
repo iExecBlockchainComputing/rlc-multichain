@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {Script, console} from "forge-std/Script.sol";
-import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {Script} from "forge-std/Script.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
-import {RLCOFTV2} from "../src/mocks/RLCOFTV2Mock.sol";
+import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
+import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {RLCOFTV2} from "../src/mocks/RLCOFTV2Mock.sol";
+
 
 contract Deploy is Script {
     function run() external returns (address) {
@@ -17,36 +19,31 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
+        bytes32 salt = vm.envBytes32("SALT");
 
-        // Set up deployment options
-        Options memory opts;
-        opts.constructorData = abi.encode(lzEndpoint);
-        // Skip validation for testing purposes
-        // TODO: check why and how to fix it
-        opts.unsafeSkipAllChecks = true;
-        // Prepare initialization data
-        bytes memory initData = abi.encodeWithSelector(
-            RLCOFT.initialize.selector,
-            name,
-            symbol,
-            owner,
-            pauser
-        );
-        // Deploy the UUPS proxy using OpenZeppelin Upgrades
-        address rlcOFTProxyAddress = Upgrades.deployUUPSProxy(
-            "RLCOFT.sol:RLCOFT",
-            initData,
-            opts
-        );
-        console.log("RLCOFT proxy deployed at:", rlcOFTProxyAddress);
-        address implementationAddress = Upgrades.getImplementationAddress(rlcOFTProxyAddress);
-        console.log("RLCOFT implementation deployed at:", implementationAddress);
+        address rlcOFTProxy = deploy(lzEndpoint, name, symbol, owner, pauser, salt);
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxyAddress);
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS", implementationAddress);
-        return rlcOFTProxyAddress;
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxy);
+        return rlcOFTProxy;
+    }
+
+    function deploy(
+        address lzEndpoint,
+        string memory name,
+        string memory symbol,
+        address owner,
+        address pauser,
+        bytes32 salt
+    ) public returns (address) {
+        address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
+
+        bytes memory constructorData = abi.encode(lzEndpoint);
+        bytes memory initializeData = abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
+        return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+            "RLCOFT", constructorData, initializeData, createXFactory, salt
+        );
     }
 }
 
@@ -103,8 +100,6 @@ contract Upgrade is Script {
 
         // Log the new implementation address
         address newImplementationAddress = Upgrades.getImplementationAddress(proxyAddress);
-        console.log("RLCOFT upgraded to new implementation:", newImplementationAddress);
-        console.log("Proxy address remains:", proxyAddress);
 
         vm.stopBroadcast();
 
@@ -124,6 +119,5 @@ contract ValidateUpgrade is Script {
         opts.unsafeSkipAllChecks = true;
         // Validate that the upgrade is safe
         Upgrades.validateUpgrade("RLCOFTV2Mock.sol:RLCOFTV2", opts);
-        console.log("Upgrade validation passed for RLCOFT");
     }
 }
