@@ -5,6 +5,7 @@ pragma solidity ^0.8.22;
 import {Script, console} from "forge-std/Script.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
+import {RLCOFTV2} from "../src/mocks/RLCOFTV2Mock.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract Deploy is Script {
@@ -73,16 +74,26 @@ contract Upgrade is Script {
 
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address proxyAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
+        
+        // For testing purpose
+        address minter = vm.envAddress("OWNER_ADDRESS");
+        uint256 minterDailyLimit = 100000 * 10**9; 
 
         // Set up upgrade options
         Options memory opts;
         opts.constructorData = abi.encode(lzEndpoint);
 
+        bytes memory initData = abi.encodeWithSelector(
+            RLCOFTV2.initializeV2.selector,
+            minter,  // minter
+            minterDailyLimit
+        );
+
         // Upgrade the proxy to a new implementation
         Upgrades.upgradeProxy(
             proxyAddress,
-            "RLCOFT.sol:RLCOFT",
-            "",
+            "RLCOFTV2.sol:RLCOFTV2",
+            initData,
             opts
         );
 
@@ -105,7 +116,7 @@ contract ValidateUpgrade is Script {
         opts.constructorData = abi.encode(lzEndpoint);
 
         // Validate that the upgrade is safe
-        Upgrades.validateUpgrade("RLCOFT.sol:RLCOFT", opts);
+        Upgrades.validateUpgrade("RLCOFTV2.sol:RLCOFTV2", opts);
         console.log("Upgrade validation passed for RLCOFT");
     }
 }

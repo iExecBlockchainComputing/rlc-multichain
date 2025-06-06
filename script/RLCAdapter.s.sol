@@ -5,6 +5,7 @@ pragma solidity ^0.8.22;
 import {Script, console} from "forge-std/Script.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
+import {RLCAdapterV2} from "../src/mocks/RLCAdapterV2Mock.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
 contract Deploy is Script {
@@ -61,24 +62,33 @@ contract Configure is Script {
     }
 }
 
-
 contract Upgrade is Script {
     function run() external {
         vm.startBroadcast();
 
+        address proxyAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS");
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
-        address proxyAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS");
+
+        // For testing purpose
+        address operator = vm.envAddress("OWNER_ADDRESS"); 
+        uint256 maxTransferLimit = 1000000 * 10**9; // 1M token max transfer limit
 
         // Set up upgrade options
         Options memory opts;
         opts.constructorData = abi.encode(rlcToken, lzEndpoint);
 
+        bytes memory initData = abi.encodeWithSelector(
+            RLCAdapterV2.initializeV2.selector,
+            operator,
+            maxTransferLimit
+        );
+
         // Upgrade the proxy to a new implementation
         Upgrades.upgradeProxy(
             proxyAddress,
-            "RLCAdapter.sol:RLCAdapter",
-            "",
+            "RLCAdapterV2.sol:RLCAdapterV2",
+            initData,
             opts
         );
 
@@ -102,7 +112,7 @@ contract ValidateUpgrade is Script {
         opts.constructorData = abi.encode(rlcToken, lzEndpoint);
 
         // Validate that the upgrade is safe
-        Upgrades.validateUpgrade("RLCAdapter.sol:RLCAdapter", opts);
+        Upgrades.validateUpgrade("RLCAdapterV2.sol:RLCAdapterV2", opts);
         console.log("Upgrade validation passed for RLCAdapter");
     }
 }
