@@ -37,34 +37,13 @@ contract RLCOFTTest is TestHelperOz5 {
     function setUp() public virtual override {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
-        address createXFactory = address(new CreateX());
-
-        // Deploy RLC token mock
-        address rlcToken = address(new RLCMock(name, symbol));
 
         // Set up endpoints for the deployment
         address lzEndpointOFT = address(endpoints[SOURCE_EID]);
         address lzEndpoint = address(endpoints[DEST_EID]);
 
-        // Deploy source RLCOFTMock
-        bytes32 salt = keccak256("RLCOFT_SALT");
-        bytes memory constructorDataRLCOFT = abi.encode(lzEndpointOFT);
-        bytes memory initializeDataRLCOFT =
-            abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
-        sourceOFT = RLCOFTMock(
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "RLCOFTMock", constructorDataRLCOFT, initializeDataRLCOFT, createXFactory, salt
-            )
-        );
-
-        // Deploy destination RLCAdapter
-        bytes memory constructorDataRLCAdapter = abi.encode(rlcToken, lzEndpoint);
-        bytes memory initializeDataRLCAdapter = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser);
-        destAdapterMock = RLCAdapter(
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "RLCAdapter", constructorDataRLCAdapter, initializeDataRLCAdapter, createXFactory, salt
-            )
-        );
+        (destAdapterMock, sourceOFT,) =
+            TestUtils.setupDeployment(name, symbol, lzEndpoint, lzEndpointOFT, owner, pauser);
 
         // Wire the contracts
         address[] memory contracts = new address[](2);

@@ -56,7 +56,7 @@ library UUPSProxyDeployer {
         bytes32 salt
     ) internal returns (address) {
         // Deploy the implementation contract using CreateX Factory
-        bytes memory creationCode = StdConstants.VM.getCode(contractName);
+        bytes memory creationCode = vm.getCode(contractName);
         address implementation = createXFactory.deployCreate2(salt, abi.encodePacked(creationCode, constructorData));
         console.log("Implementation deployed at:", implementation);
 

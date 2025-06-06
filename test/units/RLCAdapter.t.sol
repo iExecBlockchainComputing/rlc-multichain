@@ -5,11 +5,9 @@ import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/Option
 import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {CreateX} from "@createx/contracts/CreateX.sol";
 import {RLCOFTMock} from "./mocks/RLCOFTMock.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
-import {UUPSProxyDeployer} from "../../script/lib/UUPSProxyDeployer.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
@@ -38,34 +36,13 @@ contract RLCAdapterTest is TestHelperOz5 {
     function setUp() public virtual override {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
-        address createXFactory = address(new CreateX());
-
-        // Deploy RLC token mock
-        rlcToken = new RLCMock(name, symbol);
 
         // Set up endpoints for the deployment
         address lzEndpoint = address(endpoints[SOURCE_EID]);
         address lzEndpointOFT = address(endpoints[DEST_EID]);
 
-        // Deploy source RLCAdapter
-        bytes32 salt = keccak256("RLCAdapter_SALT");
-        bytes memory constructorDataRLCAdapter = abi.encode(rlcToken, lzEndpoint);
-        bytes memory initializeDataRLCAdapter = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser);
-        sourceAdapter = RLCAdapter(
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "RLCAdapter", constructorDataRLCAdapter, initializeDataRLCAdapter, createXFactory, salt
-            )
-        );
-
-        // Deploy destination RLCOFTMock
-        bytes memory constructorDataRLCOFT = abi.encode(lzEndpointOFT);
-        bytes memory initializeDataRLCOFT =
-            abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
-        destOFTMock = RLCOFTMock(
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "RLCOFTMock", constructorDataRLCOFT, initializeDataRLCOFT, createXFactory, salt
-            )
-        );
+        (sourceAdapter, destOFTMock, rlcToken) =
+            TestUtils.setupDeployment(name, symbol, lzEndpoint, lzEndpointOFT, owner, pauser);
 
         // Wire the contracts
         address[] memory contracts = new address[](2);

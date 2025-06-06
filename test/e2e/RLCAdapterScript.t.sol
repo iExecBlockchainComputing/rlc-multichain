@@ -9,7 +9,7 @@ contract RLCAdapterScriptTest is Test {
     // Unique instance of the deployment script
     address lzEndpoint = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
     address owner = makeAddr("OWNER_ADDRESS");
-        address pauser = makeAddr("PAUSER_ADDRESS");
+    address pauser = makeAddr("PAUSER_ADDRESS");
     address RLC_TOKEN = 0x26A738b6D33EF4D94FF084D3552961b8f00639Cd;
 
     RLCAdapterDeploy public deployer;

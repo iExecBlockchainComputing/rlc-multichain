@@ -14,8 +14,8 @@ contract Deploy is Script {
 
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
-        address owner = vm.envAddress("OWNER_ADDRESS"); 
-            address pauser = vm.envAddress("PAUSER_ADDRESS");
+        address owner = vm.envAddress("OWNER_ADDRESS");
+        address pauser = vm.envAddress("PAUSER_ADDRESS");
         bytes32 salt = vm.envBytes32("SALT");
 
         // Deploy the proxy contract
@@ -27,7 +27,10 @@ contract Deploy is Script {
         return rlcAdapterProxy;
     }
 
-    function deploy(address lzEndpoint, address owner, address pauser, bytes32 salt, address rlcToken) public returns (address) {
+    function deploy(address lzEndpoint, address owner, address pauser, bytes32 salt, address rlcToken)
+        public
+        returns (address)
+    {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
         bytes memory constructorData = abi.encode(rlcToken, lzEndpoint);
         bytes memory initializeData = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser);
