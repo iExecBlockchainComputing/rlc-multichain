@@ -17,6 +17,9 @@ fork-arbitrum-sepolia:
 utest:
 	FOUNDRY_PROFILE=test forge test -vvvv
 
+upgrade-test:
+	FOUNDRY_PROFILE=test forge test -vvvvv --match-path "./test/upgrade/**" --fail-fast
+
 clean:
 	forge clean
 
