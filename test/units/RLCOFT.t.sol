@@ -57,7 +57,7 @@ contract RLCOFTTest is TestHelperOz5 {
         );
 
         // Deploy destination RLCAdapter
-        vm.setEnv("CREATE_X_FACTORY", vm.toString(createXFactory));
+        vm.setEnv("CREATE_X_FACTORY_ADDRESS", vm.toString(createXFactory));
         destAdapterMock = RLCAdapter(new RLCAdapterDeploy().deploy(lzEndpoint, owner, salt, rlcToken));
 
         // Wire the contracts
