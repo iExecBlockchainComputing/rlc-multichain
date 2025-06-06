@@ -7,10 +7,8 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {RLCOFTMock} from "./mocks/RLCOFTMock.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
-import {RLCOFT} from "../../src/RLCOFT.sol";
-import {TestUtils} from "./utils/TestUtils.sol";
-import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
+import {TestUtils} from "./utils/TestUtils.sol";
 
 contract RLCAdapterTest is TestHelperOz5 {
     using OptionsBuilder for bytes;

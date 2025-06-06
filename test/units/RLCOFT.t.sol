@@ -7,12 +7,8 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {RLCOFTMock} from "./mocks/RLCOFTMock.sol";
-import {RLCMock} from "./mocks/RLCMock.sol";
-import {RLCOFT} from "../../src/RLCOFT.sol";
-import {UUPSProxyDeployer} from "../../script/lib/UUPSProxyDeployer.sol";
-import {TestUtils} from "./utils/TestUtils.sol";
-import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
+import {TestUtils} from "./utils/TestUtils.sol";
 
 contract RLCOFTTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
