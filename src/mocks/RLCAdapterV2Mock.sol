@@ -45,5 +45,4 @@ contract RLCAdapterV2 is RLCAdapter {
         dailyTransferLimit = _limit;
         emit DailyTransferLimitSet(_limit);
     }
-
 }

@@ -17,8 +17,7 @@ contract RLCOFTV2 is RLCOFT {
     event DailyMintLimitUpdated(uint256 newLimit);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(address _lzEndpoint) RLCOFT(_lzEndpoint) {
-    }
+    constructor(address _lzEndpoint) RLCOFT(_lzEndpoint) {}
 
     /// @notice Initializes V2 features (called after upgrade)
     /// @param _minter Address to grant minter role
