@@ -9,7 +9,6 @@ import {EnvUtils} from "./UpdateEnvUtils.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCOFTV2} from "../src/mocks/RLCOFTV2Mock.sol";
 
-
 contract Deploy is Script {
     function run() external returns (address) {
         vm.startBroadcast();
@@ -24,7 +23,8 @@ contract Deploy is Script {
         address rlcOFTProxy = deploy(lzEndpoint, name, symbol, owner, pauser, salt);
 
         vm.stopBroadcast();
-
+        address implementationAddress = Upgrades.getImplementationAddress(rlcOFTProxy);
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS", implementationAddress);
         EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxy);
         return rlcOFTProxy;
     }
@@ -108,7 +108,7 @@ contract Upgrade is Script {
 }
 
 contract ValidateUpgrade is Script {
-    function run() external {  // Remove 'view' modifier
+    function run() external {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
 
         Options memory opts;

@@ -23,7 +23,8 @@ contract Deploy is Script {
         address rlcAdapterProxy = deploy(lzEndpoint, owner, pauser, salt, rlcToken);
 
         vm.stopBroadcast();
-
+        address implementationAddress = Upgrades.getImplementationAddress(rlcAdapterProxy);
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS", implementationAddress);
         EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy);
         return rlcAdapterProxy;
     }
