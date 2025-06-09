@@ -10,9 +10,9 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-/// @notice RLCAdapterV2Mock - Mock V2 implementation with additional features
+/// @notice RLCAdapterV2 - V2 implementation with additional features
 /// @dev This is a mock contract for testing upgrade functionality
-contract RLCAdapterV2Mock is
+contract RLCAdapterV2 is
     OFTAdapterUpgradeable,
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
