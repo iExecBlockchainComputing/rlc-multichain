@@ -2,41 +2,45 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {Test, console} from "forge-std/Test.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
 import {RLCOFTV2} from "../../src/mocks/RLCOFTV2Mock.sol";
 import {TestUtils} from "./../units/utils/TestUtils.sol";
+import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 
-contract UpgradeRLCOFTTest is Test {
+contract UpgradeRLCOFTTest is TestHelperOz5 {
+    using TestUtils for *;
     RLCOFT public oftV1;
     RLCOFTV2 public oftV2;
-    address public mockEndpoint = makeAddr("mockEndpoint"); 
+    address public mockEndpoint;
     address public owner = makeAddr("owner");
     address public pauser = makeAddr("pauser");
     address public minter = makeAddr("minter");
     address public user = makeAddr("user");
 
     address public proxyAddress;
-    string public constant TOKEN_NAME = "RLC OFT Test";
-    string public constant TOKEN_SYMBOL = "RLCOFT";
+    string public name = "RLC OFT Token";
+    string public symbol = "RLC";
 
-    function setUp() public {
-        (, oftV1, ) =
-        TestUtils.setupDeployment(TOKEN_NAME, TOKEN_SYMBOL, mockEndpoint, mockEndpoint, owner, pauser);
+    function setUp() public virtual override  {
+        super.setUp();
+        setUpEndpoints(2, LibraryType.UltraLightNode);
+        mockEndpoint = address(endpoints[1]);
+
+
+        (, oftV1,) =
+            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
         proxyAddress = address(oftV1);
     }
 
     function testV1DoesNotHaveV2Functions() public {
         // Test that V1 doesn't have V2 functions
-        vm.expectRevert();
         (bool success,) = proxyAddress.call(abi.encodeWithSignature("version()"));
-        assertFalse(success);
+        assertFalse(success, "V1 should not have version() function");
 
-        vm.expectRevert();
-        (success,) = proxyAddress.call(abi.encodeWithSignature("setDailyMintLimit(uint256)", 1000));
-        assertFalse(success);
+        (bool success2,) = proxyAddress.call(abi.encodeWithSignature("setDailyMintLimit(uint256)", 1000));
+        assertFalse(success2, "V1 should not have setDailyMintLimit() function");
     }
 
     function testUpgradeToV2() public {
@@ -55,7 +59,7 @@ contract UpgradeRLCOFTTest is Test {
 
         Upgrades.upgradeProxy(
             proxyAddress,
-            "RLCOFTV2.sol:RLCOFTV2",
+            "RLCOFTV2Mock.sol:RLCOFTV2",
             initData,
             opts
         );
@@ -70,8 +74,8 @@ contract UpgradeRLCOFTTest is Test {
         testUpgradeToV2();
 
         // Test that original state is preserved
-        assertEq(oftV2.name(), TOKEN_NAME, "Token name should be preserved");
-        assertEq(oftV2.symbol(), TOKEN_SYMBOL, "Token symbol should be preserved");
+        assertEq(oftV2.name(), name, "Token name should be preserved");
+        assertEq(oftV2.symbol(), symbol, "Token symbol should be preserved");
         assertEq(oftV2.decimals(), 9, "Decimals should be preserved");
         assertEq(oftV2.owner(), owner, "Owner should be preserved");
         assertTrue(oftV2.hasRole(oftV2.UPGRADER_ROLE(), owner), "Original upgrader role should be preserved");
@@ -97,8 +101,8 @@ contract UpgradeRLCOFTTest is Test {
 
         uint256 newLimit = 200000 * 10**9;
 
-        // Test setting daily mint limit by owner
-        vm.prank(owner);
+        // Test setting daily mint limit by minter
+        vm.prank(minter);
         oftV2.setDailyMintLimit(newLimit);
 
         assertEq(oftV2.dailyMintLimit(), newLimit, "Daily mint limit should be updated");
