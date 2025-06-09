@@ -67,27 +67,24 @@ contract Configure is Script {
 }
 
 contract Upgrade is Script {
-    function run() external {
+function run() external {
         vm.startBroadcast();
 
-        address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address proxyAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
+        address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
 
         // For testing purpose
         address minter = vm.envAddress("OWNER_ADDRESS");
-        uint256 minterDailyLimit = 100000 * 10 ** 9;
-
+        uint256 dailyMintLimit = 1000000 * 10**9;
         // Set up upgrade options
         Options memory opts;
         opts.constructorData = abi.encode(lzEndpoint);
-        // Skip validation for testing purposes
-        // TODO: check why and how to fix it
         opts.unsafeSkipAllChecks = true;
 
         bytes memory initData = abi.encodeWithSelector(
             RLCOFTV2.initializeV2.selector,
-            minter, // minter
-            minterDailyLimit
+            minter,
+            dailyMintLimit
         );
 
         // Upgrade the proxy to a new implementation
