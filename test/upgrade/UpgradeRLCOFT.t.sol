@@ -8,9 +8,9 @@ import {RLCOFTV2} from "../../src/mocks/RLCOFTV2Mock.sol";
 import {TestUtils} from "./../units/utils/TestUtils.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
-
 contract UpgradeRLCOFTTest is TestHelperOz5 {
     using TestUtils for *;
+
     RLCOFT public oftV1;
     RLCOFTV2 public oftV2;
     address public mockEndpoint;
@@ -23,14 +23,12 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     string public name = "RLC OFT Token";
     string public symbol = "RLC";
 
-    function setUp() public virtual override  {
+    function setUp() public virtual override {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-
-        (, oftV1,) =
-            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
+        (, oftV1,) = TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
         proxyAddress = address(oftV1);
     }
 
@@ -46,23 +44,14 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     function testUpgradeToV2() public {
         // Upgrade to V2
         vm.startPrank(owner);
-        
+
         Options memory opts;
         opts.constructorData = abi.encode(mockEndpoint);
         opts.unsafeSkipAllChecks = true;
 
-        bytes memory initData = abi.encodeWithSelector(
-            RLCOFTV2.initializeV2.selector,
-            minter,
-            100000 * 10**9
-        );
+        bytes memory initData = abi.encodeWithSelector(RLCOFTV2.initializeV2.selector, minter, 100000 * 10 ** 9);
 
-        Upgrades.upgradeProxy(
-            proxyAddress,
-            "RLCOFTV2Mock.sol:RLCOFTV2",
-            initData,
-            opts
-        );
+        Upgrades.upgradeProxy(proxyAddress, "RLCOFTV2Mock.sol:RLCOFTV2", initData, opts);
 
         vm.stopPrank();
 
@@ -93,13 +82,13 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         assertTrue(oftV2.hasRole(oftV2.MINTER_ROLE(), minter), "Minter role should be granted");
 
         // Test daily limit
-        assertEq(oftV2.dailyMintLimit(), 100000 * 10**9, "Daily mint limit should be set correctly");
+        assertEq(oftV2.dailyMintLimit(), 100000 * 10 ** 9, "Daily mint limit should be set correctly");
     }
 
     function testV2SetDailyMintLimit() public {
         testUpgradeToV2();
 
-        uint256 newLimit = 200000 * 10**9;
+        uint256 newLimit = 200000 * 10 ** 9;
 
         // Test setting daily mint limit by minter
         vm.prank(minter);
@@ -114,6 +103,6 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         // Test that initializeV2 cannot be called again
         vm.prank(owner);
         vm.expectRevert();
-        oftV2.initializeV2(minter, 100000 * 10**9);
+        oftV2.initializeV2(minter, 100000 * 10 ** 9);
     }
 }

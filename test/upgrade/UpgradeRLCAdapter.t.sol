@@ -11,10 +11,11 @@ import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/
 
 contract UpgradeRLCAdapterTest is TestHelperOz5 {
     using TestUtils for *;
+
     RLCAdapter public adapterV1;
     RLCAdapterV2 public adapterV2;
     RLCMock public rlcToken;
-    address public mockEndpoint = makeAddr("mockEndpoint"); 
+    address public mockEndpoint = makeAddr("mockEndpoint");
     address public owner = makeAddr("owner");
     address public pauser = makeAddr("pauser");
     address public rateLimiter = makeAddr("rateLimiter");
@@ -29,8 +30,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-        (adapterV1, ,rlcToken) =
-            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
+        (adapterV1,, rlcToken) = TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
         proxyAddress = address(adapterV1);
     }
 
@@ -42,30 +42,26 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         (bool success2,) = proxyAddress.call(abi.encodeWithSignature("setDailyTransferLimit(uint256)", 1000));
         assertFalse(success2, "V1 should not have setDailyTransferLimit() function");
 
-        (bool success3,) = proxyAddress.call(abi.encodeWithSignature("initializeV2(uint256,address)", 1000, rateLimiter));
+        (bool success3,) =
+            proxyAddress.call(abi.encodeWithSignature("initializeV2(uint256,address)", 1000, rateLimiter));
         assertFalse(success3, "V1 should not have initializeV2() function");
     }
 
     function testUpgradeToV2() public {
         // Upgrade to V2
         vm.startPrank(owner);
-        
+
         Options memory opts;
         opts.constructorData = abi.encode(address(rlcToken), mockEndpoint);
         opts.unsafeSkipAllChecks = true;
 
         bytes memory initData = abi.encodeWithSelector(
             RLCAdapterV2.initializeV2.selector,
-            rateLimiter,         // rateLimiter address
-            1000000 * 10**18  // dailyLimit
+            rateLimiter, // rateLimiter address
+            1000000 * 10 ** 18 // dailyLimit
         );
 
-        Upgrades.upgradeProxy(
-            proxyAddress,
-            "RLCAdapterV2Mock.sol:RLCAdapterV2",
-            initData,
-            opts
-        );
+        Upgrades.upgradeProxy(proxyAddress, "RLCAdapterV2Mock.sol:RLCAdapterV2", initData, opts);
 
         vm.stopPrank();
 
@@ -96,15 +92,15 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
 
         // Test V2 roles
         assertTrue(adapterV2.hasRole(adapterV2.RATE_LIMITER_ROLE(), rateLimiter), "RATE_LIMITER_ROLE should be granted");
-        
+
         // Test daily transfer limit
-        assertEq(adapterV2.dailyTransferLimit(), 1000000 * 10**18, "Daily transfer limit should be set");
+        assertEq(adapterV2.dailyTransferLimit(), 1000000 * 10 ** 18, "Daily transfer limit should be set");
     }
 
     function testV2TransferLimitUpdate() public {
         testUpgradeToV2();
 
-        uint256 newLimit = 500000 * 10**18;
+        uint256 newLimit = 500000 * 10 ** 18;
 
         // Test setting transfer limit by rateLimiter
         vm.prank(rateLimiter);
@@ -122,6 +118,6 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         // Test that initializeV2 cannot be called again
         vm.prank(owner);
         vm.expectRevert();
-        adapterV2.initializeV2(rateLimiter, 1000000 * 10**18);
+        adapterV2.initializeV2(rateLimiter, 1000000 * 10 ** 18);
     }
 }

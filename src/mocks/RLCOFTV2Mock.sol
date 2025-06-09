@@ -19,7 +19,7 @@ contract RLCOFTV2 is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminR
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE"); // NEW ROLE
 
     // NEW STATE VARIABLES FOR V2
-    uint256 public dailyMintLimit;      // Daily mint limit
+    uint256 public dailyMintLimit; // Daily mint limit
 
     // NEW EVENTS
     event DailyMintLimitUpdated(uint256 newLimit);
@@ -50,10 +50,10 @@ contract RLCOFTV2 is OFTUpgradeable, UUPSUpgradeable, AccessControlDefaultAdminR
     /// @notice Initializes V2 features (called after upgrade)
     /// @param _minter Address to grant minter role
     /// @param _dailyMintLimit Daily mint limit
-    function initializeV2(address _minter,uint256 _dailyMintLimit) public reinitializer(2) {
+    function initializeV2(address _minter, uint256 _dailyMintLimit) public reinitializer(2) {
         _grantRole(MINTER_ROLE, _minter);
         dailyMintLimit = _dailyMintLimit;
-        
+
         emit DailyMintLimitUpdated(_dailyMintLimit);
     }
 

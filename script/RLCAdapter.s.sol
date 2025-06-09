@@ -69,8 +69,8 @@ contract Upgrade is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
 
         // For testing purpose
-        address operator = vm.envAddress("OWNER_ADDRESS"); 
-        uint256 maxTransferLimit = 1000000 * 10**9; // 1M token max transfer limit
+        address operator = vm.envAddress("OWNER_ADDRESS");
+        uint256 maxTransferLimit = 1000000 * 10 ** 9; // 1M token max transfer limit
 
         // Set up upgrade options
         Options memory opts;
@@ -79,19 +79,10 @@ contract Upgrade is Script {
         // TODO: check why and how to fix it
         opts.unsafeSkipAllChecks = true;
 
-        bytes memory initData = abi.encodeWithSelector(
-            RLCAdapterV2.initializeV2.selector,
-            operator,
-            maxTransferLimit
-        );
+        bytes memory initData = abi.encodeWithSelector(RLCAdapterV2.initializeV2.selector, operator, maxTransferLimit);
 
         // Upgrade the proxy to a new implementation
-        Upgrades.upgradeProxy(
-            proxyAddress,
-            "RLCAdapterV2Mock.sol:RLCAdapterV2",
-            initData,
-            opts
-        );
+        Upgrades.upgradeProxy(proxyAddress, "RLCAdapterV2Mock.sol:RLCAdapterV2", initData, opts);
 
         // Log the new implementation address
         address newImplementationAddress = Upgrades.getImplementationAddress(proxyAddress);
@@ -108,7 +99,7 @@ contract ValidateUpgrade is Script {
     function run() external {
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
-        
+
         Options memory opts;
         opts.constructorData = abi.encode(rlcToken, lzEndpoint);
         // Skip validation for testing purposes

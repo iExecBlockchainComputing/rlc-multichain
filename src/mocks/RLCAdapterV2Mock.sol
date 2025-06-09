@@ -20,13 +20,12 @@ contract RLCAdapterV2 is
 {
     // AccessControl Roles
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE"); 
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant RATE_LIMITER_ROLE = keccak256("RATE_LIMITER_ROLE"); // NEW ROLE
 
     // NEW STATE VARIABLES FOR V2
     uint256 public dailyTransferLimit;
 
-    
     // NEW EVENT
     event DailyTransferLimitSet(uint256 newLimit);
 
@@ -54,7 +53,7 @@ contract RLCAdapterV2 is
     function initializeV2(address _rateLimiter, uint256 _dailyLimit) public reinitializer(2) {
         _grantRole(RATE_LIMITER_ROLE, _rateLimiter);
         dailyTransferLimit = _dailyLimit;
-        
+
         emit DailyTransferLimitSet(_dailyLimit);
     }
     // NEW FUNCTIONS IN V2
@@ -71,7 +70,7 @@ contract RLCAdapterV2 is
         dailyTransferLimit = _limit;
         emit DailyTransferLimitSet(_limit);
     }
-    
+
     // V1 Functions (unchanged)
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
@@ -90,7 +89,6 @@ contract RLCAdapterV2 is
         return OwnableUpgradeable.owner();
     }
 
-    		
     function _debit(address _from, uint256 _amountLD, uint256 _minAmountLD, uint32 _dstEid)
         internal
         virtual
@@ -100,6 +98,7 @@ contract RLCAdapterV2 is
     {
         return super._debit(_from, _amountLD, _minAmountLD, _dstEid);
     }
+
     function _credit(address _to, uint256 _amountLD, uint32 _srcEid)
         internal
         virtual

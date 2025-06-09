@@ -72,10 +72,10 @@ contract Upgrade is Script {
 
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address proxyAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
-        
+
         // For testing purpose
         address minter = vm.envAddress("OWNER_ADDRESS");
-        uint256 minterDailyLimit = 100000 * 10**9; 
+        uint256 minterDailyLimit = 100000 * 10 ** 9;
 
         // Set up upgrade options
         Options memory opts;
@@ -86,17 +86,12 @@ contract Upgrade is Script {
 
         bytes memory initData = abi.encodeWithSelector(
             RLCOFTV2.initializeV2.selector,
-            minter,  // minter
+            minter, // minter
             minterDailyLimit
         );
 
         // Upgrade the proxy to a new implementation
-        Upgrades.upgradeProxy(
-            proxyAddress,
-            "RLCOFTV2Mock.sol:RLCOFTV2",
-            initData,
-            opts
-        );
+        Upgrades.upgradeProxy(proxyAddress, "RLCOFTV2Mock.sol:RLCOFTV2", initData, opts);
 
         // Log the new implementation address
         address newImplementationAddress = Upgrades.getImplementationAddress(proxyAddress);
