@@ -18,7 +18,7 @@ contract RLCAdapterV2 is
     AccessControlDefaultAdminRulesUpgradeable,
     PausableUpgradeable
 {
-    // AccessControl Roles (inherited from V1)
+    // AccessControl Roles
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE"); 
     bytes32 public constant RATE_LIMITER_ROLE = keccak256("RATE_LIMITER_ROLE"); // NEW ROLE
@@ -49,12 +49,11 @@ contract RLCAdapterV2 is
     }
 
     /// @notice Initializes V2 features (called after upgrade)
-    /// @param _dailyLimit Daily transfer limit in token units
     /// @param _rateLimiter Address that can manage rate limits
-    function initializeV2(uint256 _dailyLimit, address _rateLimiter) public reinitializer(2) {
-        require(dailyTransferLimit == 0, "V2 already initialized");
-        dailyTransferLimit = _dailyLimit;
+    /// @param _dailyLimit Daily transfer limit in token units
+    function initializeV2(address _rateLimiter, uint256 _dailyLimit) public reinitializer(2) {
         _grantRole(RATE_LIMITER_ROLE, _rateLimiter);
+        dailyTransferLimit = _dailyLimit;
         
         emit DailyTransferLimitSet(_dailyLimit);
     }
