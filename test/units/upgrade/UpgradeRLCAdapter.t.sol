@@ -3,10 +3,10 @@
 pragma solidity ^0.8.22;
 
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {RLCAdapter} from "../../src/RLCAdapter.sol";
-import {RLCMock} from "../units/mocks/RLCMock.sol";
-import {RLCAdapterV2} from "../../src/mocks/RLCAdapterV2Mock.sol";
-import {TestUtils} from "./../units/utils/TestUtils.sol";
+import {RLCAdapter} from "../../../src/RLCAdapter.sol";
+import {RLCMock} from "../../units/mocks/RLCMock.sol";
+import {RLCAdapterV2} from "../../../src/mocks/RLCAdapterV2Mock.sol";
+import {TestUtils} from "./../utils/TestUtils.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 contract UpgradeRLCAdapterTest is TestHelperOz5 {

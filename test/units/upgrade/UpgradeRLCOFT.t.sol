@@ -3,9 +3,9 @@
 pragma solidity ^0.8.22;
 
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {RLCOFT} from "../../src/RLCOFT.sol";
-import {RLCOFTV2} from "../../src/mocks/RLCOFTV2Mock.sol";
-import {TestUtils} from "./../units/utils/TestUtils.sol";
+import {RLCOFT} from "../../../src/RLCOFT.sol";
+import {RLCOFTV2} from "../../../src/mocks/RLCOFTV2Mock.sol";
+import {TestUtils} from "./../utils/TestUtils.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 contract UpgradeRLCOFTTest is TestHelperOz5 {
