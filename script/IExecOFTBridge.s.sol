@@ -12,14 +12,13 @@ contract Deploy is Script {
     function run() external returns (address) {
         vm.startBroadcast();
 
-        string memory name = vm.envString("RLC_OFT_TOKEN_NAME");
-        string memory symbol = vm.envString("RLC_TOKEN_SYMBOL");
+        address tokenChainX = vm.envAddress("TOKEN_CHAIN_X");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
         bytes32 salt = vm.envBytes32("SALT");
 
-        address rlcOFTProxy = deploy(lzEndpoint, name, symbol, owner, pauser, salt);
+        address rlcOFTProxy = deploy(tokenChainX, lzEndpoint, owner, pauser, salt);
 
         vm.stopBroadcast();
 
@@ -27,20 +26,16 @@ contract Deploy is Script {
         return rlcOFTProxy;
     }
 
-    function deploy(
-        address lzEndpoint,
-        string memory name,
-        string memory symbol,
-        address owner,
-        address pauser,
-        bytes32 salt
-    ) public returns (address) {
+    function deploy(address tokenChainX, address lzEndpoint, address owner, address pauser, bytes32 salt)
+        public
+        returns (address)
+    {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
 
-        bytes memory constructorData = abi.encode(lzEndpoint);
-        bytes memory initializeData = abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
+        bytes memory constructorData = abi.encode(tokenChainX, lzEndpoint);
+        bytes memory initializeData = abi.encodeWithSelector(RLCOFT.initialize.selector, owner, pauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-            "RLCOFT", constructorData, initializeData, createXFactory, salt
+            "IExecOFTBridge", constructorData, initializeData, createXFactory, salt
         );
     }
 }

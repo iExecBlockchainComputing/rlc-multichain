@@ -2,29 +2,29 @@
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
-import {Deploy as RLCOFTDeploy} from "../../script/RLCOFT.s.sol";
+import {Deploy as IExecOFTBridge} from "../../script/IExecOFTBridge.s.sol";
 import {RLCOFT} from "../../src/RLCOFT.sol";
+import {RLCMock} from "../mocks/RLCMock.sol";
 
 contract RLCOFTScriptTest is Test {
     // Unique instance of the deployment script
-    string name = "RLC OFT Token";
-    string symbol = "RLC";
     address owner = makeAddr("OWNER_ADDRESS");
     address pauser = makeAddr("PAUSER_ADDRESS");
+    address tokenChainX = address(new RLCMock("TokenChainX", "RLC")); // Mock token for testing
     address LAYERZERO_ENDPOINT = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
 
-    RLCOFTDeploy public deployer;
+    IExecOFTBridge public deployer;
 
     function setUp() public {
         vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL")); // use public node
-        deployer = new RLCOFTDeploy();
+        deployer = new IExecOFTBridge();
         vm.setEnv("CREATE_X_FACTORY", "0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed");
     }
 
     // ============ Deployment Tests ============
     function testFork_CheckDeployment() public {
         bytes32 salt = keccak256("RLCOFT_SALT");
-        RLCOFT rlcoft = RLCOFT(deployer.deploy(LAYERZERO_ENDPOINT, name, symbol, owner, pauser, salt));
+        RLCOFT rlcoft = RLCOFT(deployer.deploy(tokenChainX, LAYERZERO_ENDPOINT, owner, pauser, salt));
 
         assertEq(rlcoft.owner(), owner);
         assertEq(rlcoft.token(), address(rlcoft));
@@ -33,19 +33,19 @@ contract RLCOFTScriptTest is Test {
     function testForkFuzz_DifferentSaltsProduceDifferentAddresses(bytes32 salt1, bytes32 salt2) public {
         vm.assume(salt1 != salt2); // ensure they are different
 
-        address addr1 = deployer.deploy(LAYERZERO_ENDPOINT, name, symbol, owner, pauser, salt1);
-        address addr2 = deployer.deploy(LAYERZERO_ENDPOINT, name, symbol, owner, pauser, salt2);
+        address addr1 = deployer.deploy(tokenChainX, LAYERZERO_ENDPOINT, owner, pauser, salt1);
+        address addr2 = deployer.deploy(tokenChainX, LAYERZERO_ENDPOINT, owner, pauser, salt2);
 
         assertTrue(addr1 != addr2, "Fuzz test failed: different salts produced same address");
     }
 
     function testForkFuzz_RevertIfSecondDeploymentWithSameSalt(bytes32 salt) public {
         // First deployment
-        address addr = deployer.deploy(LAYERZERO_ENDPOINT, name, symbol, owner, pauser, salt);
+        address addr = deployer.deploy(tokenChainX, LAYERZERO_ENDPOINT, owner, pauser, salt);
         assertTrue(addr != address(0), "First deployment should succeed");
 
         // Attempt redeployment with the same salt
-        try deployer.deploy(LAYERZERO_ENDPOINT, name, symbol, owner, pauser, salt) returns (address) {
+        try deployer.deploy(tokenChainX, LAYERZERO_ENDPOINT, owner, pauser, salt) returns (address) {
             revert("Expected revert on redeployment with same salt but no revert occurred");
         } catch {
             // Expected: revert due to CREATE2 address collision
