@@ -11,22 +11,25 @@ contract Deploy is Script {
     function run() external returns (address) {
         vm.startBroadcast();
 
+        // TODO use json file to configure addresses by network.
+        // vm.readFile(path)
+        // vm.parseJson()
         address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
-        bytes32 salt = vm.envBytes32("SALT");
+        bytes32 createxSalt = vm.envBytes32("SALT");
 
         // Deploy the proxy contract
-        address rlcAdapterProxy = deploy(lzEndpoint, owner, pauser, salt, rlcToken);
+        address rlcAdapterProxy = deploy(lzEndpoint, owner, pauser, createxSalt, rlcToken);
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy);
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy); // TODO Save the address in another way becase .env file is not versioned in git.
         return rlcAdapterProxy;
     }
 
-    function deploy(address lzEndpoint, address owner, address pauser, bytes32 salt, address rlcToken)
+    function deploy(address lzEndpoint, address owner, address pauser, bytes32 createxSalt, address rlcToken)
         public
         returns (address)
     {
@@ -34,7 +37,7 @@ contract Deploy is Script {
         bytes memory constructorData = abi.encode(rlcToken, lzEndpoint);
         bytes memory initializeData = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-            "RLCAdapter", constructorData, initializeData, createXFactory, salt
+            "RLCAdapter", constructorData, initializeData, createXFactory, createxSalt
         );
     }
 }

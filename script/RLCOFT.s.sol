@@ -17,9 +17,9 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
-        bytes32 salt = vm.envBytes32("SALT");
+        bytes32 createxSalt = vm.envBytes32("SALT");
 
-        address rlcOFTProxy = deploy(lzEndpoint, name, symbol, owner, pauser, salt);
+        address rlcOFTProxy = deploy(lzEndpoint, name, symbol, owner, pauser, createxSalt);
 
         vm.stopBroadcast();
 
@@ -33,14 +33,14 @@ contract Deploy is Script {
         string memory symbol,
         address owner,
         address pauser,
-        bytes32 salt
+        bytes32 createxSalt
     ) public returns (address) {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
 
         bytes memory constructorData = abi.encode(lzEndpoint);
         bytes memory initializeData = abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-            "RLCOFT", constructorData, initializeData, createXFactory, salt
+            "RLCOFT", constructorData, initializeData, createXFactory, createxSalt
         );
     }
 }
