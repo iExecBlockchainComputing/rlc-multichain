@@ -32,7 +32,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         proxyAddress = address(oftV1);
     }
 
-    function testV1DoesNotHaveV2Functions() public {
+    function test_V1DoesNotHaveV2Functions() public {
         // Test that V1 doesn't have V2 functions
         (bool success,) = proxyAddress.call(abi.encodeWithSignature("version()"));
         assertFalse(success, "V1 should not have version() function");
@@ -41,7 +41,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         assertFalse(success2, "V1 should not have setDailyMintLimit() function");
     }
 
-    function testUpgradeToV2() public {
+    function test_UpgradeToV2() public {
         // Upgrade to V2
         vm.startPrank(owner);
 
@@ -60,8 +60,8 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         oftV2 = RLCOFTV2(proxyAddress);
     }
 
-    function testV2StatePreservation() public {
-        testUpgradeToV2();
+    function test_V2StatePreservation() public {
+        test_UpgradeToV2();
 
         // Test that original state is preserved
         assertEq(oftV2.name(), name, "Token name should be preserved");
@@ -72,8 +72,8 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         assertTrue(oftV2.hasRole(oftV2.PAUSER_ROLE(), pauser), "Original pauser role should be preserved");
     }
 
-    function testV2NewFunctionality() public {
-        testUpgradeToV2();
+    function test_V2NewFunctionality() public {
+        test_UpgradeToV2();
 
         // Test V2 version function
         string memory version = oftV2.version();
@@ -86,8 +86,8 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         assertEq(oftV2.dailyMintLimit(), 100000 * 10 ** 9, "Daily mint limit should be set correctly");
     }
 
-    function testV2SetDailyMintLimit() public {
-        testUpgradeToV2();
+    function test_V2SetDailyMintLimit() public {
+        test_UpgradeToV2();
 
         uint256 newLimit = 200000 * 10 ** 9;
 
@@ -98,8 +98,8 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         assertEq(oftV2.dailyMintLimit(), newLimit, "Daily mint limit should be updated");
     }
 
-    function testCannotInitializeV2Twice() public {
-        testUpgradeToV2();
+    function test_RevertWhen_InitializeV2Twice() public {
+        test_UpgradeToV2();
 
         // Test that initializeV2 cannot be called again
         vm.prank(owner);

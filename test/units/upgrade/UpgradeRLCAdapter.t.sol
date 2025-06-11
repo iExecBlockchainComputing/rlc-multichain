@@ -34,7 +34,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         proxyAddress = address(adapterV1);
     }
 
-    function testV1DoesNotHaveV2Functions() public {
+    function test_V1DoesNotHaveV2Functions() public {
         // Test that V1 doesn't have V2 functions
         (bool success,) = proxyAddress.call(abi.encodeWithSignature("version()"));
         assertFalse(success, "V1 should not have version() function");
@@ -47,7 +47,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         assertFalse(success3, "V1 should not have initializeV2() function");
     }
 
-    function testUpgradeToV2() public {
+    function test_UpgradeToV2() public {
         // Upgrade to V2
         vm.startPrank(owner);
 
@@ -70,13 +70,13 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         adapterV2 = RLCAdapterV2(proxyAddress);
     }
 
-    function testV2StatePreservation() public {
+    function test_V2StatePreservation() public {
         // Check V1 state before upgrade
         assertEq(adapterV1.owner(), owner);
         assertTrue(adapterV1.hasRole(adapterV1.UPGRADER_ROLE(), owner));
         assertTrue(adapterV1.hasRole(adapterV1.PAUSER_ROLE(), pauser));
 
-        testUpgradeToV2();
+        test_UpgradeToV2();
 
         // Test that original state is preserved
         assertEq(adapterV2.owner(), owner, "Owner should be preserved");
@@ -84,8 +84,8 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         assertTrue(adapterV2.hasRole(adapterV2.PAUSER_ROLE(), pauser), "PAUSER_ROLE should be preserved");
     }
 
-    function testV2NewFunctionality() public {
-        testUpgradeToV2();
+    function test_V2NewFunctionality() public {
+        test_UpgradeToV2();
 
         // Test V2 version function
         string memory version = adapterV2.version();
@@ -98,8 +98,8 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         assertEq(adapterV2.dailyTransferLimit(), 1000000 * 10 ** 18, "Daily transfer limit should be set");
     }
 
-    function testV2TransferLimitUpdate() public {
-        testUpgradeToV2();
+    function test_V2TransferLimitUpdate() public {
+        test_UpgradeToV2();
 
         uint256 newLimit = 500000 * 10 ** 18;
 
@@ -113,8 +113,8 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         assertEq(limit, newLimit, "Transfer limit should be updated");
     }
 
-    function testCannotInitializeV2Twice() public {
-        testUpgradeToV2();
+    function test_RevertWhen_InitializeV2Twice() public {
+        test_UpgradeToV2();
 
         // Test that initializeV2 cannot be called again
         vm.prank(owner);
