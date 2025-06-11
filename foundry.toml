@@ -15,13 +15,6 @@ ast = true
 build_info = true
 extra_output = ["storageLayout"]
 
-# TODO use vm.rpcUrl("arbitrumSepolia") instead of env variable.
-# [rpc_endpoints]
-# mainnet = "${RPC}"
-# sepolia = "${SEPOLIA_RPC_URL}"
-# arbitrumMainnet = "${RPC}"
-# arbitrumSepolia = "${ARBITRUM_SEPOLIA_RPC_URL}"
-
 remappings = [
     # Use for src contracts
     '@layerzerolabs/oft-evm-upgradeable/=lib/devtools/packages/oft-evm-upgradeable/',
@@ -50,3 +43,13 @@ optimizer = false
 # [profile.ci]
 # fuzz = true
 # fuzz.runs = 1000
+
+# TODO use vm.rpcUrl("arbitrumSepolia") instead of env variable.
+# https://getfoundry.sh/config/reference/testing#rpc_endpoints
+# https://getfoundry.sh/reference/cheatcodes/rpc
+# https://github.com/foundry-rs/forge-std/blob/ff4bf7db008d096ea5a657f2c20516182252a3ed/src/StdCheats.sol#L255-L271
+# [rpc_endpoints]
+# mainnet = "${RPC}"
+# sepolia = "${SEPOLIA_RPC_URL}"
+# arbitrum_one = "${RPC}"
+# arbitrum_sepolia = "${ARBITRUM_SEPOLIA_RPC_URL}"
