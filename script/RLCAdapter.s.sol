@@ -3,7 +3,6 @@
 pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
-import {ICreateX} from "@createx/contracts/ICreateX.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
