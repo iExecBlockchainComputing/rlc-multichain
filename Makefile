@@ -51,7 +51,7 @@ deploy-oft:
 	forge script script/RLCOFT.s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
 		--broadcast \
-		-vvv
+		-vvv \
 
 configure-adapter:
 	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
