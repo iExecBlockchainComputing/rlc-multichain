@@ -53,6 +53,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
 
         Options memory opts;
         opts.constructorData = abi.encode(address(rlcToken), mockEndpoint);
+        // TODO: check why and how to fix it : opts.unsafeAllow
         opts.unsafeSkipAllChecks = true;
 
         bytes memory initData = abi.encodeWithSelector(

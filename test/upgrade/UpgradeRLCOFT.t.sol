@@ -47,6 +47,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
 
         Options memory opts;
         opts.constructorData = abi.encode(mockEndpoint);
+        // TODO: check why and how to fix it : opts.unsafeAllow
         opts.unsafeSkipAllChecks = true;
 
         bytes memory initData = abi.encodeWithSelector(RLCOFTV2.initializeV2.selector, minter, 100000 * 10 ** 9);

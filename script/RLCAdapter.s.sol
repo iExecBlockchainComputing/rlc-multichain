@@ -75,6 +75,7 @@ contract Upgrade is Script {
         // Set up upgrade options
         Options memory opts;
         opts.constructorData = abi.encode(rlcToken, lzEndpoint);
+        // TODO: check why and how to fix it : opts.unsafeAllow
         opts.unsafeSkipAllChecks = true;
 
         bytes memory initData = abi.encodeWithSelector(RLCAdapterV2.initializeV2.selector, rateLimiter, dailyLimit);
@@ -101,7 +102,7 @@ contract ValidateUpgrade is Script {
         Options memory opts;
         opts.constructorData = abi.encode(rlcToken, lzEndpoint);
         // Skip validation for testing purposes
-        // TODO: check why and how to fix it
+        // TODO: check why and how to fix it : opts.unsafeAllow
         opts.unsafeSkipAllChecks = true;
 
         // Validate that the upgrade is safe
