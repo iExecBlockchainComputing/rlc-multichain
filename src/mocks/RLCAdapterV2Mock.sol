@@ -7,6 +7,7 @@ import {RLCAdapter} from "../RLCAdapter.sol";
 
 /// @notice RLCAdapterV2 - V2 implementation with additional features
 /// @dev This contract inherits from RLCAdapter (V1) and adds new functionality
+/// @custom:oz-upgrades-from src/RLCAdapter.sol:RLCAdapter
 contract RLCAdapterV2 is RLCAdapter {
     // NEW ROLE FOR V2
     bytes32 public constant RATE_LIMITER_ROLE = keccak256("RATE_LIMITER_ROLE");

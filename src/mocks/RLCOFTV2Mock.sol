@@ -6,6 +6,7 @@ import {RLCOFT} from "../RLCOFT.sol";
 
 /// @notice RLCOFTV2 - V2 implementation with additional features
 /// @dev This contract inherits from RLCOFT (V1) and adds new functionality
+/// @custom:oz-upgrades-from src/RLCOFT.sol:RLCOFT
 contract RLCOFTV2 is RLCOFT {
     // NEW ROLE FOR V2
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
