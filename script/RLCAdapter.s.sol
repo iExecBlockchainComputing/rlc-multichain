@@ -48,7 +48,7 @@ contract Configure is Script {
         address adapterAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS"); // Read this variable from .env file
         RLCAdapter adapter = RLCAdapter(adapterAddress);
 
-        // IexecLayerZeroBridge on Arbitrum Sepolia
+        // RLCOFT on Arbitrum Sepolia
         address oftAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
         uint16 arbitrumSepoliaChainId = uint16(vm.envUint("LAYER_ZERO_ARBITRUM_SEPOLIA_CHAIN_ID")); //TODO: remove or make it chain agnostic
         // Set trusted remote

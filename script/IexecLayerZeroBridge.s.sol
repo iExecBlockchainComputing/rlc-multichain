@@ -4,6 +4,7 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
+import {RLCOFT} from "../src/RLCOFT.sol";
 import {IexecLayerZeroBridge} from "../src/IexecLayerZeroBridge.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
@@ -44,9 +45,9 @@ contract Configure is Script {
     function run() external {
         vm.startBroadcast();
 
-        // IexecLayerZeroBridge on Arbitrum Sepolia
+        // RLCOFT on Arbitrum Sepolia
         address oftAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
-        IexecLayerZeroBridge oft = IexecLayerZeroBridge(oftAddress);
+        RLCOFT oft = RLCOFT(oftAddress);
 
         // RLCAdapter on Ethereum Sepolia
         address adapterAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS"); // Read this variable from .env file
