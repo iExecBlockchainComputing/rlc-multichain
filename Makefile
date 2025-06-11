@@ -46,12 +46,12 @@ deploy-adapter:
 		--broadcast \
 		-vvv
 
-deploy-LayerZero-Bridge-and-token:
-	@echo "Deploying IexecLayerZeroBridge on: $(RPC_URL)"
-	forge script script/IexecLayerZeroBridge.s.sol:Deploy \
+deploy-oft:
+	@echo "Deploying RLCOFT on on: $(RPC_URL)"
+	forge script script/RLCOFT.s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
 		--broadcast \
-		-vvv \
+		-vvv
 
 configure-adapter:
 	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
