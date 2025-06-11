@@ -16,7 +16,6 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     address public mockEndpoint;
     address public owner = makeAddr("owner");
     address public pauser = makeAddr("pauser");
-    address public minter = makeAddr("minter");
     address public user = makeAddr("user");
 
     address public proxyAddress;
@@ -37,8 +36,9 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         (bool success,) = proxyAddress.call(abi.encodeWithSignature("version()"));
         assertFalse(success, "V1 should not have version() function");
 
-        (bool success2,) = proxyAddress.call(abi.encodeWithSignature("setDailyMintLimit(uint256)", 1000));
-        assertFalse(success2, "V1 should not have setDailyMintLimit() function");
+        (bool success2,) =
+            proxyAddress.call(abi.encodeWithSignature("initializeV2(uint256)", 1000));
+        assertFalse(success2, "V1 should not have initializeV2() function");
     }
 
     function test_UpgradeToV2() public {
@@ -50,7 +50,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         // TODO: check why and how to fix it : opts.unsafeAllow
         opts.unsafeSkipAllChecks = true;
 
-        bytes memory initData = abi.encodeWithSelector(RLCOFTV2.initializeV2.selector, minter, 100000 * 10 ** 9);
+        bytes memory initData = abi.encodeWithSelector(RLCOFTV2.initializeV2.selector, 100000 * 10 ** 9);
 
         Upgrades.upgradeProxy(proxyAddress, "RLCOFTV2Mock.sol:RLCOFTV2", initData, opts);
 
@@ -79,23 +79,8 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         string memory version = oftV2.version();
         assertEq(version, "2.0.0", "Version should be 2.0.0");
 
-        // Test V2 roles
-        assertTrue(oftV2.hasRole(oftV2.MINTER_ROLE(), minter), "Minter role should be granted");
-
         // Test daily limit
         assertEq(oftV2.dailyMintLimit(), 100000 * 10 ** 9, "Daily mint limit should be set correctly");
-    }
-
-    function test_V2SetDailyMintLimit() public {
-        test_UpgradeToV2();
-
-        uint256 newLimit = 200000 * 10 ** 9;
-
-        // Test setting daily mint limit by minter
-        vm.prank(minter);
-        oftV2.setDailyMintLimit(newLimit);
-
-        assertEq(oftV2.dailyMintLimit(), newLimit, "Daily mint limit should be updated");
     }
 
     function test_RevertWhen_InitializeV2Twice() public {
@@ -104,6 +89,6 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         // Test that initializeV2 cannot be called again
         vm.prank(owner);
         vm.expectRevert();
-        oftV2.initializeV2(minter, 100000 * 10 ** 9);
+        oftV2.initializeV2(100000 * 10 ** 9);
     }
 }

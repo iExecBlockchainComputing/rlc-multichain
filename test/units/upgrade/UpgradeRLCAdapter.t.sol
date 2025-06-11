@@ -18,7 +18,6 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
     address public mockEndpoint = makeAddr("mockEndpoint");
     address public owner = makeAddr("owner");
     address public pauser = makeAddr("pauser");
-    address public rateLimiter = makeAddr("rateLimiter");
     address public user = makeAddr("user");
     string public constant name = "RLC OFT Test";
     string public constant symbol = "RLCOFT";
@@ -39,12 +38,9 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         (bool success,) = proxyAddress.call(abi.encodeWithSignature("version()"));
         assertFalse(success, "V1 should not have version() function");
 
-        (bool success2,) = proxyAddress.call(abi.encodeWithSignature("setDailyTransferLimit(uint256)", 1000));
-        assertFalse(success2, "V1 should not have setDailyTransferLimit() function");
-
-        (bool success3,) =
-            proxyAddress.call(abi.encodeWithSignature("initializeV2(uint256,address)", 1000, rateLimiter));
-        assertFalse(success3, "V1 should not have initializeV2() function");
+        (bool success2,) =
+            proxyAddress.call(abi.encodeWithSignature("initializeV2(uint256)", 1000));
+        assertFalse(success2, "V1 should not have initializeV2() function");
     }
 
     function test_UpgradeToV2() public {
@@ -58,7 +54,6 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
 
         bytes memory initData = abi.encodeWithSelector(
             RLCAdapterV2.initializeV2.selector,
-            rateLimiter, // rateLimiter address
             1000000 * 10 ** 18 // dailyLimit
         );
 
@@ -91,26 +86,8 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         string memory version = adapterV2.version();
         assertEq(version, "2.0.0", "Version should be 2.0.0");
 
-        // Test V2 roles
-        assertTrue(adapterV2.hasRole(adapterV2.RATE_LIMITER_ROLE(), rateLimiter), "RATE_LIMITER_ROLE should be granted");
-
         // Test daily transfer limit
         assertEq(adapterV2.dailyTransferLimit(), 1000000 * 10 ** 18, "Daily transfer limit should be set");
-    }
-
-    function test_V2TransferLimitUpdate() public {
-        test_UpgradeToV2();
-
-        uint256 newLimit = 500000 * 10 ** 18;
-
-        // Test setting transfer limit by rateLimiter
-        vm.prank(rateLimiter);
-        vm.expectEmit(true, false, false, true);
-        emit RLCAdapterV2.DailyTransferLimitSet(newLimit);
-        adapterV2.setDailyTransferLimit(newLimit);
-
-        uint256 limit = adapterV2.dailyTransferLimit();
-        assertEq(limit, newLimit, "Transfer limit should be updated");
     }
 
     function test_RevertWhen_InitializeV2Twice() public {
@@ -119,6 +96,6 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         // Test that initializeV2 cannot be called again
         vm.prank(owner);
         vm.expectRevert();
-        adapterV2.initializeV2(rateLimiter, 1000000 * 10 ** 18);
+        adapterV2.initializeV2(1000000 * 10 ** 18);
     }
 }
