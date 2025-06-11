@@ -38,8 +38,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         (bool success,) = proxyAddress.call(abi.encodeWithSignature("version()"));
         assertFalse(success, "V1 should not have version() function");
 
-        (bool success2,) =
-            proxyAddress.call(abi.encodeWithSignature("initializeV2(uint256)", 1000));
+        (bool success2,) = proxyAddress.call(abi.encodeWithSignature("initializeV2(uint256)", 1000));
         assertFalse(success2, "V1 should not have initializeV2() function");
     }
 

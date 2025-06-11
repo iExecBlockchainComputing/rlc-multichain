@@ -9,11 +9,10 @@ import {RLCOFT} from "../RLCOFT.sol";
  * @author IEXEC BLOCKCHAIN TECH
  * @notice This contract inherits from RLCOFT (V1) and adds new functionality
  */
-
 contract RLCOFTV2 is RLCOFT {
-
     // NEW STATE VARIABLES FOR V2
     uint256 public dailyMintLimit;
+
     constructor(address _lzEndpoint) RLCOFT(_lzEndpoint) {}
 
     /**
