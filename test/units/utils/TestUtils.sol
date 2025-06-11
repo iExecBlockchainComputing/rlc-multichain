@@ -9,8 +9,8 @@ import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
 import {RLCAdapter} from "../../../src/RLCAdapter.sol";
-import {RLCOFTMock} from "../../mocks/RLCOFTMock.sol";
-import {RLCMock} from "../../mocks/RLCMock.sol";
+import {RLCOFTMock} from "../mocks/RLCOFTMock.sol";
+import {RLCMock} from "../mocks/RLCMock.sol";
 import {RLCOFT} from "../../../src/RLCOFT.sol";
 
 library TestUtils {

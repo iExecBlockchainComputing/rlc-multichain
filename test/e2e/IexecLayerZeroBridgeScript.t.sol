@@ -4,7 +4,8 @@ pragma solidity ^0.8.13;
 import {Test} from "forge-std/Test.sol";
 import {Deploy as IexecLayerZeroBridgeDeploy} from "../../script/IexecLayerZeroBridge.s.sol";
 import {IexecLayerZeroBridge} from "../../src/IexecLayerZeroBridge.sol";
-import {RLCMock} from "../mocks/RLCMock.sol";
+//TODO: To remove when RLC_ERC20 contract will be developed
+import {RLCMock} from "./mocks/RLCMock.sol";
 
 contract IexecLayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroBridgeScriptTest is
     Test
@@ -20,6 +21,7 @@ contract IexecLayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroB
     function setUp() public {
         vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL")); // use public node
         deployer = new IexecLayerZeroBridgeDeploy();
+        //TODO: To remove when RLC_ERC20 contract will be developed
         rlcChainX = address(new RLCMock("TokenChainX", "RLC"));
         vm.setEnv("CREATE_X_FACTORY", "0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed");
     }

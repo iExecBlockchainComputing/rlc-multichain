@@ -6,7 +6,7 @@ import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfac
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
-import {RLCOFTMock} from "../mocks/RLCOFTMock.sol";
+import {RLCOFTMock} from "./mocks/RLCOFTMock.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 
