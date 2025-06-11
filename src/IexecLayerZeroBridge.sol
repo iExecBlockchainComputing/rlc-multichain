@@ -36,11 +36,13 @@ contract IexecLayerZeroBridge is
         RLC_Token = _token;
     }
 
-    /// @notice Initializes the contract
-    /// @param _owner Address of the contract owner
-    /// @param _pauser Address of the contract pauser
+    /**
+     * @notice Initializes the contract
+     * @param _owner Address of the contract owner
+     * @param _pauser Address of the contract pauser
+     */
     function initialize(address _owner, address _pauser) public initializer {
-        __Ownable_init(_owner); // TODO: exist
+        __Ownable_init(_owner);
         __OFTCore_init(_owner);
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, _owner);
@@ -59,16 +61,20 @@ contract IexecLayerZeroBridge is
         return false;
     }
 
-    /// @notice Pauses the contract
-    /// @dev Can only be called by the account with the PAUSER_ROLE
-    /// @dev When the contract is paused, all token transfers are blocked
+    /**
+     * @notice Pauses the contract
+     * @dev Can only be called by the account with the PAUSER_ROLE
+     * @dev When the contract is paused, all token transfers are blocked
+     */
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
-    /// @notice Unpauses the contract
-    /// @dev Can only be called by the account with the PAUSER_ROLE
-    /// @dev When the contract is unpaused, token transfers are allowed again
+    /**
+     * @notice Unpauses the contract
+     * @dev Can only be called by the account with the PAUSER_ROLE
+     * @dev When the contract is unpaused, token transfers are allowed again
+     */
     function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
     }
@@ -139,8 +145,10 @@ contract IexecLayerZeroBridge is
         return _amountLD;
     }
 
-    /// @notice Authorizes an upgrade to a new implementation
-    /// @dev Can only be called by the upgrader.
-    /// @param newImplementation Address of the new implementation
+    /**
+     * @notice Authorizes an upgrade to a new implementation
+     * @dev Can only be called by the upgrader.
+     * @param newImplementation Address of the new implementation
+     */
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }
