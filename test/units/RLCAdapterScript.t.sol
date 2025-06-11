@@ -15,6 +15,7 @@ contract RLCAdapterScriptTest is Test {
     RLCAdapterDeploy public deployer;
 
     function setUp() public {
+        // TODO use vm.rpcUrl("sepolia")
         vm.createSelectFork(vm.envString("SEPOLIA_RPC_URL"));
         deployer = new RLCAdapterDeploy();
         vm.setEnv("CREATE_X_FACTORY", "0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed");

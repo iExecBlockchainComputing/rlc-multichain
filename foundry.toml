@@ -14,6 +14,13 @@ ast = true
 build_info = true
 extra_output = ["storageLayout"]
 
+# TODO use vm.rpcUrl("arbitrumSepolia") instead of env variable.
+# [rpc_endpoints]
+# mainnet = "${RPC}"
+# sepolia = "${SEPOLIA_RPC_URL}"
+# arbitrumMainnet = "${RPC}"
+# arbitrumSepolia = "${ARBITRUM_SEPOLIA_RPC_URL}"
+
 remappings = [
     # Use for src contracts
     '@layerzerolabs/oft-evm-upgradeable/=lib/devtools/packages/oft-evm-upgradeable/',
