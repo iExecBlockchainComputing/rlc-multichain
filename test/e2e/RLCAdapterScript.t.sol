@@ -21,34 +21,34 @@ contract RLCAdapterScriptTest is Test {
     }
 
     // ============ Deployment Tests ============
-    // function testFork_CheckDeployment() public {
-    //     bytes32 salt = keccak256("RLCOFT_SALT");
-    //     RLCAdapter rlcAdapter = RLCAdapter(deployer.deploy(lzEndpoint, owner, pauser, salt, RLC_TOKEN));
+    function testFork_CheckDeployment() public {
+        bytes32 salt = keccak256("RLCAdapter_SALT");
+        RLCAdapter rlcAdapter = RLCAdapter(deployer.deploy(lzEndpoint, owner, pauser, salt, RLC_TOKEN));
 
-    //     assertEq(rlcAdapter.owner(), owner);
-    //     assertEq(rlcAdapter.token(), RLC_TOKEN);
-    //     //TODO: check roles
-    // }
+        assertEq(rlcAdapter.owner(), owner);
+        assertEq(rlcAdapter.token(), RLC_TOKEN);
+        //TODO: check roles
+    }
 
-    // function testForkFuzz_DifferentSaltsProduceDifferentAddresses(bytes32 salt1, bytes32 salt2) public {
-    //     vm.assume(salt1 != salt2); // ensure they are different
+    function testForkFuzz_DifferentSaltsProduceDifferentAddresses(bytes32 salt1, bytes32 salt2) public {
+        vm.assume(salt1 != salt2); // ensure they are different
 
-    //     address addr1 = deployer.deploy(lzEndpoint, owner, pauser, salt1, RLC_TOKEN);
-    //     address addr2 = deployer.deploy(lzEndpoint, owner, pauser, salt2, RLC_TOKEN);
+        address addr1 = deployer.deploy(lzEndpoint, owner, pauser, salt1, RLC_TOKEN);
+        address addr2 = deployer.deploy(lzEndpoint, owner, pauser, salt2, RLC_TOKEN);
 
-    //     assertTrue(addr1 != addr2, "Fuzz test failed: different salts produced same address");
-    // }
+        assertTrue(addr1 != addr2, "Fuzz test failed: different salts produced same address");
+    }
 
-    // function testForkFuzz_RevertIfSecondDeploymentWithSameSalt(bytes32 salt) public {
-    //     // First deployment
-    //     address addr = deployer.deploy(lzEndpoint, owner, pauser, salt, RLC_TOKEN);
-    //     assertTrue(addr != address(0), "First deployment should succeed");
+    function testForkFuzz_RevertIfSecondDeploymentWithSameSalt(bytes32 salt) public {
+        // First deployment
+        address addr = deployer.deploy(lzEndpoint, owner, pauser, salt, RLC_TOKEN);
+        assertTrue(addr != address(0), "First deployment should succeed");
 
-    //     // Attempt redeployment with the same salt
-    //     try deployer.deploy(lzEndpoint, owner, pauser, salt, RLC_TOKEN) returns (address) {
-    //         revert("Expected revert on redeployment with same salt but no revert occurred");
-    //     } catch {
-    //         // Expected: revert due to CREATE2 address collision
-    //     }
-    // }
+        // Attempt redeployment with the same salt
+        try deployer.deploy(lzEndpoint, owner, pauser, salt, RLC_TOKEN) returns (address) {
+            revert("Expected revert on redeployment with same salt but no revert occurred");
+        } catch {
+            // Expected: revert due to CREATE2 address collision
+        }
+    }
 }

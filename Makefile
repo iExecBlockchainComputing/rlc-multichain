@@ -47,8 +47,8 @@ deploy-adapter:
 		-vvv
 
 deploy-LayerZero-Bridge-and-token:
-	@echo "Deploying IExecOFTBridge on: $(RPC_URL)"
-	forge script script/IExecOFTBridge.s.sol:Deploy \
+	@echo "Deploying IexecLayerZeroBridge on: $(RPC_URL)"
+	forge script script/IexecLayerZeroBridge.s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
 		--broadcast \
 		-vvv \

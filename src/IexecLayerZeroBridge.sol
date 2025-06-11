@@ -11,7 +11,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 
-contract IExecOFTBridge is
+contract IexecLayerZeroBridge is
     OFTCoreUpgradeable,
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
