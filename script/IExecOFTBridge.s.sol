@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
-import {RLCOFT} from "../src/RLCOFT.sol";
+import {IExecOFTBridge} from "../src/IExecOFTBridge.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
@@ -33,7 +33,7 @@ contract Deploy is Script {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
 
         bytes memory constructorData = abi.encode(tokenChainX, lzEndpoint);
-        bytes memory initializeData = abi.encodeWithSelector(RLCOFT.initialize.selector, owner, pauser);
+        bytes memory initializeData = abi.encodeWithSelector(IExecOFTBridge.initialize.selector, owner, pauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "IExecOFTBridge", constructorData, initializeData, createXFactory, salt
         );
@@ -44,9 +44,9 @@ contract Configure is Script {
     function run() external {
         vm.startBroadcast();
 
-        // RLCOFT on Arbitrum Sepolia
+        // IExecOFTBridge on Arbitrum Sepolia
         address oftAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
-        RLCOFT oft = RLCOFT(oftAddress);
+        IExecOFTBridge oft = IExecOFTBridge(oftAddress);
 
         // RLCAdapter on Ethereum Sepolia
         address adapterAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS"); // Read this variable from .env file

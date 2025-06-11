@@ -46,9 +46,9 @@ deploy-adapter:
 		--broadcast \
 		-vvv
 
-deploy-oft:
-	@echo "Deploying RLCOFT on on: $(RPC_URL)"
-	forge script script/RLCOFT.s.sol:Deploy \
+deploy-LayerZero-Bridge-and-token:
+	@echo "Deploying IExecOFTBridge on: $(RPC_URL)"
+	forge script script/IExecOFTBridge.s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
 		--broadcast \
 		-vvv \

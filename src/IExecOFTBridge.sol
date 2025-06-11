@@ -39,7 +39,8 @@ contract IExecOFTBridge is
     /// @notice Initializes the contract
     /// @param _owner Address of the contract owner
     /// @param _pauser Address of the contract pauser
-    function __OFT_init(address _owner, address _pauser) internal onlyInitializing {
+    function initialize(address _owner, address _pauser) public initializer {
+        __Ownable_init(_owner); // TODO: exist
         __OFTCore_init(_owner);
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, _owner);
