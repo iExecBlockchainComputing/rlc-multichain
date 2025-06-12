@@ -3,11 +3,11 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
-import {RLCAdapterV2} from "../src/mocks/RLCAdapterV2Mock.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
+import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
     function run() external returns (address) {
@@ -27,15 +27,18 @@ contract Deploy is Script {
 
         vm.stopBroadcast();
         address implementationAddress = Upgrades.getImplementationAddress(rlcAdapterProxy);
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS", implementationAddress); // TODO Save the address in another way becase .env file is not versioned in git.
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy); // TODO Save the address in another way becase .env file is not versioned in git.
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS", implementationAddress);
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy);
         return rlcAdapterProxy;
     }
 
-    function deploy(address lzEndpoint, address owner, address pauser, bytes32 createxSalt, address rlcToken)
-        public
-        returns (address)
-    {
+    function deploy(
+        address lzEndpoint, 
+        address owner, 
+        address pauser, 
+        bytes32 createxSalt, 
+        address rlcToken
+    ) public returns (address) {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
         bytes memory constructorData = abi.encode(rlcToken, lzEndpoint);
         bytes memory initializeData = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser);
@@ -74,19 +77,20 @@ contract Upgrade is Script {
         // For testing purpose
         uint256 newStateVariable = 1000000 * 10 ** 9; // 1M token daily transfer limit
 
-        // Set up upgrade options
-        Options memory opts;
-        opts.constructorData = abi.encode(rlcToken, lzEndpoint);
-        // TODO: check why and how to fix it : opts.unsafeAllow
-        opts.unsafeSkipAllChecks = true;
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: proxyAddress,
+            contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2", // Would be production contract in real deployment
+            lzEndpoint: lzEndpoint,
+            rlcToken: rlcToken, 
+            contractType: UpgradeUtils.ContractType.ADAPTER,
+            newStateVariable: newStateVariable,
+            skipChecks: true, // TODO: Remove when validation issues are fixed
+            validateOnly: false
+        });
 
-        bytes memory initData = abi.encodeWithSelector(RLCAdapterV2.initializeV2.selector, newStateVariable);
-
-        // Upgrade the proxy to a new implementation
-        Upgrades.upgradeProxy(proxyAddress, "RLCAdapterV2Mock.sol:RLCAdapterV2", initData, opts);
+        address newImplementationAddress = UpgradeUtils.executeUpgradeAdapter(params);
 
         // Log the new implementation address
-        address newImplementationAddress = Upgrades.getImplementationAddress(proxyAddress);
         console.log("RLCAdapter upgraded to new implementation:", newImplementationAddress);
         console.log("Proxy address remains:", proxyAddress);
 
@@ -98,17 +102,21 @@ contract Upgrade is Script {
 
 contract ValidateUpgrade is Script {
     function run() external {
-        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
+        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
 
-        Options memory opts;
-        opts.constructorData = abi.encode(rlcToken, lzEndpoint);
-        // Skip validation for testing purposes
-        // TODO: check why and how to fix it : opts.unsafeAllow
-        opts.unsafeSkipAllChecks = true;
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: address(0), // Not needed for validation
+            lzEndpoint: lzEndpoint,
+            rlcToken: rlcToken, 
+            contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
+            contractType: UpgradeUtils.ContractType.ADAPTER,
+            newStateVariable: 1000000 * 10 ** 9,
+            skipChecks: true, // TODO: Remove this when validation issues are fixed
+            validateOnly: true
+        });
 
-        // Validate that the upgrade is safe
-        Upgrades.validateUpgrade("RLCAdapterV2Mock.sol:RLCAdapterV2", opts);
+        UpgradeUtils.validateUpgrade(params);
         console.log("Upgrade validation passed for RLCAdapter");
     }
 }

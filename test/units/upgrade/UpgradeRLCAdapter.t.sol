@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCAdapter} from "../../../src/RLCAdapter.sol";
 import {RLCMock} from "../../units/mocks/RLCMock.sol";
 import {RLCAdapterV2} from "../../../src/mocks/RLCAdapterV2Mock.sol";
-import {TestUtils} from "./../utils/TestUtils.sol";
+import {TestUtils, TestUpgradeUtils} from "./../utils/TestUtils.sol";
+import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 contract UpgradeRLCAdapterTest is TestHelperOz5 {
@@ -22,6 +22,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
     address public user = makeAddr("user");
     string public constant name = "RLC OFT Test";
     string public constant symbol = "RLCOFT";
+    uint256 public constant NEW_STATE_VARIABLE = 1000000 * 10 ** 18;
 
     address public proxyAddress;
 
@@ -44,25 +45,29 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
     }
 
     function test_UpgradeToV2() public {
-        // Upgrade to V2
         vm.startPrank(owner);
 
-        Options memory opts;
-        opts.constructorData = abi.encode(address(rlcToken), mockEndpoint);
-        // TODO: check why and how to fix it : opts.unsafeAllow
-        opts.unsafeSkipAllChecks = true;
-
-        bytes memory initData = abi.encodeWithSelector(
-            RLCAdapterV2.initializeV2.selector,
-            1000000 * 10 ** 18 // dailyLimit
+        TestUpgradeUtils.upgradeAdapterForTesting(
+            proxyAddress,
+            "RLCAdapterV2Mock.sol:RLCAdapterV2",
+            mockEndpoint,
+            address(rlcToken),
+            NEW_STATE_VARIABLE
         );
-
-        Upgrades.upgradeProxy(proxyAddress, "RLCAdapterV2Mock.sol:RLCAdapterV2", initData, opts);
 
         vm.stopPrank();
 
         // Cast proxy to V2
         adapterV2 = RLCAdapterV2(proxyAddress);
+    }
+
+    function test_ValidateUpgrade() public {
+        // Test that upgrade validation works
+        TestUpgradeUtils.validateUpgradeForTesting(
+            "RLCAdapterV2Mock.sol:RLCAdapterV2",
+            mockEndpoint,
+            UpgradeUtils.ContractType.ADAPTER
+        );
     }
 
     function test_V2StatePreservation() public {
@@ -88,7 +93,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         assertEq(version, "2.0.0", "Version should be 2.0.0");
 
         // Test new state variable
-        assertEq(adapterV2.newStateVariable(), 1000000 * 10 ** 18, "New state variable should be set");
+        assertEq(adapterV2.newStateVariable(), NEW_STATE_VARIABLE, "New state variable should be set");
     }
 
     function test_RevertWhen_InitializeV2Twice() public {

@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCOFT} from "../../../src/RLCOFT.sol";
 import {RLCOFTV2} from "../../../src/mocks/RLCOFTV2Mock.sol";
-import {TestUtils} from "./../utils/TestUtils.sol";
+import {TestUtils, TestUpgradeUtils} from "./../utils/TestUtils.sol";
+import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 contract UpgradeRLCOFTTest is TestHelperOz5 {
@@ -16,11 +16,11 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     address public mockEndpoint;
     address public owner = makeAddr("owner");
     address public pauser = makeAddr("pauser");
-    address public user = makeAddr("user");
 
     address public proxyAddress;
     string public name = "RLC OFT Token";
     string public symbol = "RLC";
+    uint256 public constant NEW_STATE_VARIABLE = 100000 * 10 ** 9;
 
     function setUp() public virtual override {
         super.setUp();
@@ -41,22 +41,28 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     }
 
     function test_UpgradeToV2() public {
-        // Upgrade to V2
         vm.startPrank(owner);
-
-        Options memory opts;
-        opts.constructorData = abi.encode(mockEndpoint);
-        // TODO: check why and how to fix it : opts.unsafeAllow
-        opts.unsafeSkipAllChecks = true;
-
-        bytes memory initData = abi.encodeWithSelector(RLCOFTV2.initializeV2.selector, 100000 * 10 ** 9);
-
-        Upgrades.upgradeProxy(proxyAddress, "RLCOFTV2Mock.sol:RLCOFTV2", initData, opts);
-
+        
+        TestUpgradeUtils.upgradeOFTForTesting(
+            proxyAddress,
+            "RLCOFTV2Mock.sol:RLCOFTV2",
+            mockEndpoint,
+            NEW_STATE_VARIABLE
+        );
+        
         vm.stopPrank();
 
         // Cast proxy to V2
         oftV2 = RLCOFTV2(proxyAddress);
+    }
+
+    function test_ValidateUpgrade() public {
+        // Test that upgrade validation works
+        TestUpgradeUtils.validateUpgradeForTesting(
+            "RLCOFTV2Mock.sol:RLCOFTV2",
+            mockEndpoint,
+            UpgradeUtils.ContractType.OFT
+        );
     }
 
     function test_V2StatePreservation() public {
@@ -83,7 +89,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         assertEq(version, "2.0.0", "Version should be 2.0.0");
 
         // Test new state variable
-        assertEq(oftV2.newStateVariable(), 100000 * 10 ** 9, "New state variable should be set correctly");
+        assertEq(oftV2.newStateVariable(), NEW_STATE_VARIABLE, "New state variable should be set correctly");
     }
 
     function test_RevertWhen_InitializeV2Twice() public {
@@ -92,6 +98,6 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         // Test that initializeV2 cannot be called again
         vm.prank(owner);
         vm.expectRevert();
-        oftV2.initializeV2(100000 * 10 ** 9);
+        oftV2.initializeV2(NEW_STATE_VARIABLE);
     }
 }

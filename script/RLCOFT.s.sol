@@ -6,8 +6,8 @@ import {Script} from "forge-std/Script.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
-import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {RLCOFTV2} from "../src/mocks/RLCOFTV2Mock.sol";
+import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
     function run() external returns (address) {
@@ -72,22 +72,21 @@ contract Upgrade is Script {
 
         address proxyAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
-
         // For testing purpose
         uint256 newStateVariable = 1000000 * 10 ** 9;
-        // Set up upgrade options
-        Options memory opts;
-        opts.constructorData = abi.encode(lzEndpoint);
-        // TODO: check why and how to fix it : opts.unsafeAllow
-        opts.unsafeSkipAllChecks = true;
 
-        bytes memory initData = abi.encodeWithSelector(RLCOFTV2.initializeV2.selector, newStateVariable);
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: proxyAddress,
+            rlcToken: address(0), // Not used for OFT
+            contractName: "RLCOFTV2Mock.sol:RLCOFTV2", // Would be production contract in real deployment
+            lzEndpoint: lzEndpoint,
+            contractType: UpgradeUtils.ContractType.OFT,
+            newStateVariable: newStateVariable,
+            skipChecks: true, // TODO: Remove when validation issues are fixed opts.unsafeAllow
+            validateOnly: false
+        });
 
-        // Upgrade the proxy to a new implementation
-        Upgrades.upgradeProxy(proxyAddress, "RLCOFTV2Mock.sol:RLCOFTV2", initData, opts);
-
-        // Log the new implementation address
-        address newImplementationAddress = Upgrades.getImplementationAddress(proxyAddress);
+        address newImplementationAddress = UpgradeUtils.executeUpgradeOFT(params);
 
         vm.stopBroadcast();
 
@@ -98,14 +97,17 @@ contract Upgrade is Script {
 contract ValidateUpgrade is Script {
     function run() external {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: address(0), 
+            lzEndpoint: lzEndpoint,
+            rlcToken: address(0), // Not used for OFT
+            contractName: "RLCOFTV2Mock.sol:RLCOFTV2",
+            contractType: UpgradeUtils.ContractType.OFT,
+            newStateVariable: 1000000 * 10 ** 9,
+            skipChecks: true, // TODO: Remove this when validation issues are fixed opts.unsafeAllow
+            validateOnly: true
+        });
 
-        Options memory opts;
-        opts.constructorData = abi.encode(lzEndpoint);
-
-        // Skip validation for testing purposes
-        // TODO: check why and how to fix it : opts.unsafeAllow
-        opts.unsafeSkipAllChecks = true;
-        // Validate that the upgrade is safe
-        Upgrades.validateUpgrade("RLCOFTV2Mock.sol:RLCOFTV2", opts);
+        UpgradeUtils.validateUpgrade(params);
     }
 }
