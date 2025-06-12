@@ -17,7 +17,7 @@ import {IIexecLayerZeroBridge} from "./interfaces/IIexecLayerZeroBridge.sol";
  * @dev A LayerZero OFT (Omnichain Fungible Token) bridge implementation for RLC tokens
  *
  * This contract enables cross-chain transfer of RLC tokens using LayerZero's OFT standard.
- * It overrides the `_debit` and `_credit` functions to use external mint and burn functions 
+ * It overrides the `_debit` and `_credit` functions to use external mint and burn functions
  * on the CrosschainRLC token contract.
  * It implements a cross-chain transfer mechanism where:
  * 1. When sending tokens FROM this chain: RLC tokens are permanently burned from the sender's balance via an external call
