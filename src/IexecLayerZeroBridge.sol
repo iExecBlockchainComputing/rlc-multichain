@@ -194,7 +194,7 @@ contract IexecLayerZeroBridge is
     }
 
     /**
-     * @notice Mints tokens on the destination chain as part of cross-chain transfer
+     * @notice Mints tokens to the specified account as part of cross-chain transfer.
      * @param _to The address to mint tokens to
      * @param _amountLD The amount of tokens to mint (in local decimals)
      * @return amountReceivedLD The amount of tokens actually minted
