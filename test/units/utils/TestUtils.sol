@@ -55,7 +55,11 @@ library TestUtils {
             abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser);
         iexecLayerZeroBridge = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "IexecLayerZeroBridge", constructorDataIexecLayerZeroBridge, initializeDataIexecLayerZeroBridge, createXFactory, salt
+                "IexecLayerZeroBridge",
+                constructorDataIexecLayerZeroBridge,
+                initializeDataIexecLayerZeroBridge,
+                createXFactory,
+                salt
             )
         );
     }
