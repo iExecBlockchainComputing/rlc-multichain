@@ -10,6 +10,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
+import {IIexecLayerZeroBridge} from "./interfaces/IIexecLayerZeroBridge.sol";
 
 /**
  * @title IexecLayerZeroBridge
@@ -24,6 +25,7 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
  * chain are recreated on another, maintaining a 1:1 peg across the entire ecosystem.
  */
 contract IexecLayerZeroBridge is
+    IIexecLayerZeroBridge,
     OFTCoreUpgradeable,
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
