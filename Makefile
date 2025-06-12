@@ -140,8 +140,12 @@ send-tokens-to-sepolia:
 		--broadcast \
 		-vvv
 
+#
 # Verification targets
-verify-adapter:
+#
+
+# Implementation verification
+verify-adapter-impl:
 	@echo "Verifying RLCAdapter Implementation on Sepolia Etherscan..."
 	forge verify-contract \
         --chain-id 11155111 \
@@ -151,7 +155,7 @@ verify-adapter:
         $(RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS) \
         src/RLCAdapter.sol:RLCAdapter
 
-verify-oft:
+verify-oft-impl:
 	@echo "Verifying RLCOFT Implementation on Arbitrum Sepolia Etherscan..."
 	forge verify-contract \
         --chain-id 421614 \
@@ -161,6 +165,31 @@ verify-oft:
         $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) \
         src/RLCOFT.sol:RLCOFT
 
-# Combined verification target
-verify-all: verify-adapter verify-oft
+# Proxy verification
+verify-adapter-proxy:
+	@echo "Verifying RLCAdapter Proxy on Sepolia Etherscan..."
+	forge verify-contract \
+        --chain-id 11155111 \
+        --watch \
+        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
+        --etherscan-api-key $(ETHERSCAN_API_KEY) \
+        $(RLC_SEPOLIA_ADAPTER_PROXY_ADDRESS) \
+        lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
+verify-oft-proxy:
+	@echo "Verifying RLCOFT Proxy on Arbitrum Sepolia Etherscan..."
+	forge verify-contract \
+        --chain-id 421614 \
+        --watch \
+        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
+        --etherscan-api-key $(ARBISCAN_API_KEY) \
+        $(RLC_ARBITRUM_SEPOLIA_OFT_PROXY_ADDRESS) \
+        lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
+
+# Combined verification targets
+verify-adapter: verify-adapter-impl verify-adapter-proxy
+verify-oft: verify-oft-impl verify-oft-proxy
+
+verify-implementations: verify-adapter-impl verify-oft-impl
+verify-proxies: verify-adapter-proxy verify-oft-proxy
+verify-all: verify-implementations verify-proxies
