@@ -47,10 +47,6 @@ contract IexecLayerZeroBridge is
      * @dev Constructor for the LayerZero bridge contract
      * @param _token The RLC token contract address that implements IRLC interface
      * @param _lzEndpoint The LayerZero endpoint address for this chain
-     *
-     * @notice The constructor sets up the immutable references and disables initializers
-     * to prevent the implementation contract from being initialized directly.
-     * Actual initialization happens through the initialize() function after proxy deployment.
      */
     constructor(IRLC _token, address _lzEndpoint) OFTCoreUpgradeable(_token.decimals(), _lzEndpoint) {
         _disableInitializers();
