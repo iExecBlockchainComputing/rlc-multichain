@@ -36,8 +36,8 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
 
     function test_V1DoesNotHaveV2Functions() public {
         // Test that V1 doesn't have V2 functions
-        (bool success,) = proxyAddress.call(abi.encodeWithSignature("version()"));
-        assertFalse(success, "V1 should not have version() function");
+        (bool success,) = proxyAddress.call(abi.encodeWithSignature("newStateVariable()"));
+        assertFalse(success, "V1 should not have newStateVariable() function");
 
         (bool success2,) = proxyAddress.call(abi.encodeWithSignature("initializeV2(uint256)", 1000));
         assertFalse(success2, "V1 should not have initializeV2() function");
