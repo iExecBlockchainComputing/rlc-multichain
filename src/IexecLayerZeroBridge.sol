@@ -31,8 +31,6 @@ contract IexecLayerZeroBridge is
     AccessControlDefaultAdminRulesUpgradeable,
     PausableUpgradeable
 {
-    // ============ ACCESS CONTROL ROLES ============
-
     /// @dev Role identifier for accounts authorized to upgrade the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
