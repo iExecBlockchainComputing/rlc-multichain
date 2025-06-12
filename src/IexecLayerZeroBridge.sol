@@ -39,7 +39,6 @@ contract IexecLayerZeroBridge is
 
     /**
      * @dev The RLC token contract that this bridge operates on
-     * @notice This is immutable and set during contract deployment
      * Must implement the IRLC interface with crosschainBurn and crosschainMint functions
      */
     IRLC public immutable RLC_Token;
