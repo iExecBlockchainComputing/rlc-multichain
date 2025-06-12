@@ -26,8 +26,8 @@ contract RLCAdapterTest is TestHelperOz5 {
     address private user1 = makeAddr("user1");
     address private user2 = makeAddr("user2");
 
-    uint256 private constant INITIAL_BALANCE = 100 ether;
-    uint256 private constant TRANSFER_AMOUNT = 1 ether;
+    uint256 private constant INITIAL_BALANCE = 100 * 10 ** 9; // 100 RLC tokens with 9 decimals
+    uint256 private constant TRANSFER_AMOUNT = 1 * 10 ** 9; // 1 RLC token with 9 decimals
     string private name = "RLC Sepolia Token";
     string private symbol = "RLC";
 
@@ -51,7 +51,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         vm.stopPrank();
 
         // Mint RLC tokens to user1
-        rlcEthereumToken.mint(user1, INITIAL_BALANCE);
+        rlcEthereumToken.transfer(user1, INITIAL_BALANCE);
         vm.prank(user1);
         rlcEthereumToken.approve(address(sourceAdapter), INITIAL_BALANCE);
     }
