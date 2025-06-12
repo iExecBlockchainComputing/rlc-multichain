@@ -22,12 +22,12 @@ interface IRLC is IERC20Metadata {
     function decimals() external view returns (uint8);
 
     /**
-     * @dev Mints a `value` amount of tokens to the caller.
+     * @dev Mints a `value` amount of tokens to the specified account.
      */
     function crosschainMint(address _account, uint256 _amount) external;
 
     /*
-    * @dev Mints a `value` amount of tokens to the caller.
+    * @dev Mints a `value` amount of tokens to the specified account.
     */
     function crosschainBurn(address _account, uint256 _amount) external;
 }
