@@ -16,7 +16,7 @@ contract RLCAdapterTest is TestHelperOz5 {
 
     RLCAdapter private sourceAdapter;
     IexecLayerZeroBridge private destOFTMock;
-    RLCMock private rlcToken;
+    RLCMock private rlcEthereumToken;
 
     uint32 private constant SOURCE_EID = 1;
     uint32 private constant DEST_EID = 2;
@@ -39,7 +39,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         address lzEndpoint = address(endpoints[SOURCE_EID]);
         address lzEndpointOFT = address(endpoints[DEST_EID]);
 
-        (sourceAdapter, destOFTMock, rlcToken) =
+        (sourceAdapter, destOFTMock, rlcEthereumToken,) =
             TestUtils.setupDeployment(name, symbol, lzEndpoint, lzEndpointOFT, owner, pauser);
 
         // Wire the contracts
@@ -51,14 +51,14 @@ contract RLCAdapterTest is TestHelperOz5 {
         vm.stopPrank();
 
         // Mint OFT tokens to user1
-        rlcToken.mint(user1, INITIAL_BALANCE);
+        rlcEthereumToken.mint(user1, INITIAL_BALANCE);
         vm.prank(user1);
-        rlcToken.approve(address(sourceAdapter), INITIAL_BALANCE);
+        rlcEthereumToken.approve(address(sourceAdapter), INITIAL_BALANCE);
     }
 
     function test_sendToken() public {
         // Check initial balances
-        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcEthereumToken.balanceOf(user1), INITIAL_BALANCE);
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
@@ -70,7 +70,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         sourceAdapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
+        assertEq(rlcEthereumToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
     function test_sendOFTWhenSourceAdapterPaused() public {
@@ -94,7 +94,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         }
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcEthereumToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
     function test_sendOFTWhenSourceAdapterUnpaused() public {
@@ -114,7 +114,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         sourceAdapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
+        assertEq(rlcEthereumToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues

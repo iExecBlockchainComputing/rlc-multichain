@@ -6,6 +6,7 @@ import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfac
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
+import {RLCMock} from "./mocks/RLCMock.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
 import {IexecLayerZeroBridge} from "../../src/IexecLayerZeroBridge.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
@@ -16,6 +17,7 @@ contract RLCOFTTest is TestHelperOz5 {
 
     IexecLayerZeroBridge private sourceOFT;
     RLCAdapter private destAdapterMock;
+    RLCMock private rlcArbitrumToken;
 
     uint32 private constant SOURCE_EID = 1;
     uint32 private constant DEST_EID = 2;
@@ -38,7 +40,7 @@ contract RLCOFTTest is TestHelperOz5 {
         address lzEndpointOFT = address(endpoints[SOURCE_EID]);
         address lzEndpoint = address(endpoints[DEST_EID]);
 
-        (destAdapterMock, sourceOFT,) =
+        (destAdapterMock, sourceOFT,, rlcArbitrumToken) =
             TestUtils.setupDeployment(name, symbol, lzEndpoint, lzEndpointOFT, owner, pauser);
 
         // Wire the contracts
@@ -50,12 +52,12 @@ contract RLCOFTTest is TestHelperOz5 {
         vm.stopPrank();
 
         // Mint OFT tokens to user1
-        sourceOFT.mint(user1, INITIAL_BALANCE);
+        rlcArbitrumToken.crosschainMint(user1, INITIAL_BALANCE);
     }
 
     function test_sendToken() public {
         // Check initial balances
-        assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE);
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
@@ -67,7 +69,7 @@ contract RLCOFTTest is TestHelperOz5 {
         sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
+        assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
     function test_sendOFTWhenSourceOFTPaused() public {
@@ -91,7 +93,7 @@ contract RLCOFTTest is TestHelperOz5 {
         }
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
     function test_sendOFTWhenSourceOFTUnpaused() public {
@@ -111,7 +113,7 @@ contract RLCOFTTest is TestHelperOz5 {
         sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(sourceOFT.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
+        assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues

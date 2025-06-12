@@ -22,10 +22,18 @@ library TestUtils {
         address lzEndpointOFT,
         address owner,
         address pauser
-    ) internal returns (RLCAdapter rlcAdapter, IexecLayerZeroBridge iexecLayerZeroBridge, RLCMock rlcEthereumToken) {
+    )
+        internal
+        returns (
+            RLCAdapter rlcAdapter,
+            IexecLayerZeroBridge iexecLayerZeroBridge,
+            RLCMock rlcEthereumToken,
+            RLCMock rlcArbitrumToken
+        )
+    {
         address createXFactory = address(new CreateX());
 
-        // Deploy RLC token mock for Arbitrum Sepolia
+        // Deploy RLC token mock for Ethereum
         rlcEthereumToken = new RLCMock(name, symbol);
 
         // Deploy RLCAdapter
@@ -38,8 +46,8 @@ library TestUtils {
             )
         );
 
-        // Deploy RLC token mock for Arbitrum Sepolia
-        address rlcArbitrumToken = address(new RLCMock(name, symbol));
+        // Deploy RLC token mock for Arbitrum
+        rlcArbitrumToken = new RLCMock(name, symbol);
 
         // Deploy IexecLayerZeroBridge
         bytes memory constructorDataRLCOFT = abi.encode(rlcArbitrumToken, lzEndpointOFT);
