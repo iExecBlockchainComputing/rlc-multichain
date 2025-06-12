@@ -39,7 +39,7 @@ contract IexecLayerZeroBridge is
 
     /**
      * @dev The RLC token contract that this bridge operates on
-     * Must implement the IRLC interface with crosschainBurn and crosschainMint functions
+     * Must implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) interface.
      */
     IRLC public immutable RLC_TOKEN;
 
