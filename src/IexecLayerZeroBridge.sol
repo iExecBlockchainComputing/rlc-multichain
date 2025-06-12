@@ -168,7 +168,6 @@ contract IexecLayerZeroBridge is
      */
     function _debit(address _from, uint256 _amountLD, uint256 _minAmountLD, uint32 _dstEid)
         internal
-        virtual
         override
         whenNotPaused
         returns (uint256 amountSentLD, uint256 amountReceivedLD)
@@ -202,7 +201,6 @@ contract IexecLayerZeroBridge is
      */
     function _credit(address _to, uint256 _amountLD, uint32 /*_srcEid*/ )
         internal
-        virtual
         override
         whenNotPaused
         returns (uint256 amountReceivedLD)
