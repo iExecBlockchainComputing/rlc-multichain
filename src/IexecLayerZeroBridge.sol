@@ -146,7 +146,7 @@ contract IexecLayerZeroBridge is
     // ============ CORE BRIDGE FUNCTIONS ============
 
     /**
-     * @notice Burns tokens on the source chain as part of cross-chain transfer
+     * @notice Burns tokens from the sender's balance as part of cross-chain transfer.
      * @param _from The address to burn tokens from
      * @param _amountLD The amount of tokens to burn (in local decimals)
      * @param _minAmountLD The minimum amount to burn (for slippage protection)
