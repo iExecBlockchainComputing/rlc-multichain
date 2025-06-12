@@ -85,8 +85,8 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         string memory version = adapterV2.version();
         assertEq(version, "2.0.0", "Version should be 2.0.0");
 
-        // Test daily transfer limit
-        assertEq(adapterV2.dailyTransferLimit(), 1000000 * 10 ** 18, "Daily transfer limit should be set");
+        // Test new state variable
+        assertEq(adapterV2.newStateVariable(), 1000000 * 10 ** 18, "New state variable should be set");
     }
 
     function test_RevertWhen_InitializeV2Twice() public {

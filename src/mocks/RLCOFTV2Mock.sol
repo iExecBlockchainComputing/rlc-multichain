@@ -11,16 +11,16 @@ import {RLCOFT} from "../RLCOFT.sol";
  */
 contract RLCOFTV2 is RLCOFT {
     // NEW STATE VARIABLES FOR V2
-    uint256 public dailyMintLimit;
+    uint256 public newStateVariable;
 
     constructor(address _lzEndpoint) RLCOFT(_lzEndpoint) {}
 
     /**
      * @notice Initializes V2 features (called after upgrade)
-     * @param _dailyMintLimit Daily mint limit
+     * @param _newStateVariable New state variable description
      */
-    function initializeV2(uint256 _dailyMintLimit) public reinitializer(2) {
-        dailyMintLimit = _dailyMintLimit;
+    function initializeV2(uint256 _newStateVariable) public reinitializer(2) {
+        newStateVariable = _newStateVariable;
     }
 
     // NEW FUNCTIONS IN V2

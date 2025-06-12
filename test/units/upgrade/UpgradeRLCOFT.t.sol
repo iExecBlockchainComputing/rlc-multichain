@@ -78,8 +78,8 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         string memory version = oftV2.version();
         assertEq(version, "2.0.0", "Version should be 2.0.0");
 
-        // Test daily limit
-        assertEq(oftV2.dailyMintLimit(), 100000 * 10 ** 9, "Daily mint limit should be set correctly");
+        // Test new state variable
+        assertEq(oftV2.newStateVariable(), 100000 * 10 ** 9, "New state variable should be set correctly");
     }
 
     function test_RevertWhen_InitializeV2Twice() public {

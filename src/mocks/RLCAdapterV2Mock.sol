@@ -12,17 +12,17 @@ import {RLCAdapter} from "../RLCAdapter.sol";
 
 contract RLCAdapterV2 is RLCAdapter {
     // NEW STATE VARIABLES FOR V2
-    uint256 public dailyTransferLimit;
+    uint256 public newStateVariable;
 
     //  @custom:oz-upgrades-unsafe-allow constructor
     constructor(address _token, address _lzEndpoint) RLCAdapter(_token, _lzEndpoint) {}
 
     /**
      * @notice Initializes V2 features (called after upgrade)
-     * @param _dailyLimit Daily transfer limit in token units
+     * @param _newStateVariable New state variable description
      */
-    function initializeV2(uint256 _dailyLimit) public reinitializer(2) {
-        dailyTransferLimit = _dailyLimit;
+    function initializeV2(uint256 _newStateVariable) public reinitializer(2) {
+        newStateVariable = _newStateVariable;
     }
 
     // NEW FUNCTIONS IN V2

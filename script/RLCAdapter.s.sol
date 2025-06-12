@@ -72,8 +72,7 @@ contract Upgrade is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
 
         // For testing purpose
-        address rateLimiter = vm.envAddress("OWNER_ADDRESS");
-        uint256 dailyLimit = 1000000 * 10 ** 9; // 1M token daily transfer limit
+        uint256 newStateVariable = 1000000 * 10 ** 9; // 1M token daily transfer limit
 
         // Set up upgrade options
         Options memory opts;
@@ -81,7 +80,7 @@ contract Upgrade is Script {
         // TODO: check why and how to fix it : opts.unsafeAllow
         opts.unsafeSkipAllChecks = true;
 
-        bytes memory initData = abi.encodeWithSelector(RLCAdapterV2.initializeV2.selector, rateLimiter, dailyLimit);
+        bytes memory initData = abi.encodeWithSelector(RLCAdapterV2.initializeV2.selector, newStateVariable);
 
         // Upgrade the proxy to a new implementation
         Upgrades.upgradeProxy(proxyAddress, "RLCAdapterV2Mock.sol:RLCAdapterV2", initData, opts);
