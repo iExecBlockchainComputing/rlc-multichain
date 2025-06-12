@@ -192,7 +192,7 @@ contract IexecLayerZeroBridge is
      * @dev This function is called by LayerZero's OFT core when receiving tokens
      * from another chain. It mints the specified amount to the recipient's balance.
      * It overrides the `_credit` function
-     * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L56-L69
+     * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L78-L88
      *
      *
      * IMPORTANT ASSUMPTIONS:
