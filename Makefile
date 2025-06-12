@@ -25,7 +25,7 @@ e2e-test:
 	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**"
 
 upgrade-test:
-	FOUNDRY_PROFILE=test forge test -vvvv --match-path "./test/units/upgrade/**" --fail-fast
+	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/upgrade/**"
 
 clean:
 	forge clean
