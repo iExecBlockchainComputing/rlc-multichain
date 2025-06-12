@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {Deploy as IexecLayerZeroBridgeDeploy} from "../../script/IexecLayerZeroBridge.s.sol";
 import {IexecLayerZeroBridge} from "../../src/IexecLayerZeroBridge.sol";
 //TODO: To remove when RLC_ERC20 contract will be developed
-import {RLCMock} from "./mocks/RLCMock.sol";
+import {RLCMock} from "../units/mocks/RLCMock.sol";
 
 contract IexecLayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroBridgeScriptTest is
     Test
