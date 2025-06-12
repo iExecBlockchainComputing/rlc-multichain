@@ -41,7 +41,7 @@ contract IexecLayerZeroBridge is
      * @dev The RLC token contract that this bridge operates on
      * Must implement the IRLC interface with crosschainBurn and crosschainMint functions
      */
-    IRLC public immutable RLC_Token;
+    IRLC public immutable RLC_TOKEN;
 
     /**
      * @dev Constructor for the LayerZero bridge contract
@@ -54,7 +54,7 @@ contract IexecLayerZeroBridge is
      */
     constructor(IRLC _token, address _lzEndpoint) OFTCoreUpgradeable(_token.decimals(), _lzEndpoint) {
         _disableInitializers();
-        RLC_Token = _token;
+        RLC_TOKEN = _token;
     }
 
     // ============ INITIALIZATION ============
@@ -103,7 +103,7 @@ contract IexecLayerZeroBridge is
      * which token is being bridged across chains
      */
     function token() public view returns (address) {
-        return address(RLC_Token);
+        return address(RLC_TOKEN);
     }
 
     // ============ EMERGENCY CONTROLS ============
@@ -170,7 +170,7 @@ contract IexecLayerZeroBridge is
      *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token burned = 1 token minted)
-     * - If RLC_Token implements transfer fees, burn fees, or any other fee mechanism,
+     * - If RLC_TOKEN implements transfer fees, burn fees, or any other fee mechanism,
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
      *
@@ -189,7 +189,7 @@ contract IexecLayerZeroBridge is
 
         // Burn the tokens from the sender's balance
         // This assumes crosschainBurn doesn't apply any fees
-        RLC_Token.crosschainBurn(_from, amountSentLD);
+        RLC_TOKEN.crosschainBurn(_from, amountSentLD);
     }
 
     /**
@@ -203,7 +203,7 @@ contract IexecLayerZeroBridge is
      *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token received = 1 token minted)
-     * - If RLC_Token implements minting fees or any other fee mechanism,
+     * - If RLC_TOKEN implements minting fees or any other fee mechanism,
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
      *
@@ -224,7 +224,7 @@ contract IexecLayerZeroBridge is
 
         // Mint the tokens to the recipient
         // This assumes crosschainMint doesn't apply any fees
-        RLC_Token.crosschainMint(_to, _amountLD);
+        RLC_TOKEN.crosschainMint(_to, _amountLD);
 
         // Return the amount minted (assuming no fees)
         return _amountLD;
