@@ -34,6 +34,11 @@ contract IexecLayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroB
 
         assertEq(iexecLayerZeroBridge.owner(), owner);
         assertEq(iexecLayerZeroBridge.token(), address(rlcChainX));
+        // TODO check all roles.
+        // TODO check that the contract is not paused by default.
+        // TODO check that the contract has been initialized and cannot be re-initialized.
+        // TODO check that the contract has the correct LayerZero endpoint.
+        // TODO check that the proxy address is saved.
     }
 
     function testForkFuzz_DifferentSaltsProduceDifferentAddresses(bytes32 salt1, bytes32 salt2) public {
@@ -57,4 +62,14 @@ contract IexecLayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroB
             // Expected: revert due to CREATE2 address collision
         }
     }
+
+    // TODO add tests for the configuration script.
+
+    function testFork_ConfigureContractCorrectly() public {
+        // TODO check that the peer has been set with the correct config.
+    }
+
+    function testFork_RevertWhenPeerIsAlreadySet() public {}
+
+    function testFork_RevertWhenAnyConfigurationVariableIsMissing() public {}
 }

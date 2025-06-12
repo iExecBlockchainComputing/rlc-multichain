@@ -28,6 +28,8 @@ library UUPSProxyDeployer {
         bytes32 salt
     ) internal returns (address) {
         // CreateX Factory instance
+        // TODO read factory address here.
+        // address createxFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
         ICreateX createX = ICreateX(createXFactory);
         address implementation = deployImplementationWithCreateX(contractName, constructorData, createX, salt);
 
@@ -42,6 +44,8 @@ library UUPSProxyDeployer {
 
         return proxy;
     }
+
+    // TODO remove and deploy implementation without create2.
 
     /// @notice Deploys the implementation contract using the CreateX Factory
     /// @param contractName The name of the contract to deploy (used to fetch creation code)

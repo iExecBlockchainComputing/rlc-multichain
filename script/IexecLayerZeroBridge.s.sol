@@ -17,9 +17,9 @@ contract Deploy is Script {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
-        bytes32 salt = vm.envBytes32("SALT");
+        bytes32 createxSalt = vm.envBytes32("SALT");
 
-        address IexecLayerZeroBridgeProxy = deploy(rlcChainX, lzEndpoint, owner, pauser, salt);
+        address IexecLayerZeroBridgeProxy = deploy(rlcChainX, lzEndpoint, owner, pauser, createxSalt);
 
         vm.stopBroadcast();
 
@@ -27,7 +27,7 @@ contract Deploy is Script {
         return IexecLayerZeroBridgeProxy;
     }
 
-    function deploy(address rlcChainX, address lzEndpoint, address owner, address pauser, bytes32 salt)
+    function deploy(address rlcChainX, address lzEndpoint, address owner, address pauser, bytes32 createxSalt)
         public
         returns (address)
     {
@@ -36,7 +36,7 @@ contract Deploy is Script {
         bytes memory constructorData = abi.encode(rlcChainX, lzEndpoint);
         bytes memory initializeData = abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-            "IexecLayerZeroBridge", constructorData, initializeData, createXFactory, salt
+            "IexecLayerZeroBridge", constructorData, initializeData, createXFactory, createxSalt
         );
     }
 }
