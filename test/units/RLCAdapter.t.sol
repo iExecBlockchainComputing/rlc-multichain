@@ -5,9 +5,9 @@ import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/Option
 import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {RLCOFTMock} from "./mocks/RLCOFTMock.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
+import {IexecLayerZeroBridge} from "../../src/IexecLayerZeroBridge.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 
 contract RLCAdapterTest is TestHelperOz5 {
@@ -15,7 +15,7 @@ contract RLCAdapterTest is TestHelperOz5 {
     using TestUtils for *;
 
     RLCAdapter private sourceAdapter;
-    RLCOFTMock private destOFTMock;
+    IexecLayerZeroBridge private destOFTMock;
     RLCMock private rlcToken;
 
     uint32 private constant SOURCE_EID = 1;

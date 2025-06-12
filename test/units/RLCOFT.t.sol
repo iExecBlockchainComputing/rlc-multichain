@@ -6,15 +6,15 @@ import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfac
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
-import {RLCOFTMock} from "./mocks/RLCOFTMock.sol";
 import {RLCAdapter} from "../../src/RLCAdapter.sol";
+import {IexecLayerZeroBridge} from "../../src/IexecLayerZeroBridge.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 
 contract RLCOFTTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;
 
-    RLCOFTMock private sourceOFT;
+    IexecLayerZeroBridge private sourceOFT;
     RLCAdapter private destAdapterMock;
 
     uint32 private constant SOURCE_EID = 1;

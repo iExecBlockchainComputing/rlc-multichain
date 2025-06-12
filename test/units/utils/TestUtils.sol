@@ -9,9 +9,8 @@ import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
 import {RLCAdapter} from "../../../src/RLCAdapter.sol";
-import {RLCOFTMock} from "../mocks/RLCOFTMock.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
-import {RLCOFT} from "../../../src/RLCOFT.sol";
+import {IexecLayerZeroBridge} from "../../../src/IexecLayerZeroBridge.sol";
 
 library TestUtils {
     using OptionsBuilder for bytes;
@@ -23,15 +22,15 @@ library TestUtils {
         address lzEndpointOFT,
         address owner,
         address pauser
-    ) internal returns (RLCAdapter rlcAdapter, RLCOFTMock rlcOftMock, RLCMock rlcToken) {
+    ) internal returns (RLCAdapter rlcAdapter, IexecLayerZeroBridge iexecLayerZeroBridge, RLCMock rlcEthereumToken) {
         address createXFactory = address(new CreateX());
 
-        // Deploy RLC token mock
-        rlcToken = new RLCMock(name, symbol);
+        // Deploy RLC token mock for Arbitrum Sepolia
+        rlcEthereumToken = new RLCMock(name, symbol);
 
         // Deploy RLCAdapter
         bytes32 salt = keccak256("RLCAdapter_SALT");
-        bytes memory constructorDataRLCAdapter = abi.encode(rlcToken, lzEndpointAdapter);
+        bytes memory constructorDataRLCAdapter = abi.encode(rlcEthereumToken, lzEndpointAdapter);
         bytes memory initializeDataRLCAdapter = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser);
         rlcAdapter = RLCAdapter(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
@@ -39,13 +38,16 @@ library TestUtils {
             )
         );
 
-        // Deploy RLCOFTMock
-        bytes memory constructorDataRLCOFT = abi.encode(lzEndpointOFT);
+        // Deploy RLC token mock for Arbitrum Sepolia
+        address rlcArbitrumToken = address(new RLCMock(name, symbol));
+
+        // Deploy IexecLayerZeroBridge
+        bytes memory constructorDataRLCOFT = abi.encode(rlcArbitrumToken, lzEndpointOFT);
         bytes memory initializeDataRLCOFT =
-            abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
-        rlcOftMock = RLCOFTMock(
+            abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser);
+        iexecLayerZeroBridge = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "RLCOFTMock", constructorDataRLCOFT, initializeDataRLCOFT, createXFactory, salt
+                "IexecLayerZeroBridge", constructorDataRLCOFT, initializeDataRLCOFT, createXFactory, salt
             )
         );
     }
