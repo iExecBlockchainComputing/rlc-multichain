@@ -5,7 +5,6 @@ pragma solidity ^0.8.22;
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {StdConstants} from "forge-std/StdConstants.sol";
-import {console} from "forge-std/Script.sol";
 
 /**
  * @title UpgradeUtils
