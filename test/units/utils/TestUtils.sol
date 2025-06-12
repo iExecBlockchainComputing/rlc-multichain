@@ -19,7 +19,7 @@ library TestUtils {
         string memory name,
         string memory symbol,
         address lzEndpointAdapter,
-        address lzEndpointOFT,
+        address lzEndpointBridge,
         address owner,
         address pauser
     )
@@ -50,7 +50,7 @@ library TestUtils {
         rlcArbitrumToken = new RLCMock(name, symbol);
 
         // Deploy IexecLayerZeroBridge
-        bytes memory constructorDataIexecLayerZeroBridge = abi.encode(rlcArbitrumToken, lzEndpointOFT);
+        bytes memory constructorDataIexecLayerZeroBridge = abi.encode(rlcArbitrumToken, lzEndpointBridge);
         bytes memory initializeDataIexecLayerZeroBridge =
             abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser);
         iexecLayerZeroBridge = IexecLayerZeroBridge(
@@ -65,13 +65,13 @@ library TestUtils {
     }
 
     /// @notice Prepare send parameters and quote fee without executing
-    /// @param oft The OFT contract to send from
+    /// @param layerZeroContract The LayerZero contract that respect IOFT interface to send from
     /// @param to The destination address (as bytes32)
     /// @param amount The amount to send
     /// @param dstEid The destination endpoint ID
     /// @return sendParam The prepared send parameters
     /// @return fee The quoted messaging fee
-    function prepareSend(IOFT oft, bytes32 to, uint256 amount, uint32 dstEid)
+    function prepareSend(IOFT layerZeroContract, bytes32 to, uint256 amount, uint32 dstEid)
         internal
         view
         returns (SendParam memory sendParam, MessagingFee memory fee)
@@ -86,6 +86,6 @@ library TestUtils {
             composeMsg: "",
             oftCmd: ""
         });
-        fee = oft.quoteSend(sendParam, false);
+        fee = layerZeroContract.quoteSend(sendParam, false);
     }
 }

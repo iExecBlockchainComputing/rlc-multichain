@@ -15,7 +15,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;
 
-    IexecLayerZeroBridge private sourceOFT;
+    IexecLayerZeroBridge private sourceLayerZeroBridge;
     RLCAdapter private destAdapterMock;
     RLCMock private rlcArbitrumToken;
 
@@ -29,7 +29,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     uint256 private constant INITIAL_BALANCE = 100 ether;
     uint256 private constant TRANSFER_AMOUNT = 1 ether;
-    string private name = "RLC OFT Token";
+    string private name = "RLC Arbitrum Token";
     string private symbol = "RLC";
 
     function setUp() public virtual override {
@@ -37,21 +37,21 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
 
         // Set up endpoints for the deployment
-        address lzEndpointOFT = address(endpoints[SOURCE_EID]);
-        address lzEndpoint = address(endpoints[DEST_EID]);
+        address lzEndpointBridge = address(endpoints[SOURCE_EID]);
+        address lzEndpointAdapter = address(endpoints[DEST_EID]);
 
-        (destAdapterMock, sourceOFT,, rlcArbitrumToken) =
-            TestUtils.setupDeployment(name, symbol, lzEndpoint, lzEndpointOFT, owner, pauser);
+        (destAdapterMock, sourceLayerZeroBridge,, rlcArbitrumToken) =
+            TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, pauser);
 
         // Wire the contracts
         address[] memory contracts = new address[](2);
-        contracts[0] = address(sourceOFT);
+        contracts[0] = address(sourceLayerZeroBridge);
         contracts[1] = address(destAdapterMock);
         vm.startPrank(owner);
         wireOApps(contracts);
         vm.stopPrank();
 
-        // Mint OFT tokens to user1
+        // Mint RLC tokens to user1
         rlcArbitrumToken.crosschainMint(user1, INITIAL_BALANCE);
     }
 
@@ -61,32 +61,32 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceOFT, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(sourceLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        sourceLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
         assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
-    function test_sendOFTWhenSourceOFTPaused() public {
+    function test_sendRLCWhenSourceLayerZeroBridgePaused() public {
         // Pause the destination adapter
         vm.prank(pauser);
-        sourceOFT.pause();
+        sourceLayerZeroBridge.pause();
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceOFT, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(sourceLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens - this should succeed on source but fail on destination
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        try sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1)) {
+        try sourceLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1)) {
             // If it succeeds, we expect it to revert
-            assertTrue(false, "Expected send to revert when source OFT is paused");
+            assertTrue(false, "Expected send to revert when source LayerZeroBridge is paused");
         } catch (bytes memory error) {
             // Expected revert, continue
             assertEq(error, abi.encodeWithSelector(PausableUpgradeable.EnforcedPause.selector));
@@ -96,21 +96,21 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
-    function test_sendOFTWhenSourceOFTUnpaused() public {
+    function test_sendRLCWhenSourceLayerZeroBridgeUnpaused() public {
         // Pause then unpause the destination adapter
         vm.startPrank(pauser);
-        sourceOFT.pause();
-        sourceOFT.unpause();
+        sourceLayerZeroBridge.pause();
+        sourceLayerZeroBridge.unpause();
         vm.stopPrank();
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceOFT, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(sourceLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        sourceOFT.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        sourceLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
         assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);

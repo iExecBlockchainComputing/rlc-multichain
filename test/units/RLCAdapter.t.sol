@@ -15,7 +15,7 @@ contract RLCAdapterTest is TestHelperOz5 {
     using TestUtils for *;
 
     RLCAdapter private sourceAdapter;
-    IexecLayerZeroBridge private destOFTMock;
+    IexecLayerZeroBridge private destLayerZeroBridgeMock;
     RLCMock private rlcEthereumToken;
 
     uint32 private constant SOURCE_EID = 1;
@@ -28,7 +28,7 @@ contract RLCAdapterTest is TestHelperOz5 {
 
     uint256 private constant INITIAL_BALANCE = 100 ether;
     uint256 private constant TRANSFER_AMOUNT = 1 ether;
-    string private name = "RLC OFT Token";
+    string private name = "RLC Sepolia Token";
     string private symbol = "RLC";
 
     function setUp() public virtual override {
@@ -36,16 +36,16 @@ contract RLCAdapterTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
 
         // Set up endpoints for the deployment
-        address lzEndpoint = address(endpoints[SOURCE_EID]);
-        address lzEndpointOFT = address(endpoints[DEST_EID]);
+        address lzEndpointAdapter = address(endpoints[SOURCE_EID]);
+        address lzEndpointBridge = address(endpoints[DEST_EID]);
 
-        (sourceAdapter, destOFTMock, rlcEthereumToken,) =
-            TestUtils.setupDeployment(name, symbol, lzEndpoint, lzEndpointOFT, owner, pauser);
+        (sourceAdapter, destLayerZeroBridgeMock, rlcEthereumToken,) =
+            TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, pauser);
 
         // Wire the contracts
         address[] memory contracts = new address[](2);
         contracts[0] = address(sourceAdapter);
-        contracts[1] = address(destOFTMock);
+        contracts[1] = address(destLayerZeroBridgeMock);
         vm.startPrank(owner);
         wireOApps(contracts);
         vm.stopPrank();
@@ -73,7 +73,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         assertEq(rlcEthereumToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
-    function test_sendOFTWhenSourceAdapterPaused() public {
+    function test_sendRLCWhenSourceAdapterPaused() public {
         // Pause the destination adapter
         vm.prank(pauser);
         sourceAdapter.pause();
@@ -87,7 +87,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         vm.prank(user1);
         try sourceAdapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1)) {
             // If it succeeds, we expect it to revert
-            assertTrue(false, "Expected send to revert when source OFT is paused");
+            assertTrue(false, "Expected send to revert when source Adapter is paused");
         } catch (bytes memory error) {
             // Expected revert, continue
             assertEq(error, abi.encodeWithSelector(PausableUpgradeable.EnforcedPause.selector));
@@ -97,7 +97,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         assertEq(rlcEthereumToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
-    function test_sendOFTWhenSourceAdapterUnpaused() public {
+    function test_sendRLCWhenSourceAdapterUnpaused() public {
         // Pause then unpause the destination adapter
         vm.startPrank(pauser);
         sourceAdapter.pause();
