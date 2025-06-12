@@ -68,6 +68,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
     function test_V2StatePreservation() public {
         // Check V1 state before upgrade
         assertEq(adapterV1.owner(), owner);
+        assertTrue(adapterV1.hasRole(adapterV1.DEFAULT_ADMIN_ROLE(), owner));
         assertTrue(adapterV1.hasRole(adapterV1.UPGRADER_ROLE(), owner));
         assertTrue(adapterV1.hasRole(adapterV1.PAUSER_ROLE(), pauser));
 

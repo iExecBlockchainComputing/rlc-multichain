@@ -60,6 +60,10 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     }
 
     function test_V2StatePreservation() public {
+        assertEq(oftV1.owner(), owner);
+        assertTrue(oftV1.hasRole(oftV1.DEFAULT_ADMIN_ROLE(), owner));
+        assertTrue(oftV1.hasRole(oftV1.UPGRADER_ROLE(), owner));
+        assertTrue(oftV1.hasRole(oftV1.PAUSER_ROLE(), pauser));
         test_UpgradeToV2();
 
         // Test that original state is preserved
