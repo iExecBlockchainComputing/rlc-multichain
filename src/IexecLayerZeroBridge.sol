@@ -44,8 +44,6 @@ contract IexecLayerZeroBridge is
      */
     IRLC public immutable RLC_Token;
 
-    // ============ CONSTRUCTOR ============
-
     /**
      * @dev Constructor for the LayerZero bridge contract
      * @param _token The RLC token contract address that implements IRLC interface
