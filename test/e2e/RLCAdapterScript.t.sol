@@ -23,7 +23,7 @@ contract RLCAdapterScriptTest is Test {
 
     // ============ Deployment Tests ============
     function testFork_CheckDeployment() public {
-        bytes32 salt = keccak256("RLCOFT_SALT");
+        bytes32 salt = keccak256("RLCAdapter_SALT");
         RLCAdapter rlcAdapter = RLCAdapter(deployer.deploy(lzEndpoint, owner, pauser, salt, RLC_TOKEN));
 
         assertEq(rlcAdapter.owner(), owner);

@@ -5,6 +5,7 @@ pragma solidity ^0.8.22;
 import {Script} from "forge-std/Script.sol";
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
+import {IexecLayerZeroBridge} from "../src/IexecLayerZeroBridge.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 
@@ -12,35 +13,30 @@ contract Deploy is Script {
     function run() external returns (address) {
         vm.startBroadcast();
 
-        string memory name = vm.envString("RLC_OFT_TOKEN_NAME");
-        string memory symbol = vm.envString("RLC_TOKEN_SYMBOL");
+        address rlcChainX = vm.envAddress("RLC_ARBITRUM_SEPOLIA_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
         bytes32 createxSalt = vm.envBytes32("SALT");
 
-        address rlcOFTProxy = deploy(lzEndpoint, name, symbol, owner, pauser, createxSalt);
+        address IexecLayerZeroBridgeProxy = deploy(rlcChainX, lzEndpoint, owner, pauser, createxSalt);
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", rlcOFTProxy);
-        return rlcOFTProxy;
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", IexecLayerZeroBridgeProxy);
+        return IexecLayerZeroBridgeProxy;
     }
 
-    function deploy(
-        address lzEndpoint,
-        string memory name,
-        string memory symbol,
-        address owner,
-        address pauser,
-        bytes32 createxSalt
-    ) public returns (address) {
+    function deploy(address rlcChainX, address lzEndpoint, address owner, address pauser, bytes32 createxSalt)
+        public
+        returns (address)
+    {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
 
-        bytes memory constructorData = abi.encode(lzEndpoint);
-        bytes memory initializeData = abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
+        bytes memory constructorData = abi.encode(rlcChainX, lzEndpoint);
+        bytes memory initializeData = abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-            "RLCOFT", constructorData, initializeData, createXFactory, createxSalt
+            "IexecLayerZeroBridge", constructorData, initializeData, createXFactory, createxSalt
         );
     }
 }
