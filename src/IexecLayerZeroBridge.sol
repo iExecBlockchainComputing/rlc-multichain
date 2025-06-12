@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.22;
 
-import {IRLC} from "./interfaces/IRLC.sol";
+import {ICrosschainRLC} from "./interfaces/ICrosschainRLC.sol";
 import {OFTCoreUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTCoreUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -41,14 +41,14 @@ contract IexecLayerZeroBridge is
      * @dev The RLC token contract that this bridge operates on
      * Must implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) interface.
      */
-    IRLC public immutable RLC_TOKEN;
+    ICrosschainRLC public immutable RLC_TOKEN;
 
     /**
      * @dev Constructor for the LayerZero bridge contract
-     * @param _token The RLC token contract address that implements IRLC interface
+     * @param _token The RLC token contract address that implements ICrosschainRLC interface
      * @param _lzEndpoint The LayerZero endpoint address for this chain
      */
-    constructor(IRLC _token, address _lzEndpoint) OFTCoreUpgradeable(_token.decimals(), _lzEndpoint) {
+    constructor(ICrosschainRLC _token, address _lzEndpoint) OFTCoreUpgradeable(_token.decimals(), _lzEndpoint) {
         _disableInitializers();
         RLC_TOKEN = _token;
     }

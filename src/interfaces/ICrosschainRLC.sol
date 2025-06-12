@@ -5,7 +5,7 @@ pragma solidity ^0.8.22;
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-interface IRLC is IERC20Metadata {
+interface ICrosschainRLC is IERC20Metadata {
     /**
      * @dev Returns the name of the token.
      */
