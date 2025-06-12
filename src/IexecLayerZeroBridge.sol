@@ -157,6 +157,8 @@ contract IexecLayerZeroBridge is
      *
      * @dev This function is called by LayerZero's OFT core when sending tokens
      * to another chain. It burns the specified amount from the sender's balance.
+     * It overrides the `_debit` function
+     * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L56-L69
      *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token burned = 1 token minted)
@@ -189,6 +191,9 @@ contract IexecLayerZeroBridge is
      *
      * @dev This function is called by LayerZero's OFT core when receiving tokens
      * from another chain. It mints the specified amount to the recipient's balance.
+     * It overrides the `_credit` function
+     * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L56-L69
+     *
      *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token received = 1 token minted)
