@@ -13,7 +13,7 @@ contract IexecLayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroBridgeayerZeroB
     // Unique instance of the deployment script
     address owner = makeAddr("OWNER_ADDRESS");
     address pauser = makeAddr("PAUSER_ADDRESS");
-    address rlcChainX; // This will be set to a mock token address for testing
+    address rlcAddress; // This will be set to a mock token address for testing
     address LAYERZERO_ENDPOINT = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
 
     IexecLayerZeroBridgeDeploy public deployer;
