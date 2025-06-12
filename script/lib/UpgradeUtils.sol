@@ -12,6 +12,7 @@ import {StdConstants} from "forge-std/StdConstants.sol";
  */
 library UpgradeUtils {
     Vm private constant vm = StdConstants.VM;
+
     enum ContractType {
         OFT,
         ADAPTER,
@@ -49,10 +50,8 @@ library UpgradeUtils {
      * @return newImplementationAddress Address of the new implementation
      */
     function executeUpgradeOFT(UpgradeParams memory params) internal returns (address) {
-        return _executeUpgradeWithInit(
-            params,
-            abi.encodeWithSignature("initializeV2(uint256)", params.newStateVariable)
-        );
+        return
+            _executeUpgradeWithInit(params, abi.encodeWithSignature("initializeV2(uint256)", params.newStateVariable));
     }
 
     /**
@@ -62,10 +61,8 @@ library UpgradeUtils {
      */
     function executeUpgradeAdapter(UpgradeParams memory params) internal returns (address) {
         require(params.rlcToken != address(0), "UpgradeUtils: RLC token address required for Adapter upgrades");
-        return _executeUpgradeWithInit(
-            params,
-            abi.encodeWithSignature("initializeV2(uint256)", params.newStateVariable)
-        );
+        return
+            _executeUpgradeWithInit(params, abi.encodeWithSignature("initializeV2(uint256)", params.newStateVariable));
     }
 
     /**
@@ -102,7 +99,7 @@ library UpgradeUtils {
     function validateAndUpgrade(UpgradeParams memory params) internal returns (address) {
         // First validate
         validateUpgrade(params);
-        
+
         // Then execute
         return executeUpgrade(params);
     }
@@ -113,17 +110,14 @@ library UpgradeUtils {
      * @param initData Initialization data
      * @return newImplementationAddress Address of the new implementation
      */
-    function _executeUpgradeWithInit(
-        UpgradeParams memory params, 
-        bytes memory initData
-    ) private returns (address) {
+    function _executeUpgradeWithInit(UpgradeParams memory params, bytes memory initData) private returns (address) {
         Options memory opts = _buildOptions(params);
-        
+
         Upgrades.upgradeProxy(params.proxyAddress, params.contractName, initData, opts);
-        
+
         address newImplementation = Upgrades.getImplementationAddress(params.proxyAddress);
         emit UpgradeExecuted(params.contractName, params.proxyAddress, newImplementation);
-        
+
         return newImplementation;
     }
 
@@ -134,13 +128,13 @@ library UpgradeUtils {
      */
     function _buildOptions(UpgradeParams memory params) private pure returns (Options memory opts) {
         if (params.contractType == ContractType.ADAPTER) {
-            opts.constructorData = abi.encode( params.rlcToken, params.lzEndpoint);
+            opts.constructorData = abi.encode(params.rlcToken, params.lzEndpoint);
         } else if (params.contractType == ContractType.OFT) {
             opts.constructorData = abi.encode(params.lzEndpoint);
         } else {
             opts.constructorData = abi.encode(params.lzEndpoint);
         }
-        
+
         if (params.skipChecks) {
             opts.unsafeSkipAllChecks = true;
         }

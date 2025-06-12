@@ -95,7 +95,7 @@ contract ValidateUpgrade is Script {
     function run() external {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: address(0), 
+            proxyAddress: address(0),
             lzEndpoint: lzEndpoint,
             rlcToken: address(0), // Not used for OFT
             contractName: "RLCOFTV2Mock.sol:RLCOFTV2",

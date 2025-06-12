@@ -42,14 +42,11 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
 
     function test_UpgradeToV2() public {
         vm.startPrank(owner);
-        
+
         TestUpgradeUtils.upgradeOFTForTesting(
-            proxyAddress,
-            "RLCOFTV2Mock.sol:RLCOFTV2",
-            mockEndpoint,
-            NEW_STATE_VARIABLE
+            proxyAddress, "RLCOFTV2Mock.sol:RLCOFTV2", mockEndpoint, NEW_STATE_VARIABLE
         );
-        
+
         vm.stopPrank();
 
         // Cast proxy to V2
@@ -59,9 +56,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     function test_ValidateUpgrade() public {
         // Test that upgrade validation works
         TestUpgradeUtils.validateUpgradeForTesting(
-            "RLCOFTV2Mock.sol:RLCOFTV2",
-            mockEndpoint,
-            UpgradeUtils.ContractType.OFT
+            "RLCOFTV2Mock.sol:RLCOFTV2", mockEndpoint, UpgradeUtils.ContractType.OFT
         );
     }
 

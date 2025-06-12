@@ -48,11 +48,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         vm.startPrank(owner);
 
         TestUpgradeUtils.upgradeAdapterForTesting(
-            proxyAddress,
-            "RLCAdapterV2Mock.sol:RLCAdapterV2",
-            mockEndpoint,
-            address(rlcToken),
-            NEW_STATE_VARIABLE
+            proxyAddress, "RLCAdapterV2Mock.sol:RLCAdapterV2", mockEndpoint, address(rlcToken), NEW_STATE_VARIABLE
         );
 
         vm.stopPrank();
@@ -64,9 +60,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
     function test_ValidateUpgrade() public {
         // Test that upgrade validation works
         TestUpgradeUtils.validateUpgradeForTesting(
-            "RLCAdapterV2Mock.sol:RLCAdapterV2",
-            mockEndpoint,
-            UpgradeUtils.ContractType.ADAPTER
+            "RLCAdapterV2Mock.sol:RLCAdapterV2", mockEndpoint, UpgradeUtils.ContractType.ADAPTER
         );
     }
 

@@ -32,13 +32,10 @@ contract Deploy is Script {
         return rlcAdapterProxy;
     }
 
-    function deploy(
-        address lzEndpoint, 
-        address owner, 
-        address pauser, 
-        bytes32 createxSalt, 
-        address rlcToken
-    ) public returns (address) {
+    function deploy(address lzEndpoint, address owner, address pauser, bytes32 createxSalt, address rlcToken)
+        public
+        returns (address)
+    {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
         bytes memory constructorData = abi.encode(rlcToken, lzEndpoint);
         bytes memory initializeData = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser);
@@ -81,7 +78,7 @@ contract Upgrade is Script {
             proxyAddress: proxyAddress,
             contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2", // Would be production contract in real deployment
             lzEndpoint: lzEndpoint,
-            rlcToken: rlcToken, 
+            rlcToken: rlcToken,
             contractType: UpgradeUtils.ContractType.ADAPTER,
             newStateVariable: newStateVariable,
             skipChecks: true, // TODO: Remove when validation issues are fixed
@@ -108,7 +105,7 @@ contract ValidateUpgrade is Script {
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: address(0), // Not needed for validation
             lzEndpoint: lzEndpoint,
-            rlcToken: rlcToken, 
+            rlcToken: rlcToken,
             contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
             contractType: UpgradeUtils.ContractType.ADAPTER,
             newStateVariable: 1000000 * 10 ** 9,
