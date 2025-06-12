@@ -50,12 +50,12 @@ library TestUtils {
         rlcArbitrumToken = new RLCMock(name, symbol);
 
         // Deploy IexecLayerZeroBridge
-        bytes memory constructorDataRLCOFT = abi.encode(rlcArbitrumToken, lzEndpointOFT);
-        bytes memory initializeDataRLCOFT =
+        bytes memory constructorDataIexecLayerZeroBridge = abi.encode(rlcArbitrumToken, lzEndpointOFT);
+        bytes memory initializeDataIexecLayerZeroBridge =
             abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser);
         iexecLayerZeroBridge = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "IexecLayerZeroBridge", constructorDataRLCOFT, initializeDataRLCOFT, createXFactory, salt
+                "IexecLayerZeroBridge", constructorDataIexecLayerZeroBridge, initializeDataIexecLayerZeroBridge, createXFactory, salt
             )
         );
     }

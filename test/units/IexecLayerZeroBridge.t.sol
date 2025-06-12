@@ -11,7 +11,7 @@ import {RLCAdapter} from "../../src/RLCAdapter.sol";
 import {IexecLayerZeroBridge} from "../../src/IexecLayerZeroBridge.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 
-contract RLCOFTTest is TestHelperOz5 {
+contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;
 
