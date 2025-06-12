@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 
-interface IIexecLayerZeroBridge is IOFT {
+interface IIexecLayerZeroBridge {
     /**
      * @notice Pauses the contract, disabling `_credit` & `_debit` functions.
      * @dev Should only be callable by authorized accounts: PAUSER_ROLE.
