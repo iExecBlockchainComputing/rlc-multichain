@@ -15,7 +15,8 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
     RLCAdapter public adapterV1;
     RLCAdapterV2 public adapterV2;
     RLCMock public rlcToken;
-    address public mockEndpoint = makeAddr("mockEndpoint");
+    // TODO use a common function to create addresses.
+    address public mockEndpoint;
     address public owner = makeAddr("owner");
     address public pauser = makeAddr("pauser");
     address public user = makeAddr("user");
