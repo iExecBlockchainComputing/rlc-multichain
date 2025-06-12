@@ -50,7 +50,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         wireOApps(contracts);
         vm.stopPrank();
 
-        // Mint OFT tokens to user1
+        // Mint RLC tokens to user1
         rlcEthereumToken.mint(user1, INITIAL_BALANCE);
         vm.prank(user1);
         rlcEthereumToken.approve(address(sourceAdapter), INITIAL_BALANCE);
