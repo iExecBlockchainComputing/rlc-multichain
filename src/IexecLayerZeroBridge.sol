@@ -37,8 +37,6 @@ contract IexecLayerZeroBridge is
     /// @dev Role identifier for accounts authorized to pause/unpause the contract
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-    // ============ IMMUTABLE STATE ============
-
     /**
      * @dev The RLC token contract that this bridge operates on
      * @notice This is immutable and set during contract deployment
