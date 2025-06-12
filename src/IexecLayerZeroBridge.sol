@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.22;
 
-import {IRLC} from "./interface/IRLC.sol";
+import {IRLC} from "./interfaces/IRLC.sol";
 import {OFTCoreUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTCoreUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";

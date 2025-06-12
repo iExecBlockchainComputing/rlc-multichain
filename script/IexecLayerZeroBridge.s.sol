@@ -13,7 +13,7 @@ contract Deploy is Script {
     function run() external returns (address) {
         vm.startBroadcast();
 
-        address rlcChainX = vm.envAddress("RLC_CHAIN_X");
+        address rlcChainX = vm.envAddress("RLC_ARBITRUM_SEPOLIA_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
