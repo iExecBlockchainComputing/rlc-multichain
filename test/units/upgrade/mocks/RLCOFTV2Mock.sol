@@ -4,7 +4,6 @@ pragma solidity ^0.8.22;
 
 import {RLCOFT} from "../../../../src/RLCOFT.sol";
 
-
 /**
  * @title RLCOFTV2 - V2 implementation with additional features
  * @author IEXEC BLOCKCHAIN TECH

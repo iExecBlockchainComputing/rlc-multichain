@@ -10,7 +10,6 @@ import {RLCAdapter} from "../../../../src/RLCAdapter.sol";
  * @dev This contract inherits from RLCAdapter (V1) and adds new functionality
  * @custom:oz-upgrades-from src/RLCAdapter.sol:RLCAdapter
  */
-
 contract RLCAdapterV2 is RLCAdapter {
     // NEW STATE VARIABLES FOR V2
     uint256 public newStateVariable;

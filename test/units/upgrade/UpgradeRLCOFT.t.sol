@@ -51,7 +51,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
 
         // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(owner);
-        
+
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             contractName: "RLCOFTV2Mock.sol:RLCOFTV2",
@@ -64,7 +64,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         });
 
         UpgradeUtils.executeUpgradeOFT(params);
-        
+
         vm.stopPrank();
 
         oftV2 = RLCOFTV2(proxyAddress);
@@ -88,7 +88,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
 
     function test_RevertWhen_InitializeV2Twice() public {
         vm.startPrank(owner);
-        
+
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             contractName: "RLCOFTV2Mock.sol:RLCOFTV2",
@@ -101,14 +101,14 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         });
 
         UpgradeUtils.executeUpgradeOFT(params);
-        
+
         vm.stopPrank();
 
         oftV2 = RLCOFTV2(proxyAddress);
-        
+
         // Verify it was initialized correctly
         assertEq(oftV2.newStateVariable(), NEW_STATE_VARIABLE);
-        
+
         // Attempt to initialize again should revert
         vm.prank(owner);
         vm.expectRevert();

@@ -51,7 +51,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
 
         // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(owner);
-        
+
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
@@ -64,7 +64,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         });
 
         UpgradeUtils.executeUpgradeAdapter(params);
-        
+
         vm.stopPrank();
 
         adapterV2 = RLCAdapterV2(proxyAddress);
@@ -86,7 +86,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
 
     function test_RevertWhen_InitializeV2Twice() public {
         vm.startPrank(owner);
-        
+
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
@@ -99,14 +99,14 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         });
 
         UpgradeUtils.executeUpgradeAdapter(params);
-        
+
         vm.stopPrank();
 
         adapterV2 = RLCAdapterV2(proxyAddress);
-        
+
         // Verify it was initialized correctly
         assertEq(adapterV2.newStateVariable(), NEW_STATE_VARIABLE);
-        
+
         // Attempt to initialize again should revert
         vm.prank(owner);
         vm.expectRevert();
