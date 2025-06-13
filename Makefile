@@ -70,6 +70,15 @@ deploy-oft:
         --broadcast \
         -vvv
 
+# deploy-rlc-crosschain-token RPC_URL=https://...
+deploy-rlc-crosschain-token:
+	@echo "Deploying RLC cross-chain token on: $(RPC_URL)"
+	CHAIN=arbitrum_sepolia forge script script/RLCCrosschainToken.s.sol:Deploy \
+		--rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+		--broadcast \
+		-vvv
+
 configure-adapter:
 	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
 	forge script script/RLCAdapter.s.sol:Configure \
