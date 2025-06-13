@@ -4,7 +4,8 @@ pragma solidity ^0.8.22;
 
 import {RLCOFT} from "../../../src/RLCOFT.sol";
 import {RLCOFTV2} from "./mocks/RLCOFTV2Mock.sol";
-import {TestUtils, TestUpgradeUtils} from "./../utils/TestUtils.sol";
+import {TestUtils} from "./../utils/TestUtils.sol";
+import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 contract UpgradeRLCOFTTest is TestHelperOz5 {
@@ -20,6 +21,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     string public name = "RLC OFT Token";
     string public symbol = "RLC";
     uint256 public constant NEW_STATE_VARIABLE = 2;
+
     function setUp() public virtual override {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
@@ -47,14 +49,22 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         assertTrue(oftV1.hasRole(oftV1.UPGRADER_ROLE(), owner));
         assertTrue(oftV1.hasRole(oftV1.PAUSER_ROLE(), pauser));
 
-        // 3. Perform upgrade
+        // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(owner);
-        TestUpgradeUtils.upgradeOFTForTesting(
-            proxyAddress, 
-            "RLCOFTV2Mock.sol:RLCOFTV2", 
-            mockEndpoint, 
-            NEW_STATE_VARIABLE
-        );
+        
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: proxyAddress,
+            contractName: "RLCOFTV2Mock.sol:RLCOFTV2",
+            lzEndpoint: mockEndpoint,
+            rlcToken: address(0), // Not used for OFT
+            contractType: UpgradeUtils.ContractType.OFT,
+            newStateVariable: NEW_STATE_VARIABLE,
+            skipChecks: true, // Allow for testing with mocks
+            validateOnly: false
+        });
+
+        UpgradeUtils.executeUpgradeOFT(params);
+        
         vm.stopPrank();
 
         oftV2 = RLCOFTV2(proxyAddress);
@@ -78,14 +88,24 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
 
     function test_RevertWhen_InitializeV2Twice() public {
         vm.startPrank(owner);
-        TestUpgradeUtils.upgradeOFTForTesting(
-            proxyAddress, 
-            "RLCOFTV2Mock.sol:RLCOFTV2", 
-            mockEndpoint, 
-            NEW_STATE_VARIABLE
-        );
+        
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: proxyAddress,
+            contractName: "RLCOFTV2Mock.sol:RLCOFTV2",
+            lzEndpoint: mockEndpoint,
+            rlcToken: address(0), // Not used for OFT
+            contractType: UpgradeUtils.ContractType.OFT,
+            newStateVariable: NEW_STATE_VARIABLE,
+            skipChecks: true,
+            validateOnly: false
+        });
+
+        UpgradeUtils.executeUpgradeOFT(params);
+        
         vm.stopPrank();
+
         oftV2 = RLCOFTV2(proxyAddress);
+        
         // Verify it was initialized correctly
         assertEq(oftV2.newStateVariable(), NEW_STATE_VARIABLE);
         

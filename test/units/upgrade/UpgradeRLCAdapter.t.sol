@@ -5,7 +5,8 @@ pragma solidity ^0.8.22;
 import {RLCAdapter} from "../../../src/RLCAdapter.sol";
 import {RLCMock} from "../../units/mocks/RLCMock.sol";
 import {RLCAdapterV2} from "./mocks/RLCAdapterV2Mock.sol";
-import {TestUtils, TestUpgradeUtils} from "./../utils/TestUtils.sol";
+import {TestUtils} from "./../utils/TestUtils.sol";
+import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 contract UpgradeRLCAdapterTest is TestHelperOz5 {
@@ -48,15 +49,22 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         assertTrue(adapterV1.hasRole(adapterV1.UPGRADER_ROLE(), owner));
         assertTrue(adapterV1.hasRole(adapterV1.PAUSER_ROLE(), pauser));
 
-        // 3. Perform upgrade
+        // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(owner);
-        TestUpgradeUtils.upgradeAdapterForTesting(
-            proxyAddress, 
-            "RLCAdapterV2Mock.sol:RLCAdapterV2", 
-            mockEndpoint, 
-            address(rlcToken), 
-            NEW_STATE_VARIABLE
-        );
+        
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: proxyAddress,
+            contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
+            lzEndpoint: mockEndpoint,
+            rlcToken: address(rlcToken),
+            contractType: UpgradeUtils.ContractType.ADAPTER,
+            newStateVariable: NEW_STATE_VARIABLE,
+            skipChecks: true, // Allow for testing with mocks
+            validateOnly: false
+        });
+
+        UpgradeUtils.executeUpgradeAdapter(params);
+        
         vm.stopPrank();
 
         adapterV2 = RLCAdapterV2(proxyAddress);
@@ -78,13 +86,20 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
 
     function test_RevertWhen_InitializeV2Twice() public {
         vm.startPrank(owner);
-        TestUpgradeUtils.upgradeAdapterForTesting(
-            proxyAddress, 
-            "RLCAdapterV2Mock.sol:RLCAdapterV2", 
-            mockEndpoint, 
-            address(rlcToken), 
-            NEW_STATE_VARIABLE
-        );
+        
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: proxyAddress,
+            contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
+            lzEndpoint: mockEndpoint,
+            rlcToken: address(rlcToken),
+            contractType: UpgradeUtils.ContractType.ADAPTER,
+            newStateVariable: NEW_STATE_VARIABLE,
+            skipChecks: true,
+            validateOnly: false
+        });
+
+        UpgradeUtils.executeUpgradeAdapter(params);
+        
         vm.stopPrank();
 
         adapterV2 = RLCAdapterV2(proxyAddress);
