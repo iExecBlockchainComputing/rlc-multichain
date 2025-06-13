@@ -20,8 +20,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     address public proxyAddress;
     string public name = "RLC OFT Token";
     string public symbol = "RLC";
-    uint256 public constant NEW_STATE_VARIABLE = 100000 * 10 ** 9;
-
+    uint256 public constant NEW_STATE_VARIABLE = 2;
     function setUp() public virtual override {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);

@@ -22,7 +22,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
     address public user = makeAddr("user");
     string public constant name = "RLC OFT Test";
     string public constant symbol = "RLCOFT";
-    uint256 public constant NEW_STATE_VARIABLE = 1000000 * 10 ** 18;
+    uint256 public constant NEW_STATE_VARIABLE = 2;
 
     address public proxyAddress;
 
