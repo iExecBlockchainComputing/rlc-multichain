@@ -15,8 +15,7 @@ library UpgradeUtils {
 
     enum ContractType {
         OFT,
-        ADAPTER,
-        GENERIC
+        ADAPTER
     }
 
     struct UpgradeParams {
@@ -66,28 +65,15 @@ library UpgradeUtils {
     }
 
     /**
-     * @notice Executes a generic upgrade with custom init data
-     * @param params Upgrade parameters
-     * @param initData Custom initialization data
-     * @return newImplementationAddress Address of the new implementation
-     */
-    function executeUpgradeGeneric(UpgradeParams memory params, bytes memory initData) internal returns (address) {
-        return _executeUpgradeWithInit(params, initData);
-    }
-
-    /**
      * @notice Executes upgrade based on contract type
      * @param params Upgrade parameters
      * @return newImplementationAddress Address of the new implementation
      */
     function executeUpgrade(UpgradeParams memory params) internal returns (address) {
-        if (params.contractType == ContractType.OFT) {
-            return executeUpgradeOFT(params);
-        } else if (params.contractType == ContractType.ADAPTER) {
+        if (params.contractType == ContractType.ADAPTER) {
             return executeUpgradeAdapter(params);
         } else {
-            // Generic upgrade without initialization
-            return _executeUpgradeWithInit(params, "");
+            return executeUpgradeOFT(params);
         }
     }
 
@@ -129,8 +115,6 @@ library UpgradeUtils {
     function _buildOptions(UpgradeParams memory params) private pure returns (Options memory opts) {
         if (params.contractType == ContractType.ADAPTER) {
             opts.constructorData = abi.encode(params.rlcToken, params.lzEndpoint);
-        } else if (params.contractType == ContractType.OFT) {
-            opts.constructorData = abi.encode(params.lzEndpoint);
         } else {
             opts.constructorData = abi.encode(params.lzEndpoint);
         }
