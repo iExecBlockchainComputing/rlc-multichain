@@ -78,10 +78,6 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     function test_V2NewFunctionality() public {
         test_UpgradeToV2();
 
-        // Test V2 version function
-        string memory version = oftV2.version();
-        assertEq(version, "2.0.0", "Version should be 2.0.0");
-
         // Test new state variable
         assertEq(oftV2.newStateVariable(), NEW_STATE_VARIABLE, "New state variable should be set correctly");
     }

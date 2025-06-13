@@ -23,14 +23,4 @@ contract RLCOFTV2 is RLCOFT {
     function initializeV2(uint256 _newStateVariable) public reinitializer(2) {
         newStateVariable = _newStateVariable;
     }
-
-    // NEW FUNCTIONS IN V2
-
-    /**
-     * @notice Returns the contract version
-     * @return Version string
-     */
-    function version() public pure returns (string memory) {
-        return "2.0.0";
-    }
 }
