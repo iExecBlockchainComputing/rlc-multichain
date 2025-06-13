@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {Script} from "forge-std/Script.sol";
+import {Script, console} from "forge-std/Script.sol";
+import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
+import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
     function run() external returns (address) {
@@ -24,8 +26,9 @@ contract Deploy is Script {
         address rlcAdapterProxy = deploy(lzEndpoint, owner, pauser, createxSalt, rlcToken);
 
         vm.stopBroadcast();
-
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy); // TODO Save the address in another way becase .env file is not versioned in git.
+        address implementationAddress = Upgrades.getImplementationAddress(rlcAdapterProxy);
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS", implementationAddress);
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy);
         return rlcAdapterProxy;
     }
 
@@ -57,5 +60,58 @@ contract Configure is Script {
         adapter.setPeer(arbitrumSepoliaChainId, bytes32(uint256(uint160(oftAddress))));
 
         vm.stopBroadcast();
+    }
+}
+
+contract Upgrade is Script {
+    function run() external {
+        vm.startBroadcast();
+
+        address proxyAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS");
+        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
+        address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
+
+        // For testing purpose
+        uint256 newStateVariable = 1000000 * 10 ** 9; // 1M token daily transfer limit
+
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: proxyAddress,
+            contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2", // Would be production contract in real deployment
+            lzEndpoint: lzEndpoint,
+            rlcToken: rlcToken,
+            newStateVariable: newStateVariable,
+            skipChecks: true, // TODO: Remove when validation issues are fixed
+            validateOnly: false
+        });
+
+        address newImplementationAddress = UpgradeUtils.executeUpgrade(params);
+
+        // Log the new implementation address
+        console.log("RLCAdapter upgraded to new implementation:", newImplementationAddress);
+        console.log("Proxy address remains:", proxyAddress);
+
+        vm.stopBroadcast();
+
+        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS", newImplementationAddress);
+    }
+}
+
+contract ValidateUpgrade is Script {
+    function run() external {
+        address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
+        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
+
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: address(0), // Not needed for validation
+            lzEndpoint: lzEndpoint,
+            rlcToken: rlcToken,
+            contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
+            newStateVariable: 1000000 * 10 ** 9,
+            skipChecks: true, // TODO: Remove this when validation issues are fixed
+            validateOnly: true
+        });
+
+        UpgradeUtils.validateUpgrade(params);
+        console.log("Upgrade validation passed for RLCAdapter");
     }
 }

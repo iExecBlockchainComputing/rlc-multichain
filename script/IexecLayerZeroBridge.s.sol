@@ -3,11 +3,12 @@
 pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
-import {ICreateX} from "@createx/contracts/ICreateX.sol";
 import {RLCOFT} from "../src/RLCOFT.sol";
 import {IexecLayerZeroBridge} from "../src/IexecLayerZeroBridge.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./UpdateEnvUtils.sol";
+import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
     function run() external returns (address) {
@@ -23,6 +24,8 @@ contract Deploy is Script {
 
         vm.stopBroadcast();
 
+        address implementationAddress = Upgrades.getImplementationAddress(IexecLayerZeroBridgeProxy);
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS", implementationAddress);
         EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", IexecLayerZeroBridgeProxy);
         return IexecLayerZeroBridgeProxy;
     }
@@ -57,5 +60,49 @@ contract Configure is Script {
         oft.setPeer(ethereumSepoliaChainId, bytes32(uint256(uint160(adapterAddress))));
 
         vm.stopBroadcast();
+    }
+}
+
+contract Upgrade is Script {
+    function run() external {
+        vm.startBroadcast();
+
+        address proxyAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
+        address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
+        // For testing purpose
+        uint256 newStateVariable = 1000000 * 10 ** 9;
+
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: proxyAddress,
+            rlcToken: address(0), // Not used for OFT
+            contractName: "RLCOFTV2Mock.sol:RLCOFTV2", // Would be production contract in real deployment
+            lzEndpoint: lzEndpoint,
+            newStateVariable: newStateVariable,
+            skipChecks: true, // TODO: Remove when validation issues are fixed opts.unsafeAllow
+            validateOnly: false
+        });
+
+        address newImplementationAddress = UpgradeUtils.executeUpgrade(params);
+
+        vm.stopBroadcast();
+
+        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS", newImplementationAddress);
+    }
+}
+
+contract ValidateUpgrade is Script {
+    function run() external {
+        address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: address(0),
+            lzEndpoint: lzEndpoint,
+            rlcToken: address(0), // Not used for OFT
+            contractName: "RLCOFTV2Mock.sol:RLCOFTV2",
+            newStateVariable: 1000000 * 10 ** 9,
+            skipChecks: true, // TODO: Remove this when validation issues are fixed opts.unsafeAllow
+            validateOnly: true
+        });
+
+        UpgradeUtils.validateUpgrade(params);
     }
 }

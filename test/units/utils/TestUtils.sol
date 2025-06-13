@@ -1,8 +1,7 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-FileCopyrightText: 2025 IEXEC BLOCKCHAIN TECH <contact@iex.ec>
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {Vm} from "forge-std/Vm.sol";
-import {StdConstants} from "forge-std/StdConstants.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
@@ -11,6 +10,7 @@ import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
 import {RLCAdapter} from "../../../src/RLCAdapter.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
 import {IexecLayerZeroBridge} from "../../../src/IexecLayerZeroBridge.sol";
+import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
 
 library TestUtils {
     using OptionsBuilder for bytes;
@@ -64,13 +64,15 @@ library TestUtils {
         );
     }
 
-    /// @notice Prepare send parameters and quote fee without executing
-    /// @param layerZeroContract The LayerZero contract that respect IOFT interface to send from
-    /// @param to The destination address (as bytes32)
-    /// @param amount The amount to send
-    /// @param dstEid The destination endpoint ID
-    /// @return sendParam The prepared send parameters
-    /// @return fee The quoted messaging fee
+    /**
+     * @notice Prepare send parameters and quote fee without executing
+     * @param layerZeroContract The LayerZero contract that respect IOFT interface to send from
+     * @param to The destination address (as bytes32)
+     * @param amount The amount to send
+     * @param dstEid The destination endpoint ID
+     * @return sendParam The prepared send parameters
+     * @return fee The quoted messaging fee
+     */
     function prepareSend(IOFT layerZeroContract, bytes32 to, uint256 amount, uint32 dstEid)
         internal
         view
