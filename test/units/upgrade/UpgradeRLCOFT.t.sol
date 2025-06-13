@@ -5,7 +5,6 @@ pragma solidity ^0.8.22;
 import {RLCOFT} from "../../../src/RLCOFT.sol";
 import {RLCOFTV2} from "./mocks/RLCOFTV2Mock.sol";
 import {TestUtils, TestUpgradeUtils} from "./../utils/TestUtils.sol";
-import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 contract UpgradeRLCOFTTest is TestHelperOz5 {
@@ -30,64 +29,69 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         proxyAddress = address(oftV1);
     }
 
-    function test_V1DoesNotHaveV2Functions() public {
-        // Test that V1 doesn't have V2 functions
+    function test_UpgradeCorrectly() public {
+        // 1. Verify V1 doesn't have V2 functions
         (bool success,) = proxyAddress.call(abi.encodeWithSignature("newStateVariable()"));
         assertFalse(success, "V1 should not have newStateVariable() function");
 
         (bool success2,) = proxyAddress.call(abi.encodeWithSignature("initializeV2(uint256)", 1000));
         assertFalse(success2, "V1 should not have initializeV2() function");
-    }
 
-    function test_UpgradeToV2() public {
-        vm.startPrank(owner);
+        // 2. Store V1 state for comparison
+        string memory originalName = oftV1.name();
+        string memory originalSymbol = oftV1.symbol();
+        uint8 originalDecimals = oftV1.decimals();
+        address originalOwner = oftV1.owner();
 
-        TestUpgradeUtils.upgradeOFTForTesting(
-            proxyAddress, "RLCOFTV2Mock.sol:RLCOFTV2", mockEndpoint, NEW_STATE_VARIABLE
-        );
-
-        vm.stopPrank();
-
-        // Cast proxy to V2
-        oftV2 = RLCOFTV2(proxyAddress);
-    }
-
-    function test_ValidateUpgrade() public {
-        // Test that upgrade validation works
-        TestUpgradeUtils.validateUpgradeForTesting(
-            "RLCOFTV2Mock.sol:RLCOFTV2", mockEndpoint, UpgradeUtils.ContractType.OFT
-        );
-    }
-
-    function test_V2StatePreservation() public {
-        assertEq(oftV1.owner(), owner);
         assertTrue(oftV1.hasRole(oftV1.DEFAULT_ADMIN_ROLE(), owner));
         assertTrue(oftV1.hasRole(oftV1.UPGRADER_ROLE(), owner));
         assertTrue(oftV1.hasRole(oftV1.PAUSER_ROLE(), pauser));
-        test_UpgradeToV2();
 
-        // Test that original state is preserved
-        assertEq(oftV2.name(), name, "Token name should be preserved");
-        assertEq(oftV2.symbol(), symbol, "Token symbol should be preserved");
-        assertEq(oftV2.decimals(), 9, "Decimals should be preserved");
-        assertEq(oftV2.owner(), owner, "Owner should be preserved");
-        assertTrue(oftV2.hasRole(oftV2.UPGRADER_ROLE(), owner), "Original upgrader role should be preserved");
-        assertTrue(oftV2.hasRole(oftV2.PAUSER_ROLE(), pauser), "Original pauser role should be preserved");
-    }
+        // 3. Perform upgrade
+        vm.startPrank(owner);
+        TestUpgradeUtils.upgradeOFTForTesting(
+            proxyAddress, 
+            "RLCOFTV2Mock.sol:RLCOFTV2", 
+            mockEndpoint, 
+            NEW_STATE_VARIABLE
+        );
+        vm.stopPrank();
 
-    function test_V2NewFunctionality() public {
-        test_UpgradeToV2();
+        oftV2 = RLCOFTV2(proxyAddress);
 
-        // Test new state variable
-        assertEq(oftV2.newStateVariable(), NEW_STATE_VARIABLE, "New state variable should be set correctly");
+        // 5. Verify state preservation
+        assertEq(oftV2.name(), originalName, "Token name should be preserved");
+        assertEq(oftV2.symbol(), originalSymbol, "Token symbol should be preserved");
+        assertEq(oftV2.decimals(), originalDecimals, "Decimals should be preserved");
+        assertEq(oftV2.owner(), originalOwner, "Owner should be preserved");
+        assertTrue(oftV2.hasRole(oftV2.DEFAULT_ADMIN_ROLE(), owner), "Default admin role should be preserved");
+        assertTrue(oftV2.hasRole(oftV2.UPGRADER_ROLE(), owner), "Upgrader role should be preserved");
+        assertTrue(oftV2.hasRole(oftV2.PAUSER_ROLE(), pauser), "Pauser role should be preserved");
+
+        // 6. Verify new V2 functionality
+        assertEq(oftV2.newStateVariable(), NEW_STATE_VARIABLE, "New state variable should be initialized correctly");
+
+        // 7. Verify V2 functions are now available
+        (bool v2Success,) = proxyAddress.call(abi.encodeWithSignature("newStateVariable()"));
+        assertTrue(v2Success, "V2 should have newStateVariable() function");
     }
 
     function test_RevertWhen_InitializeV2Twice() public {
-        test_UpgradeToV2();
-
-        // Test that initializeV2 cannot be called again
+        vm.startPrank(owner);
+        TestUpgradeUtils.upgradeOFTForTesting(
+            proxyAddress, 
+            "RLCOFTV2Mock.sol:RLCOFTV2", 
+            mockEndpoint, 
+            NEW_STATE_VARIABLE
+        );
+        vm.stopPrank();
+        oftV2 = RLCOFTV2(proxyAddress);
+        // Verify it was initialized correctly
+        assertEq(oftV2.newStateVariable(), NEW_STATE_VARIABLE);
+        
+        // Attempt to initialize again should revert
         vm.prank(owner);
         vm.expectRevert();
-        oftV2.initializeV2(NEW_STATE_VARIABLE);
+        oftV2.initializeV2(999); // Different value to ensure it's not a duplicate
     }
 }

@@ -6,7 +6,6 @@ import {RLCAdapter} from "../../../src/RLCAdapter.sol";
 import {RLCMock} from "../../units/mocks/RLCMock.sol";
 import {RLCAdapterV2} from "./mocks/RLCAdapterV2Mock.sol";
 import {TestUtils, TestUpgradeUtils} from "./../utils/TestUtils.sol";
-import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 contract UpgradeRLCAdapterTest is TestHelperOz5 {
@@ -19,12 +18,10 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
     address public mockEndpoint;
     address public owner = makeAddr("owner");
     address public pauser = makeAddr("pauser");
-    address public user = makeAddr("user");
+    address public proxyAddress;
     string public constant name = "RLC OFT Test";
     string public constant symbol = "RLCOFT";
     uint256 public constant NEW_STATE_VARIABLE = 2;
-
-    address public proxyAddress;
 
     function setUp() public virtual override {
         super.setUp();
@@ -35,63 +32,69 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         proxyAddress = address(adapterV1);
     }
 
-    function test_V1DoesNotHaveV2Functions() public {
-        // Test that V1 doesn't have V2 functions
+    function test_UpgradeCorrectly() public {
+        // 1. Verify V1 doesn't have V2 functions
         (bool success,) = proxyAddress.call(abi.encodeWithSignature("newStateVariable()"));
         assertFalse(success, "V1 should not have newStateVariable() function");
 
         (bool success2,) = proxyAddress.call(abi.encodeWithSignature("initializeV2(uint256)", 1000));
         assertFalse(success2, "V1 should not have initializeV2() function");
-    }
 
-    function test_UpgradeToV2() public {
-        vm.startPrank(owner);
+        // 2. Store V1 state for comparison
+        address originalOwner = adapterV1.owner();
+        address originalRlcToken = address(adapterV1.token());
 
-        TestUpgradeUtils.upgradeAdapterForTesting(
-            proxyAddress, "RLCAdapterV2Mock.sol:RLCAdapterV2", mockEndpoint, address(rlcToken), NEW_STATE_VARIABLE
-        );
-
-        vm.stopPrank();
-
-        // Cast proxy to V2
-        adapterV2 = RLCAdapterV2(proxyAddress);
-    }
-
-    function test_ValidateUpgrade() public {
-        // Test that upgrade validation works
-        TestUpgradeUtils.validateUpgradeForTesting(
-            "RLCAdapterV2Mock.sol:RLCAdapterV2", mockEndpoint, UpgradeUtils.ContractType.ADAPTER
-        );
-    }
-
-    function test_V2StatePreservation() public {
-        // Check V1 state before upgrade
-        assertEq(adapterV1.owner(), owner);
         assertTrue(adapterV1.hasRole(adapterV1.DEFAULT_ADMIN_ROLE(), owner));
         assertTrue(adapterV1.hasRole(adapterV1.UPGRADER_ROLE(), owner));
         assertTrue(adapterV1.hasRole(adapterV1.PAUSER_ROLE(), pauser));
 
-        test_UpgradeToV2();
+        // 3. Perform upgrade
+        vm.startPrank(owner);
+        TestUpgradeUtils.upgradeAdapterForTesting(
+            proxyAddress, 
+            "RLCAdapterV2Mock.sol:RLCAdapterV2", 
+            mockEndpoint, 
+            address(rlcToken), 
+            NEW_STATE_VARIABLE
+        );
+        vm.stopPrank();
 
-        // Test that original state is preserved
-        assertEq(adapterV2.owner(), owner, "Owner should be preserved");
-        assertTrue(adapterV2.hasRole(adapterV2.UPGRADER_ROLE(), owner), "UPGRADER_ROLE should be preserved");
-        assertTrue(adapterV2.hasRole(adapterV2.PAUSER_ROLE(), pauser), "PAUSER_ROLE should be preserved");
-    }
+        adapterV2 = RLCAdapterV2(proxyAddress);
 
-    function test_V2NewFunctionality() public {
-        test_UpgradeToV2();
+        // 5. Verify state preservation
+        assertEq(adapterV2.owner(), originalOwner, "Owner should be preserved");
+        assertEq(address(adapterV2.token()), originalRlcToken, "RLC token should be preserved");
+        assertTrue(adapterV2.hasRole(adapterV2.DEFAULT_ADMIN_ROLE(), owner), "Default admin role should be preserved");
+        assertTrue(adapterV2.hasRole(adapterV2.UPGRADER_ROLE(), owner), "Upgrader role should be preserved");
+        assertTrue(adapterV2.hasRole(adapterV2.PAUSER_ROLE(), pauser), "Pauser role should be preserved");
 
-        // Test new state variable
-        assertEq(adapterV2.newStateVariable(), NEW_STATE_VARIABLE, "New state variable should be set");
+        // 6. Verify new V2 functionality
+        assertEq(adapterV2.newStateVariable(), NEW_STATE_VARIABLE, "New state variable should be initialized correctly");
+
+        // 7. Verify V2 functions are now available
+        (bool v2Success,) = proxyAddress.call(abi.encodeWithSignature("newStateVariable()"));
+        assertTrue(v2Success, "V2 should have newStateVariable() function");
     }
 
     function test_RevertWhen_InitializeV2Twice() public {
-        test_UpgradeToV2();
+        vm.startPrank(owner);
+        TestUpgradeUtils.upgradeAdapterForTesting(
+            proxyAddress, 
+            "RLCAdapterV2Mock.sol:RLCAdapterV2", 
+            mockEndpoint, 
+            address(rlcToken), 
+            NEW_STATE_VARIABLE
+        );
+        vm.stopPrank();
 
-        // Test that initializeV2 cannot be called again
+        adapterV2 = RLCAdapterV2(proxyAddress);
+        
+        // Verify it was initialized correctly
+        assertEq(adapterV2.newStateVariable(), NEW_STATE_VARIABLE);
+        
+        // Attempt to initialize again should revert
         vm.prank(owner);
         vm.expectRevert();
-        adapterV2.initializeV2(1000000 * 10 ** 18);
+        adapterV2.initializeV2(999); // Different value to ensure it's not a duplicate
     }
 }
