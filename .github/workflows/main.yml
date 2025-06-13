@@ -38,3 +38,6 @@ jobs:
 
       - name: Run Forge e2e tests
         run: make e2e-test
+
+      - name: Run Forge upgrade tests
+        run: make upgrade-test

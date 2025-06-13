@@ -24,6 +24,9 @@ unit-test:
 e2e-test:
 	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**"
 
+upgrade-test:
+	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/upgrade/**"
+
 clean:
 	forge clean
 
@@ -37,39 +40,85 @@ deploy-on-anvil:
 	$(MAKE) configure-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
 	$(MAKE) configure-oft RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
+upgrade-on-anvil:
+	$(MAKE) upgrade-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
+	$(MAKE) upgrade-oft RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+
 deploy-on-testnets:
 	$(MAKE) deploy-adapter RPC_URL=$(SEPOLIA_RPC_URL)
 	$(MAKE) deploy-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 	$(MAKE) configure-adapter RPC_URL=$(SEPOLIA_RPC_URL)
 	$(MAKE) configure-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 
+upgrade-on-testnets:
+	$(MAKE) upgrade-adapter RPC_URL=$(SEPOLIA_RPC_URL)
+	$(MAKE) upgrade-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+
 deploy-adapter:
-	@echo "Deploying RLCAdapter on: $(RPC_URL)"
+	@echo "Deploying RLCAdapter (UUPS Proxy) on: $(RPC_URL)"
 	forge script script/RLCAdapter.s.sol:Deploy \
-		--rpc-url $(RPC_URL) \
-		--broadcast \
-		-vvv
+        --rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
 
 deploy-oft:
-	@echo "Deploying RLCOFT on on: $(RPC_URL)"
+	@echo "Deploying RLCOFT (UUPS Proxy) on: $(RPC_URL)"
 	forge script script/RLCOFT.s.sol:Deploy \
-		--rpc-url $(RPC_URL) \
-		--broadcast \
-		-vvv \
+        --rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
 
 configure-adapter:
 	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
 	forge script script/RLCAdapter.s.sol:Configure \
-		--rpc-url $(RPC_URL) \
-		--broadcast \
-		-vvv
+        --rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
 
 configure-oft:
-	@echo "Configuring RLCOFT on on: $(RPC_URL)"
+	@echo "Configuring RLCOFT on: $(RPC_URL)"
 	forge script script/RLCOFT.s.sol:Configure \
-		--rpc-url $(RPC_URL) \
-		--broadcast \
-		-vvv
+        --rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
+
+#
+# Upgrade targets
+#
+
+validate-adapter-upgrade:
+	@echo "Validating RLCAdapter upgrade on: $(RPC_URL)"
+	forge script script/RLCAdapter.s.sol:ValidateUpgrade \
+        --rpc-url $(RPC_URL) \
+        -vvv
+
+validate-oft-upgrade:
+	@echo "Validating RLCOFT upgrade on: $(RPC_URL)"
+	forge script script/RLCOFT.s.sol:ValidateUpgrade \
+        --rpc-url $(RPC_URL) \
+        -vvv
+
+upgrade-adapter:
+	@echo "Upgrading RLCAdapter on: $(RPC_URL)"
+	$(MAKE) validate-adapter-upgrade
+	forge script script/RLCAdapter.s.sol:Upgrade \
+        --rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
+
+upgrade-oft:
+	@echo "Upgrading RLCOFT on: $(RPC_URL)"
+	$(MAKE) validate-oft-upgrade
+	forge script script/RLCOFT.s.sol:Upgrade \
+        --rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
 
 #
 # Bridge operations.
@@ -91,27 +140,56 @@ send-tokens-to-sepolia:
 		--broadcast \
 		-vvv
 
+#
 # Verification targets
-verify-adapter:
-	@echo "Verifying RLCAdapter on Sepolia Etherscan..."
+#
+
+# Implementation verification
+verify-adapter-impl:
+	@echo "Verifying RLCAdapter Implementation on Sepolia Etherscan..."
 	forge verify-contract \
-		--chain-id 11155111 \
-		--watch \
-		--constructor-args $(shell cast abi-encode "constructor(address,address,address)" $(RLC_SEPOLIA_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS) $(OWNER_ADDRESS)) \
-		--etherscan-api-key $(ETHERSCAN_API_KEY) \
-		$(RLC_SEPOLIA_ADAPTER_ADDRESS) \
-		src/RLCAdapter.sol:RLCAdapter
+        --chain-id 11155111 \
+        --watch \
+        --constructor-args $(shell cast abi-encode "constructor(address,address)" $(RLC_SEPOLIA_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS)) \
+        --etherscan-api-key $(ETHERSCAN_API_KEY) \
+        $(RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS) \
+        src/RLCAdapter.sol:RLCAdapter
 
-verify-oft:
-	@echo "Verifying RLCOFT on Arbitrum Sepolia Etherscan..."
+verify-oft-impl:
+	@echo "Verifying RLCOFT Implementation on Arbitrum Sepolia Etherscan..."
 	forge verify-contract \
-		--chain-id 421614 \
-		--watch \
-		--constructor-args $(shell cast abi-encode "constructor(string,string,address,address)" $(RLC_OFT_TOKEN_NAME) $(RLC_TOKEN_SYMBOL) $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS) $(OWNER_ADDRESS)) \
-		--etherscan-api-key $(ARBISCAN_API_KEY) \
-		$(RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS) \
-		src/RLCOFT.sol:RLCOFT
+        --chain-id 421614 \
+        --watch \
+        --constructor-args $(shell cast abi-encode "constructor(address)" $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS)) \
+        --etherscan-api-key $(ARBISCAN_API_KEY) \
+        $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) \
+        src/RLCOFT.sol:RLCOFT
 
-# Combined verification target
-verify-all: verify-adapter verify-oft
+# Proxy verification
+verify-adapter-proxy:
+	@echo "Verifying RLCAdapter Proxy on Sepolia Etherscan..."
+	forge verify-contract \
+        --chain-id 11155111 \
+        --watch \
+        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
+        --etherscan-api-key $(ETHERSCAN_API_KEY) \
+        $(RLC_SEPOLIA_ADAPTER_PROXY_ADDRESS) \
+        lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
+verify-oft-proxy:
+	@echo "Verifying RLCOFT Proxy on Arbitrum Sepolia Etherscan..."
+	forge verify-contract \
+        --chain-id 421614 \
+        --watch \
+        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
+        --etherscan-api-key $(ARBISCAN_API_KEY) \
+        $(RLC_ARBITRUM_SEPOLIA_OFT_PROXY_ADDRESS) \
+        lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
+
+# Combined verification targets
+verify-adapter: verify-adapter-impl verify-adapter-proxy
+verify-oft: verify-oft-impl verify-oft-proxy
+
+verify-implementations: verify-adapter-impl verify-oft-impl
+verify-proxies: verify-adapter-proxy verify-oft-proxy
+verify-all: verify-implementations verify-proxies
