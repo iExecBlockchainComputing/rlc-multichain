@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 
 import {RLCAdapter} from "../../../src/RLCAdapter.sol";
 import {RLCMock} from "../../units/mocks/RLCMock.sol";
-import {RLCAdapterV2} from "../../../src/mocks/RLCAdapterV2Mock.sol";
+import {RLCAdapterV2} from "./mocks/RLCAdapterV2Mock.sol";
 import {TestUtils, TestUpgradeUtils} from "./../utils/TestUtils.sol";
 import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";

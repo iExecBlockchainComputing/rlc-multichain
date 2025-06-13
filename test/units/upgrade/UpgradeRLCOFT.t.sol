@@ -3,7 +3,7 @@
 pragma solidity ^0.8.22;
 
 import {RLCOFT} from "../../../src/RLCOFT.sol";
-import {RLCOFTV2} from "../../../src/mocks/RLCOFTV2Mock.sol";
+import {RLCOFTV2} from "./mocks/RLCOFTV2Mock.sol";
 import {TestUtils, TestUpgradeUtils} from "./../utils/TestUtils.sol";
 import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";

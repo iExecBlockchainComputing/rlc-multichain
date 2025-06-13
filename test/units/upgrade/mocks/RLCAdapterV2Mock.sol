@@ -3,7 +3,8 @@
 
 pragma solidity ^0.8.22;
 
-import {RLCAdapter} from "../RLCAdapter.sol";
+import {RLCAdapter} from "../../../../src/RLCAdapter.sol";
+
 /**
  * @notice RLCAdapterV2 - V2 implementation with additional features
  * @dev This contract inherits from RLCAdapter (V1) and adds new functionality
