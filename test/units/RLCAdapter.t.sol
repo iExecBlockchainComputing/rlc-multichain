@@ -16,7 +16,7 @@ contract RLCAdapterTest is TestHelperOz5 {
 
     RLCAdapter private sourceAdapter;
     IexecLayerZeroBridge private destLayerZeroBridgeMock;
-    RLCMock private rlcEthereumToken;
+    RLCMock private rlcToken;
 
     uint32 private constant SOURCE_EID = 1;
     uint32 private constant DEST_EID = 2;
