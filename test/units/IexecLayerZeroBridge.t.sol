@@ -72,7 +72,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
-    function test_sendRLCWhenSourceLayerZeroBridgePaused() public {
+    function test_RevertWhenSendRlcWithBridgePaused() public {
         // Pause the destination adapter
         vm.prank(pauser);
         sourceLayerZeroBridge.pause();
