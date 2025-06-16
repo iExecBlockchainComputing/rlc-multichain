@@ -6,11 +6,11 @@ pragma solidity ^0.8.22;
 import {OFTCoreUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTCoreUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {ICrosschainRLC} from "./interfaces/ICrosschainRLC.sol";
 import {IIexecLayerZeroBridge} from "./interfaces/IIexecLayerZeroBridge.sol";
+import {DualPausableUpgradeable} from "./DualPausableUpgradeable.sol";
 
 /**
  * @title IexecLayerZeroBridge
@@ -25,13 +25,16 @@ import {IIexecLayerZeroBridge} from "./interfaces/IIexecLayerZeroBridge.sol";
  *
  * This ensures the total supply across all chains remains constant - tokens destroyed on one
  * chain are minted/unlocked on another, maintaining a 1:1 peg across the entire ecosystem.
+ * It implements a dual-pause mechanism:
+ * 1. Complete Pause: Blocks all bridge operations (incoming and outgoing transfers)
+ * 2. Entrance Pause: Blocks only outgoing transfers, allows users to receive/withdraw funds
  */
 contract IexecLayerZeroBridge is
     IIexecLayerZeroBridge,
     OFTCoreUpgradeable,
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
-    PausableUpgradeable
+    DualPausableUpgradeable
 {
     /// @dev Role identifier for accounts authorized to upgrade the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -67,9 +70,58 @@ contract IexecLayerZeroBridge is
         __OFTCore_init(_owner);
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, _owner);
-        __Pausable_init();
+        __DualPausable_init();
         _grantRole(UPGRADER_ROLE, _owner);
         _grantRole(PAUSER_ROLE, _pauser);
+    }
+
+    // ============ EMERGENCY CONTROLS ============
+
+    /**
+     * @notice LEVEL 1: Pauses all cross-chain transfers (complete shutdown)
+     * @dev Can only be called by accounts with PAUSER_ROLE
+     *
+     * When fully paused:
+     * - All _debit operations (outgoing transfers) are blocked
+     * - All _credit operations (incoming transfers) are blocked  
+     * - Use this for critical security incidents (e.g., LayerZero exploit)
+     *
+     * @custom:security Critical emergency function for complete bridge shutdown
+     */
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @notice LEVEL 1: Unpauses all cross-chain transfers
+     * @dev Can only be called by accounts with PAUSER_ROLE
+     */
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
+
+    /**
+     * @notice LEVEL 2: Pauses only outgoing transfers (entrance pause)  
+     * @dev Can only be called by accounts with PAUSER_ROLE
+     *
+     * When entrances are paused:
+     * - All _debit operations (outgoing transfers) are blocked
+     * - All _credit operations (incoming transfers) still work
+     * - Users can still receive funds and "exit" their positions
+     * - Use this for less critical issues or when you want to allow withdrawals
+     *
+     * @custom:security Moderate emergency function allowing exits while blocking entrances
+     */
+    function pauseEntrances() external onlyRole(PAUSER_ROLE) {
+        _pauseEntrances();
+    }
+
+    /**
+     * @notice LEVEL 2: Unpauses outgoing transfers (restores entrances)
+     * @dev Can only be called by accounts with PAUSER_ROLE
+     */
+    function unpauseEntrances() external onlyRole(PAUSER_ROLE) {
+        _unpauseEntrances();
     }
 
     // ============ OFT CONFIGURATION ============
@@ -77,10 +129,6 @@ contract IexecLayerZeroBridge is
     /**
      * @notice Indicates whether the OFT contract requires approval to send tokens
      * @return requiresApproval Always returns false for this implementation
-     *
-     * @dev This contract uses a burn/mint mechanism where it directly calls
-     * crosschainBurn on the RLC token contract, so no approval is required.
-     * The bridge has the necessary permissions to burn tokens directly.
      */
     function approvalRequired() external pure virtual returns (bool) {
         return false;
@@ -88,42 +136,9 @@ contract IexecLayerZeroBridge is
 
     /**
      * @notice Returns the address of the underlying token being bridged
-     * @return The address of the RLC token contract
-     *
-     * @dev This function is required by the OFT standard to identify
-     * which token is being bridged across chains
      */
     function token() public view returns (address) {
         return address(RLC_TOKEN);
-    }
-
-    // ============ EMERGENCY CONTROLS ============
-
-    /**
-     * @notice Pauses all cross-chain transfers
-     * @dev Can only be called by accounts with PAUSER_ROLE
-     *
-     * When paused:
-     * - All _debit operations (outgoing transfers) are blocked
-     * - All _credit operations (incoming transfers) are blocked
-     * - Emergency measure to halt all bridge activity if needed
-     *
-     * @custom:security This is a critical emergency function that should only
-     * be used in case of security incidents or other emergencies
-     */
-    function pause() external onlyRole(PAUSER_ROLE) {
-        _pause();
-    }
-
-    /**
-     * @notice Unpauses all cross-chain transfers
-     * @dev Can only be called by accounts with PAUSER_ROLE
-     *
-     * @notice This will resume normal bridge operations after a pause
-     * Ensure any issues that caused the pause have been resolved before calling
-     */
-    function unpause() external onlyRole(PAUSER_ROLE) {
-        _unpause();
     }
 
     // ============ ACCESS CONTROL OVERRIDES ============
@@ -166,14 +181,18 @@ contract IexecLayerZeroBridge is
      * - If RLC_TOKEN implements transfer fees, burn fees, or any other fee mechanism,
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
+     * @dev This function is called for OUTGOING transfers (when sending to another chain)
+     * It's blocked when:
+     * 1. Contract is fully paused (Level 1 pause), OR
+     * 2. Entrances are paused (Level 2 pause)
      *
-     * @custom:security Only callable when contract is not paused
+     * @custom:security Uses whenEntrancesNotPaused which checks both pause levels
      * @custom:security Requires the RLC token to have granted burn permissions to this contract
      */
     function _debit(address _from, uint256 _amountLD, uint256 _minAmountLD, uint32 _dstEid)
         internal
         override
-        whenNotPaused
+        whenEntrancesNotPaused // This checks both full pause and entrance pause
         returns (uint256 amountSentLD, uint256 amountReceivedLD)
     {
         // Calculate the amounts using the parent's logic (handles slippage protection)
@@ -202,14 +221,20 @@ contract IexecLayerZeroBridge is
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
      *
-     * @custom:security Only callable when contract is not paused
+     * @dev This function is called for INCOMING transfers (when receiving from another chain)
+     * It's blocked ONLY when:
+     * 1. Contract is fully paused (Level 1 pause)
+     * 
+     * It's NOT blocked when entrances are paused (Level 2) - users can still receive/exit
+     *
+     * @custom:security Uses whenNotPaused (only checks full pause, allows entrance pause)
      * @custom:security Requires the RLC token to have granted mint permissions to this contract
      * @custom:security Uses 0xdead address if _to is zero address (minting to zero address fails)
      */
     function _credit(address _to, uint256 _amountLD, uint32 /*_srcEid*/ )
         internal
         override
-        whenNotPaused
+        whenNotPaused // Only checks full pause, allows entrance pause
         returns (uint256 amountReceivedLD)
     {
         // Handle zero address case - minting to zero address typically fails
