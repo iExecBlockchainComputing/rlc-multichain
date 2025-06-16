@@ -1,0 +1,5 @@
+// Config of juanblanco.solidity extension.
+{
+  "solidity.packageDefaultDependenciesContractsDirectory": "src",
+  "solidity.packageDefaultDependenciesDirectory": "lib"
+}
