@@ -56,15 +56,15 @@ upgrade-on-testnets:
 
 deploy-adapter:
 	@echo "Deploying RLCAdapter (UUPS Proxy) on: $(RPC_URL)"
-	forge script script/RLCAdapter.s.sol:Deploy \
+	forge script script/bridges/layerZero/RLCAdapter.s.sol:Deploy \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
         -vvv
 
-deploy-oft:
-	@echo "Deploying RLCOFT (UUPS Proxy) on: $(RPC_URL)"
-	forge script script/RLCOFT.s.sol:Deploy \
+deploy-layerzero-bridge:
+	@echo "Deploying IexecLayerZeroBridge (UUPS Proxy) on: $(RPC_URL)"
+	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Deploy \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \

@@ -21,7 +21,7 @@ contract SendTokensToSepolia is Script {
         vm.startBroadcast();
 
         // Contract addresses
-        address iexecLayerZeroBridgeAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS"); // Your RLCOFT address on Arbitrum Sepolia
+        address iexecLayerZeroBridgeAddress = vm.envAddress("RLC_CROSSCHAIN_ADDRESS"); // Your RLC address on Arbitrum Sepolia
 
         // Transfer parameters
         uint16 destinationChainId = uint16(vm.envUint("LAYER_ZERO_SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Ethereum Sepolia

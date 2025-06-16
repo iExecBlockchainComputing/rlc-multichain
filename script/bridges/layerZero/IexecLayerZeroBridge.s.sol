@@ -13,29 +13,29 @@ contract Deploy is Script {
     function run() external returns (address) {
         vm.startBroadcast();
 
-        address rlcChainX = vm.envAddress("RLC_ARBITRUM_SEPOLIA_ADDRESS");
+        address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
         bytes32 createxSalt = vm.envBytes32("SALT");
 
-        address IexecLayerZeroBridgeProxy = deploy(rlcChainX, lzEndpoint, owner, pauser, createxSalt);
+        address IexecLayerZeroBridgeProxy = deploy(rlcCrosschain, lzEndpoint, owner, pauser, createxSalt);
 
         vm.stopBroadcast();
 
         address implementationAddress = Upgrades.getImplementationAddress(IexecLayerZeroBridgeProxy);
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS", implementationAddress);
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS", IexecLayerZeroBridgeProxy);
+        EnvUtils.updateEnvVariable("RLC_LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS", implementationAddress);
+        EnvUtils.updateEnvVariable("RLC_CROSSCHAIN_ADDRESS", IexecLayerZeroBridgeProxy);
         return IexecLayerZeroBridgeProxy;
     }
 
-    function deploy(address rlcChainX, address lzEndpoint, address owner, address pauser, bytes32 createxSalt)
+    function deploy(address rlcCrosschain, address lzEndpoint, address owner, address pauser, bytes32 createxSalt)
         public
         returns (address)
     {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
 
-        bytes memory constructorData = abi.encode(rlcChainX, lzEndpoint);
+        bytes memory constructorData = abi.encode(rlcCrosschain, lzEndpoint);
         bytes memory initializeData = abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "IexecLayerZeroBridge", constructorData, initializeData, createXFactory, createxSalt
@@ -47,8 +47,8 @@ contract Configure is Script {
     function run() external {
         vm.startBroadcast();
 
-        // RLCOFT on Arbitrum Sepolia
-        address iexecLayerZeroBridgeAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
+        // RLC on Arbitrum Sepolia
+        address iexecLayerZeroBridgeAddress = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
 
         // RLCAdapter on Ethereum Sepolia
@@ -66,15 +66,16 @@ contract Upgrade is Script {
     function run() external {
         vm.startBroadcast();
 
-        address proxyAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
+        address proxyAddress = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
+        address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
         // For testing purpose
         uint256 newStateVariable = 1000000 * 10 ** 9;
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
-            rlcToken: address(0), // Not used for OFT
-            contractName: "RLCOFTV2Mock.sol:RLCOFTV2", // Would be production contract in real deployment
+            rlcToken: rlcCrosschain,
+            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
             lzEndpoint: lzEndpoint,
             newStateVariable: newStateVariable,
             skipChecks: true, // TODO: Remove when validation issues are fixed opts.unsafeAllow
@@ -85,18 +86,19 @@ contract Upgrade is Script {
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS", newImplementationAddress);
+        EnvUtils.updateEnvVariable("RLC_LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS", newImplementationAddress);
     }
 }
 
 contract ValidateUpgrade is Script {
     function run() external {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
+        address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: address(0),
             lzEndpoint: lzEndpoint,
-            rlcToken: address(0), // Not used for OFT
-            contractName: "RLCOFTV2Mock.sol:RLCOFTV2",
+            rlcToken: rlcCrosschain,
+            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             newStateVariable: 1000000 * 10 ** 9,
             skipChecks: true, // TODO: Remove this when validation issues are fixed opts.unsafeAllow
             validateOnly: true
