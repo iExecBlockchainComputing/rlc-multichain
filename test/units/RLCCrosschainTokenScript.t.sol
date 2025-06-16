@@ -18,9 +18,9 @@ contract RLCCrosschainTokenTest is Test {
     function setUp() public {}
 
     function test_Deploy() public {
-        address crosschainTokenAddress = deployer.deploy("RLC Token", "RLC", owner, upgrader, createx, salt);
+        address crosschainTokenAddress = deployer.deploy("RLC Crosschain Token", "RLC", owner, upgrader, createx, salt);
         RLCCrosschainToken crossChainToken = RLCCrosschainToken(crosschainTokenAddress);
-        assertEq(crossChainToken.name(), "RLC Token");
+        assertEq(crossChainToken.name(), "RLC Crosschain Token");
         assertEq(crossChainToken.symbol(), "RLC");
         assertEq(crossChainToken.owner(), owner);
         assertEq(crossChainToken.hasRole(crossChainToken.DEFAULT_ADMIN_ROLE(), owner), true);
@@ -32,7 +32,7 @@ contract RLCCrosschainTokenTest is Test {
     function test_RevertWhenTwoDeploymentsWithTheSameSalt() public {
         console.log("CreateX address:", createx);
         address random = makeAddr("random");
-        deployer.deploy("RLC Token", "RLC", owner, upgrader, createx, salt);
+        deployer.deploy("RLC Crosschain Token", "RLC", owner, upgrader, createx, salt);
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", createx));
         deployer.deploy("Foo", "BAR", random, random, createx, salt);
     }
