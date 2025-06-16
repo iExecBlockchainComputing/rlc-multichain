@@ -75,7 +75,7 @@ contract Upgrade is Script {
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             rlcToken: rlcCrosschain,
-            contractName: "test/units/mocks/IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
+            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
             lzEndpoint: lzEndpoint,
             newStateVariable: newStateVariable,
             skipChecks: true, // TODO: Remove when validation issues are fixed opts.unsafeAllow
