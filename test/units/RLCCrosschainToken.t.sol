@@ -42,3 +42,4 @@ contract RLCCrosschainTokenTest is Test {
         vm.prank(unauthorizedUpgrader);
         crossChainToken.upgradeToAndCall(makeAddr("newImpl"), "");
     }
+}
