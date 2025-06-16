@@ -14,8 +14,8 @@ contract RLCAdapterTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;
 
-    RLCAdapter private sourceAdapter;
-    IexecLayerZeroBridge private destLayerZeroBridgeMock;
+    RLCAdapter private adapter;
+    IexecLayerZeroBridge private layerZeroBridgeMock;
     RLCMock private rlcToken;
 
     uint32 private constant SOURCE_EID = 1;
@@ -39,13 +39,13 @@ contract RLCAdapterTest is TestHelperOz5 {
         address lzEndpointAdapter = address(endpoints[SOURCE_EID]);
         address lzEndpointBridge = address(endpoints[DEST_EID]);
 
-        (sourceAdapter, destLayerZeroBridgeMock, rlcToken,) =
+        (adapter, layerZeroBridgeMock, rlcToken,) =
             TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, pauser);
 
         // Wire the contracts
         address[] memory contracts = new address[](2);
-        contracts[0] = address(sourceAdapter);
-        contracts[1] = address(destLayerZeroBridgeMock);
+        contracts[0] = address(adapter);
+        contracts[1] = address(layerZeroBridgeMock);
         vm.startPrank(owner);
         wireOApps(contracts);
         vm.stopPrank();
@@ -53,7 +53,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         // Mint RLC tokens to user1
         rlcToken.transfer(user1, INITIAL_BALANCE);
         vm.prank(user1);
-        rlcToken.approve(address(sourceAdapter), INITIAL_BALANCE);
+        rlcToken.approve(address(adapter), INITIAL_BALANCE);
     }
 
     function test_sendToken() public {
@@ -62,12 +62,12 @@ contract RLCAdapterTest is TestHelperOz5 {
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceAdapter, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(adapter, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        sourceAdapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        adapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
         assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
@@ -76,16 +76,16 @@ contract RLCAdapterTest is TestHelperOz5 {
     function test_sendRLCWhenSourceAdapterPaused() public {
         // Pause the destination adapter
         vm.prank(pauser);
-        sourceAdapter.pause();
+        adapter.pause();
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceAdapter, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(adapter, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens - this should succeed on source but fail on destination
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        try sourceAdapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1)) {
+        try adapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1)) {
             // If it succeeds, we expect it to revert
             assertTrue(false, "Expected send to revert when source Adapter is paused");
         } catch (bytes memory error) {
@@ -100,18 +100,18 @@ contract RLCAdapterTest is TestHelperOz5 {
     function test_sendRLCWhenSourceAdapterUnpaused() public {
         // Pause then unpause the destination adapter
         vm.startPrank(pauser);
-        sourceAdapter.pause();
-        sourceAdapter.unpause();
+        adapter.pause();
+        adapter.unpause();
         vm.stopPrank();
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceAdapter, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(adapter, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        sourceAdapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        adapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
         assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);

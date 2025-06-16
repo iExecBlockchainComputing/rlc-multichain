@@ -16,7 +16,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     using TestUtils for *;
 
     IexecLayerZeroBridge private iexecLayerZeroBridge;
-    RLCAdapter private destAdapterMock;
+    RLCAdapter private adapterMock;
     RLCMock private rlcCrosschainToken;
 
     uint32 private constant SOURCE_EID = 1;
@@ -40,13 +40,13 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address lzEndpointBridge = address(endpoints[SOURCE_EID]);
         address lzEndpointAdapter = address(endpoints[DEST_EID]);
 
-        (destAdapterMock, iexecLayerZeroBridge,, rlcCrosschainToken) =
+        (adapterMock, iexecLayerZeroBridge,, rlcCrosschainToken) =
             TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, pauser);
 
         // Wire the contracts
         address[] memory contracts = new address[](2);
         contracts[0] = address(iexecLayerZeroBridge);
-        contracts[1] = address(destAdapterMock);
+        contracts[1] = address(adapterMock);
         vm.startPrank(owner);
         wireOApps(contracts);
         vm.stopPrank();
