@@ -4,10 +4,10 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
-import {EnvUtils} from "../../lib/UpdateEnvUtils.sol";
-import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
+import {IexecLayerZeroBridge} from "../src/IexecLayerZeroBridge.sol";
+import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
+import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
+import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
     function run() external returns (address) {
@@ -75,7 +75,7 @@ contract Upgrade is Script {
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             rlcToken: rlcCrosschain,
-            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
+            contractName: "test/units/mocks/IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
             lzEndpoint: lzEndpoint,
             newStateVariable: newStateVariable,
             skipChecks: true, // TODO: Remove when validation issues are fixed opts.unsafeAllow
