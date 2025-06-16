@@ -10,7 +10,6 @@ import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosscha
 import {RLCCrosschainToken} from "../../src/token/RLCCrosschainToken.sol";
 
 contract RLCCrosschainTokenTest is Test {
-
     address private owner = makeAddr("owner");
     address private upgrader = makeAddr("upgrader");
 
@@ -18,12 +17,7 @@ contract RLCCrosschainTokenTest is Test {
 
     function test_Deploy() public {
         address crosschainTokenAddress = new RLCCrosschainTokenDeployScript().deploy(
-            "RLC Token",
-            "RLC",
-            owner,
-            upgrader,
-            address(new CreateX()),
-            keccak256("salt")
+            "RLC Token", "RLC", owner, upgrader, address(new CreateX()), keccak256("salt")
         );
         RLCCrosschainToken crossChainToken = RLCCrosschainToken(crosschainTokenAddress);
         assertEq(crossChainToken.name(), "RLC Token");

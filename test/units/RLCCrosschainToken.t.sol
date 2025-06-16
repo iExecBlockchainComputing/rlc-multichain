@@ -9,7 +9,6 @@ import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosscha
 import {RLCCrosschainToken} from "../../src/token/RLCCrosschainToken.sol";
 
 contract RLCCrosschainTokenTest is Test {
-
     error InvalidInitialization();
     error AccessControlUnauthorizedAccount(address account, bytes32 role);
 
@@ -21,12 +20,7 @@ contract RLCCrosschainTokenTest is Test {
     function setUp() public {
         crossChainToken = RLCCrosschainToken(
             new RLCCrosschainTokenDeployScript().deploy(
-                "RLC Token",
-                "RLC",
-                owner,
-                upgrader,
-                address(new CreateX()),
-                keccak256("salt")
+                "RLC Token", "RLC", owner, upgrader, address(new CreateX()), keccak256("salt")
             )
         );
     }
@@ -48,4 +42,3 @@ contract RLCCrosschainTokenTest is Test {
         vm.prank(unauthorizedUpgrader);
         crossChainToken.upgradeToAndCall(makeAddr("newImpl"), "");
     }
-}

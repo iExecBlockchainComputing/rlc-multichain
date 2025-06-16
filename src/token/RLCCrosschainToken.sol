@@ -4,9 +4,11 @@
 pragma solidity ^0.8.22;
 
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import {ERC20PermitUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
+import {ERC20PermitUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {AccessControlDefaultAdminRulesUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
+import {AccessControlDefaultAdminRulesUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 
 /**
  * This contract is an upgradeable (UUPS) ERC20 token with cross-chain capabilities.
@@ -23,7 +25,6 @@ contract RLCCrosschainToken is
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable
 {
-
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -31,12 +32,7 @@ contract RLCCrosschainToken is
         _disableInitializers();
     }
 
-    function initialize(
-        string memory name,
-        string memory symbol,
-        address admin,
-        address upgrader
-    ) public initializer {
+    function initialize(string memory name, string memory symbol, address admin, address upgrader) public initializer {
         __ERC20_init(name, symbol);
         __ERC20Permit_init(name);
         __UUPSUpgradeable_init();
@@ -50,8 +46,5 @@ contract RLCCrosschainToken is
      * @dev Authorizes upgrades of the proxy. It can only be called by
      * an account with the UPGRADER_ROLE.
      */
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        override
-        onlyRole(UPGRADER_ROLE) {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }
