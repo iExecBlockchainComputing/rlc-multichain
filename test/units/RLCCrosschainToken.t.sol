@@ -27,6 +27,11 @@ contract RLCCrosschainTokenTest is Test {
         crossChainToken.initialize("Foo", "BAR", owner, upgrader);
     }
 
+    function test_SupportErc7802Interface() public view {
+        assertTrue(type(IERC7802).interfaceId == bytes4(0x33331994));
+        assertTrue(crossChainToken.supportsInterface(type(IERC7802).interfaceId));
+    }
+
     function test_RevertWhen_UnauthorizedUpgrader() public {
         address unauthorizedUpgrader = makeAddr("unauthorized");
         vm.expectRevert(
