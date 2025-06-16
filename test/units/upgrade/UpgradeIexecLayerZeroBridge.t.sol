@@ -21,7 +21,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     address public pauser = makeAddr("pauser");
 
     address public proxyAddress;
-    string public name = "RLC OFT Token";
+    string public name = "RLC Crosschain Token";
     string public symbol = "RLC";
     uint256 public constant NEW_STATE_VARIABLE = 2;
 
