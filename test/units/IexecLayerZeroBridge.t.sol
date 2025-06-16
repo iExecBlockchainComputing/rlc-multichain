@@ -15,9 +15,9 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;
 
-    IexecLayerZeroBridge private sourceLayerZeroBridge;
+    IexecLayerZeroBridge private iexecLayerZeroBridge;
     RLCAdapter private destAdapterMock;
-    RLCMock private rlcArbitrumToken;
+    RLCMock private rlcCrosschainToken;
 
     uint32 private constant SOURCE_EID = 1;
     uint32 private constant DEST_EID = 2;
