@@ -5,7 +5,6 @@ pragma solidity ^0.8.22;
 
 import {Test, console} from "forge-std/Test.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
-import {ICreateX} from "@createx/contracts/ICreateX.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosschainToken.s.sol";
 import {RLCCrosschainToken} from "../../src/token/RLCCrosschainToken.sol";
 
