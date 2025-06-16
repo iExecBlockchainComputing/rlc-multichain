@@ -77,13 +77,12 @@ contract Upgrade is Script {
             rlcToken: address(0), // Not used for OFT
             contractName: "RLCOFTV2Mock.sol:RLCOFTV2", // Would be production contract in real deployment
             lzEndpoint: lzEndpoint,
-            contractType: UpgradeUtils.ContractType.OFT,
             newStateVariable: newStateVariable,
             skipChecks: true, // TODO: Remove when validation issues are fixed opts.unsafeAllow
             validateOnly: false
         });
 
-        address newImplementationAddress = UpgradeUtils.executeUpgradeOFT(params);
+        address newImplementationAddress = UpgradeUtils.executeUpgrade(params);
 
         vm.stopBroadcast();
 
@@ -99,7 +98,6 @@ contract ValidateUpgrade is Script {
             lzEndpoint: lzEndpoint,
             rlcToken: address(0), // Not used for OFT
             contractName: "RLCOFTV2Mock.sol:RLCOFTV2",
-            contractType: UpgradeUtils.ContractType.OFT,
             newStateVariable: 1000000 * 10 ** 9,
             skipChecks: true, // TODO: Remove this when validation issues are fixed opts.unsafeAllow
             validateOnly: true

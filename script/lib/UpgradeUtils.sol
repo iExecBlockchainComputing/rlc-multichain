@@ -13,17 +13,11 @@ import {StdConstants} from "forge-std/StdConstants.sol";
 library UpgradeUtils {
     Vm private constant vm = StdConstants.VM;
 
-    enum ContractType {
-        OFT,
-        ADAPTER
-    }
-
     struct UpgradeParams {
         address proxyAddress;
         string contractName;
         address lzEndpoint;
-        address rlcToken; // Only used for ADAPTER type, ignored for OFT
-        ContractType contractType;
+        address rlcToken;
         uint256 newStateVariable; // For initialization
         bool skipChecks;
         bool validateOnly;
@@ -44,37 +38,19 @@ library UpgradeUtils {
     }
 
     /**
-     * @notice Executes an OFT upgrade with V2 initialization
-     * @param params Upgrade parameters (rlcToken field is ignored for OFT)
-     * @return newImplementationAddress Address of the new implementation
-     */
-    function executeUpgradeOFT(UpgradeParams memory params) internal returns (address) {
-        return
-            _executeUpgradeWithInit(params, abi.encodeWithSignature("initializeV2(uint256)", params.newStateVariable));
-    }
-
-    /**
      * @notice Executes an Adapter upgrade with V2 initialization
      * @param params Upgrade parameters (rlcToken field is required for ADAPTER)
      * @return newImplementationAddress Address of the new implementation
      */
-    function executeUpgradeAdapter(UpgradeParams memory params) internal returns (address) {
-        require(params.rlcToken != address(0), "UpgradeUtils: RLC token address required for Adapter upgrades");
-        return
-            _executeUpgradeWithInit(params, abi.encodeWithSignature("initializeV2(uint256)", params.newStateVariable));
-    }
-
-    /**
-     * @notice Executes upgrade based on contract type
-     * @param params Upgrade parameters
-     * @return newImplementationAddress Address of the new implementation
-     */
     function executeUpgrade(UpgradeParams memory params) internal returns (address) {
-        if (params.contractType == ContractType.ADAPTER) {
-            return executeUpgradeAdapter(params);
-        } else {
-            return executeUpgradeOFT(params);
-        }
+        Options memory opts = _buildOptions(params);
+        bytes memory initData = abi.encodeWithSignature("initializeV2(uint256)", params.newStateVariable);
+
+        Upgrades.upgradeProxy(params.proxyAddress, params.contractName, initData, opts);
+        address newImplementation = Upgrades.getImplementationAddress(params.proxyAddress);
+        emit UpgradeExecuted(params.contractName, params.proxyAddress, newImplementation);
+
+        return newImplementation;
     }
 
     /**
@@ -91,34 +67,12 @@ library UpgradeUtils {
     }
 
     /**
-     * @dev Internal function to execute upgrade with initialization
-     * @param params Upgrade parameters
-     * @param initData Initialization data
-     * @return newImplementationAddress Address of the new implementation
-     */
-    function _executeUpgradeWithInit(UpgradeParams memory params, bytes memory initData) private returns (address) {
-        Options memory opts = _buildOptions(params);
-
-        Upgrades.upgradeProxy(params.proxyAddress, params.contractName, initData, opts);
-
-        address newImplementation = Upgrades.getImplementationAddress(params.proxyAddress);
-        emit UpgradeExecuted(params.contractName, params.proxyAddress, newImplementation);
-
-        return newImplementation;
-    }
-
-    /**
      * @notice Builds Options struct for upgrades
      * @param params Upgrade parameters
      * @return opts Configured Options struct
      */
     function _buildOptions(UpgradeParams memory params) private pure returns (Options memory opts) {
-        if (params.contractType == ContractType.ADAPTER) {
-            opts.constructorData = abi.encode(params.rlcToken, params.lzEndpoint);
-        } else {
-            opts.constructorData = abi.encode(params.lzEndpoint);
-        }
-
+        opts.constructorData = abi.encode(params.rlcToken, params.lzEndpoint);
         if (params.skipChecks) {
             opts.unsafeSkipAllChecks = true;
         }

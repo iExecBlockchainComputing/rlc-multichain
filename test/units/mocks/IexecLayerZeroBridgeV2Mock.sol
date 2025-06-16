@@ -2,18 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {RLCOFT} from "../../../../src/RLCOFT.sol";
+import {IexecLayerZeroBridge} from "../../../../src/IexecLayerZeroBridge.sol";
+import {ICrosschainRLC} from "../../../../src/interfaces/ICrosschainRLC.sol";
 
 /**
- * @title RLCOFTV2 - V2 implementation with additional features
+ * @title IexecLayerZeroBridgeV2 - V2 implementation with additional features
  * @author IEXEC BLOCKCHAIN TECH
- * @notice This contract inherits from RLCOFT (V1) and adds new functionality
+ * @notice This contract inherits from IexecLayerZeroBridge (V1) and adds new functionality
  */
-contract RLCOFTV2 is RLCOFT {
+contract IexecLayerZeroBridgeV2 is IexecLayerZeroBridge {
     // NEW STATE VARIABLES FOR V2
     uint256 public newStateVariable;
 
-    constructor(address _lzEndpoint) RLCOFT(_lzEndpoint) {}
+    constructor(ICrosschainRLC _token, address _lzEndpoint) IexecLayerZeroBridge(_token, _lzEndpoint) {}
 
     /**
      * @notice Initializes V2 features (called after upgrade)
