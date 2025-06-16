@@ -3,9 +3,9 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {RLCOFT} from "../src/bridges/layerZero/RLCOFT.sol";
 import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 
 contract SendTokensToSepolia is Script {
     /**
@@ -21,7 +21,7 @@ contract SendTokensToSepolia is Script {
         vm.startBroadcast();
 
         // Contract addresses
-        address oftAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS"); // Your RLCOFT address on Arbitrum Sepolia
+        address iexecLayerZeroBridgeAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS"); // Your RLCOFT address on Arbitrum Sepolia
 
         // Transfer parameters
         uint16 destinationChainId = uint16(vm.envUint("LAYER_ZERO_SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Ethereum Sepolia
@@ -31,7 +31,7 @@ contract SendTokensToSepolia is Script {
         uint256 amount = 5 * 10 ** 18; // RLC tokens (adjust the amount as needed)
 
         // Send tokens cross-chain
-        RLCOFT oft = RLCOFT(oftAddress);
+        IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
         console.log("Sending %s RLC to Ethereum Sepolia", amount / 10 ** 9);
 
         // Estimate gas for the OFT endpoint
@@ -50,11 +50,11 @@ contract SendTokensToSepolia is Script {
         );
 
         // Get the fee for the transfer
-        MessagingFee memory fee = oft.quoteSend(sendParam, false);
+        MessagingFee memory fee = iexecLayerZeroBridge.quoteSend(sendParam, false);
         console.log("Fee amount: ", fee.nativeFee);
 
         // Execute the cross-chain transfer
-        oft.send{value: fee.nativeFee}(sendParam, fee, msg.sender);
+        iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, msg.sender);
 
         console.log("Cross-chain transfer from Arbitrum to Ethereum initiated!");
         vm.stopBroadcast();

@@ -3,10 +3,9 @@
 pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
-import {RLCOFT} from "../src/RLCOFT.sol";
-import {IexecLayerZeroBridge} from "../src/IexecLayerZeroBridge.sol";
+import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
-import {EnvUtils} from "./UpdateEnvUtils.sol";
+import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 
@@ -49,15 +48,15 @@ contract Configure is Script {
         vm.startBroadcast();
 
         // RLCOFT on Arbitrum Sepolia
-        address oftAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
-        RLCOFT oft = RLCOFT(oftAddress);
+        address iexecLayerZeroBridgeAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
+        IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
 
         // RLCAdapter on Ethereum Sepolia
         address adapterAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS"); // Read this variable from .env file
         uint16 ethereumSepoliaChainId = uint16(vm.envUint("LAYER_ZERO_SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Ethereum Sepolia - TODO: remove or make it chain agnostic
 
         // Set trusted remote
-        oft.setPeer(ethereumSepoliaChainId, bytes32(uint256(uint160(adapterAddress))));
+        iexecLayerZeroBridge.setPeer(ethereumSepoliaChainId, bytes32(uint256(uint160(adapterAddress))));
 
         vm.stopBroadcast();
     }
