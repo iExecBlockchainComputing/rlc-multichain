@@ -9,9 +9,6 @@ import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosscha
 import {RLCCrosschainToken} from "../../src/token/RLCCrosschainToken.sol";
 
 contract RLCCrosschainTokenTest is Test {
-    error InvalidInitialization();
-    error AccessControlUnauthorizedAccount(address account, bytes32 role);
-
     address private owner = makeAddr("owner");
     address private upgrader = makeAddr("upgrader");
 
@@ -26,7 +23,7 @@ contract RLCCrosschainTokenTest is Test {
     }
 
     function test_RevertWhenInitializedMoreThanOnce() public {
-        vm.expectRevert(InvalidInitialization.selector);
+        vm.expectRevert(abi.encodeWithSignature("InvalidInitialization()"));
         crossChainToken.initialize("Foo", "BAR", owner, upgrader);
     }
 
