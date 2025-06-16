@@ -31,7 +31,8 @@ contract Deploy is Script {
         string memory prefix = string.concat(".chains.", chain);
         bytes32 createxSalt = config.readBytes32(string.concat(prefix, ".rlcCrossChainTokenCreatexSalt"));
         vm.startBroadcast();
-        address rlcCrosschainTokenProxy = deploy("RLC Token", "RLC", owner, upgrader, createxFactory, createxSalt);
+        address rlcCrosschainTokenProxy =
+            deploy("RLC Crosschain Token", "RLC", owner, upgrader, createxFactory, createxSalt);
         vm.stopBroadcast();
 
         //TODO: use config file to store addresses.
