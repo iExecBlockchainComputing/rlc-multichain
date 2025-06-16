@@ -14,7 +14,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
 
     IexecLayerZeroBridge public iexecLayerZeroBridgeV1;
     IexecLayerZeroBridgeV2 public iexecLayerZeroBridgeV2;
-    RLCMock private rlcArbitrumToken;
+    RLCMock private rlcCrosschainToken;
 
     address public mockEndpoint;
     address public owner = makeAddr("owner");
@@ -30,7 +30,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-        (, iexecLayerZeroBridgeV1,, rlcArbitrumToken) =
+        (, iexecLayerZeroBridgeV1,, rlcCrosschainToken) =
             TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
         proxyAddress = address(iexecLayerZeroBridgeV1);
     }
@@ -57,7 +57,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
             proxyAddress: proxyAddress,
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             lzEndpoint: mockEndpoint,
-            rlcToken: address(rlcArbitrumToken),
+            rlcToken: address(rlcCrosschainToken),
             newStateVariable: NEW_STATE_VARIABLE,
             skipChecks: true, // Allow for testing with mocks
             validateOnly: false
@@ -103,7 +103,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
             proxyAddress: proxyAddress,
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             lzEndpoint: mockEndpoint,
-            rlcToken: address(rlcArbitrumToken),
+            rlcToken: address(rlcCrosschainToken),
             newStateVariable: NEW_STATE_VARIABLE,
             skipChecks: true,
             validateOnly: false

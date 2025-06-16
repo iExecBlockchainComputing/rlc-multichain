@@ -27,18 +27,18 @@ library TestUtils {
         returns (
             RLCAdapter rlcAdapter,
             IexecLayerZeroBridge iexecLayerZeroBridge,
-            RLCMock rlcEthereumToken,
-            RLCMock rlcArbitrumToken
+            RLCMock rlcToken,
+            RLCMock rlcCrosschainToken
         )
     {
         address createXFactory = address(new CreateX());
 
         // Deploy RLC token mock for Ethereum
-        rlcEthereumToken = new RLCMock(name, symbol);
+        rlcToken = new RLCMock(name, symbol);
 
         // Deploy RLCAdapter
         bytes32 salt = keccak256("RLCAdapter_SALT");
-        bytes memory constructorDataRLCAdapter = abi.encode(rlcEthereumToken, lzEndpointAdapter);
+        bytes memory constructorDataRLCAdapter = abi.encode(rlcToken, lzEndpointAdapter);
         bytes memory initializeDataRLCAdapter = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser);
         rlcAdapter = RLCAdapter(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
@@ -47,10 +47,10 @@ library TestUtils {
         );
 
         // Deploy RLC token mock for Arbitrum
-        rlcArbitrumToken = new RLCMock(name, symbol);
+        rlcCrosschainToken = new RLCMock(name, symbol);
 
         // Deploy IexecLayerZeroBridge
-        bytes memory constructorDataIexecLayerZeroBridge = abi.encode(rlcArbitrumToken, lzEndpointBridge);
+        bytes memory constructorDataIexecLayerZeroBridge = abi.encode(rlcCrosschainToken, lzEndpointBridge);
         bytes memory initializeDataIexecLayerZeroBridge =
             abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser);
         iexecLayerZeroBridge = IexecLayerZeroBridge(

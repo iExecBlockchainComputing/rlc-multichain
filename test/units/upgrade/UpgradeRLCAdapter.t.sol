@@ -14,7 +14,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
 
     RLCAdapter public adapterV1;
     RLCAdapterV2 public adapterV2;
-    RLCMock public rlcEthereumToken;
+    RLCMock public rlcToken;
     // TODO use a common function to create addresses.
     address public mockEndpoint;
     address public owner = makeAddr("owner");
@@ -29,8 +29,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-        (adapterV1,, rlcEthereumToken,) =
-            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
+        (adapterV1,, rlcToken,) = TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
         proxyAddress = address(adapterV1);
     }
 
@@ -57,7 +56,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
             proxyAddress: proxyAddress,
             contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
             lzEndpoint: mockEndpoint,
-            rlcToken: address(rlcEthereumToken),
+            rlcToken: address(rlcToken),
             newStateVariable: NEW_STATE_VARIABLE,
             skipChecks: true, // Allow for testing with mocks
             validateOnly: false
@@ -91,7 +90,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
             proxyAddress: proxyAddress,
             contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
             lzEndpoint: mockEndpoint,
-            rlcToken: address(rlcEthereumToken),
+            rlcToken: address(rlcToken),
             newStateVariable: NEW_STATE_VARIABLE,
             skipChecks: true,
             validateOnly: false

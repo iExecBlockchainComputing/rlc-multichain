@@ -40,51 +40,51 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address lzEndpointBridge = address(endpoints[SOURCE_EID]);
         address lzEndpointAdapter = address(endpoints[DEST_EID]);
 
-        (destAdapterMock, sourceLayerZeroBridge,, rlcArbitrumToken) =
+        (destAdapterMock, iexecLayerZeroBridge,, rlcCrosschainToken) =
             TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, pauser);
 
         // Wire the contracts
         address[] memory contracts = new address[](2);
-        contracts[0] = address(sourceLayerZeroBridge);
+        contracts[0] = address(iexecLayerZeroBridge);
         contracts[1] = address(destAdapterMock);
         vm.startPrank(owner);
         wireOApps(contracts);
         vm.stopPrank();
 
         // Mint RLC tokens to user1
-        rlcArbitrumToken.crosschainMint(user1, INITIAL_BALANCE);
+        rlcCrosschainToken.crosschainMint(user1, INITIAL_BALANCE);
     }
 
     function test_sendToken() public {
         // Check initial balances
-        assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        sourceLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
+        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
     function test_RevertWhenSendRlcWithBridgePaused() public {
         // Pause the destination adapter
         vm.prank(pauser);
-        sourceLayerZeroBridge.pause();
+        iexecLayerZeroBridge.pause();
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens - this should succeed on source but fail on destination
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        try sourceLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1)) {
+        try iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1)) {
             // If it succeeds, we expect it to revert
             assertTrue(false, "Expected send to revert when source LayerZeroBridge is paused");
         } catch (bytes memory error) {
@@ -93,27 +93,27 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         }
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
     function test_sendRLCWhenSourceLayerZeroBridgeUnpaused() public {
         // Pause then unpause the destination adapter
         vm.startPrank(pauser);
-        sourceLayerZeroBridge.pause();
-        sourceLayerZeroBridge.unpause();
+        iexecLayerZeroBridge.pause();
+        iexecLayerZeroBridge.unpause();
         vm.stopPrank();
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(sourceLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        sourceLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be locked in adapter
-        assertEq(rlcArbitrumToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
+        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
