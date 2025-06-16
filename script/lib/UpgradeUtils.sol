@@ -3,6 +3,7 @@
 pragma solidity ^0.8.22;
 
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+
 /**
  * @title UpgradeUtils
  * @notice Utility library for handling UUPS upgrades in a parameterized way
