@@ -38,11 +38,13 @@ library TestUtils {
 
         // Deploy RLCAdapter
         bytes32 salt = keccak256("RLCAdapter_SALT");
-        bytes memory constructorDataRLCAdapter = abi.encode(rlcToken, lzEndpointAdapter);
-        bytes memory initializeDataRLCAdapter = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser);
         rlcAdapter = RLCAdapter(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "RLCAdapter", constructorDataRLCAdapter, initializeDataRLCAdapter, createXFactory, salt
+                "RLCAdapter",
+                abi.encode(rlcToken, lzEndpointAdapter),
+                abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser),
+                createXFactory,
+                salt
             )
         );
 
@@ -50,14 +52,11 @@ library TestUtils {
         rlcCrosschainToken = new RLCMock(name, symbol);
 
         // Deploy IexecLayerZeroBridge
-        bytes memory constructorDataIexecLayerZeroBridge = abi.encode(rlcCrosschainToken, lzEndpointBridge);
-        bytes memory initializeDataIexecLayerZeroBridge =
-            abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser);
         iexecLayerZeroBridge = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
-                constructorDataIexecLayerZeroBridge,
-                initializeDataIexecLayerZeroBridge,
+                abi.encode(rlcCrosschainToken, lzEndpointBridge),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser),
                 createXFactory,
                 salt
             )
