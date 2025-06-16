@@ -22,12 +22,12 @@ contract RLCCrosschainTokenTest is Test {
         );
     }
 
-    function test_RevertWhenInitializedMoreThanOnce() public {
+    function test_RevertWhen_InitializedMoreThanOnce() public {
         vm.expectRevert(abi.encodeWithSignature("InvalidInitialization()"));
         crossChainToken.initialize("Foo", "BAR", owner, upgrader);
     }
 
-    function test_RevertWhenUnauthorizedUpgrader() public {
+    function test_RevertWhen_UnauthorizedUpgrader() public {
         address unauthorizedUpgrader = makeAddr("unauthorized");
         vm.expectRevert(
             abi.encodeWithSignature(
