@@ -17,7 +17,7 @@ contract RLCCrosschainTokenTest is Test {
     function setUp() public {
         crossChainToken = RLCCrosschainToken(
             new RLCCrosschainTokenDeployScript().deploy(
-                "RLC Token", "RLC", owner, upgrader, address(new CreateX()), keccak256("salt")
+                "RLC Crosschain Token", "RLC", owner, upgrader, address(new CreateX()), keccak256("salt")
             )
         );
     }
