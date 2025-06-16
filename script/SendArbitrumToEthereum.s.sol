@@ -3,7 +3,7 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {RLCOFT} from "../src/RLCOFT.sol";
+import {RLCOFT} from "../src/bridges/layerZero/RLCOFT.sol";
 import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 

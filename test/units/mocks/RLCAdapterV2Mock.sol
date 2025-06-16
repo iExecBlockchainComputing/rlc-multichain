@@ -3,12 +3,12 @@
 
 pragma solidity ^0.8.22;
 
-import {RLCAdapter} from "../../../../src/RLCAdapter.sol";
+import {RLCAdapter} from "../../../../src/bridges/layerZero/RLCAdapter.sol";
 
 /**
  * @notice RLCAdapterV2 - V2 implementation with additional features
  * @dev This contract inherits from RLCAdapter (V1) and adds new functionality
- * @custom:oz-upgrades-from src/RLCAdapter.sol:RLCAdapter
+ * @custom:oz-upgrades-from src/bridges/layerZero/RLCAdapter.sol:RLCAdapter
  */
 contract RLCAdapterV2 is RLCAdapter {
     // NEW STATE VARIABLES FOR V2

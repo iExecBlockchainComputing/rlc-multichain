@@ -9,8 +9,8 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
-import {ICrosschainRLC} from "./interfaces/ICrosschainRLC.sol";
-import {IIexecLayerZeroBridge} from "./interfaces/IIexecLayerZeroBridge.sol";
+import {ICrosschainRLC} from "../../interfaces/ICrosschainRLC.sol";
+import {IIexecLayerZeroBridge} from "../../interfaces/IIexecLayerZeroBridge.sol";
 
 /**
  * @title IexecLayerZeroBridge

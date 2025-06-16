@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
 import {Deploy as RLCAdapterDeploy} from "../../script/RLCAdapter.s.sol";
-import {RLCAdapter} from "../../src/RLCAdapter.sol";
+import {RLCAdapter} from "../../src/bridges/layerZero/RLCAdapter.sol";
 
 contract RLCAdapterScriptTest is Test {
     // Unique instance of the deployment script

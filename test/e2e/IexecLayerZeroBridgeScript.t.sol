@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
 import {Deploy as IexecLayerZeroBridgeDeploy} from "../../script/IexecLayerZeroBridge.s.sol";
-import {IexecLayerZeroBridge} from "../../src/IexecLayerZeroBridge.sol";
+import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 //TODO: To remove when RLC_ERC20 contract will be developed
 import {RLCMock} from "../units/mocks/RLCMock.sol";
 
