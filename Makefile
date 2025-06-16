@@ -36,7 +36,8 @@ clean:
 
 deploy-on-anvil:
 	$(MAKE) deploy-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
-	$(MAKE) deploy-oft RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) deploy-rlc-crosschain-token RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) deploy-layerzero-bridge RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 	$(MAKE) configure-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
 	$(MAKE) configure-oft RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
@@ -46,7 +47,7 @@ upgrade-on-anvil:
 
 deploy-on-testnets:
 	$(MAKE) deploy-adapter RPC_URL=$(SEPOLIA_RPC_URL)
-	$(MAKE) deploy-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) deploy-layerzero-bridge RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 	$(MAKE) configure-adapter RPC_URL=$(SEPOLIA_RPC_URL)
 	$(MAKE) configure-oft RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 
@@ -62,14 +63,6 @@ deploy-adapter:
         --broadcast \
         -vvv
 
-deploy-layerzero-bridge:
-	@echo "Deploying IexecLayerZeroBridge (UUPS Proxy) on: $(RPC_URL)"
-	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Deploy \
-        --rpc-url $(RPC_URL) \
-        --account $(ACCOUNT) \
-        --broadcast \
-        -vvv
-
 # deploy-rlc-crosschain-token RPC_URL=https://...
 deploy-rlc-crosschain-token:
 	@echo "Deploying RLC cross-chain token on: $(RPC_URL)"
@@ -79,9 +72,17 @@ deploy-rlc-crosschain-token:
 		--broadcast \
 		-vvv
 
+deploy-layerzero-bridge:
+	@echo "Deploying IexecLayerZeroBridge (UUPS Proxy) on: $(RPC_URL)"
+	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Deploy \
+        --rpc-url $(RPC_URL) \
+        --account $(ACCOUNT) \
+        --broadcast \
+        -vvv
+
 configure-adapter:
 	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
-	forge script script/RLCAdapter.s.sol:Configure \
+	forge script script/bridges/layerZero/RLCAdapter.s.sol:Configure \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -89,7 +90,7 @@ configure-adapter:
 
 configure-oft:
 	@echo "Configuring RLCOFT on: $(RPC_URL)"
-	forge script script/RLCOFT.s.sol:Configure \
+	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Configure \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -159,9 +160,9 @@ verify-adapter-impl:
 	forge verify-contract \
         --chain-id 11155111 \
         --watch \
-        --constructor-args $(shell cast abi-encode "constructor(address,address)" $(RLC_SEPOLIA_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS)) \
+        --constructor-args $(shell cast abi-encode "constructor(address,address)" $(RLC_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS)) \
         --etherscan-api-key $(ETHERSCAN_API_KEY) \
-        $(RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS) \
+        $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) \
         src/RLCAdapter.sol:RLCAdapter
 
 verify-oft-impl:
@@ -180,7 +181,7 @@ verify-adapter-proxy:
 	forge verify-contract \
         --chain-id 11155111 \
         --watch \
-        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
+        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
         --etherscan-api-key $(ETHERSCAN_API_KEY) \
         $(RLC_SEPOLIA_ADAPTER_PROXY_ADDRESS) \
         lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy

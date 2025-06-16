@@ -7,6 +7,7 @@ import "forge-std/StdJson.sol";
 import {Script} from "forge-std/Script.sol";
 import {RLCCrosschainToken} from "../src/token/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
+import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
 
 /**
  * Deployment script for the RLCCrosschainToken contract.
@@ -32,7 +33,9 @@ contract Deploy is Script {
         vm.startBroadcast();
         address rlcCrosschainTokenProxy = deploy("RLC Token", "RLC", owner, upgrader, createxFactory, createxSalt);
         vm.stopBroadcast();
-        // TODO save contract address.
+
+        //TODO: use config file to store addresses.
+        EnvUtils.updateEnvVariable("RLC_CROSSCHAIN_ADDRESS", rlcCrosschainTokenProxy);
         return rlcCrosschainTokenProxy;
     }
 

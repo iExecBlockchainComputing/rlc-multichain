@@ -25,7 +25,7 @@ contract Deploy is Script {
 
         address implementationAddress = Upgrades.getImplementationAddress(IexecLayerZeroBridgeProxy);
         EnvUtils.updateEnvVariable("RLC_LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS", implementationAddress);
-        EnvUtils.updateEnvVariable("RLC_CROSSCHAIN_ADDRESS", IexecLayerZeroBridgeProxy);
+        EnvUtils.updateEnvVariable("RLC_LAYERZERO_BRIDGE_PROXY_ADDRESS", IexecLayerZeroBridgeProxy);
         return IexecLayerZeroBridgeProxy;
     }
 
@@ -48,11 +48,11 @@ contract Configure is Script {
         vm.startBroadcast();
 
         // RLC on Arbitrum Sepolia
-        address iexecLayerZeroBridgeAddress = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
+        address iexecLayerZeroBridgeAddress = vm.envAddress("RLC_LAYERZERO_BRIDGE_PROXY_ADDRESS");
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
 
         // RLCAdapter on Ethereum Sepolia
-        address adapterAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS"); // Read this variable from .env file
+        address adapterAddress = vm.envAddress("RLC_ADAPTER_PROXY_ADDRESS"); // Read this variable from .env file
         uint16 ethereumSepoliaChainId = uint16(vm.envUint("LAYER_ZERO_SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Ethereum Sepolia - TODO: remove or make it chain agnostic
 
         // Set trusted remote
@@ -66,7 +66,7 @@ contract Upgrade is Script {
     function run() external {
         vm.startBroadcast();
 
-        address proxyAddress = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
+        address proxyAddress = vm.envAddress("RLC_LAYERZERO_BRIDGE_PROXY_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
         // For testing purpose
