@@ -3,25 +3,26 @@
 pragma solidity ^0.8.22;
 
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {RLCAdapter} from "../../../src/RLCAdapter.sol";
-import {RLCMock} from "../../units/mocks/RLCMock.sol";
-import {RLCAdapterV2} from "../mocks/RLCAdapterV2Mock.sol";
+import {IexecLayerZeroBridgeV2} from "../mocks/IexecLayerZeroBridgeV2Mock.sol";
 import {TestUtils} from "./../utils/TestUtils.sol";
+import {RLCMock} from "../../units/mocks/RLCMock.sol";
 import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
+import {IexecLayerZeroBridge} from "../../../src/IexecLayerZeroBridge.sol";
 
-contract UpgradeRLCAdapterTest is TestHelperOz5 {
+contract UpgradeRLCOFTTest is TestHelperOz5 {
     using TestUtils for *;
 
-    RLCAdapter public adapterV1;
-    RLCAdapterV2 public adapterV2;
-    RLCMock public rlcToken;
-    // TODO use a common function to create addresses.
+    IexecLayerZeroBridge public iexecLayerZeroBridgeV1;
+    IexecLayerZeroBridgeV2 public iexecLayerZeroBridgeV2;
+    RLCMock private rlcCrosschainToken;
+
     address public mockEndpoint;
     address public owner = makeAddr("owner");
     address public pauser = makeAddr("pauser");
+
     address public proxyAddress;
-    string public constant name = "RLC Ethereum Test";
-    string public constant symbol = "RLC";
+    string public name = "RLC Crosschain Token";
+    string public symbol = "RLC";
     uint256 public constant NEW_STATE_VARIABLE = 2;
 
     function setUp() public virtual override {
@@ -29,8 +30,9 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-        (adapterV1,, rlcToken,) = TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
-        proxyAddress = address(adapterV1);
+        (, iexecLayerZeroBridgeV1,, rlcCrosschainToken) =
+            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
+        proxyAddress = address(iexecLayerZeroBridgeV1);
     }
 
     function test_UpgradeCorrectly() public {
@@ -42,21 +44,20 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         assertFalse(success2, "V1 should not have initializeV2() function");
 
         // 2. Store V1 state for comparison
-        address originalOwner = adapterV1.owner();
-        address originalRlcToken = address(adapterV1.token());
+        address originalOwner = iexecLayerZeroBridgeV1.owner();
 
-        assertTrue(adapterV1.hasRole(adapterV1.DEFAULT_ADMIN_ROLE(), owner));
-        assertTrue(adapterV1.hasRole(adapterV1.UPGRADER_ROLE(), owner));
-        assertTrue(adapterV1.hasRole(adapterV1.PAUSER_ROLE(), pauser));
+        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.DEFAULT_ADMIN_ROLE(), owner));
+        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.UPGRADER_ROLE(), owner));
+        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.PAUSER_ROLE(), pauser));
 
         // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(owner);
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
-            contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
+            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             lzEndpoint: mockEndpoint,
-            rlcToken: address(rlcToken),
+            rlcToken: address(rlcCrosschainToken),
             newStateVariable: NEW_STATE_VARIABLE,
             skipChecks: true, // Allow for testing with mocks
             validateOnly: false
@@ -66,17 +67,29 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
 
         vm.stopPrank();
 
-        adapterV2 = RLCAdapterV2(proxyAddress);
+        iexecLayerZeroBridgeV2 = IexecLayerZeroBridgeV2(proxyAddress);
 
         // 5. Verify state preservation
-        assertEq(adapterV2.owner(), originalOwner, "Owner should be preserved");
-        assertEq(address(adapterV2.token()), originalRlcToken, "RLC token should be preserved");
-        assertTrue(adapterV2.hasRole(adapterV2.DEFAULT_ADMIN_ROLE(), owner), "Default admin role should be preserved");
-        assertTrue(adapterV2.hasRole(adapterV2.UPGRADER_ROLE(), owner), "Upgrader role should be preserved");
-        assertTrue(adapterV2.hasRole(adapterV2.PAUSER_ROLE(), pauser), "Pauser role should be preserved");
+        assertEq(iexecLayerZeroBridgeV2.owner(), originalOwner, "Owner should be preserved");
+        assertTrue(
+            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.DEFAULT_ADMIN_ROLE(), owner),
+            "Default admin role should be preserved"
+        );
+        assertTrue(
+            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.UPGRADER_ROLE(), owner),
+            "Upgrader role should be preserved"
+        );
+        assertTrue(
+            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.PAUSER_ROLE(), pauser),
+            "Pauser role should be preserved"
+        );
 
         // 6. Verify new V2 functionality
-        assertEq(adapterV2.newStateVariable(), NEW_STATE_VARIABLE, "New state variable should be initialized correctly");
+        assertEq(
+            iexecLayerZeroBridgeV2.newStateVariable(),
+            NEW_STATE_VARIABLE,
+            "New state variable should be initialized correctly"
+        );
 
         // 7. Verify V2 functions are now available
         (bool v2Success,) = proxyAddress.call(abi.encodeWithSignature("newStateVariable()"));
@@ -88,9 +101,9 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
-            contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
+            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             lzEndpoint: mockEndpoint,
-            rlcToken: address(rlcToken),
+            rlcToken: address(rlcCrosschainToken),
             newStateVariable: NEW_STATE_VARIABLE,
             skipChecks: true,
             validateOnly: false
@@ -100,14 +113,14 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
 
         vm.stopPrank();
 
-        adapterV2 = RLCAdapterV2(proxyAddress);
+        iexecLayerZeroBridgeV2 = IexecLayerZeroBridgeV2(proxyAddress);
 
         // Verify it was initialized correctly
-        assertEq(adapterV2.newStateVariable(), NEW_STATE_VARIABLE);
+        assertEq(iexecLayerZeroBridgeV2.newStateVariable(), NEW_STATE_VARIABLE);
 
         // Attempt to initialize again should revert
         vm.prank(owner);
         vm.expectRevert();
-        adapterV2.initializeV2(999); // Different value to ensure it's not a duplicate
+        iexecLayerZeroBridgeV2.initializeV2(999); // Different value to ensure it's not a duplicate
     }
 }

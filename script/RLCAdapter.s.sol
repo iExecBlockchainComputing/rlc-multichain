@@ -79,13 +79,12 @@ contract Upgrade is Script {
             contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2", // Would be production contract in real deployment
             lzEndpoint: lzEndpoint,
             rlcToken: rlcToken,
-            contractType: UpgradeUtils.ContractType.ADAPTER,
             newStateVariable: newStateVariable,
             skipChecks: true, // TODO: Remove when validation issues are fixed
             validateOnly: false
         });
 
-        address newImplementationAddress = UpgradeUtils.executeUpgradeAdapter(params);
+        address newImplementationAddress = UpgradeUtils.executeUpgrade(params);
 
         // Log the new implementation address
         console.log("RLCAdapter upgraded to new implementation:", newImplementationAddress);
@@ -107,7 +106,6 @@ contract ValidateUpgrade is Script {
             lzEndpoint: lzEndpoint,
             rlcToken: rlcToken,
             contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
-            contractType: UpgradeUtils.ContractType.ADAPTER,
             newStateVariable: 1000000 * 10 ** 9,
             skipChecks: true, // TODO: Remove this when validation issues are fixed
             validateOnly: true

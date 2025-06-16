@@ -8,9 +8,8 @@ import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
 import {RLCAdapter} from "../../../src/RLCAdapter.sol";
-import {RLCOFTMock} from "../mocks/RLCOFTMock.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
-import {RLCOFT} from "../../../src/RLCOFT.sol";
+import {IexecLayerZeroBridge} from "../../../src/IexecLayerZeroBridge.sol";
 import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
 
 library TestUtils {
@@ -20,46 +19,60 @@ library TestUtils {
         string memory name,
         string memory symbol,
         address lzEndpointAdapter,
-        address lzEndpointOFT,
+        address lzEndpointBridge,
         address owner,
         address pauser
-    ) internal returns (RLCAdapter rlcAdapter, RLCOFTMock rlcOftMock, RLCMock rlcToken) {
+    )
+        internal
+        returns (
+            RLCAdapter rlcAdapter,
+            IexecLayerZeroBridge iexecLayerZeroBridge,
+            RLCMock rlcToken,
+            RLCMock rlcCrosschainToken
+        )
+    {
         address createXFactory = address(new CreateX());
 
-        // Deploy RLC token mock
+        // Deploy RLC token mock for Ethereum
         rlcToken = new RLCMock(name, symbol);
 
         // Deploy RLCAdapter
         bytes32 salt = keccak256("RLCAdapter_SALT");
-        bytes memory constructorDataRLCAdapter = abi.encode(rlcToken, lzEndpointAdapter);
-        bytes memory initializeDataRLCAdapter = abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser);
         rlcAdapter = RLCAdapter(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "RLCAdapter", constructorDataRLCAdapter, initializeDataRLCAdapter, createXFactory, salt
+                "RLCAdapter",
+                abi.encode(rlcToken, lzEndpointAdapter),
+                abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser),
+                createXFactory,
+                salt
             )
         );
 
-        // Deploy RLCOFTMock
-        bytes memory constructorDataRLCOFT = abi.encode(lzEndpointOFT);
-        bytes memory initializeDataRLCOFT =
-            abi.encodeWithSelector(RLCOFT.initialize.selector, name, symbol, owner, pauser);
-        rlcOftMock = RLCOFTMock(
+        // Deploy RLC token mock for Arbitrum
+        rlcCrosschainToken = new RLCMock(name, symbol);
+
+        // Deploy IexecLayerZeroBridge
+        iexecLayerZeroBridge = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "RLCOFTMock", constructorDataRLCOFT, initializeDataRLCOFT, createXFactory, salt
+                "IexecLayerZeroBridge",
+                abi.encode(rlcCrosschainToken, lzEndpointBridge),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser),
+                createXFactory,
+                salt
             )
         );
     }
 
     /**
      * @notice Prepare send parameters and quote fee without executing
-     * @param oft The OFT contract to send from
+     * @param layerZeroContract The LayerZero contract that respect IOFT interface to send from
      * @param to The destination address (as bytes32)
      * @param amount The amount to send
      * @param dstEid The destination endpoint ID
      * @return sendParam The prepared send parameters
      * @return fee The quoted messaging fee
      */
-    function prepareSend(IOFT oft, bytes32 to, uint256 amount, uint32 dstEid)
+    function prepareSend(IOFT layerZeroContract, bytes32 to, uint256 amount, uint32 dstEid)
         internal
         view
         returns (SendParam memory sendParam, MessagingFee memory fee)
@@ -74,6 +87,6 @@ library TestUtils {
             composeMsg: "",
             oftCmd: ""
         });
-        fee = oft.quoteSend(sendParam, false);
+        fee = layerZeroContract.quoteSend(sendParam, false);
     }
 }
