@@ -75,7 +75,7 @@ deploy-rlc-crosschain-token:
 	@echo "Deploying RLC cross-chain token on: $(RPC_URL)"
 	CHAIN=arbitrum_sepolia forge script script/RLCCrosschainToken.s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
-        --account $(ACCOUNT) \
+		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 
