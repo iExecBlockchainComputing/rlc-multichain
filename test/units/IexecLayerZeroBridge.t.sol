@@ -173,7 +173,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     // ============ LEVEL 2 PAUSE TESTS (Entrance Pause) ============
 
-    function test_PauseEntrances_EmitsCorrectEvent() public { // fails
+    function test_PauseEntrances_EmitsCorrectEvent() public {
         vm.expectEmit(true, false, false, false);
         emit EntrancePaused(pauser);
 
@@ -221,7 +221,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         iexecLayerZeroBridge.pauseEntrances();
     }
 
-    function test_UnpauseEntrances_RestoresOutgoingTransfers() public { // fails
+    function test_UnpauseEntrances_RestoresOutgoingTransfers() public {
         // Pause then unpause entrances
         vm.startPrank(pauser);
         iexecLayerZeroBridge.pauseEntrances();
