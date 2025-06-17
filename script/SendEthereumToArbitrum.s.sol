@@ -23,8 +23,8 @@ contract SendTokensToArbitrumSepolia is Script {
         vm.startBroadcast();
 
         // Contract addresses
-        address adapterAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS"); // Your RLCAdapter address
-        address rlcTokenAddress = vm.envAddress("RLC_SEPOLIA_ADDRESS"); // RLC token address on sepolia testnet
+        address adapterAddress = vm.envAddress("RLC_ADAPTER_PROXY_ADDRESS"); // Your RLCAdapter address
+        address rlcTokenAddress = vm.envAddress("RLC_ADDRESS"); // RLC token address on sepolia testnet
 
         // Transfer parameters
         uint16 destinationChainId = uint16(vm.envUint("LAYER_ZERO_ARBITRUM_SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Arbitrum Sepolia

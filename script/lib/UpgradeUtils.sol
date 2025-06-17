@@ -3,16 +3,12 @@
 pragma solidity ^0.8.22;
 
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {Vm} from "forge-std/Vm.sol";
-import {StdConstants} from "forge-std/StdConstants.sol";
 
 /**
  * @title UpgradeUtils
  * @notice Utility library for handling UUPS upgrades in a parameterized way
  */
 library UpgradeUtils {
-    Vm private constant vm = StdConstants.VM;
-
     struct UpgradeParams {
         address proxyAddress;
         string contractName;
