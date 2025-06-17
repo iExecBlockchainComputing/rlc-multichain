@@ -121,7 +121,6 @@ contract RLCAdapterTest is TestHelperOz5 {
         assertEq(rlcToken.balanceOf(address(adapter)), 0);
     }
 
-
     function test_Unpause_RestoresFullFunctionality() public {
         // Pause then unpause the adapter
         vm.startPrank(pauser);
