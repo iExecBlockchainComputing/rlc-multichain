@@ -67,15 +67,20 @@ contract RLCCrosschainToken is
     }
 
     /**
-     * @dev See {IERC7802-crosschainMint}. Emits a {CrosschainMint} event.
+     * @dev See {IERC7802-crosschainMint}.
+     * Does not mint if `to` is the zero address.
+     * Reverts if the caller does not have the `TOKEN_BRIDGE_ROLE`.
+     * Emits a {CrosschainMint} event.
      */
     function crosschainMint(address to, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
+        // TODO require(to != msg.sender, "RLCCrosschainToken: cannot mint to self"); ???
         _mint(to, value);
         emit CrosschainMint(to, value, _msgSender());
     }
 
     /**
-     * @dev See {IERC7802-crosschainBurn}. Emits a {CrosschainBurn} event.
+     * @dev See {IERC7802-crosschainBurn}.
+     * Emits a {CrosschainBurn} event.
      */
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
         _burn(from, value);
