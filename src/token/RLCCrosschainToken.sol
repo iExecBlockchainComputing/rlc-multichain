@@ -82,8 +82,9 @@ contract RLCCrosschainToken is
      * Emits a {CrosschainBurn} event.
      */
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
-        _burn(from, value);
-        emit CrosschainBurn(from, value, _msgSender());
+        // TODO
+        // _burn(from, value);
+        // emit CrosschainBurn(from, value, _msgSender());
     }
 
     /**
