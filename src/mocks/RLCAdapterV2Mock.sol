@@ -1,19 +1,21 @@
 // SPDX-FileCopyrightText: 2025 IEXEC BLOCKCHAIN TECH <contact@iex.ec>
 // SPDX-License-Identifier: Apache-2.0
+
 pragma solidity ^0.8.22;
 
-import {IexecLayerZeroBridge} from "../../../../src/IexecLayerZeroBridge.sol";
+import {RLCAdapter} from "../RLCAdapter.sol";
 
 /**
- * @title IexecLayerZeroBridgeV2 - V2 implementation with additional features
- * @author IEXEC BLOCKCHAIN TECH
- * @notice This contract inherits from IexecLayerZeroBridge (V1) and adds new functionality
+ * @notice RLCAdapterV2 - V2 implementation with additional features
+ * @dev This contract inherits from RLCAdapter (V1) and adds new functionality
+ * @custom:oz-upgrades-from src/RLCAdapter.sol:RLCAdapter
  */
-contract IexecLayerZeroBridgeV2 is IexecLayerZeroBridge {
+contract RLCAdapterV2 is RLCAdapter {
     // NEW STATE VARIABLES FOR V2
     uint256 public newStateVariable;
 
-    constructor(address _token, address _lzEndpoint) IexecLayerZeroBridge(_token, _lzEndpoint) {}
+    //  @custom:oz-upgrades-unsafe-allow constructor
+    constructor(address _token, address _lzEndpoint) RLCAdapter(_token, _lzEndpoint) {}
 
     /**
      * @notice Initializes V2 features (called after upgrade)

@@ -5,7 +5,7 @@ pragma solidity ^0.8.22;
 import {Script, console} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCAdapter} from "../src/RLCAdapter.sol";
-import {EnvUtils} from "./UpdateEnvUtils.sol";
+import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 
@@ -16,7 +16,7 @@ contract Deploy is Script {
         // TODO use json file to configure addresses by network.
         // vm.readFile(path)
         // vm.parseJson()
-        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
+        address rlcToken = vm.envAddress("RLC_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address pauser = vm.envAddress("PAUSER_ADDRESS");
@@ -27,8 +27,8 @@ contract Deploy is Script {
 
         vm.stopBroadcast();
         address implementationAddress = Upgrades.getImplementationAddress(rlcAdapterProxy);
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS", implementationAddress);
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_ADDRESS", rlcAdapterProxy);
+        EnvUtils.updateEnvVariable("RLC_ADAPTER_IMPLEMENTATION_ADDRESS", implementationAddress);
+        EnvUtils.updateEnvVariable("RLC_ADAPTER_PROXY_ADDRESS", rlcAdapterProxy);
         return rlcAdapterProxy;
     }
 
@@ -50,14 +50,14 @@ contract Configure is Script {
         vm.startBroadcast();
 
         // RLCAdapter on Ethereum Sepolia
-        address adapterAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS"); // Read this variable from .env file
+        address adapterAddress = vm.envAddress("RLC_ADAPTER_PROXY_ADDRESS"); // Read this variable from .env file
         RLCAdapter adapter = RLCAdapter(adapterAddress);
 
-        // RLCOFT on Arbitrum Sepolia
-        address oftAddress = vm.envAddress("RLC_ARBITRUM_SEPOLIA_OFT_ADDRESS");
+        // RLC on Arbitrum Sepolia
+        address layerZeroBridge = vm.envAddress("LAYERZERO_BRIDGE_PROXY_ADDRESS");
         uint16 arbitrumSepoliaChainId = uint16(vm.envUint("LAYER_ZERO_ARBITRUM_SEPOLIA_CHAIN_ID")); //TODO: remove or make it chain agnostic
         // Set trusted remote
-        adapter.setPeer(arbitrumSepoliaChainId, bytes32(uint256(uint160(oftAddress))));
+        adapter.setPeer(arbitrumSepoliaChainId, bytes32(uint256(uint160(layerZeroBridge))));
 
         vm.stopBroadcast();
     }
@@ -67,8 +67,8 @@ contract Upgrade is Script {
     function run() external {
         vm.startBroadcast();
 
-        address proxyAddress = vm.envAddress("RLC_SEPOLIA_ADAPTER_ADDRESS");
-        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
+        address proxyAddress = vm.envAddress("RLC_ADAPTER_PROXY_ADDRESS");
+        address rlcToken = vm.envAddress("RLC_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
 
         // For testing purpose
@@ -92,14 +92,14 @@ contract Upgrade is Script {
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_SEPOLIA_ADAPTER_IMPLEMENTATION_ADDRESS", newImplementationAddress);
+        EnvUtils.updateEnvVariable("RLC_ADAPTER_IMPLEMENTATION_ADDRESS", newImplementationAddress);
     }
 }
 
 contract ValidateUpgrade is Script {
     function run() external {
         address lzEndpoint = vm.envAddress("LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS");
-        address rlcToken = vm.envAddress("RLC_SEPOLIA_ADDRESS");
+        address rlcToken = vm.envAddress("RLC_ADDRESS");
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: address(0), // Not needed for validation
