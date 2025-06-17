@@ -83,7 +83,7 @@ contract IexecLayerZeroBridge is
      *
      * When fully paused:
      * - All _debit operations (outgoing transfers) are blocked
-     * - All _credit operations (incoming transfers) are blocked  
+     * - All _credit operations (incoming transfers) are blocked
      * - Use this for critical security incidents (e.g., LayerZero exploit)
      *
      * @custom:security Critical emergency function for complete bridge shutdown
@@ -101,7 +101,7 @@ contract IexecLayerZeroBridge is
     }
 
     /**
-     * @notice LEVEL 2: Pauses only outgoing transfers (entrance pause)  
+     * @notice LEVEL 2: Pauses only outgoing transfers (entrance pause)
      * @dev Can only be called by accounts with PAUSER_ROLE
      *
      * When entrances are paused:
@@ -224,7 +224,7 @@ contract IexecLayerZeroBridge is
      * @dev This function is called for INCOMING transfers (when receiving from another chain)
      * It's blocked ONLY when:
      * 1. Contract is fully paused (Level 1 pause)
-     * 
+     *
      * It's NOT blocked when entrances are paused (Level 2) - users can still receive/exit
      *
      * @custom:security Uses whenNotPaused (only checks full pause, allows entrance pause)

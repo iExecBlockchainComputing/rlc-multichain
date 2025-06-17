@@ -90,7 +90,7 @@ contract RLCAdapterTest is TestHelperOz5 {
     function test_Pause_EmitsCorrectEvent() public {
         vm.expectEmit(true, false, false, false);
         emit Paused(pauser);
-        
+
         vm.prank(pauser);
         adapter.pause();
     }
@@ -145,7 +145,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         // Pause then unpause the adapter
         vm.startPrank(pauser);
         adapter.pause();
-        
+
         vm.expectEmit(true, false, false, false);
         emit Unpaused(pauser);
         adapter.unpause();
@@ -231,7 +231,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         // Pause then unpause entrances
         vm.startPrank(pauser);
         adapter.pauseEntrances();
-        
+
         vm.expectEmit(true, false, false, false);
         emit EntranceUnpaused(pauser);
         adapter.unpauseEntrances();
@@ -240,7 +240,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         // Should now work normally
         assertFalse(adapter.paused());
         assertFalse(adapter.entrancesPaused());
-        
+
         test_SendToken_WhenOperational();
     }
 
@@ -251,13 +251,13 @@ contract RLCAdapterTest is TestHelperOz5 {
         vm.startPrank(pauser);
         adapter.pauseEntrances();
         assertTrue(adapter.entrancesPaused());
-        
+
         // Escalate to full pause - should reset entrance pause and emit events
         vm.expectEmit(true, false, false, false);
         emit EntranceUnpaused(pauser);
         vm.expectEmit(true, false, false, false);
         emit Paused(pauser);
-        
+
         adapter.pause();
         vm.stopPrank();
 
@@ -267,7 +267,7 @@ contract RLCAdapterTest is TestHelperOz5 {
 
     function test_DualPause_UnpauseFromFullRestoresOperational() public {
         vm.startPrank(pauser);
-        
+
         // Go through: operational -> entrance pause -> full pause -> operational
         adapter.pauseEntrances();
         adapter.pause();
@@ -282,22 +282,22 @@ contract RLCAdapterTest is TestHelperOz5 {
     function test_PauseState_ReturnsCorrectStates() public {
         // Test pauseState function if it exists (it should based on the bridge contract)
         // Note: You'll need to add this function to RLCAdapter contract
-        
+
         // Initially operational
         assertFalse(adapter.paused());
         assertFalse(adapter.entrancesPaused());
-        
+
         // After entrance pause
         vm.prank(pauser);
         adapter.pauseEntrances();
-        
+
         assertFalse(adapter.paused());
         assertTrue(adapter.entrancesPaused());
-        
+
         // After full pause
         vm.prank(pauser);
         adapter.pause();
-        
+
         assertTrue(adapter.paused());
         assertFalse(adapter.entrancesPaused()); // Reset when fully paused
     }
@@ -306,15 +306,15 @@ contract RLCAdapterTest is TestHelperOz5 {
 
     function test_PauseEntrances_CannotUnpauseWhenFullyPaused() public {
         vm.startPrank(pauser);
-        
+
         // Pause entrances then full pause
         adapter.pauseEntrances();
         adapter.pause();
-        
+
         // Attempt to unpause entrances while fully paused - should revert
         vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
         adapter.unpauseEntrances();
-        
+
         vm.stopPrank();
     }
 

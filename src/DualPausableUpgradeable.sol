@@ -37,7 +37,7 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
 
     function _getDualPausableStorage() private pure returns (DualPausableStorage storage $) {
         assembly {
-             $.slot := DUAL_PAUSABLE_STORAGE_LOCATION
+            $.slot := DUAL_PAUSABLE_STORAGE_LOCATION
         }
     }
 
@@ -102,8 +102,8 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
      * @dev Returns true if entrances are paused, false otherwise
      */
     function entrancesPaused() public view virtual returns (bool) {
-        DualPausableStorage storage  $  = _getDualPausableStorage();
-        return  $._entrancesPaused;
+        DualPausableStorage storage $ = _getDualPausableStorage();
+        return $._entrancesPaused;
     }
 
     /**
@@ -145,7 +145,7 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
     function _requireEntrancesPaused() internal view virtual {
         // Check complete pause first (takes precedence)
         _requireNotPaused();
-        
+
         if (!entrancesPaused()) {
             revert ExpectedEntrancesPause();
         }
@@ -153,12 +153,12 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
 
     /**
      * @dev Triggers entrance paused state
-     * Requirements: 
+     * Requirements:
      * - Contract must not be completely paused
      * - Entrances must not already be paused
      */
     function _pauseEntrances() internal virtual whenEntrancesNotPaused {
-        DualPausableStorage storage  $  = _getDualPausableStorage();
+        DualPausableStorage storage $ = _getDualPausableStorage();
         $._entrancesPaused = true;
         emit EntrancePaused(_msgSender());
     }
@@ -168,7 +168,7 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
      * Requirements: Entrances must be paused
      */
     function _unpauseEntrances() internal virtual whenEntrancesPaused {
-        DualPausableStorage storage  $  = _getDualPausableStorage();
+        DualPausableStorage storage $ = _getDualPausableStorage();
         $._entrancesPaused = false;
         emit EntranceUnpaused(_msgSender());
     }
@@ -179,9 +179,9 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
      */
     function _pause() internal virtual override {
         // First reset entrances if they were paused (complete pause takes precedence)
-        DualPausableStorage storage  $  = _getDualPausableStorage();
+        DualPausableStorage storage $ = _getDualPausableStorage();
         if ($._entrancesPaused) {
-             $ ._entrancesPaused = false;
+            $._entrancesPaused = false;
             emit EntranceUnpaused(_msgSender());
         }
 
@@ -195,7 +195,7 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
      */
     function _unpause() internal virtual override {
         // First unpause entrances if they were paused
-        DualPausableStorage storage  $  = _getDualPausableStorage();
+        DualPausableStorage storage $ = _getDualPausableStorage();
         if ($._entrancesPaused) {
             $._entrancesPaused = false;
             emit EntranceUnpaused(_msgSender());

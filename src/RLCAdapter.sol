@@ -22,7 +22,7 @@ import {DualPausableUpgradeable} from "./DualPausableUpgradeable.sol";
  * 1. When sending tokens FROM this chain: RLC tokens are locked in the adapter contract
  * 2. When receiving tokens TO this chain: Previously locked RLC tokens are unlocked to the recipient
  *
- * ⚠️  IMPORTANT: There can only be one OFT Adapter deployed per chain. Multiple OFT Adapters break 
+ * ⚠️  IMPORTANT: There can only be one OFT Adapter deployed per chain. Multiple OFT Adapters break
  * omnichain unified liquidity by effectively creating separate token pools.
  *
  * It implements a dual-pause mechanism:
@@ -133,7 +133,7 @@ contract RLCAdapter is
     /**
      * @notice Internal function to handle outgoing cross-chain transfers
      * @dev Overridden to implement dual-pause logic
-     * 
+     *
      * Pause behavior:
      * - Complete pause: Blocks all operations
      * - Entrance pause: Blocks only this operation (outgoing transfers)
@@ -159,7 +159,7 @@ contract RLCAdapter is
     /**
      * @notice Internal function to handle incoming cross-chain transfers
      * @dev Overridden to implement pause logic
-     * 
+     *
      * Pause behavior:
      * - Complete pause: Blocks all operations
      * - Entrance pause: Allows this operation (incoming transfers)
@@ -184,7 +184,7 @@ contract RLCAdapter is
      * @notice Authorizes contract upgrades
      * @dev Can only be called by accounts with UPGRADER_ROLE
      * @param newImplementation Address of the new implementation contract
-     * 
+     *
      * @custom:security Ensure proper testing and security review before any upgrade
      */
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}

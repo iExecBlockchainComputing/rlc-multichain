@@ -88,7 +88,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function test_Pause_EmitsCorrectEvent() public {
         vm.expectEmit(true, false, false, false);
         emit Paused(pauser);
-        
+
         vm.prank(pauser);
         iexecLayerZeroBridge.pause();
     }
@@ -141,7 +141,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         // Pause then unpause the bridge
         vm.startPrank(pauser);
         iexecLayerZeroBridge.pause();
-        
+
         vm.expectEmit(true, false, false, false);
         emit Unpaused(pauser);
         iexecLayerZeroBridge.unpause();
@@ -225,7 +225,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         // Pause then unpause entrances
         vm.startPrank(pauser);
         iexecLayerZeroBridge.pauseEntrances();
-        
+
         vm.expectEmit(true, false, false, false);
         emit EntranceUnpaused(pauser);
         iexecLayerZeroBridge.unpauseEntrances();
@@ -234,7 +234,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         // Should now work normally
         assertFalse(iexecLayerZeroBridge.paused());
         assertFalse(iexecLayerZeroBridge.entrancesPaused());
-        
+
         test_SendToken_WhenOperational();
     }
 
@@ -245,13 +245,13 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         vm.startPrank(pauser);
         iexecLayerZeroBridge.pauseEntrances();
         assertTrue(iexecLayerZeroBridge.entrancesPaused());
-        
+
         // Escalate to full pause - should reset entrance pause and emit events
         vm.expectEmit(true, false, false, false);
         emit EntranceUnpaused(pauser);
         vm.expectEmit(true, false, false, false);
         emit Paused(pauser);
-        
+
         iexecLayerZeroBridge.pause();
         vm.stopPrank();
 
@@ -261,7 +261,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     function test_DualPause_UnpauseFromFullRestoresOperational() public {
         vm.startPrank(pauser);
-        
+
         // Go through: operational -> entrance pause -> full pause -> operational
         iexecLayerZeroBridge.pauseEntrances();
         iexecLayerZeroBridge.pause();
@@ -273,26 +273,27 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertFalse(iexecLayerZeroBridge.entrancesPaused());
     }
 
-    function test_PauseState_ReturnsCorrectStates() public { // fails
+    function test_PauseState_ReturnsCorrectStates() public {
+        // fails
         // Initially operational
         (bool fullyPaused, bool entrancesPaused_, bool fullyOperational) = iexecLayerZeroBridge.pauseState();
         assertFalse(fullyPaused);
         assertFalse(entrancesPaused_);
         assertTrue(fullyOperational);
-        
+
         // After entrance pause
         vm.prank(pauser);
         iexecLayerZeroBridge.pauseEntrances();
-        
+
         (fullyPaused, entrancesPaused_, fullyOperational) = iexecLayerZeroBridge.pauseState();
         assertFalse(fullyPaused);
         assertTrue(entrancesPaused_);
         assertFalse(fullyOperational);
-        
+
         // After full pause
         vm.prank(pauser);
         iexecLayerZeroBridge.pause();
-        
+
         (fullyPaused, entrancesPaused_, fullyOperational) = iexecLayerZeroBridge.pauseState();
         assertTrue(fullyPaused);
         assertFalse(entrancesPaused_); // Reset when fully paused
@@ -301,17 +302,18 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     // ============ EDGE CASE TESTS ============
 
-    function test_PauseEntrances_CannotUnpauseWhenFullyPaused() public { //fails
+    function test_PauseEntrances_CannotUnpauseWhenFullyPaused() public {
+        //fails
         vm.startPrank(pauser);
-        
+
         // Pause entrances then full pause
         iexecLayerZeroBridge.pauseEntrances();
         iexecLayerZeroBridge.pause();
-        
+
         // Attempt to unpause entrances while fully paused - should revert
         vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
         iexecLayerZeroBridge.unpauseEntrances();
-        
+
         vm.stopPrank();
     }
 
