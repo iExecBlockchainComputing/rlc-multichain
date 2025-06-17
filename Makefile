@@ -4,12 +4,15 @@ MAKEFLAGS += --no-print-directory
 
 -include .env
 
+# exluding e2/while the e2e are failing locaally
 generate-coverage:
 	rm -rf coverage lcov.info lcov.src.info && \
-	forge coverage --ir-minimum --report lcov --no-match-coverage script --match-path test/units/ && \
+	forge coverage --ir-minimum --report lcov \
+		--no-match-coverage script \
+		--no-match-path "test/e2e/*" && \
 	lcov --extract lcov.info "src/*" -o lcov.src.info && \
 	genhtml lcov.src.info --branch-coverage --output-dir coverage && \
-    rm lcov.info lcov.src.info
+	rm lcov.info lcov.src.info
 #
 # Test and utility targets
 #
