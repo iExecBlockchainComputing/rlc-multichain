@@ -200,10 +200,10 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         (SendParam memory sendParam, MessagingFee memory fee) =
             TestUtils.prepareSend(iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
-        // Attempt to send tokens - should revert with EntrancesPaused
+        // Attempt to send tokens - should revert with EnforcedEntrancePause
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        vm.expectRevert(DualPausableUpgradeable.EntrancesPaused.selector);
+        vm.expectRevert(DualPausableUpgradeable.EnforcedEntrancePause.selector);
         iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify no tokens were burned
@@ -240,7 +240,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     // ============ DUAL PAUSE WORKFLOW TESTS ============
 
-    function test_DualPause_EscalateFromEntranceToFull() public { // fails
+    function test_DualPause_EscalateFromEntranceToFull() public {
         // Start with entrance pause
         vm.startPrank(pauser);
         iexecLayerZeroBridge.pauseEntrances();
@@ -318,8 +318,19 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function test_PauseEntrances_CannotUnpauseWhenNotPaused() public {
         // Attempt to unpause entrances when not paused
         vm.prank(pauser);
-        vm.expectRevert(DualPausableUpgradeable.EntrancesNotPaused.selector);
+        vm.expectRevert(DualPausableUpgradeable.ExpectedEntrancesPause.selector);
         iexecLayerZeroBridge.unpauseEntrances();
+    }
+
+    function test_PauseEntrances_CannotPauseTwice() public {
+        // Pause entrances once
+        vm.prank(pauser);
+        iexecLayerZeroBridge.pauseEntrances();
+
+        // Try to pause again - should revert
+        vm.prank(pauser);
+        vm.expectRevert(DualPausableUpgradeable.EnforcedEntrancePause.selector);
+        iexecLayerZeroBridge.pauseEntrances();
     }
 
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
