@@ -29,7 +29,7 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
 
     // keccak256(abi.encode(uint256(keccak256("iexec.storage.DualPausable")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant DUAL_PAUSABLE_STORAGE_LOCATION =
-        0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b900;
+        0xcfbc5ec03206ba5826cf1103520b82c735e9bad14c6d8ed92dff9144ead3f400;
 
     function _getDualPausableStorage() private pure returns (DualPausableStorage storage $) {
         assembly {
