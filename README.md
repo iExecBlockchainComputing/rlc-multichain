@@ -112,7 +112,7 @@ Always validate upgrades before execution:
 make validate-adapter-upgrade RPC_URL=$(SEPOLIA_RPC_URL)
 
 # Validate RLCOFT upgrade  
-make validate-oft-upgrade RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+make validate-layerzero-bridge-upgrade RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 ```
 
 #### 3. Live Network Upgrades
@@ -182,7 +182,7 @@ make verify-all
 
 # Verify specific components
 make verify-adapter        # Both implementation and proxy
-make verify-oft           # Both implementation and proxy
+make verify-layerzero-bridge           # Both implementation and proxy
 make verify-implementations # Only implementations
 make verify-proxies       # Only proxies
 ```
@@ -234,5 +234,6 @@ The scripts automatically calculate these fees and include them in the transacti
 - [OpenZeppelin Upgrade Safety](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable)
 - [iExec Platform Documentation](https://docs.iex.ec/)
 
-## TODO:
+## TODO
+
 - Use an entreprise RPC URL for `secrets.SEPOLIA_RPC_URL` in Github environment `ci`.
