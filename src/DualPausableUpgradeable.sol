@@ -58,12 +58,12 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
     /**
      * @dev The operation failed because entrances are paused
      */
-    error EntrancesPaused();
+    error EnforcedEntrancePause();
 
     /**
      * @dev The operation failed because entrances are not paused
      */
-    error EntrancesNotPaused();
+    error ExpectedEntrancesPause();
 
     // ============ MODIFIERS ============
 
@@ -135,7 +135,7 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
 
         // Then check entrance pause
         if (entrancesPaused()) {
-            revert EntrancesPaused();
+            revert EnforcedEntrancePause();
         }
     }
 
@@ -143,8 +143,11 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
      * @dev Throws if entrances are not paused
      */
     function _requireEntrancesPaused() internal view virtual {
+        // Check complete pause first (takes precedence)
+        _requireNotPaused();
+        
         if (!entrancesPaused()) {
-            revert EntrancesNotPaused();
+            revert ExpectedEntrancesPause();
         }
     }
 
@@ -154,13 +157,8 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
      * - Contract must not be completely paused
      * - Entrances must not already be paused
      */
-    function _pauseEntrances() internal virtual whenNotPaused {
+    function _pauseEntrances() internal virtual whenEntrancesNotPaused {
         DualPausableStorage storage  $  = _getDualPausableStorage();
-        
-        if ($._entrancesPaused) {
-            revert EntrancesPaused();
-        }
-
         $._entrancesPaused = true;
         emit EntrancePaused(_msgSender());
     }
@@ -173,6 +171,22 @@ abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgrade
         DualPausableStorage storage  $  = _getDualPausableStorage();
         $._entrancesPaused = false;
         emit EntranceUnpaused(_msgSender());
+    }
+
+    /**
+     * @dev Override to handle entrance pause when completely pausing
+     * When pausing completely, we also reset entrance pause since complete pause takes precedence
+     */
+    function _pause() internal virtual override {
+        // First reset entrances if they were paused (complete pause takes precedence)
+        DualPausableStorage storage  $  = _getDualPausableStorage();
+        if ($._entrancesPaused) {
+             $ ._entrancesPaused = false;
+            emit EntranceUnpaused(_msgSender());
+        }
+
+        // Then pause completely
+        super._pause();
     }
 
     /**
