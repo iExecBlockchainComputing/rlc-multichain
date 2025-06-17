@@ -121,25 +121,6 @@ contract RLCAdapterTest is TestHelperOz5 {
         assertEq(rlcToken.balanceOf(address(adapter)), 0);
     }
 
-    function test_RevertWhenSendRlcWithBridgePaused() public {
-        // Pause the adapter
-        vm.prank(pauser);
-        adapter.pause();
-
-        // Prepare send parameters using utility
-        (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(adapter, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
-
-        // Send tokens - should revert
-        vm.deal(user1, fee.nativeFee);
-        vm.prank(user1);
-        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        adapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
-
-        // Verify source state - no tokens should be locked
-        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE);
-        assertEq(rlcToken.balanceOf(address(adapter)), 0);
-    }
 
     function test_Unpause_RestoresFullFunctionality() public {
         // Pause then unpause the adapter

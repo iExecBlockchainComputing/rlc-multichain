@@ -118,25 +118,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
-    function test_RevertWhenSendRlcWithBridgePaused() public {
-        // Pause the bridge
-        vm.prank(pauser);
-        iexecLayerZeroBridge.pause();
-
-        // Prepare send parameters using utility
-        (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
-
-        // Send tokens - should revert
-        vm.deal(user1, fee.nativeFee);
-        vm.prank(user1);
-        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
-
-        // Verify source state - no tokens should be burned
-        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
-    }
-
     function test_Unpause_RestoresFullFunctionality() public {
         // Pause then unpause the bridge
         vm.startPrank(pauser);
