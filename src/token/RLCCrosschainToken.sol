@@ -73,7 +73,6 @@ contract RLCCrosschainToken is
      * Emits a {CrosschainMint} event.
      */
     function crosschainMint(address to, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
-        // TODO require(to != msg.sender, "RLCCrosschainToken: cannot mint to self"); ???
         _mint(to, value);
         emit CrosschainMint(to, value, _msgSender());
     }
