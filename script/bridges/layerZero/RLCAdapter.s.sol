@@ -54,10 +54,10 @@ contract Configure is Script {
         RLCAdapter adapter = RLCAdapter(adapterAddress);
 
         // RLC on Arbitrum Sepolia
-        address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
+        address layerZeroBridge = vm.envAddress("LAYERZERO_BRIDGE_PROXY_ADDRESS");
         uint16 arbitrumSepoliaChainId = uint16(vm.envUint("LAYER_ZERO_ARBITRUM_SEPOLIA_CHAIN_ID")); //TODO: remove or make it chain agnostic
         // Set trusted remote
-        adapter.setPeer(arbitrumSepoliaChainId, bytes32(uint256(uint160(rlcCrosschain))));
+        adapter.setPeer(arbitrumSepoliaChainId, bytes32(uint256(uint160(layerZeroBridge))));
 
         vm.stopBroadcast();
     }

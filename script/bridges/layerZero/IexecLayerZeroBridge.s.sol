@@ -19,14 +19,14 @@ contract Deploy is Script {
         address pauser = vm.envAddress("PAUSER_ADDRESS");
         bytes32 createxSalt = vm.envBytes32("SALT");
 
-        address IexecLayerZeroBridgeProxy = deploy(rlcCrosschain, lzEndpoint, owner, pauser, createxSalt);
+        address iexecLayerZeroBridgeProxy = deploy(rlcCrosschain, lzEndpoint, owner, pauser, createxSalt);
 
         vm.stopBroadcast();
 
-        address implementationAddress = Upgrades.getImplementationAddress(IexecLayerZeroBridgeProxy);
-        EnvUtils.updateEnvVariable("RLC_LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS", implementationAddress);
-        EnvUtils.updateEnvVariable("RLC_LAYERZERO_BRIDGE_PROXY_ADDRESS", IexecLayerZeroBridgeProxy);
-        return IexecLayerZeroBridgeProxy;
+        address implementationAddress = Upgrades.getImplementationAddress(iexecLayerZeroBridgeProxy);
+        EnvUtils.updateEnvVariable("LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS", implementationAddress);
+        EnvUtils.updateEnvVariable("LAYERZERO_BRIDGE_PROXY_ADDRESS", iexecLayerZeroBridgeProxy);
+        return iexecLayerZeroBridgeProxy;
     }
 
     function deploy(address rlcCrosschain, address lzEndpoint, address owner, address pauser, bytes32 createxSalt)
@@ -48,7 +48,7 @@ contract Configure is Script {
         vm.startBroadcast();
 
         // RLC on Arbitrum Sepolia
-        address iexecLayerZeroBridgeAddress = vm.envAddress("RLC_LAYERZERO_BRIDGE_PROXY_ADDRESS");
+        address iexecLayerZeroBridgeAddress = vm.envAddress("LAYERZERO_BRIDGE_PROXY_ADDRESS");
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
 
         // RLCAdapter on Ethereum Sepolia
@@ -66,7 +66,7 @@ contract Upgrade is Script {
     function run() external {
         vm.startBroadcast();
 
-        address proxyAddress = vm.envAddress("RLC_LAYERZERO_BRIDGE_PROXY_ADDRESS");
+        address proxyAddress = vm.envAddress("LAYERZERO_BRIDGE_PROXY_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
         // For testing purpose
@@ -86,7 +86,7 @@ contract Upgrade is Script {
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("RLC_LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS", newImplementationAddress);
+        EnvUtils.updateEnvVariable("LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS", newImplementationAddress);
     }
 }
 

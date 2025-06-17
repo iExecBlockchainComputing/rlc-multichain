@@ -65,7 +65,7 @@ deploy-adapter:
 
 # deploy-rlc-crosschain-token RPC_URL=https://...
 deploy-rlc-crosschain-token:
-	@echo "Deploying RLC cross-chain token on: $(RPC_URL)"
+	@echo "Deploying RLC cross-chain token (UUPS Proxy) on : $(RPC_URL)"
 	CHAIN=arbitrum_sepolia forge script script/RLCCrosschainToken.s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
 		--account $(ACCOUNT) \
@@ -106,7 +106,7 @@ validate-adapter-upgrade:
         --rpc-url $(RPC_URL) \
         -vvv
 
-validate-layerZero-upgrade:
+validate-layerZero-bridge-upgrade:
 	@echo "Validating RLC LayerZero upgrade on: $(RPC_URL)"
 	forge script script/IexecLayerZeroBridge.s.sol:ValidateUpgrade \
         --rpc-url $(RPC_URL) \
@@ -123,7 +123,7 @@ upgrade-adapter:
 
 upgrade-layerzero-bridge:
 	@echo "Upgrading RLC LayerZero Bridge on: $(RPC_URL)"
-	$(MAKE) validate-layerZero-upgrade
+	$(MAKE) validate-layerZero-bridge-upgrade
 	forge script script/IexecLayerZeroBridge.s.sol:Upgrade \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
