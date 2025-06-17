@@ -49,6 +49,8 @@ contract IexecLayerZeroBridge is
      * @dev Constructor for the LayerZero bridge contract
      * @param _token The RLC token contract address that implements ICrosschainRLC interface
      * @param _lzEndpoint The LayerZero endpoint address for this chain
+     *
+     * @custom:oz-upgrades-unsafe-allow constructor
      */
     constructor(ICrosschainRLC _token, address _lzEndpoint) OFTCoreUpgradeable(_token.decimals(), _lzEndpoint) {
         _disableInitializers();

@@ -10,9 +10,11 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-/// @notice OFTAdapter uses a deployed ERC-20 token and safeERC20 to interact with the OFTCore contract.
-/// There can only be one OFT Adapter deployed per chain. Multiple OFT Adapters break omnichain unified
-/// liquidity by effectively creating token pools.
+/**
+ * @notice OFTAdapter uses a deployed ERC-20 token and safeERC20 to interact with the OFTCore contract.
+ * There can only be one OFT Adapter deployed per chain. Multiple OFT Adapters break omnichain unified
+ * liquidity by effectively creating token pools.
+ */
 contract RLCAdapter is
     OFTAdapterUpgradeable,
     UUPSUpgradeable,
@@ -28,8 +30,13 @@ contract RLCAdapter is
         _disableInitializers();
     }
 
-    /// @notice Initializes the contract
-    /// @param _owner Address of the contract owner
+    /**
+     * @notice Initializes the contract
+     * @param _owner Address of the contract owner
+     * @param _pauser Address that will receive the pauser role
+     *
+     * @custom:oz-upgrades-unsafe-allow constructor
+     */
     function initialize(address _owner, address _pauser) public initializer {
         __Ownable_init(_owner);
         __OFTAdapter_init(_owner);
@@ -40,16 +47,20 @@ contract RLCAdapter is
         _grantRole(PAUSER_ROLE, _pauser);
     }
 
-    /// @notice Pauses the contract
-    /// @dev Can only be called by the account with the PAUSER_ROLE
-    /// @dev When the contract is paused, all token transfers are blocked
+    /**
+     * @notice Pauses the contract
+     * @dev Can only be called by the account with the PAUSER_ROLE
+     * @dev When the contract is paused, all token transfers are blocked
+     */
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
-    /// @notice Unpauses the contract
-    /// @dev Can only be called by the account with the PAUSER_ROLE
-    /// @dev When the contract is unpaused, token transfers are allowed again
+    /**
+     * @notice Unpauses the contract
+     * @dev Can only be called by the account with the PAUSER_ROLE
+     * @dev When the contract is unpaused, token transfers are allowed again
+     */
     function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
     }
