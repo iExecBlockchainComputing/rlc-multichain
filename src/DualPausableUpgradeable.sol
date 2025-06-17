@@ -13,9 +13,6 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
  * 1. Complete Pause (Level 1): Blocks all operations when activated
  * 2. Entrance Pause (Level 2): Blocks only specific "entrance" operations while allowing "exits"
  *
- * The complete pause takes precedence over entrance pause.
- * - When complete pause is active: ALL operations are blocked
- * - When only entrance pause is active: Only entrance operations are blocked, exits are allowed
  *
  * This is useful for scenarios like:
  * - Complete pause: Critical security incidents requiring full shutdown
