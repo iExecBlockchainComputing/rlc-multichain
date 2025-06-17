@@ -57,7 +57,7 @@ upgrade-on-testnets:
 
 deploy-adapter:
 	@echo "Deploying RLCAdapter (UUPS Proxy) on: $(RPC_URL)"
-	forge script script/RLCAdapter.s.sol:Deploy \
+	forge script script/bridges/layerZero/RLCAdapter.s.sol:Deploy \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -74,7 +74,7 @@ deploy-rlc-crosschain-token:
 
 deploy-layerzero-bridge:
 	@echo "Deploying IexecLayerZeroBridge (UUPS Proxy) on: $(RPC_URL)"
-	forge script script/IexecLayerZeroBridge.s.sol:Deploy \
+	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Deploy \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -82,7 +82,7 @@ deploy-layerzero-bridge:
 
 configure-adapter:
 	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
-	forge script script/RLCAdapter.s.sol:Configure \
+	forge script script/bridges/layerZero/RLCAdapter.s.sol:Configure \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -90,7 +90,7 @@ configure-adapter:
 
 configure-layerzero-bridge:
 	@echo "Configuring RLCOFT on: $(RPC_URL)"
-	forge script script/IexecLayerZeroBridge.s.sol:Configure \
+	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Configure \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -102,20 +102,20 @@ configure-layerzero-bridge:
 
 validate-adapter-upgrade:
 	@echo "Validating RLCAdapter upgrade on: $(RPC_URL)"
-	forge script script/RLCAdapter.s.sol:ValidateUpgrade \
+	forge script script/bridges/layerZero/RLCAdapter.s.sol:ValidateUpgrade \
         --rpc-url $(RPC_URL) \
         -vvv
 
 validate-layerZero-bridge-upgrade:
 	@echo "Validating RLC LayerZero upgrade on: $(RPC_URL)"
-	forge script script/IexecLayerZeroBridge.s.sol:ValidateUpgrade \
+	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:ValidateUpgrade \
         --rpc-url $(RPC_URL) \
         -vvv
 
 upgrade-adapter:
 	@echo "Upgrading RLCAdapter on: $(RPC_URL)"
 	$(MAKE) validate-adapter-upgrade
-	forge script script/RLCAdapter.s.sol:Upgrade \
+	forge script script/bridges/layerZero/RLCAdapter.s.sol:Upgrade \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -124,7 +124,7 @@ upgrade-adapter:
 upgrade-layerzero-bridge:
 	@echo "Upgrading RLC LayerZero Bridge on: $(RPC_URL)"
 	$(MAKE) validate-layerZero-bridge-upgrade
-	forge script script/IexecLayerZeroBridge.s.sol:Upgrade \
+	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Upgrade \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
