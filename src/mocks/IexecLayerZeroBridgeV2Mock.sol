@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {IexecLayerZeroBridge} from "../IexecLayerZeroBridge.sol";
+import {IexecLayerZeroBridge} from "../bridges/layerZero/IexecLayerZeroBridge.sol";
 import {ICrosschainRLC} from "../interfaces/ICrosschainRLC.sol";
 
 /**

@@ -4,10 +4,10 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {IexecLayerZeroBridge} from "../src/IexecLayerZeroBridge.sol";
-import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
-import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
-import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
+import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
+import {EnvUtils} from "../../lib/UpdateEnvUtils.sol";
+import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
     function run() external returns (address) {

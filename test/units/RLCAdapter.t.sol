@@ -6,8 +6,8 @@ import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfac
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
-import {RLCAdapter} from "../../src/RLCAdapter.sol";
-import {IexecLayerZeroBridge} from "../../src/IexecLayerZeroBridge.sol";
+import {RLCAdapter} from "../../src/bridges/layerZero/RLCAdapter.sol";
+import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 
 contract RLCAdapterTest is TestHelperOz5 {
