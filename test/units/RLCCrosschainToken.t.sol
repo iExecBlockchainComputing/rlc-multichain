@@ -18,6 +18,8 @@ contract RLCCrosschainTokenTest is Test {
     address private anyone = makeAddr("anyone");
     uint256 amount = 100e9; // 100 RLC
 
+    bytes32 private bridgeTokenRoleId;
+
     RLCCrosschainToken private crossChainToken;
 
     function setUp() public {
@@ -26,26 +28,30 @@ contract RLCCrosschainTokenTest is Test {
                 "RLC Crosschain Token", "RLC", owner, upgrader, address(new CreateX()), keccak256("salt")
             )
         );
+        bridgeTokenRoleId = crossChainToken.TOKEN_BRIDGE_ROLE();
     }
+
+    // initialize
 
     function test_RevertWhen_InitializedMoreThanOnce() public {
         vm.expectRevert(abi.encodeWithSignature("InvalidInitialization()"));
         crossChainToken.initialize("Foo", "BAR", owner, upgrader);
     }
 
+    // supportsInterface
+
     function test_SupportErc7802Interface() public view {
         assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
         assertTrue(crossChainToken.supportsInterface(type(IERC7802).interfaceId));
     }
 
+    // crosschainMint
+
     function test_MintTokens() public {
-        assertEq(crossChainToken.balanceOf(user), 0);
-        assertEq(crossChainToken.balanceOf(bridge), 0);
-        assertEq(crossChainToken.totalSupply(), 0);
         // Grant TOKEN_BRIDGE_ROLE to the bridge.
-        bytes32 roleId = crossChainToken.TOKEN_BRIDGE_ROLE();
-        vm.prank(owner);
-        crossChainToken.grantRole(roleId, bridge);
+        _authorizeBridge(bridge);
+        // Check initial total supply.
+        assertEq(crossChainToken.totalSupply(), 0);
         // Send mint request from the bridge.
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user, amount);
@@ -54,21 +60,18 @@ contract RLCCrosschainTokenTest is Test {
         vm.prank(bridge);
         crossChainToken.crosschainMint(user, amount);
         // Check that tokens are minted.
+        assertEq(crossChainToken.totalSupply(), amount);
         assertEq(crossChainToken.balanceOf(user), amount);
         assertEq(crossChainToken.balanceOf(bridge), 0);
-        assertEq(crossChainToken.totalSupply(), amount);
     }
 
     function test_RevertWhen_UnauthorizedMinter() public {
+        _authorizeBridge(bridge);
         assertEq(crossChainToken.balanceOf(user), 0);
         assertEq(crossChainToken.totalSupply(), 0);
-        // Grant TOKEN_BRIDGE_ROLE to the bridge.
-        bytes32 roleId = crossChainToken.TOKEN_BRIDGE_ROLE();
-        vm.prank(owner);
-        crossChainToken.grantRole(roleId, bridge);
         // Attempt to mint tokens from an unauthorized account.
         vm.expectRevert(
-            abi.encodeWithSignature("AccessControlUnauthorizedAccount(address,bytes32)", anyone, roleId)
+            abi.encodeWithSignature("AccessControlUnauthorizedAccount(address,bytes32)", anyone, bridgeTokenRoleId)
         );
         vm.prank(anyone);
         crossChainToken.crosschainMint(user, amount);
@@ -78,12 +81,9 @@ contract RLCCrosschainTokenTest is Test {
     }
 
     function test_RevertWhen_MintToZeroAddress() public {
+        _authorizeBridge(bridge);
         assertEq(crossChainToken.balanceOf(address(0)), 0);
         assertEq(crossChainToken.totalSupply(), 0);
-        // Grant TOKEN_BRIDGE_ROLE to the bridge.
-        bytes32 roleId = crossChainToken.TOKEN_BRIDGE_ROLE();
-        vm.prank(owner);
-        crossChainToken.grantRole(roleId, bridge);
         // Attempt to mint tokens the zero address.
         vm.expectRevert(
             abi.encodeWithSignature("ERC20InvalidReceiver(address)", address(0))
@@ -94,6 +94,8 @@ contract RLCCrosschainTokenTest is Test {
         assertEq(crossChainToken.balanceOf(address(0)), 0);
         assertEq(crossChainToken.totalSupply(), 0);
     }
+
+    // upgradeToAndCall
 
     function test_RevertWhen_UnauthorizedUpgrader() public {
         address unauthorizedUpgrader = makeAddr("unauthorized");
@@ -106,5 +108,13 @@ contract RLCCrosschainTokenTest is Test {
         );
         vm.prank(unauthorizedUpgrader);
         crossChainToken.upgradeToAndCall(makeAddr("newImpl"), "");
+    }
+
+
+    // Helper functions
+
+    function _authorizeBridge(address bridgeAddress) internal {
+        vm.prank(owner);
+        crossChainToken.grantRole(bridgeTokenRoleId, bridgeAddress);
     }
 }
