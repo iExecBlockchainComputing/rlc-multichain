@@ -82,16 +82,8 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
     // ============ INITIALIZATION ============
 
     function __DualPausable_init() internal onlyInitializing {
-        __Context_init();
         __Pausable_init();
-        __DualPausable_init_unchained();
     }
-
-    function __DualPausable_init_unchained() internal onlyInitializing {
-        // Initialize entrance pause to false
-        // Complete pause is already initialized by PausableUpgradeable
-    }
-
     // ============ VIEW FUNCTIONS ============
 
     /**
