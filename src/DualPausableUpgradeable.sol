@@ -4,7 +4,6 @@
 pragma solidity ^0.8.22;
 
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 /**
  * @title DualPausableUpgradeable
@@ -24,7 +23,7 @@ import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cont
  *
  * @custom:storage-location erc7201:iexec.storage.DualPausable
  */
-abstract contract DualPausableUpgradeable is ContextUpgradeable, PausableUpgradeable {
+abstract contract DualPausableUpgradeable is PausableUpgradeable {
     /// @custom:storage-location erc7201:iexec.storage.DualPausable
     struct DualPausableStorage {
         /// @dev True when entrance operations are paused, but exit operations are allowed
