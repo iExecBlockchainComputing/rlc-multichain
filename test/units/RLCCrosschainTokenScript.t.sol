@@ -30,7 +30,6 @@ contract RLCCrosschainTokenTest is Test {
 
     // Makes sure create2 deployment is well implemented.
     function test_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        console.log("CreateX address:", createx);
         address random = makeAddr("random");
         deployer.deploy("RLC Crosschain Token", "RLC", owner, upgrader, createx, salt);
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", createx));
