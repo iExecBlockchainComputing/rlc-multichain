@@ -15,7 +15,6 @@ library UpgradeUtils {
         address lzEndpoint;
         address rlcToken;
         uint256 newStateVariable; // For initialization
-        bool skipChecks;
         bool validateOnly;
     }
 
@@ -69,8 +68,6 @@ library UpgradeUtils {
      */
     function _buildOptions(UpgradeParams memory params) private pure returns (Options memory opts) {
         opts.constructorData = abi.encode(params.rlcToken, params.lzEndpoint);
-        if (params.skipChecks) {
-            opts.unsafeSkipAllChecks = true;
-        }
+        opts.unsafeAllow = "constructor,state-variable-immutable,missing-initializer-call";
     }
 }
