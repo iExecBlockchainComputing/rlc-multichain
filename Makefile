@@ -8,8 +8,7 @@ MAKEFLAGS += --no-print-directory
 generate-coverage:
 	rm -rf coverage lcov.info lcov.src.info && \
 	forge coverage --ir-minimum --report lcov \
-		--no-match-coverage script \
-		--no-match-path "test/e2e/*" && \
+		--no-match-coverage "script|src/mocks" && \
 	lcov --extract lcov.info "src/*" -o lcov.src.info && \
 	genhtml lcov.src.info --branch-coverage --output-dir coverage && \
 	rm lcov.info lcov.src.info
