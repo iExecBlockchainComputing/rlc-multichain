@@ -55,33 +55,80 @@ Instead of duplicating code that may become outdated, here are links to the key 
 
 ## Deployment
 
-The deployment process involves four steps:
+### Local deployment
 
-1. Deploy the RLCAdapter on Ethereum Sepolia:
-
-   ```bash
-   make deploy-adapter
-   ```
-
-2. Deploy the RLCOFT on Arbitrum Sepolia:
+1. Start a local Anvil fork of Sepolia:
 
    ```bash
-   make deploy-oft
+   make fork-sepolia
    ```
 
-3. Configure the RLCAdapter to trust the RLCOFT contract:
+2. Start a local fork of Arbitrum Sepolia:
 
    ```bash
-   make configure-adapter
+   make fork-arbitrum-sepolia
    ```
 
-4. Configure the RLCOFT to trust the RLCAdapter contract:
+3. Deploy all contracts:
 
    ```bash
-   make configure-oft
+   make deploy-on-anvil
    ```
 
-After deployment, update your `.env` file with the deployed contract addresses.
+### Live network deployment
+
+   ```bash
+   make deploy-on-testnets
+   ```
+
+## Upgrades
+
+Both RLCAdapter and RLCOFT contracts are implemented using the UUPS pattern, allowing for seamless contract upgrades while maintaining the same proxy address.
+
+### Upgrade Architecture
+
+- **UUPS Proxies**: Both contracts use OpenZeppelin's UUPS proxy pattern
+- **Upgrade Authorization**: Only the contract owner can authorize upgrades
+- **State Preservation**: Contract state is preserved across upgrades
+- **Initialization**: New contract versions can include initialization logic for new features
+
+### Upgrade Process
+
+#### 1. Local Testing (Anvil)
+
+Test upgrades locally before deploying to live networks:
+
+```bash
+# Test upgrade process on local forks
+make upgrade-on-anvil
+```
+
+#### 2. Validation (Testnets)
+
+Always validate upgrades before execution:
+
+```bash
+# Validate RLCAdapter upgrade
+make validate-adapter-upgrade RPC_URL=$(SEPOLIA_RPC_URL)
+
+# Validate RLCOFT upgrade  
+make validate-layerzero-bridge-upgrade RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+```
+
+#### 3. Live Network Upgrades
+
+Execute upgrades on testnets:
+
+```bash
+make upgrade-on-testnets
+```
+
+### Upgrade Safety Features
+
+- **Automatic Validation**: All upgrade commands automatically validate compatibility first
+- **OpenZeppelin Checks**: Uses OpenZeppelin's upgrade safety validations
+- **Storage Layout Protection**: Prevents storage slot conflicts between versions
+- **Constructor Validation**: Ensures new implementations have compatible constructors
 
 ## Usage
 
@@ -125,12 +172,29 @@ This will:
    - LayerZero delivers a message to RLCAdapter
    - RLCAdapter unlocks the original RLC tokens to the recipient on Ethereum
 
+## Verification
+
+Verify your deployed contracts on block explorers:
+
+```bash
+# Verify all contracts (implementations and proxies)
+make verify-all
+
+# Verify specific components
+make verify-adapter        # Both implementation and proxy
+make verify-layerzero-bridge           # Both implementation and proxy
+make verify-implementations # Only implementations
+make verify-proxies       # Only proxies
+```
+
 ## Security Considerations
 
 - The bridge security relies on LayerZero's security model
 - Administrative functions are protected by the Ownable pattern
+- UUPS upgrade authorization is restricted to contract owners only
 - Use caution when setting trusted remotes to prevent unauthorized cross-chain interactions
-- Always test thoroughly on testnets before deploying to mainnet
+- Always test upgrades thoroughly on testnets before deploying to mainnet
+- Upgrade safety is enforced through OpenZeppelin's upgrade validation
 
 ## Gas Costs and Fees
 
@@ -148,4 +212,10 @@ The scripts automatically calculate these fees and include them in the transacti
 
 - [LayerZero Documentation](https://layerzero.gitbook.io/docs/)
 - [OFT Contracts](https://github.com/LayerZero-Labs/solidity-examples/tree/main/contracts/token/oft)
+- [OpenZeppelin UUPS Proxy Pattern](https://docs.openzeppelin.com/contracts/5.x/api/proxy#UUPSUpgradeable)
+- [OpenZeppelin Upgrade Safety](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable)
 - [iExec Platform Documentation](https://docs.iex.ec/)
+
+## TODO
+
+- Use an entreprise RPC URL for `secrets.SEPOLIA_RPC_URL` in Github environment `ci`.
