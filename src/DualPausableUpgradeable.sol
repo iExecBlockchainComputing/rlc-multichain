@@ -100,17 +100,15 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
      * @dev Returns the overall operational state
      * @return fullyPaused True if complete pause is active
      * @return entrancesPaused_ True if entrance pause is active
-     * @return fullyOperational True if neither pause is active
      */
     function pauseState()
         public
         view
         virtual
-        returns (bool fullyPaused, bool entrancesPaused_, bool fullyOperational)
+        returns (bool fullyPaused, bool entrancesPaused_)
     {
         fullyPaused = paused();
         entrancesPaused_ = entrancesPaused();
-        fullyOperational = !fullyPaused && !entrancesPaused_;
     }
 
     // ============ INTERNAL FUNCTIONS ============
