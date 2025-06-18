@@ -179,7 +179,7 @@ contract RLCCrosschainTokenTest is Test {
         crossChainToken.crosschainMint(user3, amount3);
         // Check that tokens are minted.
         assertEq(crossChainToken.totalSupply(), 2 * amount + amount2 + amount3);
-        assertEq(crossChainToken.balanceOf(user), 2* amount); // Bridge 1 and bridge 2
+        assertEq(crossChainToken.balanceOf(user), 2 * amount); // Bridge 1 and bridge 2
         assertEq(crossChainToken.balanceOf(user2), amount2); // Bridge 1
         assertEq(crossChainToken.balanceOf(user3), amount3); // Bridge 2
         assertEq(crossChainToken.balanceOf(bridge), 0);
@@ -206,9 +206,7 @@ contract RLCCrosschainTokenTest is Test {
         assertEq(crossChainToken.balanceOf(address(0)), 0);
         assertEq(crossChainToken.totalSupply(), 0);
         // Attempt to mint tokens the zero address.
-        vm.expectRevert(
-            abi.encodeWithSignature("ERC20InvalidReceiver(address)", address(0))
-        );
+        vm.expectRevert(abi.encodeWithSignature("ERC20InvalidReceiver(address)", address(0)));
         vm.prank(bridge);
         crossChainToken.crosschainMint(address(0), amount);
         // Check that no tokens were minted.

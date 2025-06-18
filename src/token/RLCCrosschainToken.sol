@@ -62,7 +62,12 @@ contract RLCCrosschainToken is
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view override(AccessControlDefaultAdminRulesUpgradeable, ERC165Upgradeable, IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(AccessControlDefaultAdminRulesUpgradeable, ERC165Upgradeable, IERC165)
+        returns (bool)
+    {
         return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
     }
 

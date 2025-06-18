@@ -51,7 +51,9 @@ contract IexecLayerZeroBridge is
      * @param _token The RLC token contract address that implements IERC7802 interface
      * @param _lzEndpoint The LayerZero endpoint address for this chain
      */
-    constructor(address _token, address _lzEndpoint) OFTCoreUpgradeable(IERC20Metadata(_token).decimals(), _lzEndpoint) {
+    constructor(address _token, address _lzEndpoint)
+        OFTCoreUpgradeable(IERC20Metadata(_token).decimals(), _lzEndpoint)
+    {
         _disableInitializers();
         RLC_TOKEN = IERC7802(_token);
     }
