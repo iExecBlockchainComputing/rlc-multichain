@@ -21,3 +21,5 @@ docs/
 .idea
 .DS_Store
 /coverage
+lcov.info 
+lcov.src.info
