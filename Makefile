@@ -203,3 +203,178 @@ verify-layerzero-bridge: verify-layerzero-bridge-impl verify-layerzero-bridge-pr
 verify-implementations: verify-adapter-impl verify-layerzero-bridge-impl
 verify-proxies: verify-adapter-proxy verify-layerzero-bridge-proxy
 verify-all: verify-implementations verify-proxies
+
+
+# Audit Preparation Report Command
+audit-report:
+	@echo "🔍 GENERATING COMPREHENSIVE AUDIT REPORT"
+	@echo "========================================"
+	@mkdir -p audit-report
+	@echo "📊 Report generated on: $$(date)" > audit-report/audit-report.txt
+	@echo "" >> audit-report/audit-report.txt
+    
+	@echo "1. PROJECT SCOPE ANALYSIS" | tee -a audit-report/audit-report.txt
+	@echo "=========================" | tee -a audit-report/audit-report.txt
+
+	@echo "📁 Total Solidity Files:" | tee -a audit-report/audit-report.txt
+	@find src/ -name '*.sol' -not -path "*/mocks/*" | wc -l | tee -a audit-report/audit-report.txt
+	@echo "" | tee -a audit-report/audit-report.txt
+
+	@echo "📏 Lines of Code Analysis (SLOC):" | tee -a audit-report/audit-report.txt
+	@if command -v cloc >/dev/null 2>&1; then \
+		cloc src/ --include-lang=Solidity | tee -a audit-report/audit-report.txt; \
+	else \
+		echo "⚠️  cloc not installed. Installing via npm..."; \
+		npm install -g cloc; \
+		cloc src/ --include-lang=Solidity | tee -a audit-report/audit-report.txt; \
+	fi
+	@echo "" | tee -a audit-report/audit-report.txt
+
+	@echo "📋 Lines per Solidity File:" | tee -a audit-report/audit-report.txt
+	@find src/ -name '*.sol' -not -path "*/mocks/*" | xargs wc -l | tee -a audit-report/audit-report.txt
+	@echo "" | tee -a audit-report/audit-report.txt
+
+	@echo "🔐 SHA256 Hash of Contract Files:" | tee -a audit-report/audit-report.txt
+	@find src/ -name '*.sol' -not -path "*/mocks/*" -exec shasum -a 256 {} \; | tee -a audit-report/audit-report.txt
+	@echo "" | tee -a audit-report/audit-report.txt
+
+	@echo "2. SOLIDITY CODE METRICS" | tee -a audit-report/audit-report.txt
+	@echo "========================" | tee -a audit-report/audit-report.txt
+	$(eval SOL_FILES := $(shell find src/ -name '*.sol' -not -path "*/mocks/*"))
+	@if command -v solidity-code-metrics >/dev/null 2>&1; then \
+		solidity-code-metrics $(SOL_FILES) --html > audit-report/code-metrics.html; \
+		echo "✅ Detailed code metrics saved to audit-report/code-metrics.html" | tee -a audit-report/audit-report.txt; \
+	else \
+		echo "⚠️  Installing solidity-code-metrics..."; \
+		npm install -g solidity-code-metrics; \
+		solidity-code-metrics $(SOL_FILES) --html > audit-report/code-metrics.html; \
+		echo "✅ Detailed code metrics saved to audit-report/code-metrics.html" | tee -a audit-report/audit-report.txt; \
+	fi
+	@echo "" | tee -a audit-report/audit-report.txt
+
+	@echo "3. EXTERNAL CALLS ANALYSIS" | tee -a audit-report/audit-report.txt
+	@echo "==========================" | tee -a audit-report/audit-report.txt
+	@echo "🔍 External function calls found:" | tee -a audit-report/audit-report.txt
+	@find src/ -name '*.sol' -not -path "*/mocks/*" -exec grep -Hn '\.[a-zA-Z_][a-zA-Z0-9_]*(' {} \; | head -50 | tee -a audit-report/audit-report.txt || echo "No external calls found" | tee -a audit-report/audit-report.txt
+	@echo "" | tee -a audit-report/audit-report.txt
+
+
+	@echo "4. COMPILATION & TESTING" | tee -a audit-report/audit-report.txt
+	@echo "========================" | tee -a audit-report/audit-report.txt
+	@echo "🔨 Running forge build..." | tee -a audit-report/audit-report.txt
+	@forge build 2>&1 | tee -a audit-report/audit-report.txt
+	@echo "" | tee -a audit-report/audit-report.txt
+
+	@echo "🧪 Running test suite..." | tee -a audit-report/audit-report.txt
+	@forge test 2>&1 | grep -E "^(Ran [0-9]+.*:|Suite result:|Encountered.*failing|tests passed)" | tee -a audit-report/audit-report.txt
+	@if forge test 2>&1 | grep -q "FAILED"; then \
+		echo "❌ Some tests are failing - see details below:" | tee -a audit-report/audit-report.txt; \
+		forge test 2>&1 | grep "FAIL:" | head -5 | tee -a audit-report/audit-report.txt; \
+	else \
+		echo "✅ All tests passed!" | tee -a audit-report/audit-report.txt; \
+	fi
+	@echo "" | tee -a audit-report/audit-report.txt
+
+
+# @echo "5. GAS ANALYSIS" | tee -a audit-report/audit-report.txt
+# @echo "===============" | tee -a audit-report/audit-report.txt
+# @echo "⛽ Gas usage for main operations:" | tee -a audit-report/audit-report.txt
+# @forge test --gas-report 2>&1 | grep -E "
+
+# $$
+# PASS
+# $$
+
+# .*$ gas: [0-9]+ $ " | \
+# grep -E "(sendRLC|sendToken|Deploy|Upgrade)" | \
+# sed 's/
+
+# $$
+# PASS
+# $$
+
+# /  ✅ /' | sed 's/ (gas: / - Gas: /' | sed 's/)/ units/' | \
+# head -8 | tee -a audit-report/audit-report.txt
+# @echo "" | tee -a audit-report/audit-report.txt
+# @echo "📈 Contract deployment costs:" | tee -a audit-report/audit-report.txt
+# @forge test --gas-report 2>&1 | grep -A 2 "src/.*Contract" | grep -E "(src/|Deployment Cost)" | \
+# paste - - | sed 's/.*src\/$ .* $ \.sol:$ .* $  Contract.* $ [0-9]* $ .*/  - \2: \3 gas/' | \
+# head -5 | tee -a audit-report/audit-report.txt || echo "  No deployment data found" | tee -a audit-report/audit-report.txt
+# @echo "" | tee -a audit-report/audit-report.txt
+
+
+
+	@echo "6. STATIC ANALYSIS" | tee -a audit-report/audit-report.txt
+	@echo "==================" | tee -a audit-report/audit-report.txt
+	@if command -v slither >/dev/null 2>&1; then \
+		echo "🐍 Running Slither analysis..." | tee -a audit-report/audit-report.txt; \
+		slither . --checklist 2>&1 | sed -n '/\*\*THIS CHECKLIST IS NOT COMPLETE\*\*/,$p' | tee audit-report/slither-report.md; \
+		echo "✅ Slither report saved to audit-report/slither-report.md" | tee -a audit-report/audit-report.txt; \
+	else \
+		echo "⚠️  Slither not installed. Please install: pip3 install slither-analyzer" | tee -a audit-report/audit-report.txt; \
+	fi
+	@echo "" | tee -a audit-report/audit-report.txt
+
+
+
+
+
+# @echo "7. DEPENDENCY ANALYSIS" | tee -a audit-report/audit-report.txt
+# @echo "======================" | tee -a audit-report/audit-report.txt
+# @echo "📦 Forge dependencies:" | tee -a audit-report/audit-report.txt
+# @forge tree 2>&1 | tee -a audit-report/audit-report.txt
+# @echo "" | tee -a audit-report/audit-report.txt
+
+# @echo "8. CONTRACT SIZE ANALYSIS" | tee -a audit-report/audit-report.txt
+# @echo "=========================" | tee -a audit-report/audit-report.txt
+# @echo "📏 Contract sizes (bytecode):" | tee -a audit-report/audit-report.txt
+# @forge build --sizes 2>&1 | tee -a audit-report/audit-report.txt
+# @echo "" | tee -a audit-report/audit-report.txt
+
+# @echo "9. COVERAGE ANALYSIS" | tee -a audit-report/audit-report.txt
+# @echo "====================" | tee -a audit-report/audit-report.txt
+# @echo "📊 Test coverage report:" | tee -a audit-report/audit-report.txt
+# @forge coverage --report lcov 2>&1 | tee -a audit-report/audit-report.txt
+# @if [ -f lcov.info ]; then \
+# 	mv lcov.info audit-report/; \
+# 	echo "✅ Coverage data saved to audit-report/lcov.info" | tee -a audit-report/audit-report.txt; \
+# fi
+# @echo "" | tee -a audit-report/audit-report.txt
+
+# @echo "10. SECURITY PATTERNS CHECK" | tee -a audit-report/audit-report.txt
+# @echo "===========================" | tee -a audit-report/audit-report.txt
+# @echo "🔒 Checking for common patterns:" | tee -a audit-report/audit-report.txt
+# @echo "- Reentrancy guards:" | tee -a audit-report/audit-report.txt
+# @grep -r "nonReentrant\|ReentrancyGuard" src/ --include="*.sol" | wc -l | tee -a audit-report/audit-report.txt
+# @echo "- Access control:" | tee -a audit-report/audit-report.txt
+# @grep -r "onlyOwner\|AccessControl\|modifier" src/ --include="*.sol" | wc -l | tee -a audit-report/audit-report.txt
+# @echo "- SafeMath usage:" | tee -a audit-report/audit-report.txt
+# @grep -r "SafeMath\|using.*for" src/ --include="*.sol" | wc -l | tee -a audit-report/audit-report.txt
+# @echo "" | tee -a audit-report/audit-report.txt
+
+# @echo "✅ AUDIT REPORT COMPLETE!" | tee -a audit-report/audit-report.txt
+# @echo "=========================" | tee -a audit-report/audit-report.txt
+# @echo "📁 All reports saved in ./audit-report/ directory" | tee -a audit-report/audit-report.txt
+# @echo "📄 Main report: audit-report/audit-report.txt"
+# @echo "📊 Code metrics: audit-report/code-metrics.html"
+# @echo "📋 Coverage data: audit-report/lcov.info"
+# @echo "🐍 Slither report: audit-report/slither-report.json"
+# @echo ""
+# @echo "🎯 Ready for audit submission!"
+
+# Helper command to install audit dependencies
+install-audit-deps:
+	@echo "📦 Installing audit dependencies..."
+	npm install -g cloc solidity-code-metrics
+	pip3 install slither-analyzer
+	@echo "✅ Dependencies installed!"
+
+# Clean audit reports
+clean-audit:
+	@echo "🧹 Cleaning audit reports..."
+	rm -rf audit-report/
+	@echo "✅ Audit reports cleaned!"
+
+audit: 
+	make clean-audit
+	make audit-report
