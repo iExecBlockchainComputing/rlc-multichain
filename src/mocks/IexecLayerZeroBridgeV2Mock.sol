@@ -19,6 +19,8 @@ contract IexecLayerZeroBridgeV2 is IexecLayerZeroBridge {
     /**
      * @notice Initializes V2 features (called after upgrade)
      * @param _newStateVariable New state variable description
+     *
+     * @custom:oz-upgrades-validate-as-initializer
      */
     function initializeV2(uint256 _newStateVariable) public reinitializer(2) {
         newStateVariable = _newStateVariable;
