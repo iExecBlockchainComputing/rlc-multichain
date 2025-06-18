@@ -257,28 +257,25 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function test_PauseState_ReturnsCorrectStates() public {
         // fails
         // Initially operational
-        (bool fullyPaused, bool entrancesPaused_, bool fullyOperational) = iexecLayerZeroBridge.pauseState();
+        (bool fullyPaused, bool entrancesPaused_) = iexecLayerZeroBridge.pauseState();
         assertFalse(fullyPaused);
         assertFalse(entrancesPaused_);
-        assertTrue(fullyOperational);
 
         // After entrance pause
         vm.prank(pauser);
         iexecLayerZeroBridge.pauseEntrances();
 
-        (fullyPaused, entrancesPaused_, fullyOperational) = iexecLayerZeroBridge.pauseState();
+        (fullyPaused, entrancesPaused_) = iexecLayerZeroBridge.pauseState();
         assertFalse(fullyPaused);
         assertTrue(entrancesPaused_);
-        assertFalse(fullyOperational);
 
         // After full pause
         vm.prank(pauser);
         iexecLayerZeroBridge.pause();
 
-        (fullyPaused, entrancesPaused_, fullyOperational) = iexecLayerZeroBridge.pauseState();
+        (fullyPaused, entrancesPaused_) = iexecLayerZeroBridge.pauseState();
         assertTrue(fullyPaused);
         assertFalse(entrancesPaused_); // Reset when fully paused
-        assertFalse(fullyOperational);
     }
 
     // ============ EDGE CASE TESTS ============
