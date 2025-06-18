@@ -15,6 +15,9 @@ contract RLCAdapterV2 is RLCAdapter {
     // NEW STATE VARIABLES FOR V2
     uint256 public newStateVariable;
 
+    /**
+     * @custom:oz-upgrades-unsafe-allow constructor
+     */
     constructor(address _token, address _lzEndpoint) RLCAdapter(_token, _lzEndpoint) {}
 
     /**

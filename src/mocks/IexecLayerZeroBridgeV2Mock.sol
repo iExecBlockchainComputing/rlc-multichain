@@ -16,6 +16,9 @@ contract IexecLayerZeroBridgeV2 is IexecLayerZeroBridge {
     // NEW STATE VARIABLES FOR V2
     uint256 public newStateVariable;
 
+    /**
+     * @custom:oz-upgrades-unsafe-allow constructor
+     */
     constructor(ICrosschainRLC _token, address _lzEndpoint) IexecLayerZeroBridge(_token, _lzEndpoint) {}
 
     /**
