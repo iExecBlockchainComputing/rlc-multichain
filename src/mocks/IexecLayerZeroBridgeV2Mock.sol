@@ -9,6 +9,8 @@ import {ICrosschainRLC} from "../interfaces/ICrosschainRLC.sol";
  * @title IexecLayerZeroBridgeV2 - V2 implementation with additional features
  * @author IEXEC BLOCKCHAIN TECH
  * @notice This contract inherits from IexecLayerZeroBridge (V1) and adds new functionality
+ *
+ * @custom:oz-upgrades-from src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge
  */
 contract IexecLayerZeroBridgeV2 is IexecLayerZeroBridge {
     // NEW STATE VARIABLES FOR V2
