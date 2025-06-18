@@ -226,7 +226,7 @@ The scripts automatically calculate these fees and include them in the transacti
 - [OpenZeppelin UUPS Proxy Pattern](https://docs.openzeppelin.com/contracts/5.x/api/proxy#UUPSUpgradeable)
 - [OpenZeppelin Upgrade Safety](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable)
 - [iExec Platform Documentation](https://docs.iex.ec/)
-- [Foundry Coverage](https://book.getfoundry.sh/reference/forge/forge-coverage)
+- [Forge Coverage](https://book.getfoundry.sh/reference/forge/forge-coverage)
 
 ## TODO
 
