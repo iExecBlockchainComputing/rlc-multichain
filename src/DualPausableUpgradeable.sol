@@ -11,7 +11,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
  *
  * This contract implements a two-level pause mechanism:
  * 1. Complete Pause (Level 1): Blocks all operations when activated
- * 2. Entrance Pause (Level 2): Blocks only specific "entrance" operations while allowing "exits"
+ * 2. Entrance Pause (Level 2): Blocks only specific "entrance" operations while allowing "exiting" requests.
  *
  *
  * This is useful for scenarios like:
@@ -116,7 +116,7 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
     // ============ INTERNAL FUNCTIONS ============
 
     /**
-     * @dev Throws if entrances are paused or if completely paused
+     * @dev Throws if only entries are paused or if completely paused
      * Complete pause takes precedence over entrance pause
      */
     function _requireEntrancesNotPaused() internal view virtual {

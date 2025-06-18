@@ -209,10 +209,10 @@ Both the RLCAdapter and IexecLayerZeroBridge implement a sophisticated **dual-pa
 - **Emergency**: Maximum protection - complete bridge shutdown
 
 #### Level 2: Entrance Pause (`pauseEntrances()`)
-**Use Case**: Destination chain issues, network congestion, or controlled maintenance
-- **Blocks**: ❌ Outgoing transfers only (users can't send tokens out)
-- **Allows**: ✅ Incoming transfers (users can still receive tokens and withdraw)
-- **Benefit**: Users aren't trapped - they can still exit their positions
+**Use Case**: Destination chain issues, or controlled maintenance
+- **Blocks**: ❌ Triggering transfers only (users can't submit send requests)
+- **Allows**: ✅ Already submitted transfers (users can still receive their tokens if the send operation was submitted before level 2 pause).
+- **Benefit**: Bridge request that are on-going do not get blocked.
 
 ## Gas Costs and Fees
 
