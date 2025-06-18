@@ -19,13 +19,13 @@ test-all:
 	make e2e-test
 
 unit-test:
-	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/**"
+	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/**" --force
 
 e2e-test:
-	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**"
+	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**" --force
 
 upgrade-test:
-	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/upgrade/**"
+	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/upgrade/**" --force
 
 clean:
 	forge clean
