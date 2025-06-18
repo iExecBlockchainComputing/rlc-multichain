@@ -162,8 +162,8 @@ verify-adapter-impl:
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address,address)" $(RLC_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS)) \
         --etherscan-api-key $(ETHERSCAN_API_KEY) \
-        $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) \
-        src/RLCAdapter.sol:RLCAdapter
+        $(RLC_ADAPTER_PROXY_ADDRESS) \
+        src/bridges/layerZero/RLCAdapter.sol:RLCAdapter
 
 verify-layerzero-bridge-impl:
 	@echo "Verifying RLCOFT Implementation on Arbitrum Sepolia Etherscan..."
@@ -172,8 +172,8 @@ verify-layerzero-bridge-impl:
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address)" $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS)) \
         --etherscan-api-key $(ARBISCAN_API_KEY) \
-        $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) \
-        src/RLCOFT.sol:RLCOFT
+        $(LAYERZERO_BRIDGE_PROXY_ADDRESS) \
+        src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge
 
 # Proxy verification
 verify-adapter-proxy:
@@ -183,7 +183,7 @@ verify-adapter-proxy:
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
         --etherscan-api-key $(ETHERSCAN_API_KEY) \
-        $(RLC_SEPOLIA_ADAPTER_PROXY_ADDRESS) \
+        $(RLC_ADAPTER_PROXY_ADDRESS) \
         lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
 verify-layerzero-bridge-proxy:
@@ -193,7 +193,7 @@ verify-layerzero-bridge-proxy:
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
         --etherscan-api-key $(ARBISCAN_API_KEY) \
-        $(RLC_ARBITRUM_SEPOLIA_OFT_PROXY_ADDRESS) \
+        $(LAYERZERO_BRIDGE_PROXY_ADDRESS) \
         lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
 # Combined verification targets
