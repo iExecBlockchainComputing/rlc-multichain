@@ -4,7 +4,6 @@ MAKEFLAGS += --no-print-directory
 
 -include .env
 
-# excluding e2e while the e2e are failing locally
 generate-coverage:
 	rm -rf coverage lcov.info lcov.src.info && \
 	forge coverage --ir-minimum --report lcov \
