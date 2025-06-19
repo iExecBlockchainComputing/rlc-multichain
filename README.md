@@ -16,6 +16,7 @@ The system consists of two main components:
 - [Foundry](https://book.getfoundry.sh/getting-started/installation.html) for contract compilation and deployment
 - Ethereum wallet with Sepolia ETH and Arbitrum Sepolia ETH for gas
 - RLC tokens on Sepolia testnet for bridge testing
+- [LCOV](https://wiki.documentfoundation.org/Development/Lcov) for coverage report generation (install via `brew install lcov` on macOS)
 
 ## Installation
 
@@ -52,6 +53,16 @@ Instead of duplicating code that may become outdated, here are links to the key 
 
 - [RLCAdapter.sol](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/main/src/RLCAdapter.sol) - Ethereum-side adapter that wraps the existing RLC token
 - [RLCOFT.sol](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/main/src/RLCOFT.sol) - Arbitrum-side token that implements the OFT standard
+
+## 📊 Code Coverage Analysis
+
+### Generating Coverage Reports
+
+To generate and view the coverage report, run:
+
+```bash
+make generate-coverage
+```
 
 ## Deployment
 
@@ -233,6 +244,7 @@ The scripts automatically calculate these fees and include them in the transacti
 - [OpenZeppelin UUPS Proxy Pattern](https://docs.openzeppelin.com/contracts/5.x/api/proxy#UUPSUpgradeable)
 - [OpenZeppelin Upgrade Safety](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable)
 - [iExec Platform Documentation](https://docs.iex.ec/)
+- [Forge Coverage](https://book.getfoundry.sh/reference/forge/forge-coverage)
 
 ## TODO
 
