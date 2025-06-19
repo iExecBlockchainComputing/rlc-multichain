@@ -36,8 +36,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     string private symbol = "RLC";
 
     // ============ EVENTS ============
-    event EntrancePaused(address account);
-    event EntranceUnpaused(address account);
+    event SendPaused(address account);
+    event SendUnPaused(address account);
     event Paused(address account);
     event Unpaused(address account);
 
@@ -152,84 +152,71 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
-    // ============ LEVEL 2 PAUSE TESTS (Entrance Pause) ============
+    // ============ LEVEL 2 PAUSE TESTS (Send Pause) ============
 
-    function test_PauseEntrances_EmitsCorrectEvent() public {
+    function test_PauseSends_EmitsCorrectEvent() public {
         vm.expectEmit(true, false, false, false);
-        emit EntrancePaused(pauser);
+        emit SendPaused(pauser);
 
         vm.prank(pauser);
-        iexecLayerZeroBridge.pauseEntrances();
+        iexecLayerZeroBridge.pauseSend();
     }
 
-    function test_PauseEntrances_OnlyPauserRole() public {
+    function test_PauseSends_OnlyPauserRole() public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
-        iexecLayerZeroBridge.pauseEntrances();
+        iexecLayerZeroBridge.pauseSend();
     }
 
-    function test_PauseEntrances_BlocksOutgoingOnly() public {
-        // Pause entrances
+    function test_PauseSends_BlocksOutgoingOnly() public {
+        // Pause send
         vm.prank(pauser);
-        iexecLayerZeroBridge.pauseEntrances();
+        iexecLayerZeroBridge.pauseSend();
 
         // Verify state
         assertFalse(iexecLayerZeroBridge.paused());
-        assertTrue(iexecLayerZeroBridge.entrancesPaused());
+        assertTrue(iexecLayerZeroBridge.sendPaused());
 
         // Prepare send parameters
         (SendParam memory sendParam, MessagingFee memory fee) =
             TestUtils.prepareSend(iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
-        // Attempt to send tokens - should revert with EnforcedEntrancePause
+        // Attempt to send tokens - should revert with EnforcedSendPause
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        vm.expectRevert(DualPausableUpgradeable.EnforcedEntrancePause.selector);
+        vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
         iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify no tokens were burned
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
-    function test_PauseEntrances_CannotPauseWhenFullyPaused() public {
-        // First fully pause
-        vm.prank(pauser);
-        iexecLayerZeroBridge.pause();
 
-        // Attempt to pause entrances - should revert
-        vm.prank(pauser);
-        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        iexecLayerZeroBridge.pauseEntrances();
-    }
-
-    function test_UnpauseEntrances_RestoresOutgoingTransfers() public {
-        // Pause then unpause entrances
+    function test_UnpauseSends_RestoresOutgoingTransfers() public {
+        // Pause then unpause send
         vm.startPrank(pauser);
-        iexecLayerZeroBridge.pauseEntrances();
+        iexecLayerZeroBridge.pauseSend();
 
         vm.expectEmit(true, false, false, false);
-        emit EntranceUnpaused(pauser);
-        iexecLayerZeroBridge.unpauseEntrances();
+        emit SendUnPaused(pauser);
+        iexecLayerZeroBridge.unpauseSend();
         vm.stopPrank();
 
         // Should now work normally
         assertFalse(iexecLayerZeroBridge.paused());
-        assertFalse(iexecLayerZeroBridge.entrancesPaused());
+        assertFalse(iexecLayerZeroBridge.sendPaused());
 
         test_SendToken_WhenOperational();
     }
 
     // ============ DUAL PAUSE WORKFLOW TESTS ============
 
-    function test_DualPause_EscalateFromEntranceToFull() public {
-        // Start with entrance pause
+    function test_DualPause_PauseFromSendToFull() public {
+        // Start with send pause
         vm.startPrank(pauser);
-        iexecLayerZeroBridge.pauseEntrances();
-        assertTrue(iexecLayerZeroBridge.entrancesPaused());
+        iexecLayerZeroBridge.pauseSend();
+        assertTrue(iexecLayerZeroBridge.sendPaused());
 
-        // Escalate to full pause - should reset entrance pause and emit events
-        vm.expectEmit(true, false, false, false);
-        emit EntranceUnpaused(pauser);
         vm.expectEmit(true, false, false, false);
         emit Paused(pauser);
 
@@ -237,80 +224,51 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         vm.stopPrank();
 
         assertTrue(iexecLayerZeroBridge.paused());
-        assertFalse(iexecLayerZeroBridge.entrancesPaused());
+        assertTrue(iexecLayerZeroBridge.sendPaused());
     }
 
-    function test_DualPause_UnpauseFromFullRestoresOperational() public {
-        vm.startPrank(pauser);
-
-        // Go through: operational -> entrance pause -> full pause -> operational
-        iexecLayerZeroBridge.pauseEntrances();
-        iexecLayerZeroBridge.pause();
-        iexecLayerZeroBridge.unpause();
-        vm.stopPrank();
-
-        // Should be fully operational
-        assertFalse(iexecLayerZeroBridge.paused());
-        assertFalse(iexecLayerZeroBridge.entrancesPaused());
-    }
-
-    function test_PauseState_ReturnsCorrectStates() public {
+    function test_PauseStatus_ReturnsCorrectStates() public {
         // fails
         // Initially operational
-        (bool fullyPaused, bool entrancesPaused_) = iexecLayerZeroBridge.pauseState();
+        (bool fullyPaused, bool onlySendPaused) = iexecLayerZeroBridge.pauseStatus();
         assertFalse(fullyPaused);
-        assertFalse(entrancesPaused_);
+        assertFalse(onlySendPaused);
 
-        // After entrance pause
+        // After send pause
         vm.prank(pauser);
-        iexecLayerZeroBridge.pauseEntrances();
+        iexecLayerZeroBridge.pauseSend();
 
-        (fullyPaused, entrancesPaused_) = iexecLayerZeroBridge.pauseState();
+        (fullyPaused, onlySendPaused) = iexecLayerZeroBridge.pauseStatus();
         assertFalse(fullyPaused);
-        assertTrue(entrancesPaused_);
+        assertTrue(onlySendPaused);
 
         // After full pause
         vm.prank(pauser);
         iexecLayerZeroBridge.pause();
 
-        (fullyPaused, entrancesPaused_) = iexecLayerZeroBridge.pauseState();
+        (fullyPaused, onlySendPaused) = iexecLayerZeroBridge.pauseStatus();
         assertTrue(fullyPaused);
-        assertFalse(entrancesPaused_); // Reset when fully paused
+        assertTrue(onlySendPaused); 
     }
 
     // ============ EDGE CASE TESTS ============
 
-    function test_PauseEntrances_CannotUnpauseWhenFullyPaused() public {
-        //fails
-        vm.startPrank(pauser);
-
-        // Pause entrances then full pause
-        iexecLayerZeroBridge.pauseEntrances();
-        iexecLayerZeroBridge.pause();
-
-        // Attempt to unpause entrances while fully paused - should revert
-        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        iexecLayerZeroBridge.unpauseEntrances();
-
-        vm.stopPrank();
+    function test_PauseSends_CannotUnpauseWhenNotPaused() public {
+        // Attempt to unpause send when not paused
+        vm.prank(pauser);
+        vm.expectRevert(DualPausableUpgradeable.ExpectedSendPause.selector);
+        iexecLayerZeroBridge.unpauseSend();
     }
 
-    function test_PauseEntrances_CannotUnpauseWhenNotPaused() public {
-        // Attempt to unpause entrances when not paused
+    function test_PauseSends_CannotPauseTwice() public {
+        // Pause send once
         vm.prank(pauser);
-        vm.expectRevert(DualPausableUpgradeable.ExpectedEntrancesPause.selector);
-        iexecLayerZeroBridge.unpauseEntrances();
-    }
-
-    function test_PauseEntrances_CannotPauseTwice() public {
-        // Pause entrances once
-        vm.prank(pauser);
-        iexecLayerZeroBridge.pauseEntrances();
+        iexecLayerZeroBridge.pauseSend();
 
         // Try to pause again - should revert
         vm.prank(pauser);
-        vm.expectRevert(DualPausableUpgradeable.EnforcedEntrancePause.selector);
-        iexecLayerZeroBridge.pauseEntrances();
+        vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
+        iexecLayerZeroBridge.pauseSend();
     }
 
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
