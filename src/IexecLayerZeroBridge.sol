@@ -27,7 +27,7 @@ import {DualPausableUpgradeable} from "./DualPausableUpgradeable.sol";
  * chain are minted/unlocked on another, maintaining a 1:1 peg across the entire ecosystem.
  * It implements a dual-pause mechanism:
  * 1. Complete Pause: Blocks all bridge operations (incoming and outgoing transfers)
- * 2. Entrance Pause: Blocks only outgoing transfers, allows users to receive/withdraw funds
+ * 2. Send Pause: Blocks only outgoing transfers, allows users to receive/withdraw funds
  */
 contract IexecLayerZeroBridge is
     IIexecLayerZeroBridge,
@@ -101,27 +101,27 @@ contract IexecLayerZeroBridge is
     }
 
     /**
-     * @notice LEVEL 2: Pauses only outgoing transfers (entrance pause)
+     * @notice LEVEL 2: Pauses only outgoing transfers (send pause)
      * @dev Can only be called by accounts with PAUSER_ROLE
      *
-     * When entrances are paused:
+     * When send is paused:
      * - All _debit operations (outgoing transfers) are blocked
      * - All _credit operations (incoming transfers) still work
      * - Users can still receive funds and "exit" their positions
      * - Use this for less critical issues or when you want to allow withdrawals
      *
-     * @custom:security Moderate emergency function allowing exits while blocking entrances
+     * @custom:security Moderate emergency function allowing exits while blocking send
      */
-    function pauseEntrances() external onlyRole(PAUSER_ROLE) {
-        _pauseEntrances();
+    function pauseSend() external onlyRole(PAUSER_ROLE) {
+        _pauseSend();
     }
 
     /**
-     * @notice LEVEL 2: Unpauses outgoing transfers (restores entrances)
+     * @notice LEVEL 2: Unpauses outgoing transfers (restores send)
      * @dev Can only be called by accounts with PAUSER_ROLE
      */
-    function unpauseEntrances() external onlyRole(PAUSER_ROLE) {
-        _unpauseEntrances();
+    function unpauseSend() external onlyRole(PAUSER_ROLE) {
+        _unpauseSend();
     }
 
     // ============ OFT CONFIGURATION ============
@@ -184,15 +184,15 @@ contract IexecLayerZeroBridge is
      * @dev This function is called for OUTGOING transfers (when sending to another chain)
      * It's blocked when:
      * 1. Contract is fully paused (Level 1 pause), OR
-     * 2. Entrances are paused (Level 2 pause)
+     * 2. Sends are paused (Level 2 pause)
      *
-     * @custom:security Uses whenEntrancesNotPaused which checks both pause levels
+     * @custom:security Uses whenSendNotPaused which checks both pause levels
      * @custom:security Requires the RLC token to have granted burn permissions to this contract
      */
     function _debit(address _from, uint256 _amountLD, uint256 _minAmountLD, uint32 _dstEid)
         internal
         override
-        whenEntrancesNotPaused // This checks both full pause and entrance pause
+        whenSendNotPaused whenNotPaused// This checks both full pause and send pause
         returns (uint256 amountSentLD, uint256 amountReceivedLD)
     {
         // Calculate the amounts using the parent's logic (handles slippage protection)
@@ -225,16 +225,16 @@ contract IexecLayerZeroBridge is
      * It's blocked ONLY when:
      * 1. Contract is fully paused (Level 1 pause)
      *
-     * It's NOT blocked when entrances are paused (Level 2) - users can still receive/exit
+     * It's NOT blocked when send is paused (Level 2) - users can still receive/exit
      *
-     * @custom:security Uses whenNotPaused (only checks full pause, allows entrance pause)
+     * @custom:security Uses whenNotPaused (only checks full pause, allows send pause)
      * @custom:security Requires the RLC token to have granted mint permissions to this contract
      * @custom:security Uses 0xdead address if _to is zero address (minting to zero address fails)
      */
     function _credit(address _to, uint256 _amountLD, uint32 /*_srcEid*/ )
         internal
         override
-        whenNotPaused // Only checks full pause, allows entrance pause
+        whenNotPaused // Only checks full pause, allows send pause
         returns (uint256 amountReceivedLD)
     {
         // Handle zero address case - minting to zero address typically fails

@@ -11,7 +11,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
  *
  * This contract implements a two-level pause mechanism:
  * 1. Complete Pause (Level 1): Blocks all operations when activated
- * 2. Entrance Pause (Level 2): Blocks only specific "entrance" operations while allowing "existing" requests.
+ * 2. Send Pause (Level 2): Blocks only specific "send" operations while allowing "receive" requests.
  *
  *
  * This is useful for scenarios like:
@@ -24,7 +24,7 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
     /// @custom:storage-location erc7201:iexec.storage.DualPausable
     struct DualPausableStorage {
         /// @dev True when send operations are paused, but receive operations are allowed.
-        bool _entrancesPaused;
+        bool _sendPaused;
     }
 
     // keccak256(abi.encode(uint256(keccak256("iexec.storage.DualPausable")) - 1)) & ~bytes32(uint256(0xff))
@@ -40,42 +40,42 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
     // ============ EVENTS ============
 
     /**
-     * @dev Emitted when entrance pause is triggered by `account`
+     * @dev Emitted when send pause is triggered by `account`
      */
-    event EntrancePaused(address account);
+    event SendPaused(address account);
 
     /**
-     * @dev Emitted when entrance pause is lifted by `account`
+     * @dev Emitted when send pause is lifted by `account`
      */
-    event EntranceUnpaused(address account);
+    event SendUnPaused(address account);
 
     // ============ ERRORS ============
 
     /**
-     * @dev The operation failed because entrances are paused
+     * @dev The operation failed because send is paused
      */
-    error EnforcedEntrancePause();
+    error EnforcedSendPause();
 
     /**
-     * @dev The operation failed because entrances are not paused
+     * @dev The operation failed because send is not paused
      */
-    error ExpectedEntrancesPause();
+    error ExpectedSendPause();
 
     // ============ MODIFIERS ============
 
     /**
-     * @dev Modifier for entrance operations - blocks when fully paused OR when entrances are paused
+     * @dev Modifier for send operations - blocks when send is paused
      */
-    modifier whenEntrancesNotPaused() {
-        _requireEntrancesNotPaused();
+    modifier whenSendNotPaused() {
+        _requireSendNotPaused();
         _;
     }
 
     /**
-     * @dev Modifier to make a function callable only when entrances are paused
+     * @dev Modifier to make a function callable only when send is paused
      */
-    modifier whenEntrancesPaused() {
-        _requireEntrancesPaused();
+    modifier whenSendPaused() {
+        _requireSendPaused();
         _;
     }
 
@@ -89,102 +89,62 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
     // ============ VIEW FUNCTIONS ============
 
     /**
-     * @dev Returns true if entrances are paused, false otherwise
+     * @dev Returns true if send is paused, false otherwise
      */
-    function entrancesPaused() public view virtual returns (bool) {
+    function sendPaused() public view virtual returns (bool) {
         DualPausableStorage storage $ = _getDualPausableStorage();
-        return $._entrancesPaused;
+        return $._sendPaused;
     }
 
     /**
      * @dev Returns the overall operational state
      * @return fullyPaused True if complete pause is active
-     * @return entrancesPaused_ True if entrance pause is active
+     * @return onlySendPaused True if send pause is active
      */
-    function pauseState() public view virtual returns (bool fullyPaused, bool entrancesPaused_) {
+    function pauseStatus() public view virtual returns (bool fullyPaused, bool onlySendPaused) {
         fullyPaused = paused();
-        entrancesPaused_ = entrancesPaused();
+        onlySendPaused = sendPaused();
     }
 
     // ============ INTERNAL FUNCTIONS ============
 
     /**
-     * @dev Throws if only entries are paused or if completely paused
-     * Complete pause takes precedence over entrance pause
+     * @dev Throws if send is paused
      */
-    function _requireEntrancesNotPaused() internal view virtual {
-        // Check complete pause first (takes precedence)
-        _requireNotPaused();
-
-        // Then check entrance pause
-        if (entrancesPaused()) {
-            revert EnforcedEntrancePause();
+    function _requireSendNotPaused() internal view virtual {
+        if (sendPaused()) {
+            revert EnforcedSendPause();
         }
     }
 
     /**
-     * @dev Throws if entrances are not paused
+     * @dev Throws if send operation are not paused
      */
-    function _requireEntrancesPaused() internal view virtual {
-        // Check complete pause first (takes precedence)
-        _requireNotPaused();
-
-        if (!entrancesPaused()) {
-            revert ExpectedEntrancesPause();
+    function _requireSendPaused() internal view virtual {
+        if (!sendPaused()) {
+            revert ExpectedSendPause();
         }
     }
 
     /**
-     * @dev Triggers entrance paused state
+     * @dev Triggers send paused state
      * Requirements:
-     * - Contract must not be completely paused
-     * - Entrances must not already be paused
+     * - Send must not already be paused
      */
-    function _pauseEntrances() internal virtual whenEntrancesNotPaused {
+    function _pauseSend() internal virtual whenSendNotPaused {
         DualPausableStorage storage $ = _getDualPausableStorage();
-        $._entrancesPaused = true;
-        emit EntrancePaused(_msgSender());
+        $._sendPaused = true;
+        emit SendPaused(_msgSender());
     }
 
     /**
-     * @dev Returns entrances to normal state
-     * Requirements: Entrances must be paused
+     * @dev Returns send to normal state
+     * Requirements: Send must be paused
      */
-    function _unpauseEntrances() internal virtual whenEntrancesPaused {
+    function _unpauseSend() internal virtual whenSendPaused {
         DualPausableStorage storage $ = _getDualPausableStorage();
-        $._entrancesPaused = false;
-        emit EntranceUnpaused(_msgSender());
+        $._sendPaused = false;
+        emit SendUnPaused(_msgSender());
     }
 
-    /**
-     * @dev Override to handle entrance pause when completely pausing
-     * When pausing completely, we also reset entrance pause since complete pause takes precedence
-     */
-    function _pause() internal virtual override {
-        // First reset entrances if they were paused (complete pause takes precedence)
-        DualPausableStorage storage $ = _getDualPausableStorage();
-        if ($._entrancesPaused) {
-            $._entrancesPaused = false;
-            emit EntranceUnpaused(_msgSender());
-        }
-
-        // Then pause completely
-        super._pause();
-    }
-
-    /**
-     * @dev Override to handle entrance pause when completely unpausing
-     * When unpausing completely, we also unpause entrances to return to fully operational state
-     */
-    function _unpause() internal virtual override {
-        // First unpause entrances if they were paused
-        DualPausableStorage storage $ = _getDualPausableStorage();
-        if ($._entrancesPaused) {
-            $._entrancesPaused = false;
-            emit EntranceUnpaused(_msgSender());
-        }
-
-        // Then unpause completely
-        super._unpause();
-    }
 }

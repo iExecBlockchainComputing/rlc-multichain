@@ -27,7 +27,7 @@ import {DualPausableUpgradeable} from "./DualPausableUpgradeable.sol";
  *
  * It implements a dual-pause mechanism:
  * 1. Complete Pause: Blocks all adapter operations (incoming and outgoing transfers)
- * 2. Entrance Pause: Blocks only outgoing transfers, allows users to receive/withdraw locked funds
+ * 2. Send Pause: Blocks only outgoing transfers, allows users to receive/withdraw locked funds
  *
  * @custom:security-contact security@iex.ec
  */
@@ -85,17 +85,17 @@ contract RLCAdapter is
     /**
      * @notice Unpauses all operations (returns to fully operational state)
      * @dev Can only be called by accounts with PAUSER_ROLE
-     * @dev Automatically resets entrance pause if it was active
+     * @dev Automatically resets send pause if it was active
      */
     function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
     }
 
     /**
-     * @notice LEVEL 2: Pauses only outgoing transfers (entrance pause)
+     * @notice LEVEL 2: Pauses only outgoing transfers (send pause)
      * @dev Can only be called by accounts with PAUSER_ROLE
      *
-     * When entrance paused:
+     * When send paused:
      * - _debit operations (outgoing transfers) are blocked
      * - _credit operations (incoming transfers) continue to work
      * - Users can still receive tokens and withdraw previously locked funds
@@ -103,16 +103,16 @@ contract RLCAdapter is
      * Use this when you want to stop new outgoing transfers while allowing users
      * to receive funds and withdraw locked tokens.
      */
-    function pauseEntrances() external onlyRole(PAUSER_ROLE) {
-        _pauseEntrances();
+    function pauseSend() external onlyRole(PAUSER_ROLE) {
+        _pauseSend();
     }
 
     /**
-     * @notice Unpauses entrance operations (allows outgoing transfers again)
+     * @notice Unpauses send operations (allows outgoing transfers again)
      * @dev Can only be called by accounts with PAUSER_ROLE
      */
-    function unpauseEntrances() external onlyRole(PAUSER_ROLE) {
-        _unpauseEntrances();
+    function unpauseSend() external onlyRole(PAUSER_ROLE) {
+        _unpauseSend();
     }
 
     // ============ OVERRIDES ============
@@ -136,7 +136,7 @@ contract RLCAdapter is
      *
      * Pause behavior:
      * - Complete pause: Blocks all operations
-     * - Entrance pause: Blocks only this operation (outgoing transfers)
+     * - Send pause: Blocks only this operation (outgoing transfers)
      * - Operational: Allows all operations
      *
      * @param _from Address tokens are being debited from
@@ -150,7 +150,7 @@ contract RLCAdapter is
         internal
         virtual
         override
-        whenEntrancesNotPaused
+        whenSendNotPaused whenNotPaused
         returns (uint256 amountSentLD, uint256 amountReceivedLD)
     {
         return super._debit(_from, _amountLD, _minAmountLD, _dstEid);
@@ -162,7 +162,7 @@ contract RLCAdapter is
      *
      * Pause behavior:
      * - Complete pause: Blocks all operations
-     * - Entrance pause: Allows this operation (incoming transfers)
+     * - Send pause: Allows this operation (incoming transfers)
      * - Operational: Allows all operations
      *
      * @param _to Address tokens are being credited to
