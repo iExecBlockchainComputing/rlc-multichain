@@ -34,7 +34,6 @@ contract RLCAdapterTest is TestHelperOz5 {
     string private name = "RLC Token";
     string private symbol = "RLC";
 
-
     function setUp() public virtual override {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);

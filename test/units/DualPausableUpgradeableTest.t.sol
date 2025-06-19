@@ -157,7 +157,6 @@ contract DualPausableUpgradeableTest is Test {
         dualPausable.pauseSend();
         assertTrue(dualPausable.sendPaused());
 
-
         dualPausable.pause();
         vm.stopPrank();
 
@@ -179,7 +178,6 @@ contract DualPausableUpgradeableTest is Test {
         vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
         dualPausable.mockOperation();
     }
-
 }
 
 /**

@@ -34,6 +34,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     uint256 private constant TRANSFER_AMOUNT = 1 * 10 ** 9; // 1 RLC token with 9 decimals
     string private name = "RLC Crosschain Token";
     string private symbol = "RLC";
+
     function setUp() public virtual override {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
