@@ -269,5 +269,16 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         iexecLayerZeroBridge.pauseSend();
     }
 
+    function test_Pause_CannotPauseTwice() public {
+        // Pause once
+        vm.prank(pauser);
+        iexecLayerZeroBridge.pause();
+
+        // Try to pause again - should revert
+        vm.prank(pauser);
+        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
+        iexecLayerZeroBridge.pause();
+    }
+
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
 }
