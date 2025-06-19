@@ -154,7 +154,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     // ============ LEVEL 2 PAUSE TESTS (Send Pause) ============
 
-    function test_PauseSends_EmitsCorrectEvent() public {
+    function test_PauseSend_EmitsCorrectEvent() public {
         vm.expectEmit(true, false, false, false);
         emit SendPaused(pauser);
 
@@ -162,13 +162,13 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         iexecLayerZeroBridge.pauseSend();
     }
 
-    function test_PauseSends_OnlyPauserRole() public {
+    function test_PauseSend_OnlyPauserRole() public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
         iexecLayerZeroBridge.pauseSend();
     }
 
-    function test_PauseSends_BlocksOutgoingOnly() public {
+    function test_PauseSend_BlocksOutgoingOnly() public {
         // Pause send
         vm.prank(pauser);
         iexecLayerZeroBridge.pauseSend();
@@ -191,7 +191,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
-    function test_UnpauseSends_RestoresOutgoingTransfers() public {
+    function test_UnpauseSend_RestoresOutgoingTransfers() public {
         // Pause then unpause send
         vm.startPrank(pauser);
         iexecLayerZeroBridge.pauseSend();
@@ -251,14 +251,14 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     // ============ EDGE CASE TESTS ============
 
-    function test_PauseSends_CannotUnpauseWhenNotPaused() public {
+    function test_PauseSend_CannotUnpauseWhenNotPaused() public {
         // Attempt to unpause send when not paused
         vm.prank(pauser);
         vm.expectRevert(DualPausableUpgradeable.ExpectedSendPause.selector);
         iexecLayerZeroBridge.unpauseSend();
     }
 
-    function test_PauseSends_CannotPauseTwice() public {
+    function test_PauseSend_CannotPauseTwice() public {
         // Pause send once
         vm.prank(pauser);
         iexecLayerZeroBridge.pauseSend();

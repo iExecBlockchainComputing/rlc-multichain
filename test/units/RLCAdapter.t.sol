@@ -164,7 +164,7 @@ contract RLCAdapterTest is TestHelperOz5 {
 
     // ============ LEVEL 2 PAUSE TESTS (Send Pause) ============
 
-    function test_PauseSends_EmitsCorrectEvent() public {
+    function test_PauseSend_EmitsCorrectEvent() public {
         vm.expectEmit(true, false, false, false);
         emit SendPaused(pauser);
 
@@ -172,13 +172,13 @@ contract RLCAdapterTest is TestHelperOz5 {
         adapter.pauseSend();
     }
 
-    function test_PauseSends_OnlyPauserRole() public {
+    function test_PauseSend_OnlyPauserRole() public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
         adapter.pauseSend();
     }
 
-    function test_PauseSends_BlocksOutgoingOnly() public {
+    function test_PauseSend_BlocksOutgoingOnly() public {
         // Pause send
         vm.prank(pauser);
         adapter.pauseSend();
@@ -202,7 +202,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         assertEq(rlcToken.balanceOf(address(adapter)), 0);
     }
 
-    function test_UnpauseSends_RestoresOutgoingTransfers() public {
+    function test_UnpauseSend_RestoresOutgoingTransfers() public {
         // Pause then unpause send
         vm.startPrank(pauser);
         adapter.pauseSend();
@@ -262,14 +262,14 @@ contract RLCAdapterTest is TestHelperOz5 {
 
     // ============ EDGE CASE TESTS ============
 
-    function test_PauseSends_CannotUnpauseWhenNotPaused() public {
+    function test_PauseSend_CannotUnpauseWhenNotPaused() public {
         // Attempt to unpause send when not paused
         vm.prank(pauser);
         vm.expectRevert(DualPausableUpgradeable.ExpectedSendPause.selector);
         adapter.unpauseSend();
     }
 
-    function test_PauseSends_CannotPauseTwice() public {
+    function test_PauseSend_CannotPauseTwice() public {
         // Pause send once
         vm.prank(pauser);
         adapter.pauseSend();
