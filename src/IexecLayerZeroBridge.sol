@@ -19,13 +19,15 @@ import {DualPausableUpgradeable} from "./DualPausableUpgradeable.sol";
  * This contract enables cross-chain transfer of RLC tokens using LayerZero's OFT standard.
  * It overrides the `_debit` and `_credit` functions to use external mint and burn functions
  * on the CrosschainRLC token contract.
- * It implements a cross-chain transfer mechanism where:
- * 1. When sending tokens FROM this chain: RLC tokens are permanently burned from the sender's balance via an external call
- * 2. When receiving tokens TO this chain: New RLC tokens are minted to the recipient's balance via an external call
+ * 
+ * Cross-chain Transfer Mechanism:
+ * 1. When sending tokens FROM this chain: RLC tokens are permanently burned from the sender's balance
+ * 2. When receiving tokens TO this chain: New RLC tokens are minted to the recipient's balance
  *
  * This ensures the total supply across all chains remains constant - tokens destroyed on one
- * chain are minted/unlocked on another, maintaining a 1:1 peg across the entire ecosystem.
- * It implements a dual-pause mechanism:
+ * chain are minted on another, maintaining a 1:1 peg across the entire ecosystem.
+ * 
+ * Dual-Pause Emergency System:
  * 1. Complete Pause: Blocks all bridge operations (incoming and outgoing transfers)
  * 2. Send Pause: Blocks only outgoing transfers, allows users to receive/withdraw funds
  */
@@ -53,7 +55,9 @@ contract IexecLayerZeroBridge is
      * @param _token The RLC token contract address that implements ICrosschainRLC interface
      * @param _lzEndpoint The LayerZero endpoint address for this chain
      */
-    constructor(ICrosschainRLC _token, address _lzEndpoint) OFTCoreUpgradeable(_token.decimals(), _lzEndpoint) {
+    constructor(ICrosschainRLC _token, address _lzEndpoint) 
+        OFTCoreUpgradeable(_token.decimals(), _lzEndpoint) 
+    {
         _disableInitializers();
         RLC_TOKEN = _token;
     }
@@ -65,7 +69,7 @@ contract IexecLayerZeroBridge is
      * @param _owner Address that will receive owner and default admin roles
      * @param _pauser Address that will receive the pauser role
      */
-    function initialize(address _owner, address _pauser) public initializer {
+    function initialize(address _owner, address _pauser) external initializer {
         __Ownable_init(_owner);
         __OFTCore_init(_owner);
         __UUPSUpgradeable_init();
@@ -117,7 +121,7 @@ contract IexecLayerZeroBridge is
     }
 
     /**
-     * @notice LEVEL 2: Unpauses outgoing transfers (restores send)
+     * @notice LEVEL 2: Unpauses outgoing transfers (restores send functionality)
      * @dev Can only be called by accounts with PAUSER_ROLE
      */
     function unpauseSend() external onlyRole(PAUSER_ROLE) {
@@ -136,8 +140,9 @@ contract IexecLayerZeroBridge is
 
     /**
      * @notice Returns the address of the underlying token being bridged
+     * @return The address of the RLC token contract
      */
-    function token() public view returns (address) {
+    function token() external view returns (address) {
         return address(RLC_TOKEN);
     }
 
@@ -163,7 +168,7 @@ contract IexecLayerZeroBridge is
     // ============ CORE BRIDGE FUNCTIONS ============
 
     /**
-     * @notice Burns tokens from the sender's balance as part of cross-chain transfer.
+     * @notice Burns tokens from the sender's balance as part of cross-chain transfer
      * @param _from The address to burn tokens from
      * @param _amountLD The amount of tokens to burn (in local decimals)
      * @param _minAmountLD The minimum amount to burn (for slippage protection)
@@ -182,24 +187,24 @@ contract IexecLayerZeroBridge is
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
      * @dev This function is called for OUTGOING transfers (when sending to another chain)
-     * It's blocked when:
-     * 1. Contract is fully paused (Level 1 pause), OR
-     * 2. Sends are paused (Level 2 pause)
+     * Pause Behavior:
+     * - Blocked when contract is fully paused (Level 1 pause)
+     * - Blocked when sends are paused (Level 2 pause)
+     * - Uses both whenNotPaused and whenSendNotPaused modifiers
      *
-     * @custom:security Uses whenSendNotPaused which checks both pause levels
      * @custom:security Requires the RLC token to have granted burn permissions to this contract
      */
     function _debit(address _from, uint256 _amountLD, uint256 _minAmountLD, uint32 _dstEid)
         internal
         override
-        whenSendNotPaused whenNotPaused// This checks both full pause and send pause
+        whenNotPaused
+        whenSendNotPaused
         returns (uint256 amountSentLD, uint256 amountReceivedLD)
     {
         // Calculate the amounts using the parent's logic (handles slippage protection)
         (amountSentLD, amountReceivedLD) = _debitView(_amountLD, _minAmountLD, _dstEid);
 
         // Burn the tokens from the sender's balance
-        // This assumes crosschainBurn doesn't apply any fees
         RLC_TOKEN.crosschainBurn(_from, amountSentLD);
     }
 
@@ -222,19 +227,18 @@ contract IexecLayerZeroBridge is
      * - The function would need pre/post balance checks to handle fee scenarios
      *
      * @dev This function is called for INCOMING transfers (when receiving from another chain)
-     * It's blocked ONLY when:
-     * 1. Contract is fully paused (Level 1 pause)
+     * Pause Behavior:
+     * - Blocked ONLY when contract is fully paused (Level 1 pause)
+     * - NOT blocked when sends are paused (Level 2) - users can still receive/exit
+     * - Uses only whenNotPaused modifier
      *
-     * It's NOT blocked when send is paused (Level 2) - users can still receive/exit
-     *
-     * @custom:security Uses whenNotPaused (only checks full pause, allows send pause)
      * @custom:security Requires the RLC token to have granted mint permissions to this contract
-     * @custom:security Uses 0xdead address if _to is zero address (minting to zero address fails)
+     * @custom:security Uses 0xdead address if _to is zero address (minting to zero fails)
      */
     function _credit(address _to, uint256 _amountLD, uint32 /*_srcEid*/ )
         internal
         override
-        whenNotPaused // Only checks full pause, allows send pause
+        whenNotPaused
         returns (uint256 amountReceivedLD)
     {
         // Handle zero address case - minting to zero address typically fails
