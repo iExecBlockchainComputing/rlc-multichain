@@ -5,7 +5,10 @@ pragma solidity ^0.8.22;
 
 import {Test, console} from "forge-std/Test.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosschainToken.s.sol";
 import {IERC7802} from "../../src/interfaces/IERC7802.sol";
 import {RLCCrosschainToken} from "../../src/token/RLCCrosschainToken.sol";
@@ -39,7 +42,7 @@ contract RLCCrosschainTokenTest is Test {
     // ============ initialize ============
 
     function test_RevertWhen_InitializedMoreThanOnce() public {
-        vm.expectRevert(abi.encodeWithSignature("InvalidInitialization()"));
+        vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
         crossChainToken.initialize("Foo", "BAR", owner, upgrader);
     }
 
@@ -191,7 +194,7 @@ contract RLCCrosschainTokenTest is Test {
         assertEq(crossChainToken.totalSupply(), 0);
         // Attempt to mint tokens from an unauthorized account.
         vm.expectRevert(
-            abi.encodeWithSignature("AccessControlUnauthorizedAccount(address,bytes32)", anyone, bridgeTokenRoleId)
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, anyone, bridgeTokenRoleId)
         );
         vm.prank(anyone);
         crossChainToken.crosschainMint(user, amount);
@@ -205,7 +208,7 @@ contract RLCCrosschainTokenTest is Test {
         assertEq(crossChainToken.balanceOf(address(0)), 0);
         assertEq(crossChainToken.totalSupply(), 0);
         // Attempt to mint tokens the zero address.
-        vm.expectRevert(abi.encodeWithSignature("ERC20InvalidReceiver(address)", address(0)));
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidReceiver.selector, address(0)));
         vm.prank(bridge);
         crossChainToken.crosschainMint(address(0), amount);
         // Check that no tokens were minted.
@@ -218,8 +221,8 @@ contract RLCCrosschainTokenTest is Test {
     function test_RevertWhen_UnauthorizedUpgrader() public {
         address unauthorizedUpgrader = makeAddr("unauthorized");
         vm.expectRevert(
-            abi.encodeWithSignature(
-                "AccessControlUnauthorizedAccount(address,bytes32)",
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
                 unauthorizedUpgrader,
                 crossChainToken.UPGRADER_ROLE()
             )
