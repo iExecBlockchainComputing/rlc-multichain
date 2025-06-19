@@ -16,7 +16,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
  *
  * This is useful for scenarios like:
  * - Complete pause: Critical security incidents requiring full shutdown
- * - Entrance pause: Allow users to withdraw/exit while preventing new entries
+ * - Entries only pause: Allows on-going transfers to get finalized while preventing new transfers.
  *
  * @custom:storage-location erc7201:iexec.storage.DualPausable
  */
