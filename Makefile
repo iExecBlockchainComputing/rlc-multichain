@@ -168,7 +168,7 @@ verify-adapter-impl:
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address,address)" $(RLC_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS)) \
         --etherscan-api-key $(ETHERSCAN_API_KEY) \
-        $(RLC_ADAPTER_PROXY_ADDRESS) \
+        $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) \
         src/bridges/layerZero/RLCAdapter.sol:RLCAdapter
 
 verify-layerzero-bridge-impl:
@@ -178,7 +178,7 @@ verify-layerzero-bridge-impl:
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address)" $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS)) \
         --etherscan-api-key $(ARBISCAN_API_KEY) \
-        $(LAYERZERO_BRIDGE_PROXY_ADDRESS) \
+        $(LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS) \
         src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge
 
 # Proxy verification
