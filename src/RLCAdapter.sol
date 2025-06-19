@@ -8,7 +8,7 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {DualPausableUpgradeable} from "./DualPausableUpgradeable.sol";
+import {DualPausableUpgradeable} from "./utils/DualPausableUpgradeable.sol";
 
 /**
  * @title RLCAdapter

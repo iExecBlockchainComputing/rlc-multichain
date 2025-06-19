@@ -10,7 +10,7 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {ICrosschainRLC} from "./interfaces/ICrosschainRLC.sol";
 import {IIexecLayerZeroBridge} from "./interfaces/IIexecLayerZeroBridge.sol";
-import {DualPausableUpgradeable} from "./DualPausableUpgradeable.sol";
+import {DualPausableUpgradeable} from "./utils/DualPausableUpgradeable.sol";
 
 /**
  * @title IexecLayerZeroBridge
