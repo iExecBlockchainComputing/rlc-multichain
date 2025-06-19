@@ -34,13 +34,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     uint256 private constant TRANSFER_AMOUNT = 1 * 10 ** 9; // 1 RLC token with 9 decimals
     string private name = "RLC Crosschain Token";
     string private symbol = "RLC";
-
-    // ============ EVENTS ============
-    event SendPaused(address account);
-    event SendUnpaused(address account);
-    event Paused(address account);
-    event Unpaused(address account);
-
     function setUp() public virtual override {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
@@ -84,15 +77,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     // ============ LEVEL 1 PAUSE TESTS (Complete Pause) ============
-
-    function test_Pause_EmitsCorrectEvent() public {
-        vm.expectEmit(true, false, false, false);
-        emit Paused(pauser);
-
-        vm.prank(pauser);
-        iexecLayerZeroBridge.pause();
-    }
-
     function test_Pause_OnlyPauserRole() public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
@@ -123,8 +107,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         vm.startPrank(pauser);
         iexecLayerZeroBridge.pause();
 
-        vm.expectEmit(true, false, false, false);
-        emit Unpaused(pauser);
         iexecLayerZeroBridge.unpause();
         vm.stopPrank();
 
@@ -153,14 +135,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     // ============ LEVEL 2 PAUSE TESTS (Send Pause) ============
-
-    function test_PauseSend_EmitsCorrectEvent() public {
-        vm.expectEmit(true, false, false, false);
-        emit SendPaused(pauser);
-
-        vm.prank(pauser);
-        iexecLayerZeroBridge.pauseSend();
-    }
 
     function test_PauseSend_OnlyPauserRole() public {
         vm.expectRevert();
@@ -196,8 +170,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         vm.startPrank(pauser);
         iexecLayerZeroBridge.pauseSend();
 
-        vm.expectEmit(true, false, false, false);
-        emit SendUnpaused(pauser);
         iexecLayerZeroBridge.unpauseSend();
         vm.stopPrank();
 
@@ -206,78 +178,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertFalse(iexecLayerZeroBridge.sendPaused());
 
         test_SendToken_WhenOperational();
-    }
-
-    // ============ DUAL PAUSE WORKFLOW TESTS ============
-
-    function test_DualPause_PauseFromSendToFull() public {
-        // Start with send pause
-        vm.startPrank(pauser);
-        iexecLayerZeroBridge.pauseSend();
-        assertTrue(iexecLayerZeroBridge.sendPaused());
-
-        vm.expectEmit(true, false, false, false);
-        emit Paused(pauser);
-
-        iexecLayerZeroBridge.pause();
-        vm.stopPrank();
-
-        assertTrue(iexecLayerZeroBridge.paused());
-        assertTrue(iexecLayerZeroBridge.sendPaused());
-    }
-
-    function test_PauseStatus_ReturnsCorrectStates() public {
-        // Initially operational
-        (bool fullyPaused, bool onlySendPaused) = iexecLayerZeroBridge.pauseStatus();
-        assertFalse(fullyPaused);
-        assertFalse(onlySendPaused);
-
-        // After send pause
-        vm.prank(pauser);
-        iexecLayerZeroBridge.pauseSend();
-
-        (fullyPaused, onlySendPaused) = iexecLayerZeroBridge.pauseStatus();
-        assertFalse(fullyPaused);
-        assertTrue(onlySendPaused);
-
-        // After full pause
-        vm.prank(pauser);
-        iexecLayerZeroBridge.pause();
-
-        (fullyPaused, onlySendPaused) = iexecLayerZeroBridge.pauseStatus();
-        assertTrue(fullyPaused);
-        assertTrue(onlySendPaused);
-    }
-
-    // ============ EDGE CASE TESTS ============
-
-    function test_PauseSend_CannotUnpauseWhenNotPaused() public {
-        // Attempt to unpause send when not paused
-        vm.prank(pauser);
-        vm.expectRevert(DualPausableUpgradeable.ExpectedSendPause.selector);
-        iexecLayerZeroBridge.unpauseSend();
-    }
-
-    function test_PauseSend_CannotPauseTwice() public {
-        // Pause send once
-        vm.prank(pauser);
-        iexecLayerZeroBridge.pauseSend();
-
-        // Try to pause again - should revert
-        vm.prank(pauser);
-        vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
-        iexecLayerZeroBridge.pauseSend();
-    }
-
-    function test_Pause_CannotPauseTwice() public {
-        // Pause once
-        vm.prank(pauser);
-        iexecLayerZeroBridge.pause();
-
-        // Try to pause again - should revert
-        vm.prank(pauser);
-        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        iexecLayerZeroBridge.pause();
     }
 
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues

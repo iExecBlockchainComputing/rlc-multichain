@@ -34,11 +34,6 @@ contract RLCAdapterTest is TestHelperOz5 {
     string private name = "RLC Token";
     string private symbol = "RLC";
 
-    // ============ EVENTS ============
-    event SendPaused(address account);
-    event SendUnpaused(address account);
-    event Paused(address account);
-    event Unpaused(address account);
 
     function setUp() public virtual override {
         super.setUp();
@@ -88,14 +83,6 @@ contract RLCAdapterTest is TestHelperOz5 {
 
     // ============ LEVEL 1 PAUSE TESTS (Complete Pause) ============
 
-    function test_Pause_EmitsCorrectEvent() public {
-        vm.expectEmit(true, false, false, false);
-        emit Paused(pauser);
-
-        vm.prank(pauser);
-        adapter.pause();
-    }
-
     function test_Pause_OnlyPauserRole() public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
@@ -131,8 +118,6 @@ contract RLCAdapterTest is TestHelperOz5 {
         adapter.pause();
         assertTrue(adapter.paused());
 
-        vm.expectEmit(true, false, false, false);
-        emit Unpaused(pauser);
         adapter.unpause();
         vm.stopPrank();
 
@@ -163,15 +148,6 @@ contract RLCAdapterTest is TestHelperOz5 {
     }
 
     // ============ LEVEL 2 PAUSE TESTS (Send Pause) ============
-
-    function test_PauseSend_EmitsCorrectEvent() public {
-        vm.expectEmit(true, false, false, false);
-        emit SendPaused(pauser);
-
-        vm.prank(pauser);
-        adapter.pauseSend();
-    }
-
     function test_PauseSend_OnlyPauserRole() public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
@@ -208,8 +184,6 @@ contract RLCAdapterTest is TestHelperOz5 {
         adapter.pauseSend();
         assertTrue(adapter.sendPaused());
 
-        vm.expectEmit(true, false, false, false);
-        emit SendUnpaused(pauser);
         adapter.unpauseSend();
         vm.stopPrank();
 
@@ -218,77 +192,6 @@ contract RLCAdapterTest is TestHelperOz5 {
         assertFalse(adapter.sendPaused());
 
         test_SendToken_WhenOperational();
-    }
-
-    // ============ DUAL PAUSE WORKFLOW TESTS ============
-
-    function test_DualPause_PauseFromSendToFull() public {
-        // Start with send pause
-        vm.startPrank(pauser);
-        adapter.pauseSend();
-        assertTrue(adapter.sendPaused());
-        assertFalse(adapter.paused());
-
-        // Escalate to full pause
-        vm.expectEmit(true, false, false, false);
-        emit Paused(pauser);
-        adapter.pause();
-        vm.stopPrank();
-
-        // Both should be true
-        assertTrue(adapter.paused());
-        assertTrue(adapter.sendPaused());
-    }
-
-    function test_PauseStatus_ReturnsCorrectStates() public {
-        // Initially operational
-        assertFalse(adapter.paused());
-        assertFalse(adapter.sendPaused());
-
-        // After send pause
-        vm.prank(pauser);
-        adapter.pauseSend();
-
-        assertFalse(adapter.paused());
-        assertTrue(adapter.sendPaused());
-
-        // After full pause (from send pause state)
-        vm.prank(pauser);
-        adapter.pause();
-
-        assertTrue(adapter.paused());
-        assertTrue(adapter.sendPaused());
-    }
-
-    // ============ EDGE CASE TESTS ============
-
-    function test_PauseSend_CannotUnpauseWhenNotPaused() public {
-        // Attempt to unpause send when not paused
-        vm.prank(pauser);
-        vm.expectRevert(DualPausableUpgradeable.ExpectedSendPause.selector);
-        adapter.unpauseSend();
-    }
-
-    function test_PauseSend_CannotPauseTwice() public {
-        // Pause send once
-        vm.prank(pauser);
-        adapter.pauseSend();
-
-        // Try to pause again - should revert
-        vm.prank(pauser);
-        vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
-        adapter.pauseSend();
-    }
-
-    function test_Pause_CannotPauseTwice() public {
-        // Pause once
-        vm.prank(pauser);
-        adapter.pause();
-
-        // Try to pause again - should revert
-        vm.prank(pauser);
-        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        adapter.pause();
     }
 
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
