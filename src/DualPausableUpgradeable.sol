@@ -11,7 +11,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
  *
  * This contract implements a two-level pause mechanism:
  * 1. Complete Pause (Level 1): Blocks all operations when activated
- * 2. Entrance Pause (Level 2): Blocks only specific "entrance" operations while allowing "exiting" requests.
+ * 2. Entrance Pause (Level 2): Blocks only specific "entrance" operations while allowing "existing" requests.
  *
  *
  * This is useful for scenarios like:
@@ -23,7 +23,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 abstract contract DualPausableUpgradeable is PausableUpgradeable {
     /// @custom:storage-location erc7201:iexec.storage.DualPausable
     struct DualPausableStorage {
-        /// @dev True when entrance operations are paused, but exit operations are allowed
+        /// @dev True when send operations are paused, but receive operations are allowed.
         bool _entrancesPaused;
     }
 

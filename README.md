@@ -212,7 +212,7 @@ Both the RLCAdapter and IexecLayerZeroBridge implement a sophisticated **dual-pa
 **Use Case**: Destination chain issues, or controlled maintenance
 - **Blocks**: ❌ Triggering transfers only (users can't submit send requests)
 - **Allows**: ✅ Already submitted transfers (users can still receive their tokens if the send operation was submitted before level 2 pause).
-- **Benefit**: Bridge request that are on-going do not get blocked.
+- **Benefit**: Bridge requests that are on-going do not get blocked.
 
 ## Gas Costs and Fees
 
