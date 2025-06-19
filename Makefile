@@ -4,6 +4,15 @@ MAKEFLAGS += --no-print-directory
 
 -include .env
 
+generate-coverage:
+	rm -rf coverage lcov.info lcov.src.info && \
+	forge coverage \
+		--ir-minimum \
+		--report lcov \
+		--no-match-coverage "script|src/mocks" && \
+	lcov --extract lcov.info "src/*" -o lcov.src.info && \
+	genhtml lcov.src.info --branch-coverage --output-dir coverage
+
 #
 # Test and utility targets
 #
@@ -23,9 +32,6 @@ unit-test:
 
 e2e-test:
 	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**" --force
-
-upgrade-test:
-	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/upgrade/**" --force
 
 clean:
 	forge clean
