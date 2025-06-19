@@ -59,7 +59,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         wireOApps(contracts);
         vm.stopPrank();
 
-        // Mint RLC tokens to user1
+        // Mint RLC tokens to user1 and setup approval
         rlcToken.transfer(user1, INITIAL_BALANCE);
         vm.prank(user1);
         rlcToken.approve(address(adapter), INITIAL_BALANCE);
@@ -70,6 +70,7 @@ contract RLCAdapterTest is TestHelperOz5 {
     function test_SendToken_WhenOperational() public {
         // Check initial balances
         assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcToken.balanceOf(address(adapter)), 0);
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
@@ -80,7 +81,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         vm.prank(user1);
         adapter.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
-        // Verify source state - tokens should be locked in adapter
+        // Verify source state - tokens should be locked in adapter (not burned)
         assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
         assertEq(rlcToken.balanceOf(address(adapter)), TRANSFER_AMOUNT);
     }
@@ -106,11 +107,14 @@ contract RLCAdapterTest is TestHelperOz5 {
         vm.prank(pauser);
         adapter.pause();
 
+        // Verify adapter is fully paused
+        assertTrue(adapter.paused());
+
         // Prepare send parameters
         (SendParam memory sendParam, MessagingFee memory fee) =
             TestUtils.prepareSend(adapter, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
-        // Attempt to send tokens - should revert
+        // Attempt to send tokens - should revert with EnforcedPause
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
         vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
@@ -125,6 +129,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         // Pause then unpause the adapter
         vm.startPrank(pauser);
         adapter.pause();
+        assertTrue(adapter.paused());
 
         vm.expectEmit(true, false, false, false);
         emit Unpaused(pauser);
@@ -132,9 +137,9 @@ contract RLCAdapterTest is TestHelperOz5 {
         vm.stopPrank();
 
         // Should now work normally
+        assertFalse(adapter.paused());
         test_SendToken_WhenOperational();
     }
-
     function test_sendRLCWhenSourceAdapterUnpaused() public {
         // Pause then unpause the adapter
         vm.startPrank(pauser);
@@ -200,6 +205,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         // Pause then unpause send
         vm.startPrank(pauser);
         adapter.pauseSend();
+        assertTrue(adapter.sendPaused());
 
         vm.expectEmit(true, false, false, false);
         emit SendUnpaused(pauser);
@@ -220,21 +226,20 @@ contract RLCAdapterTest is TestHelperOz5 {
         vm.startPrank(pauser);
         adapter.pauseSend();
         assertTrue(adapter.sendPaused());
+        assertFalse(adapter.paused());
 
+        // Escalate to full pause
         vm.expectEmit(true, false, false, false);
         emit Paused(pauser);
-
         adapter.pause();
         vm.stopPrank();
 
+        // Both should be true
         assertTrue(adapter.paused());
         assertTrue(adapter.sendPaused());
     }
 
     function test_PauseStatus_ReturnsCorrectStates() public {
-        // Test pauseStatus function if it exists (it should based on the bridge contract)
-        // Note: You'll need to add this function to RLCAdapter contract
-
         // Initially operational
         assertFalse(adapter.paused());
         assertFalse(adapter.sendPaused());
@@ -246,7 +251,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         assertFalse(adapter.paused());
         assertTrue(adapter.sendPaused());
 
-        // After full pause
+        // After full pause (from send pause state)
         vm.prank(pauser);
         adapter.pause();
 
@@ -272,6 +277,17 @@ contract RLCAdapterTest is TestHelperOz5 {
         vm.prank(pauser);
         vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
         adapter.pauseSend();
+    }
+
+    function test_Pause_CannotPauseTwice() public {
+        // Pause once
+        vm.prank(pauser);
+        adapter.pause();
+
+        // Try to pause again - should revert
+        vm.prank(pauser);
+        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
+        adapter.pause();
     }
 
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
