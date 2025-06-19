@@ -238,6 +238,7 @@ audit-report:
 	@find src/ -name '*.sol' -not -path "*/mocks/*" -exec shasum -a 256 {} \; | tee -a audit-report/audit-report.txt
 	@echo "" | tee -a audit-report/audit-report.txt
 
+
 	@echo "2. SOLIDITY CODE METRICS" | tee -a audit-report/audit-report.txt
 	@echo "========================" | tee -a audit-report/audit-report.txt
 	$(eval SOL_FILES := $(shell find src/ -name '*.sol' -not -path "*/mocks/*"))
@@ -252,28 +253,156 @@ audit-report:
 	fi
 	@echo "" | tee -a audit-report/audit-report.txt
 
-	@echo "3. EXTERNAL CALLS ANALYSIS" | tee -a audit-report/audit-report.txt
-	@echo "==========================" | tee -a audit-report/audit-report.txt
-	@echo "🔍 External function calls found:" | tee -a audit-report/audit-report.txt
-	@find src/ -name '*.sol' -not -path "*/mocks/*" -exec grep -Hn '\.[a-zA-Z_][a-zA-Z0-9_]*(' {} \; | head -50 | tee -a audit-report/audit-report.txt || echo "No external calls found" | tee -a audit-report/audit-report.txt
-	@echo "" | tee -a audit-report/audit-report.txt
+# @echo "3. EXTERNAL CALLS ANALYSIS" | tee -a audit-report/audit-report.txt
+# @echo "==========================" | tee -a audit-report/audit-report.txt
+# @echo "🔍 External function calls found:" | tee -a audit-report/audit-report.txt
+# @find src/ -name '*.sol' -not -path "*/mocks/*" -exec grep -Hn '\.[a-zA-Z_][a-zA-Z0-9_]*(' {} \; | head -50 | tee -a audit-report/audit-report.txt || echo "No external calls found" | tee -a audit-report/audit-report.txt
+# @echo "" | tee -a audit-report/audit-report.txt
 
 
-	@echo "4. COMPILATION & TESTING" | tee -a audit-report/audit-report.txt
-	@echo "========================" | tee -a audit-report/audit-report.txt
-	@echo "🔨 Running forge build..." | tee -a audit-report/audit-report.txt
-	@forge build 2>&1 | tee -a audit-report/audit-report.txt
-	@echo "" | tee -a audit-report/audit-report.txt
+# @echo "4. COMPILATION & TESTING" | tee -a audit-report/audit-report.txt
+# @echo "========================" | tee -a audit-report/audit-report.txt
+# @echo "🔨 Running forge build..." | tee -a audit-report/audit-report.txt
+# @forge clean
+# @forge build 2>&1 | tail -1 | tee -a audit-report/audit-report.txt
+# @echo "" | tee -a audit-report/audit-report.txt
 
-	@echo "🧪 Running test suite..." | tee -a audit-report/audit-report.txt
-	@forge test 2>&1 | grep -E "^(Ran [0-9]+.*:|Suite result:|Encountered.*failing|tests passed)" | tee -a audit-report/audit-report.txt
-	@if forge test 2>&1 | grep -q "FAILED"; then \
-		echo "❌ Some tests are failing - see details below:" | tee -a audit-report/audit-report.txt; \
-		forge test 2>&1 | grep "FAIL:" | head -5 | tee -a audit-report/audit-report.txt; \
+# @echo "🧪 Running test suite..." | tee -a audit-report/audit-report.txt
+# @forge test 2>&1 | grep -E "^(Ran [0-9]+.*:|Suite result:|Encountered.*failing|tests passed)" | tee -a audit-report/audit-report.txt
+# @if forge test 2>&1 | grep -q "FAILED"; then \
+# 	echo "❌ Some tests are failing - see details below:" | tee -a audit-report/audit-report.txt; \
+# 	forge test 2>&1 | grep "FAIL:" | head -5 | tee -a audit-report/audit-report.txt; \
+# else \
+# 	echo "✅ All tests passed!" | tee -a audit-report/audit-report.txt; \
+# fi
+# @echo "" | tee -a audit-report/audit-report.txt
+
+
+# @echo "6. STATIC ANALYSIS" | tee -a audit-report/audit-report.txt
+# @echo "==================" | tee -a audit-report/audit-report.txt
+# @if command -v slither >/dev/null 2>&1; then \
+# 	echo "🐍 Running Slither analysis..." | tee -a audit-report/audit-report.txt; \
+# 	slither . --checklist 2>&1 | grep -A 10000 "THIS CHECKLIST IS NOT COMPLETE" | tee audit-report/slither-report.md; \
+# 	echo "✅ Slither report saved to audit-report/slither-report.md" | tee -a audit-report/audit-report.txt; \
+# else \
+# 	echo "⚠️  Slither not installed. Please install: pip3 install slither-analyzer" | tee -a audit-report/audit-report.txt; \
+# fi
+# @echo "" | tee -a audit-report/audit-report.txt
+
+	@echo "6. STATIC ANALYSIS" | tee -a audit-report/audit-report.txt
+	@echo "==================" | tee -a audit-report/audit-report.txt
+    
+    # Slither Analysis
+    # @if command -v slither >/dev/null 2>&1; then \
+    #     echo "🐍 Running Slither analysis..." | tee -a audit-report/audit-report.txt; \
+	# 	slither . --checklist 2>&1 | grep -A 10000 "THIS CHECKLIST IS NOT COMPLETE" | tee audit-report/slither-report.md; \
+    #     echo "✅ Slither report saved to audit-report/slither-report.md" | tee -a audit-report/audit-report.txt; \
+    # else \
+    #     echo "⚠️  Slither not installed. Install with: pip3 install slither-analyzer" | tee -a audit-report/audit-report.txt; \
+    # fi
+    
+# Aderyn Analysis
+# @if command -v aderyn >/dev/null 2>&1; then \
+# 	echo "🔍 Running Aderyn analysis..." | tee -a audit-report/audit-report.txt; \
+# 	aderyn --output audit-report/aderyn-report.md 2>&1 | grep -E "(High|Medium|Low|Found|issues)" | tee -a audit-report/audit-report.txt; \
+# 	echo "✅ Aderyn report saved to audit-report/aderyn-report.md" | tee -a audit-report/audit-report.txt; \
+# else \
+# 	echo "⚠️  Aderyn not installed. Install from: https://github.com/cyfrin/aderyn" | tee -a audit-report/audit-report.txt; \
+# fi
+    
+    # Mythril Analysis
+# @if command -v myth >/dev/null 2>&1; then \
+# 	echo "⚡ Running Mythril analysis..." | tee -a audit-report/audit-report.txt; \
+# 	if [ -f mythril.config.json ]; then \
+# 		myth analyze src/ --solc-json mythril.config.json --output markdown > audit-report/mythril-report.md 2>&1; \
+# 	else \
+# 		myth analyze src/ --output markdown > audit-report/mythril-report.md 2>&1; \
+# 	fi; \
+# 	if [ -f audit-report/mythril-report.md ]; then \
+# 		echo "✅ Mythril report saved to audit-report/mythril-report.md" | tee -a audit-report/audit-report.txt; \
+# 	else \
+# 		echo "❌ Mythril analysis failed" | tee -a audit-report/audit-report.txt; \
+# 	fi; \
+# else \
+# 	echo "⚠️  Mythril not installed. Install with: pip3 install mythril" | tee -a audit-report/audit-report.txt; \
+# fi
+
+# @echo "" | tee -a audit-report/audit-report.txt
+
+
+
+	@if command -v myth >/dev/null 2>&1; then \
+		echo "⚡ Running Mythril analysis..." | tee -a audit-report/audit-report.txt; \
+		mkdir -p audit-report/mythril; \
+		for file in $$(find src/ -name '*.sol' -not -path "*/mocks/*"); do \
+			echo "  Analyzing $$file..." | tee -a audit-report/audit-report.txt; \
+			filename=$$(basename "$$file" .sol); \
+			if [ -f mythril.config.json ]; then \
+				myth analyze "$$file" --solc-json mythril.config.json -o markdown > "audit-report/mythril/$$filename-mythril.md" 2>&1; \
+			else \
+				myth analyze "$$file" -o markdown > "audit-report/mythril/$$filename-mythril.md" 2>&1; \
+			fi; \
+		done; \
+		echo "📋 Consolidating Mythril reports..." | tee -a audit-report/audit-report.txt; \
+		echo "# Mythril Analysis Report" > audit-report/mythril-report.md; \
+		echo "Generated on: $$(date)" >> audit-report/mythril-report.md; \
+		echo "" >> audit-report/mythril-report.md; \
+		for file in audit-report/mythril/*-mythril.md; do \
+			if [ -f "$$file" ]; then \
+				filename=$$(basename "$$file" -mythril.md); \
+				echo "## Analysis for $$filename.sol" >> audit-report/mythril-report.md; \
+				echo "" >> audit-report/mythril-report.md; \
+				cat "$$file" >> audit-report/mythril-report.md; \
+				echo "" >> audit-report/mythril-report.md; \
+				echo "---" >> audit-report/mythril-report.md; \
+				echo "" >> audit-report/mythril-report.md; \
+			fi; \
+		done; \
+		if [ -f audit-report/mythril-report.md ]; then \
+			echo "✅ Mythril consolidated report saved to audit-report/mythril-report.md" | tee -a audit-report/audit-report.txt; \
+			echo "✅ Individual reports saved in audit-report/mythril/" | tee -a audit-report/audit-report.txt; \
+		else \
+			echo "❌ Mythril analysis failed" | tee -a audit-report/audit-report.txt; \
+		fi; \
 	else \
-		echo "✅ All tests passed!" | tee -a audit-report/audit-report.txt; \
+		echo "⚠️  Mythril not installed. Install with: pipx install mythril" | tee -a audit-report/audit-report.txt; \
 	fi
+
 	@echo "" | tee -a audit-report/audit-report.txt
+
+
+# @echo "9. COVERAGE ANALYSIS" | tee -a audit-report/audit-report.txt
+# @echo "====================" | tee -a audit-report/audit-report.txt
+# @echo "📊 Test coverage report:" | tee -a audit-report/audit-report.txt
+# @FOUNDRY_DISABLE_NIGHTLY_WARNING=true rm -rf coverage lcov.info lcov.src.info && \
+# forge coverage --ir-minimum --report lcov --no-match-coverage "script|src/mocks" 2>&1 | \
+# 	grep -E "(File|Overall coverage|Wrote LCOV)" | grep -v "^$$" | tee -a audit-report/audit-report.txt
+# @if [ -f lcov.info ]; then \
+# 	echo "🔍 Processing coverage data..." | tee -a audit-report/audit-report.txt; \
+# 	lcov --extract lcov.info "src/*" -o lcov.src.info --quiet; \
+# 	genhtml lcov.src.info --branch-coverage --output-dir coverage 2>&1 | \
+# 		grep -E "(Overall coverage rate|source files|lines\.\.\.\.\.\.\.|functions\.\.\.|branches\.\.\.|Message summary)" | \
+# 		grep -v "^$$" | tee -a audit-report/audit-report.txt; \
+# 	mv lcov.info lcov.src.info audit-report/ 2>/dev/null || true; \
+# 	echo "✅ Coverage data saved to audit-report/" | tee -a audit-report/audit-report.txt; \
+# 	echo "📈 HTML report generated in ./coverage/" | tee -a audit-report/audit-report.txt; \
+# else \
+# 	echo "❌ Coverage analysis failed" | tee -a audit-report/audit-report.txt; \
+# fi
+# @echo "" | tee -a audit-report/audit-report.txt
+
+
+# @echo "10. SECURITY PATTERNS CHECK" | tee -a audit-report/audit-report.txt
+# @echo "===========================" | tee -a audit-report/audit-report.txt
+# @echo "🔒 Checking for common patterns:" | tee -a audit-report/audit-report.txt
+# @echo "- Reentrancy guards:" | tee -a audit-report/audit-report.txt
+# @grep -r "nonReentrant\|ReentrancyGuard" src/ --include="*.sol" | wc -l | tee -a audit-report/audit-report.txt
+# @echo "- Access control:" | tee -a audit-report/audit-report.txt
+# @grep -r "onlyOwner\|AccessControl\|modifier" src/ --include="*.sol" | wc -l | tee -a audit-report/audit-report.txt
+# @echo "- SafeMath usage:" | tee -a audit-report/audit-report.txt
+# @grep -r "SafeMath\|using.*for" src/ --include="*.sol" | wc -l | tee -a audit-report/audit-report.txt
+# @echo "" | tee -a audit-report/audit-report.txt
+
 
 
 # @echo "5. GAS ANALYSIS" | tee -a audit-report/audit-report.txt
@@ -302,54 +431,19 @@ audit-report:
 # head -5 | tee -a audit-report/audit-report.txt || echo "  No deployment data found" | tee -a audit-report/audit-report.txt
 # @echo "" | tee -a audit-report/audit-report.txt
 
-
-
-	@echo "6. STATIC ANALYSIS" | tee -a audit-report/audit-report.txt
-	@echo "==================" | tee -a audit-report/audit-report.txt
-	@if command -v slither >/dev/null 2>&1; then \
-		echo "🐍 Running Slither analysis..." | tee -a audit-report/audit-report.txt; \
-		slither . --checklist 2>&1 | sed -n '/\*\*THIS CHECKLIST IS NOT COMPLETE\*\*/,$p' | tee audit-report/slither-report.md; \
-		echo "✅ Slither report saved to audit-report/slither-report.md" | tee -a audit-report/audit-report.txt; \
-	else \
-		echo "⚠️  Slither not installed. Please install: pip3 install slither-analyzer" | tee -a audit-report/audit-report.txt; \
-	fi
-	@echo "" | tee -a audit-report/audit-report.txt
-
-
-
-
-
 # @echo "7. DEPENDENCY ANALYSIS" | tee -a audit-report/audit-report.txt
 # @echo "======================" | tee -a audit-report/audit-report.txt
 # @echo "📦 Forge dependencies:" | tee -a audit-report/audit-report.txt
-# @forge tree 2>&1 | tee -a audit-report/audit-report.txt
+# @forge tree 2>&1 | grep -E "^[a-zA-Z]|^├──[^│]*$$|^└──[^│]*$$" | tee -a audit-report/audit-report.txt
 # @echo "" | tee -a audit-report/audit-report.txt
+
+
+
 
 # @echo "8. CONTRACT SIZE ANALYSIS" | tee -a audit-report/audit-report.txt
 # @echo "=========================" | tee -a audit-report/audit-report.txt
 # @echo "📏 Contract sizes (bytecode):" | tee -a audit-report/audit-report.txt
 # @forge build --sizes 2>&1 | tee -a audit-report/audit-report.txt
-# @echo "" | tee -a audit-report/audit-report.txt
-
-# @echo "9. COVERAGE ANALYSIS" | tee -a audit-report/audit-report.txt
-# @echo "====================" | tee -a audit-report/audit-report.txt
-# @echo "📊 Test coverage report:" | tee -a audit-report/audit-report.txt
-# @forge coverage --report lcov 2>&1 | tee -a audit-report/audit-report.txt
-# @if [ -f lcov.info ]; then \
-# 	mv lcov.info audit-report/; \
-# 	echo "✅ Coverage data saved to audit-report/lcov.info" | tee -a audit-report/audit-report.txt; \
-# fi
-# @echo "" | tee -a audit-report/audit-report.txt
-
-# @echo "10. SECURITY PATTERNS CHECK" | tee -a audit-report/audit-report.txt
-# @echo "===========================" | tee -a audit-report/audit-report.txt
-# @echo "🔒 Checking for common patterns:" | tee -a audit-report/audit-report.txt
-# @echo "- Reentrancy guards:" | tee -a audit-report/audit-report.txt
-# @grep -r "nonReentrant\|ReentrancyGuard" src/ --include="*.sol" | wc -l | tee -a audit-report/audit-report.txt
-# @echo "- Access control:" | tee -a audit-report/audit-report.txt
-# @grep -r "onlyOwner\|AccessControl\|modifier" src/ --include="*.sol" | wc -l | tee -a audit-report/audit-report.txt
-# @echo "- SafeMath usage:" | tee -a audit-report/audit-report.txt
-# @grep -r "SafeMath\|using.*for" src/ --include="*.sol" | wc -l | tee -a audit-report/audit-report.txt
 # @echo "" | tee -a audit-report/audit-report.txt
 
 # @echo "✅ AUDIT REPORT COMPLETE!" | tee -a audit-report/audit-report.txt
