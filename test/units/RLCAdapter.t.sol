@@ -140,6 +140,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         assertFalse(adapter.paused());
         test_SendToken_WhenOperational();
     }
+
     function test_sendRLCWhenSourceAdapterUnpaused() public {
         // Pause then unpause the adapter
         vm.startPrank(pauser);
