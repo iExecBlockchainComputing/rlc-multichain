@@ -36,7 +36,7 @@ contract RLCAdapterTest is TestHelperOz5 {
 
     // ============ EVENTS ============
     event SendPaused(address account);
-    event SendUnPaused(address account);
+    event SendUnpaused(address account);
     event Paused(address account);
     event Unpaused(address account);
 
@@ -202,7 +202,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         adapter.pauseSend();
 
         vm.expectEmit(true, false, false, false);
-        emit SendUnPaused(pauser);
+        emit SendUnpaused(pauser);
         adapter.unpauseSend();
         vm.stopPrank();
 
