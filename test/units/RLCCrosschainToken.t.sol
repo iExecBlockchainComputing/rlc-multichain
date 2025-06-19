@@ -36,21 +36,21 @@ contract RLCCrosschainTokenTest is Test {
         bridgeTokenRoleId = crossChainToken.TOKEN_BRIDGE_ROLE();
     }
 
-    // initialize
+    // ============ initialize ============
 
     function test_RevertWhen_InitializedMoreThanOnce() public {
         vm.expectRevert(abi.encodeWithSignature("InvalidInitialization()"));
         crossChainToken.initialize("Foo", "BAR", owner, upgrader);
     }
 
-    // supportsInterface
+    // ============ supportsInterface ============
 
     function test_SupportErc7802Interface() public view {
         assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
         assertTrue(crossChainToken.supportsInterface(type(IERC7802).interfaceId));
     }
 
-    // crosschainMint
+    // ============ crosschainMint ============
 
     function test_MintForOneUserFromOneBridge() public {
         _authorizeBridge(bridge);
@@ -214,7 +214,7 @@ contract RLCCrosschainTokenTest is Test {
         assertEq(crossChainToken.totalSupply(), 0);
     }
 
-    // upgradeToAndCall
+    // ============ upgradeToAndCall ============
 
     function test_RevertWhen_UnauthorizedUpgrader() public {
         address unauthorizedUpgrader = makeAddr("unauthorized");
