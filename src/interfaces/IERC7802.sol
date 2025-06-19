@@ -3,15 +3,13 @@
 
 pragma solidity ^0.8.22;
 
-import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-
 // Code copied from OpenZeppelin's community contract `IERC7802`
 // https://github.com/OpenZeppelin/openzeppelin-community-contracts/blob/075587479556632d3dd9e9e3b37417cabf3e26a3/contracts/interfaces/IERC7802.sol
 
 /**
  * @notice Defines the interface for crosschain ERC20 transfers.
  */
-interface IERC7802 is IERC165 {
+interface IERC7802 {
     /**
      * @notice Emitted when a crosschain transfer mints tokens.
      * @param to       Address of the account tokens are being minted for.

@@ -9,8 +9,6 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {ERC20PermitUpgradeable} from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
-import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IERC7802} from "../interfaces/IERC7802.sol";
 
 /**
@@ -28,7 +26,6 @@ import {IERC7802} from "../interfaces/IERC7802.sol";
 contract RLCCrosschainToken is
     ERC20Upgradeable,
     ERC20PermitUpgradeable,
-    ERC165Upgradeable,
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
     IERC7802
@@ -53,7 +50,6 @@ contract RLCCrosschainToken is
     function initialize(string memory name, string memory symbol, address admin, address upgrader) public initializer {
         __ERC20_init(name, symbol);
         __ERC20Permit_init(name);
-        __ERC165_init();
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, admin);
         _grantRole(UPGRADER_ROLE, upgrader);
@@ -62,17 +58,13 @@ contract RLCCrosschainToken is
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(AccessControlDefaultAdminRulesUpgradeable, ERC165Upgradeable, IERC165)
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
         return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
      * @dev See {IERC7802-crosschainMint}.
+     *
      * Does not mint if `to` is the zero address.
      * Reverts if the caller does not have the `TOKEN_BRIDGE_ROLE`.
      * Emits a {CrosschainMint} event.
