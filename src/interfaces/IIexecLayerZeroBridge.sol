@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 
 interface IIexecLayerZeroBridge {
     /**
@@ -15,4 +14,16 @@ interface IIexecLayerZeroBridge {
      * @dev Should only be callable by authorized accounts: PAUSER_ROLE.
      */
     function unpause() external;
+
+    /**
+     * @notice Pauses only the `_debit` function, allowing `_credit` to still work.
+     * @dev Should only be callable by authorized accounts: PAUSER_ROLE.
+     */
+    function pauseSend() external;
+    
+    /**
+     * @notice Unpauses the `_debit` function, allowing outgoing transfers again.
+     * @dev Should only be callable by authorized accounts: PAUSER_ROLE.
+     */
+    function unpauseSend() external;
 }
