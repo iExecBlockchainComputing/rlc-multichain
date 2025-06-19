@@ -227,7 +227,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     function test_PauseStatus_ReturnsCorrectStates() public {
-        // fails
         // Initially operational
         (bool fullyPaused, bool onlySendPaused) = iexecLayerZeroBridge.pauseStatus();
         assertFalse(fullyPaused);
