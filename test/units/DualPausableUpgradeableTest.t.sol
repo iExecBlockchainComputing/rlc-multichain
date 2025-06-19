@@ -149,6 +149,22 @@ contract DualPausableUpgradeableTest is Test {
         assertTrue(onlySendPaused, "Send should remain paused during full pause");
     }
 
+    // ============ DUAL PAUSE WORKFLOW TESTS ============
+
+    function test_DualPause_PauseFromSendToFull() public {
+        // Start with send pause
+        vm.startPrank(OWNER);
+        dualPausable.pauseSend();
+        assertTrue(dualPausable.sendPaused());
+
+
+        dualPausable.pause();
+        vm.stopPrank();
+
+        assertTrue(dualPausable.paused());
+        assertTrue(dualPausable.sendPaused());
+    }
+
     // ============ MODIFIER TESTS ============
 
     function test_whenSendNotPaused_AllowsOperationWhenOperational() public view {
