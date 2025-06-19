@@ -150,7 +150,8 @@ contract RLCAdapter is
         internal
         virtual
         override
-        whenSendNotPaused whenNotPaused
+        whenSendNotPaused
+        whenNotPaused
         returns (uint256 amountSentLD, uint256 amountReceivedLD)
     {
         return super._debit(_from, _amountLD, _minAmountLD, _dstEid);

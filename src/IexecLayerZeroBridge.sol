@@ -19,14 +19,14 @@ import {DualPausableUpgradeable} from "./DualPausableUpgradeable.sol";
  * This contract enables cross-chain transfer of RLC tokens using LayerZero's OFT standard.
  * It overrides the `_debit` and `_credit` functions to use external mint and burn functions
  * on the CrosschainRLC token contract.
- * 
+ *
  * Cross-chain Transfer Mechanism:
  * 1. When sending tokens FROM this chain: RLC tokens are permanently burned from the sender's balance
  * 2. When receiving tokens TO this chain: New RLC tokens are minted to the recipient's balance
  *
  * This ensures the total supply across all chains remains constant - tokens destroyed on one
  * chain are minted on another, maintaining a 1:1 peg across the entire ecosystem.
- * 
+ *
  * Dual-Pause Emergency System:
  * 1. Complete Pause: Blocks all bridge operations (incoming and outgoing transfers)
  * 2. Send Pause: Blocks only outgoing transfers, allows users to receive/withdraw funds
@@ -55,9 +55,7 @@ contract IexecLayerZeroBridge is
      * @param _token The RLC token contract address that implements ICrosschainRLC interface
      * @param _lzEndpoint The LayerZero endpoint address for this chain
      */
-    constructor(ICrosschainRLC _token, address _lzEndpoint) 
-        OFTCoreUpgradeable(_token.decimals(), _lzEndpoint) 
-    {
+    constructor(ICrosschainRLC _token, address _lzEndpoint) OFTCoreUpgradeable(_token.decimals(), _lzEndpoint) {
         _disableInitializers();
         RLC_TOKEN = _token;
     }

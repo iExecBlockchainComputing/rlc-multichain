@@ -191,7 +191,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
-
     function test_UnpauseSends_RestoresOutgoingTransfers() public {
         // Pause then unpause send
         vm.startPrank(pauser);
@@ -248,7 +247,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
         (fullyPaused, onlySendPaused) = iexecLayerZeroBridge.pauseStatus();
         assertTrue(fullyPaused);
-        assertTrue(onlySendPaused); 
+        assertTrue(onlySendPaused);
     }
 
     // ============ EDGE CASE TESTS ============

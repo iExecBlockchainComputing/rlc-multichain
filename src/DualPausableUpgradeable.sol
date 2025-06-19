@@ -19,9 +19,8 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
  * @custom:storage-location erc7201:iexec.storage.DualPausable
  */
 abstract contract DualPausableUpgradeable is PausableUpgradeable {
-    
     // ============ STORAGE ============
-    
+
     /// @custom:storage-location erc7201:iexec.storage.DualPausable
     struct DualPausableStorage {
         /// @dev True when send operations are paused, but receive operations are allowed.

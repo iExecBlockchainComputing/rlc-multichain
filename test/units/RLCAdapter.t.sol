@@ -231,7 +231,6 @@ contract RLCAdapterTest is TestHelperOz5 {
         assertTrue(adapter.sendPaused());
     }
 
-
     function test_PauseStatus_ReturnsCorrectStates() public {
         // Test pauseStatus function if it exists (it should based on the bridge contract)
         // Note: You'll need to add this function to RLCAdapter contract
@@ -252,7 +251,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         adapter.pause();
 
         assertTrue(adapter.paused());
-        assertTrue(adapter.sendPaused()); 
+        assertTrue(adapter.sendPaused());
     }
 
     // ============ EDGE CASE TESTS ============
