@@ -187,7 +187,6 @@ contract RLCCrosschainTokenTest is Test {
     }
 
     function test_RevertWhen_UnauthorizedCaller() public {
-        _authorizeBridge(bridge);
         assertEq(crossChainToken.balanceOf(user), 0);
         assertEq(crossChainToken.totalSupply(), 0);
         // Attempt to mint tokens from an unauthorized account.
