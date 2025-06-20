@@ -80,7 +80,6 @@ contract Upgrade is Script {
             lzEndpoint: lzEndpoint,
             rlcToken: rlcToken,
             newStateVariable: newStateVariable,
-            skipChecks: true, // TODO: Remove when validation issues are fixed
             validateOnly: false
         });
 
@@ -107,7 +106,6 @@ contract ValidateUpgrade is Script {
             rlcToken: rlcToken,
             contractName: "RLCAdapterV2Mock.sol:RLCAdapterV2",
             newStateVariable: 1000000 * 10 ** 9,
-            skipChecks: true, // TODO: Remove this when validation issues are fixed
             validateOnly: true
         });
 
