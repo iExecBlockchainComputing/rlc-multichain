@@ -29,7 +29,7 @@ e2e-test:
 ci-coverage:
 	FOUNDRY_PROFILE=test forge coverage \
 		--report lcov \
-		--junit e2e-tests-results.xml \
+		--junit \
 		--ir-minimum \
 		--no-match-coverage "script|src/mocks|test"
 

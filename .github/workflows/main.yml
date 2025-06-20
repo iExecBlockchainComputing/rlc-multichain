@@ -48,7 +48,6 @@ jobs:
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: junit-unit-tests.xml,junit-e2e-tests.xml
 
       - name: Run static analysis with slither
         uses: crytic/slither-action@v0.4.1
