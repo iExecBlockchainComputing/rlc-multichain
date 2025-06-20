@@ -207,6 +207,24 @@ make verify-proxies       # Only proxies
 - Always test upgrades thoroughly on testnets before deploying to mainnet
 - Upgrade safety is enforced through OpenZeppelin's upgrade validation
 
+## Emergency Controls: Dual-Pause System
+
+Both the RLCAdapter and IexecLayerZeroBridge implement a sophisticated **dual-pause emergency system** designed to handle different types of security incidents while minimizing user impact.
+
+### 🚨 Pause Levels
+
+#### Level 1: Complete Pause (`pause()`)
+**Use Case**: Critical security incidents requiring immediate complete shutdown
+- **Blocks**: ❌ All bridge operations (incoming and outgoing transfers)
+- **Allows**: ✅ Admin functions, view functions
+- **Emergency**: Maximum protection - complete bridge shutdown
+
+#### Level 2: Entrance Pause (`pauseEntrances()`)
+**Use Case**: Destination chain issues, or controlled maintenance
+- **Blocks**: ❌ Triggering transfers only (users can't submit send requests)
+- **Allows**: ✅ Already submitted transfers (users can still receive their tokens if the send operation was submitted before level 2 pause).
+- **Benefit**: Bridge requests that are on-going do not get blocked.
+
 ## Gas Costs and Fees
 
 LayerZero transactions require fees to cover:
