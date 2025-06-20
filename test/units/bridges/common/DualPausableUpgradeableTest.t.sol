@@ -13,28 +13,17 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
  * Tests the dual-pause mechanism with Level 1 (complete) and Level 2 (send-only) pause functionality
  */
 contract DualPausableUpgradeableTest is Test {
-    // ============ TEST IMPLEMENTATION CONTRACT ============
-
-    /**
-     * @dev Concrete implementation of DualPausableUpgradeable for testing
-     * Includes mock functions that use the pause modifiers
-     */
-    DualPausableTestImpl private dualPausable;
-
-    // ============ TEST ACCOUNTS ============
     address private OWNER = makeAddr("owner");
 
-    // ============ EVENTS ============
-    event SendPaused(address account);
-    event SendUnpaused(address account);
+    DualPausableUpgradeableImpl private dualPausable;
 
     function setUp() public {
-        dualPausable = new DualPausableTestImpl();
+        dualPausable = new DualPausableUpgradeableImpl();
         vm.prank(OWNER);
         dualPausable.initialize();
     }
 
-    // ============ INITIALIZE TESTS ============
+    // ============ initialize ============
 
     function test_initialize_SetsCorrectInitialStates() public view {
         assertFalse(dualPausable.sendPaused(), "Send should not be paused initially");
@@ -44,12 +33,11 @@ contract DualPausableUpgradeableTest is Test {
         assertFalse(onlySendPaused, "Send should not be paused initially");
     }
 
-    // ============ PAUSESEND TESTS ============
+    // ============ pauseSend ============
 
     function test_pauseSend_EmitsCorrectEvent() public {
         vm.expectEmit(true, true, true, true);
-        emit SendPaused(OWNER);
-
+        emit DualPausableUpgradeable.SendPaused(OWNER);
         vm.prank(OWNER);
         dualPausable.pauseSend();
     }
@@ -64,7 +52,7 @@ contract DualPausableUpgradeableTest is Test {
         dualPausable.mockOperation();
     }
 
-    function test_RevertWhen_pauseSend_AlreadyPaused() public {
+    function test_RevertWhen_SendAlreadyPaused() public {
         vm.startPrank(OWNER);
         dualPausable.pauseSend();
 
@@ -73,14 +61,14 @@ contract DualPausableUpgradeableTest is Test {
         vm.stopPrank();
     }
 
-    // ============ UNPAUSESEND TESTS ============
+    // ============ unpauseSend ============
 
     function test_unpauseSend_EmitsCorrectEvent() public {
         vm.startPrank(OWNER);
         dualPausable.pauseSend();
 
         vm.expectEmit(true, true, true, true);
-        emit SendUnpaused(OWNER);
+        emit DualPausableUpgradeable.SendUnpaused(OWNER);
         dualPausable.unpauseSend();
         vm.stopPrank();
     }
@@ -99,12 +87,12 @@ contract DualPausableUpgradeableTest is Test {
         assertTrue(dualPausable.mockOperation(), "Mock operation should succeed after unpause");
     }
 
-    function test_RevertWhen_unpauseSend_NotPaused() public {
+    function test_RevertWhen_SendNotPaused() public {
         vm.expectRevert(DualPausableUpgradeable.ExpectedSendPause.selector);
         dualPausable.unpauseSend();
     }
 
-    // ============ UNPAUSE TESTS ============
+    // ============ unpause ============
 
     function test_unpause_RestoresFullOperationality() public {
         vm.startPrank(OWNER);
@@ -118,13 +106,12 @@ contract DualPausableUpgradeableTest is Test {
         vm.stopPrank();
 
         assertFalse(dualPausable.paused(), "Contract should not be paused after unpause");
-        assertFalse(dualPausable.sendPaused(), "Send should not be paused after unpause");
 
         // Operation should work normally
         assertTrue(dualPausable.mockOperation(), "Mock operation should succeed after full unpause");
     }
 
-    // ============ PAUSESTATUS TESTS ============
+    // ============ pauseStatus ============
 
     function test_pauseStatus_ReturnsCorrectStatesInAllScenarios() public {
         // Initially operational
@@ -149,7 +136,7 @@ contract DualPausableUpgradeableTest is Test {
         assertTrue(onlySendPaused, "Send should remain paused during full pause");
     }
 
-    // ============ DUAL PAUSE WORKFLOW TESTS ============
+    // ============ dual pause workflow tests ============
 
     function test_DualPause_PauseFromSendToFull() public {
         // Start with send pause
@@ -164,7 +151,50 @@ contract DualPausableUpgradeableTest is Test {
         assertTrue(dualPausable.sendPaused());
     }
 
-    // ============ MODIFIER TESTS ============
+    function test_DualPause_PauseFromFullToSend() public {
+        // pause
+        vm.startPrank(OWNER);
+        dualPausable.pause();
+        assertTrue(dualPausable.paused());
+        // pauseSend
+        dualPausable.pauseSend();
+        vm.stopPrank();
+        // Check status
+        assertTrue(dualPausable.paused());
+        assertTrue(dualPausable.sendPaused());
+    }
+
+    function test_DualPause_PauseShouldNotImpactSendPause() public {
+        vm.startPrank(OWNER);
+        // pause & pauseSend
+        dualPausable.pause();
+        dualPausable.pauseSend();
+        assertTrue(dualPausable.paused());
+        assertTrue(dualPausable.sendPaused());
+        // unpause
+        dualPausable.unpause();
+        assertFalse(dualPausable.paused());
+        // pauseSend should still be active
+        assertTrue(dualPausable.sendPaused(), "Send should remain paused after unpause");
+        vm.stopPrank();
+    }
+
+    function test_DualPause_SendPauseShouldNotImpactPause() public {
+        vm.startPrank(OWNER);
+        // pause & pauseSend
+        dualPausable.pause();
+        dualPausable.pauseSend();
+        assertTrue(dualPausable.paused());
+        assertTrue(dualPausable.sendPaused());
+        // unpauseSend
+        dualPausable.unpauseSend();
+        assertFalse(dualPausable.sendPaused());
+        // pause should still be active
+        assertTrue(dualPausable.paused(), "Pause should remain active after unpauseSend");
+        vm.stopPrank();
+    }
+
+    // ============ modifier ============
 
     function test_whenSendNotPaused_AllowsOperationWhenOperational() public view {
         // Should work when fully operational
@@ -181,10 +211,11 @@ contract DualPausableUpgradeableTest is Test {
 }
 
 /**
- * @title DualPausableTestImpl
+ * @title DualPausableUpgradeableImpl
  * @dev Concrete implementation of DualPausableUpgradeable for testing
+ * Includes a mock functions that use `whenSendNotPaused` modifiers
  */
-contract DualPausableTestImpl is DualPausableUpgradeable {
+contract DualPausableUpgradeableImpl is DualPausableUpgradeable {
     function initialize() public initializer {
         __DualPausable_init();
     }
