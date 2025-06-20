@@ -52,7 +52,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: iExecBlockchainComputing/rlc-multichain
           exclude: lib
-          files: junit-unit-tests.xml,junit-e2e-tests.xml
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
