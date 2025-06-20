@@ -9,8 +9,8 @@ concurrency:
 
 env:
   FOUNDRY_PROFILE: ci
-  SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
-  ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+  SEPOLIA_RPC_URL: secrets.SEPOLIA_RPC_URL
+  ARBITRUM_SEPOLIA_RPC_URL: secrets.ARBITRUM_SEPOLIA_RPC_URL
 
 jobs:
   build-and-test:
@@ -34,7 +34,7 @@ jobs:
         run: forge build --sizes && cp .env.template .env
 
       - name: Run Tests coverage
-        run: forge coverage --ir-minimum --no-match-coverage "script|src/mocks|test"
+        run: make e2e-test
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
