@@ -30,10 +30,7 @@ unit-test:
 	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/**" --force $(FORGE_EXTRA_ARGS)
 
 e2e-test:
-	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**" --force
-
-generate-coverage:
-	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**" --force --junit > junit-e2e-tests.xml
+	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**" --force $(FORGE_EXTRA_ARGS)
 
 clean:
 	forge clean
