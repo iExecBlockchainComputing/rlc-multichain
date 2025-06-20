@@ -51,7 +51,7 @@ contract IexecLayerZeroBridge is
      *
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
-    IERC7802 public immutable _liquidityUnifier;
+    IERC7802 public immutable BRIDGEABLE_TOKEN;
 
     /**
      * @dev Constructor for the LayerZero bridge contract
@@ -61,7 +61,7 @@ contract IexecLayerZeroBridge is
      * @custom:oz-upgrades-unsafe-allow constructor
      */
     constructor(address _liquidityUnifier, address _lzEndpoint)
-        OFTCoreUpgradeable(_liquidityUnifier.RLC_TOKEN.decimals(), _lzEndpoint)
+        OFTCoreUpgradeable(_liquidityUnifier.decimals(), _lzEndpoint)
     {
         _disableInitializers();
         _liquidityUnifier = IERC7802(_liquidityUnifier);
@@ -140,6 +140,7 @@ contract IexecLayerZeroBridge is
      * @return requiresApproval Always returns false for this implementation
      */
     function approvalRequired() external pure virtual returns (bool) {
+        //TODO: check
         return false;
     }
 
