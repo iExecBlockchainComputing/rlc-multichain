@@ -125,8 +125,6 @@ audit-report:
 	@echo "✅ AUDIT REPORT COMPLETED" | tee -a audit-report/audit-report.txt
 	@echo "=========================" | tee -a audit-report/audit-report.txt
 	@echo "📁 Main report: audit-report/audit-report.txt" | tee -a audit-report/audit-report.txt
-	@echo "📊 Files generated:" | tee -a audit-report/audit-report.txt
-	@ls -la audit-report/ | tee -a audit-report/audit-report.txt
 
 # Smart installer - checks then installs what it can
 audit-install:
