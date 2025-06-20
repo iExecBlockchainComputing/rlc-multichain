@@ -27,10 +27,10 @@ test-all:
 	make e2e-test
 
 unit-test:
-	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/**"
+	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/**" $(FORGE_EXTRA_ARGS)
 
 e2e-test:
-	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**"
+	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**" $(FORGE_EXTRA_ARGS)
 
 clean:
 	forge clean
