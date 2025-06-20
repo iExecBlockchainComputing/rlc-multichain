@@ -20,15 +20,16 @@ test-all:
 	make e2e-test
 
 unit-test:
-	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/**" --force $(FORGE_EXTRA_ARGS)
+	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/**" --force
 
 e2e-test:
-	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**" --force $(FORGE_EXTRA_ARGS)
+	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**" --force
 
 # Basic coverage for CI (fast)
 ci-coverage:
 	FOUNDRY_PROFILE=test forge coverage \
 		--report lcov \
+		--junit e2e-tests-results.xml \
 		--ir-minimum \
 		--no-match-coverage "script|src/mocks|test"
 
