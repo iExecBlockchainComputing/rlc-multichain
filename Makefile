@@ -343,7 +343,7 @@ audit-report:
 	@if command -v myth >/dev/null 2>&1; then \
 		echo "⚡ Running Mythril analysis..." | tee -a audit-report/audit-report.txt; \
 		mkdir -p audit-report/mythril; \
-		for file in $$(find src/ -name '*.sol' -not -path "*/mocks/*"); do \
+		for file in $$(find src/ -name '*.sol' -not -path "*/mocks/*" -not -path "*/interfaces/*"); do \
 			echo "  Analyzing $$file..." | tee -a audit-report/audit-report.txt; \
 			filename=$$(basename "$$file" .sol); \
 			if [ -f mythril.config.json ]; then \
