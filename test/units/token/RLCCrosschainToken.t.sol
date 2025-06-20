@@ -285,7 +285,6 @@ contract RLCCrosschainTokenTest is Test {
         _mintForUser(user, amount);
         _mintForUser(user2, amount2);
         _mintForUser(user3, amount3);
-
         // User 1
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user, address(0), amount);
@@ -402,7 +401,9 @@ contract RLCCrosschainTokenTest is Test {
         _authorizeBridge(bridge);
         _mintForUser(user, amount);
         // Attempt to burn more than balance
-        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, user, amount, amount + 1));
+        vm.expectRevert(
+            abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, user, amount, amount + 1)
+        );
         vm.prank(bridge);
         crossChainToken.crosschainBurn(user, amount + 1);
         assertEq(crossChainToken.balanceOf(user), amount);
