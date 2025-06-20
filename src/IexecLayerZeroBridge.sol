@@ -6,12 +6,12 @@ pragma solidity ^0.8.22;
 import {OFTCoreUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTCoreUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IIexecLayerZeroBridge} from "./interfaces/IIexecLayerZeroBridge.sol";
 import {IERC7802} from "./interfaces/IERC7802.sol";
+import {DualPausableUpgradeable} from "./utils/DualPausableUpgradeable.sol";
 
 /**
  * @title IexecLayerZeroBridge
@@ -20,19 +20,24 @@ import {IERC7802} from "./interfaces/IERC7802.sol";
  * This contract enables cross-chain transfer of RLC tokens using LayerZero's OFT standard.
  * It overrides the `_debit` and `_credit` functions to use external mint and burn functions
  * on the CrosschainRLC token contract.
- * It implements a cross-chain transfer mechanism where:
- * 1. When sending tokens FROM this chain: RLC tokens are permanently burned from the sender's balance via an external call
- * 2. When receiving tokens TO this chain: New RLC tokens are minted to the recipient's balance via an external call
+ *
+ * Cross-chain Transfer Mechanism:
+ * 1. When sending tokens FROM this chain: RLC tokens are permanently burned from the sender's balance
+ * 2. When receiving tokens TO this chain: New RLC tokens are minted to the recipient's balance
  *
  * This ensures the total supply across all chains remains constant - tokens destroyed on one
- * chain are minted/unlocked on another, maintaining a 1:1 peg across the entire ecosystem.
+ * chain are minted on another, maintaining a 1:1 peg across the entire ecosystem.
+ *
+ * Dual-Pause Emergency System:
+ * 1. Complete Pause: Blocks all bridge operations (incoming and outgoing transfers)
+ * 2. Send Pause: Blocks only outgoing transfers, allows users to receive/withdraw funds
  */
 contract IexecLayerZeroBridge is
     IIexecLayerZeroBridge,
     OFTCoreUpgradeable,
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
-    PausableUpgradeable
+    DualPausableUpgradeable
 {
     /// @dev Role identifier for accounts authorized to upgrade the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -65,14 +70,63 @@ contract IexecLayerZeroBridge is
      * @param _owner Address that will receive owner and default admin roles
      * @param _pauser Address that will receive the pauser role
      */
-    function initialize(address _owner, address _pauser) public initializer {
+    function initialize(address _owner, address _pauser) external initializer {
         __Ownable_init(_owner);
         __OFTCore_init(_owner);
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, _owner);
-        __Pausable_init();
+        __DualPausable_init();
         _grantRole(UPGRADER_ROLE, _owner);
         _grantRole(PAUSER_ROLE, _pauser);
+    }
+
+    // ============ EMERGENCY CONTROLS ============
+
+    /**
+     * @notice LEVEL 1: Pauses all cross-chain transfers (complete shutdown)
+     * @dev Can only be called by accounts with PAUSER_ROLE
+     *
+     * When fully paused:
+     * - All _debit operations (outgoing transfers) are blocked
+     * - All _credit operations (incoming transfers) are blocked
+     * - Use this for critical security incidents (e.g., LayerZero exploit)
+     *
+     * @custom:security Critical emergency function for complete bridge shutdown
+     */
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @notice LEVEL 1: Unpauses all cross-chain transfers
+     * @dev Can only be called by accounts with PAUSER_ROLE
+     */
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
+
+    /**
+     * @notice LEVEL 2: Pauses only outgoing transfers (send pause)
+     * @dev Can only be called by accounts with PAUSER_ROLE
+     *
+     * When send is paused:
+     * - All _debit operations (outgoing transfers) are blocked
+     * - All _credit operations (incoming transfers) still work
+     * - Users can still receive funds and "exit" their positions
+     * - Use this for less critical issues or when you want to allow withdrawals
+     *
+     * @custom:security Moderate emergency function allowing exits while blocking send
+     */
+    function pauseSend() external onlyRole(PAUSER_ROLE) {
+        _pauseSend();
+    }
+
+    /**
+     * @notice LEVEL 2: Unpauses outgoing transfers (restores send functionality)
+     * @dev Can only be called by accounts with PAUSER_ROLE
+     */
+    function unpauseSend() external onlyRole(PAUSER_ROLE) {
+        _unpauseSend();
     }
 
     // ============ OFT CONFIGURATION ============
@@ -80,10 +134,6 @@ contract IexecLayerZeroBridge is
     /**
      * @notice Indicates whether the OFT contract requires approval to send tokens
      * @return requiresApproval Always returns false for this implementation
-     *
-     * @dev This contract uses a burn/mint mechanism where it directly calls
-     * crosschainBurn on the RLC token contract, so no approval is required.
-     * The bridge has the necessary permissions to burn tokens directly.
      */
     function approvalRequired() external pure virtual returns (bool) {
         return false;
@@ -92,41 +142,9 @@ contract IexecLayerZeroBridge is
     /**
      * @notice Returns the address of the underlying token being bridged
      * @return The address of the RLC token contract
-     *
-     * @dev This function is required by the OFT standard to identify
-     * which token is being bridged across chains
      */
-    function token() public view returns (address) {
+    function token() external view returns (address) {
         return address(RLC_TOKEN);
-    }
-
-    // ============ EMERGENCY CONTROLS ============
-
-    /**
-     * @notice Pauses all cross-chain transfers
-     * @dev Can only be called by accounts with PAUSER_ROLE
-     *
-     * When paused:
-     * - All _debit operations (outgoing transfers) are blocked
-     * - All _credit operations (incoming transfers) are blocked
-     * - Emergency measure to halt all bridge activity if needed
-     *
-     * @custom:security This is a critical emergency function that should only
-     * be used in case of security incidents or other emergencies
-     */
-    function pause() external onlyRole(PAUSER_ROLE) {
-        _pause();
-    }
-
-    /**
-     * @notice Unpauses all cross-chain transfers
-     * @dev Can only be called by accounts with PAUSER_ROLE
-     *
-     * @notice This will resume normal bridge operations after a pause
-     * Ensure any issues that caused the pause have been resolved before calling
-     */
-    function unpause() external onlyRole(PAUSER_ROLE) {
-        _unpause();
     }
 
     // ============ ACCESS CONTROL OVERRIDES ============
@@ -151,7 +169,7 @@ contract IexecLayerZeroBridge is
     // ============ CORE BRIDGE FUNCTIONS ============
 
     /**
-     * @notice Burns tokens from the sender's balance as part of cross-chain transfer.
+     * @notice Burns tokens from the sender's balance as part of cross-chain transfer
      * @param _from The address to burn tokens from
      * @param _amountLD The amount of tokens to burn (in local decimals)
      * @param _minAmountLD The minimum amount to burn (for slippage protection)
@@ -169,21 +187,25 @@ contract IexecLayerZeroBridge is
      * - If RLC_TOKEN implements transfer fees, burn fees, or any other fee mechanism,
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
+     * @dev This function is called for OUTGOING transfers (when sending to another chain)
+     * Pause Behavior:
+     * - Blocked when contract is fully paused (Level 1 pause)
+     * - Blocked when sends are paused (Level 2 pause)
+     * - Uses both whenNotPaused and whenSendNotPaused modifiers
      *
-     * @custom:security Only callable when contract is not paused
      * @custom:security Requires the RLC token to have granted burn permissions to this contract
      */
     function _debit(address _from, uint256 _amountLD, uint256 _minAmountLD, uint32 _dstEid)
         internal
         override
         whenNotPaused
+        whenSendNotPaused
         returns (uint256 amountSentLD, uint256 amountReceivedLD)
     {
         // Calculate the amounts using the parent's logic (handles slippage protection)
         (amountSentLD, amountReceivedLD) = _debitView(_amountLD, _minAmountLD, _dstEid);
 
         // Burn the tokens from the sender's balance
-        // This assumes crosschainBurn doesn't apply any fees
         RLC_TOKEN.crosschainBurn(_from, amountSentLD);
     }
 
@@ -205,9 +227,14 @@ contract IexecLayerZeroBridge is
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
      *
-     * @custom:security Only callable when contract is not paused
+     * @dev This function is called for INCOMING transfers (when receiving from another chain)
+     * Pause Behavior:
+     * - Blocked ONLY when contract is fully paused (Level 1 pause)
+     * - NOT blocked when sends are paused (Level 2) - users can still receive/exit
+     * - Uses only whenNotPaused modifier
+     *
      * @custom:security Requires the RLC token to have granted mint permissions to this contract
-     * @custom:security Uses 0xdead address if _to is zero address (minting to zero address fails)
+     * @custom:security Uses 0xdead address if _to is zero address (minting to zero fails)
      */
     function _credit(address _to, uint256 _amountLD, uint32 /*_srcEid*/ )
         internal
