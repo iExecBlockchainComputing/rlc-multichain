@@ -9,7 +9,7 @@ import {CreateX} from "@createx/contracts/CreateX.sol";
 import {RLCMock} from "../../mocks/RLCMock.sol";
 import {RLCAdapter} from "../../../../src/bridges/layerZero/RLCAdapter.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {DualPausableUpgradeable} from "../../../../src/utils/DualPausableUpgradeable.sol";
+import {DualPausableUpgradeable} from "../../../../src/bridges/common/DualPausableUpgradeable.sol";
 import {TestUtils} from "../../utils/TestUtils.sol";
 
 contract IexecLayerZeroBridgeTest is TestHelperOz5 {
