@@ -262,29 +262,29 @@ audit-report:
 	fi
 	@echo "" | tee -a audit-report/audit-report.txt
 
-# @echo "3. EXTERNAL CALLS ANALYSIS" | tee -a audit-report/audit-report.txt
-# @echo "==========================" | tee -a audit-report/audit-report.txt
-# @echo "🔍 External function calls found:" | tee -a audit-report/audit-report.txt
-# @find src/ -name '*.sol' -not -path "*/mocks/*" -exec grep -Hn '\.[a-zA-Z_][a-zA-Z0-9_]*(' {} \; | head -50 | tee -a audit-report/audit-report.txt || echo "No external calls found" | tee -a audit-report/audit-report.txt
-# @echo "" | tee -a audit-report/audit-report.txt
+	@echo "3. EXTERNAL CALLS ANALYSIS" | tee -a audit-report/audit-report.txt
+	@echo "==========================" | tee -a audit-report/audit-report.txt
+	@echo "🔍 External function calls found:" | tee -a audit-report/audit-report.txt
+	@find src/ -name '*.sol' -not -path "*/mocks/*" -exec grep -Hn '\.[a-zA-Z_][a-zA-Z0-9_]*(' {} \; | head -50 | tee -a audit-report/audit-report.txt || echo "No external calls found" | tee -a audit-report/audit-report.txt
+	@echo "" | tee -a audit-report/audit-report.txt
 
 
-# @echo "4. COMPILATION & TESTING" | tee -a audit-report/audit-report.txt
-# @echo "========================" | tee -a audit-report/audit-report.txt
-# @echo "🔨 Running forge build..." | tee -a audit-report/audit-report.txt
-# @forge clean
-# @forge build 2>&1 | tail -1 | tee -a audit-report/audit-report.txt
-# @echo "" | tee -a audit-report/audit-report.txt
+	@echo "4. COMPILATION & TESTING" | tee -a audit-report/audit-report.txt
+	@echo "========================" | tee -a audit-report/audit-report.txt
+	@echo "🔨 Running forge build..." | tee -a audit-report/audit-report.txt
+	@forge clean
+	@forge build 2>&1 | tail -1 | tee -a audit-report/audit-report.txt
+	@echo "" | tee -a audit-report/audit-report.txt
 
-# @echo "🧪 Running test suite..." | tee -a audit-report/audit-report.txt
-# @forge test 2>&1 | grep -E "^(Ran [0-9]+.*:|Suite result:|Encountered.*failing|tests passed)" | tee -a audit-report/audit-report.txt
-# @if forge test 2>&1 | grep -q "FAILED"; then \
-# 	echo "❌ Some tests are failing - see details below:" | tee -a audit-report/audit-report.txt; \
-# 	forge test 2>&1 | grep "FAIL:" | head -5 | tee -a audit-report/audit-report.txt; \
-# else \
-# 	echo "✅ All tests passed!" | tee -a audit-report/audit-report.txt; \
-# fi
-# @echo "" | tee -a audit-report/audit-report.txt
+	@echo "🧪 Running test suite..." | tee -a audit-report/audit-report.txt
+	@forge test 2>&1 | grep -E "^(Ran [0-9]+.*:|Suite result:|Encountered.*failing|tests passed)" | tee -a audit-report/audit-report.txt
+	@if forge test 2>&1 | grep -q "FAILED"; then \
+		echo "❌ Some tests are failing - see details below:" | tee -a audit-report/audit-report.txt; \
+		forge test 2>&1 | grep "FAIL:" | head -5 | tee -a audit-report/audit-report.txt; \
+	else \
+		echo "✅ All tests passed!" | tee -a audit-report/audit-report.txt; \
+	fi
+	@echo "" | tee -a audit-report/audit-report.txt
 
 
 # @echo "6. STATIC ANALYSIS" | tee -a audit-report/audit-report.txt
@@ -298,8 +298,8 @@ audit-report:
 # fi
 # @echo "" | tee -a audit-report/audit-report.txt
 
-	@echo "6. STATIC ANALYSIS" | tee -a audit-report/audit-report.txt
-	@echo "==================" | tee -a audit-report/audit-report.txt
+# @echo "6. STATIC ANALYSIS" | tee -a audit-report/audit-report.txt
+# @echo "==================" | tee -a audit-report/audit-report.txt
     
     # Slither Analysis
     # @if command -v slither >/dev/null 2>&1; then \
@@ -338,39 +338,38 @@ audit-report:
 
 # @echo "" | tee -a audit-report/audit-report.txt
 
-	@if command -v myth >/dev/null 2>&1; then \
-		echo "⚡ Running Mythril analysis..." | tee -a audit-report/audit-report.txt; \
-		mkdir -p audit-report/mythril; \
-		for file in $$(find src/ -name '*.sol' -not -path "*/mocks/*" -not -path "*/interfaces/*"); do \
-			echo "  Analyzing $$file..." | tee -a audit-report/audit-report.txt; \
-			filename=$$(basename "$$file" .sol); \
-			if [ -f mythril.config.json ]; then \
-				myth analyze "$$file" --solc-json mythril.config.json -o markdown 2>/dev/null > "audit-report/mythril/$$filename-mythril.md"; \
-			else \
-				myth analyze "$$file" -o markdown 2>/dev/null > "audit-report/mythril/$$filename-mythril.md"; \
-			fi; \
-		done; \
-		echo "✅ Individual reports saved in audit-report/mythril/" | tee -a audit-report/audit-report.txt; \
-	else \
-		echo "⚠️  Mythril not installed. Install with: pipx install mythril" | tee -a audit-report/audit-report.txt; \
-	fi
+# @if command -v myth >/dev/null 2>&1; then \
+# 	echo "⚡ Running Mythril analysis..." | tee -a audit-report/audit-report.txt; \
+# 	mkdir -p audit-report/mythril; \
+# 	for file in $$(find src/ -name '*.sol' -not -path "*/mocks/*" -not -path "*/interfaces/*"); do \
+# 		echo "  Analyzing $$file..." | tee -a audit-report/audit-report.txt; \
+# 		filename=$$(basename "$$file" .sol); \
+# 		if [ -f mythril.config.json ]; then \
+# 			myth analyze "$$file" --solc-json mythril.config.json -o markdown 2>/dev/null > "audit-report/mythril/$$filename-mythril.md"; \
+# 		else \
+# 			myth analyze "$$file" -o markdown 2>/dev/null > "audit-report/mythril/$$filename-mythril.md"; \
+# 		fi; \
+# 	done; \
+# 	echo "✅ Individual reports saved in audit-report/mythril/" | tee -a audit-report/audit-report.txt; \
+# else \
+# 	echo "⚠️  Mythril not installed. Install with: pipx install mythril" | tee -a audit-report/audit-report.txt; \
+# fi
 
-	@echo "" | tee -a audit-report/audit-report.txt
+# @echo "" | tee -a audit-report/audit-report.txt
 
 
 # @echo "9. COVERAGE ANALYSIS" | tee -a audit-report/audit-report.txt
 # @echo "====================" | tee -a audit-report/audit-report.txt
 # @echo "📊 Test coverage report:" | tee -a audit-report/audit-report.txt
 # @FOUNDRY_DISABLE_NIGHTLY_WARNING=true rm -rf coverage lcov.info lcov.src.info && \
-# forge coverage --ir-minimum --report lcov --no-match-coverage "script|src/mocks" 2>&1 | \
+# forge coverage --ir-minimum --report lcov --no-match-coverage "script|src/mocks|test" 2>&1 | \
 # 	grep -E "(File|Overall coverage|Wrote LCOV)" | grep -v "^$$" | tee -a audit-report/audit-report.txt
 # @if [ -f lcov.info ]; then \
 # 	echo "🔍 Processing coverage data..." | tee -a audit-report/audit-report.txt; \
-# 	lcov --extract lcov.info "src/*" -o lcov.src.info --quiet; \
-# 	genhtml lcov.src.info --branch-coverage --output-dir coverage 2>&1 | \
+# 	genhtml lcov.info--branch-coverage --output-dir coverage 2>&1 | \
 # 		grep -E "(Overall coverage rate|source files|lines\.\.\.\.\.\.\.|functions\.\.\.|branches\.\.\.|Message summary)" | \
 # 		grep -v "^$$" | tee -a audit-report/audit-report.txt; \
-# 	mv lcov.info lcov.src.info audit-report/ 2>/dev/null || true; \
+# 	rm -f lcov.info 2>/dev/null || true; \
 # 	echo "✅ Coverage data saved to audit-report/" | tee -a audit-report/audit-report.txt; \
 # 	echo "📈 HTML report generated in ./coverage/" | tee -a audit-report/audit-report.txt; \
 # else \
