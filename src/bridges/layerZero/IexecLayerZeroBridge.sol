@@ -48,6 +48,8 @@ contract IexecLayerZeroBridge is
     /**
      * @dev The RLC token contract that this bridge operates on
      * Must implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) interface.
+     *
+     * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
     IERC7802 public immutable RLC_TOKEN;
 
@@ -55,6 +57,8 @@ contract IexecLayerZeroBridge is
      * @dev Constructor for the LayerZero bridge contract
      * @param _token The RLC token contract address that implements IERC7802 interface
      * @param _lzEndpoint The LayerZero endpoint address for this chain
+     *
+     * @custom:oz-upgrades-unsafe-allow constructor
      */
     constructor(address _token, address _lzEndpoint)
         OFTCoreUpgradeable(IERC20Metadata(_token).decimals(), _lzEndpoint)

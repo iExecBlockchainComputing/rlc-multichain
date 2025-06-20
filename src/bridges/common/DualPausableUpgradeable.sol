@@ -27,7 +27,7 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
         bool _sendPaused;
     }
 
-    // keccak256(abi.encode(uint256(keccak256("iexec.storage.DualPausable")) - 1)) & ~bytes32(uint256(0xff))
+    /// keccak256(abi.encode(uint256(keccak256("iexec.storage.DualPausable")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 private constant DUAL_PAUSABLE_STORAGE_LOCATION =
         0xcfbc5ec03206ba5826cf1103520b82c735e9bad14c6d8ed92dff9144ead3f400;
 
