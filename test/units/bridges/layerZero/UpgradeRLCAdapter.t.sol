@@ -58,7 +58,6 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
             lzEndpoint: mockEndpoint,
             rlcToken: address(rlcToken),
             newStateVariable: NEW_STATE_VARIABLE,
-            skipChecks: true, // Allow for testing with mocks
             validateOnly: false
         });
 
@@ -92,7 +91,6 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
             lzEndpoint: mockEndpoint,
             rlcToken: address(rlcToken),
             newStateVariable: NEW_STATE_VARIABLE,
-            skipChecks: true,
             validateOnly: false
         });
 
