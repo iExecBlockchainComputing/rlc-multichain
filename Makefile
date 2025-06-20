@@ -2,6 +2,7 @@
 
 MAKEFLAGS += --no-print-directory
 
+include audit.mk
 -include .env
 
 generate-coverage:
