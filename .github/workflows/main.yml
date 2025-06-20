@@ -42,6 +42,9 @@ jobs:
         run: make e2e-test
         env:
           FORGE_EXTRA_ARGS: "--junit > junit-e2e-tests.xml"
+
+      - name: Run Foundry coverage
+        run: make ci-coverage
         
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
