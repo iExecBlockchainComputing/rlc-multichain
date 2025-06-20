@@ -35,12 +35,13 @@ jobs:
 
       - name: Run Forge unit tests
         run: make unit-test
-
+        env:
+          FORGE_EXTRA_ARGS: "--junit > junit-unit-tests.xml"
+          
       - name: Run Forge e2e tests
         run: make e2e-test
-
-      - name: Generate coverage reports
-        run: make generate-coverage
+        env:
+          FORGE_EXTRA_ARGS: "--junit > junit-e2e-tests.xml"
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
@@ -53,6 +54,7 @@ jobs:
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: junit-unit-tests.xml,junit-e2e-tests.xml
 
       - name: Run static analysis with slither
         uses: crytic/slither-action@v0.4.1
