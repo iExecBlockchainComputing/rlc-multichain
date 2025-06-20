@@ -76,12 +76,14 @@ contract RLCCrosschainToken is
 
     /**
      * @dev See {IERC7802-crosschainBurn}.
+     *
+     * Does not burn if `from` is the zero address.
+     * Reverts if the caller does not have the `TOKEN_BRIDGE_ROLE`.
      * Emits a {CrosschainBurn} event.
      */
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
-        // TODO
-        // _burn(from, value);
-        // emit CrosschainBurn(from, value, _msgSender());
+        _burn(from, value);
+        emit CrosschainBurn(from, value, _msgSender());
     }
 
     /**
