@@ -338,8 +338,6 @@ audit-report:
 
 # @echo "" | tee -a audit-report/audit-report.txt
 
-
-
 	@if command -v myth >/dev/null 2>&1; then \
 		echo "⚡ Running Mythril analysis..." | tee -a audit-report/audit-report.txt; \
 		mkdir -p audit-report/mythril; \
@@ -347,32 +345,12 @@ audit-report:
 			echo "  Analyzing $$file..." | tee -a audit-report/audit-report.txt; \
 			filename=$$(basename "$$file" .sol); \
 			if [ -f mythril.config.json ]; then \
-				myth analyze "$$file" --solc-json mythril.config.json -o markdown > "audit-report/mythril/$$filename-mythril.md" 2>&1; \
+				myth analyze "$$file" --solc-json mythril.config.json -o markdown 2>/dev/null > "audit-report/mythril/$$filename-mythril.md"; \
 			else \
-				myth analyze "$$file" -o markdown > "audit-report/mythril/$$filename-mythril.md" 2>&1; \
+				myth analyze "$$file" -o markdown 2>/dev/null > "audit-report/mythril/$$filename-mythril.md"; \
 			fi; \
 		done; \
-		echo "📋 Consolidating Mythril reports..." | tee -a audit-report/audit-report.txt; \
-		echo "# Mythril Analysis Report" > audit-report/mythril-report.md; \
-		echo "Generated on: $$(date)" >> audit-report/mythril-report.md; \
-		echo "" >> audit-report/mythril-report.md; \
-		for file in audit-report/mythril/*-mythril.md; do \
-			if [ -f "$$file" ]; then \
-				filename=$$(basename "$$file" -mythril.md); \
-				echo "## Analysis for $$filename.sol" >> audit-report/mythril-report.md; \
-				echo "" >> audit-report/mythril-report.md; \
-				cat "$$file" >> audit-report/mythril-report.md; \
-				echo "" >> audit-report/mythril-report.md; \
-				echo "---" >> audit-report/mythril-report.md; \
-				echo "" >> audit-report/mythril-report.md; \
-			fi; \
-		done; \
-		if [ -f audit-report/mythril-report.md ]; then \
-			echo "✅ Mythril consolidated report saved to audit-report/mythril-report.md" | tee -a audit-report/audit-report.txt; \
-			echo "✅ Individual reports saved in audit-report/mythril/" | tee -a audit-report/audit-report.txt; \
-		else \
-			echo "❌ Mythril analysis failed" | tee -a audit-report/audit-report.txt; \
-		fi; \
+		echo "✅ Individual reports saved in audit-report/mythril/" | tee -a audit-report/audit-report.txt; \
 	else \
 		echo "⚠️  Mythril not installed. Install with: pipx install mythril" | tee -a audit-report/audit-report.txt; \
 	fi
