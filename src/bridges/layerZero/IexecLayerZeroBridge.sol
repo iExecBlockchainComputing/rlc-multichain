@@ -8,9 +8,10 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
-import {ICrosschainRLC} from "./interfaces/ICrosschainRLC.sol";
-import {IIexecLayerZeroBridge} from "./interfaces/IIexecLayerZeroBridge.sol";
-import {DualPausableUpgradeable} from "./utils/DualPausableUpgradeable.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {DualPausableUpgradeable} from "../common/DualPausableUpgradeable.sol";
+import {IIexecLayerZeroBridge} from "../../interfaces/IIexecLayerZeroBridge.sol";
+import {IERC7802} from "../../interfaces/IERC7802.sol";
 
 /**
  * @title IexecLayerZeroBridge
@@ -48,16 +49,18 @@ contract IexecLayerZeroBridge is
      * @dev The RLC token contract that this bridge operates on
      * Must implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) interface.
      */
-    ICrosschainRLC public immutable RLC_TOKEN;
+    IERC7802 public immutable RLC_TOKEN;
 
     /**
      * @dev Constructor for the LayerZero bridge contract
-     * @param _token The RLC token contract address that implements ICrosschainRLC interface
+     * @param _token The RLC token contract address that implements IERC7802 interface
      * @param _lzEndpoint The LayerZero endpoint address for this chain
      */
-    constructor(ICrosschainRLC _token, address _lzEndpoint) OFTCoreUpgradeable(_token.decimals(), _lzEndpoint) {
+    constructor(address _token, address _lzEndpoint)
+        OFTCoreUpgradeable(IERC20Metadata(_token).decimals(), _lzEndpoint)
+    {
         _disableInitializers();
-        RLC_TOKEN = _token;
+        RLC_TOKEN = IERC7802(_token);
     }
 
     // ============ INITIALIZATION ============

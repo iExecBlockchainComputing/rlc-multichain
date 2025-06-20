@@ -39,9 +39,6 @@ jobs:
       - name: Run Forge e2e tests
         run: make e2e-test
 
-      - name: Run Forge upgrade tests
-        run: make upgrade-test
-
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:

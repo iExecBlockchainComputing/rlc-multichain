@@ -5,8 +5,8 @@ pragma solidity ^0.8.22;
 
 import {Test, console} from "forge-std/Test.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
-import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosschainToken.s.sol";
-import {RLCCrosschainToken} from "../../src/token/RLCCrosschainToken.sol";
+import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
+import {RLCCrosschainToken} from "../../../src/token/RLCCrosschainToken.sol";
 
 contract RLCCrosschainTokenTest is Test {
     address private createx = address(new CreateX());
@@ -29,8 +29,7 @@ contract RLCCrosschainTokenTest is Test {
     }
 
     // Makes sure create2 deployment is well implemented.
-    function test_RevertWhenTwoDeploymentsWithTheSameSalt() public {
-        console.log("CreateX address:", createx);
+    function test_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
         address random = makeAddr("random");
         deployer.deploy("RLC Crosschain Token", "RLC", owner, upgrader, createx, salt);
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", createx));

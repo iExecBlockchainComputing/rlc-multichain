@@ -4,10 +4,10 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {IexecLayerZeroBridge} from "../src/IexecLayerZeroBridge.sol";
-import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
-import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
-import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
+import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
+import {EnvUtils} from "../../lib/UpdateEnvUtils.sol";
+import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
     function run() external returns (address) {
@@ -19,14 +19,14 @@ contract Deploy is Script {
         address pauser = vm.envAddress("PAUSER_ADDRESS");
         bytes32 createxSalt = vm.envBytes32("SALT");
 
-        address IexecLayerZeroBridgeProxy = deploy(rlcCrosschain, lzEndpoint, owner, pauser, createxSalt);
+        address iexecLayerZeroBridgeProxy = deploy(rlcCrosschain, lzEndpoint, owner, pauser, createxSalt);
 
         vm.stopBroadcast();
 
-        address implementationAddress = Upgrades.getImplementationAddress(IexecLayerZeroBridgeProxy);
+        address implementationAddress = Upgrades.getImplementationAddress(iexecLayerZeroBridgeProxy);
         EnvUtils.updateEnvVariable("LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS", implementationAddress);
-        EnvUtils.updateEnvVariable("LAYERZERO_BRIDGE_PROXY_ADDRESS", IexecLayerZeroBridgeProxy);
-        return IexecLayerZeroBridgeProxy;
+        EnvUtils.updateEnvVariable("LAYERZERO_BRIDGE_PROXY_ADDRESS", iexecLayerZeroBridgeProxy);
+        return iexecLayerZeroBridgeProxy;
     }
 
     function deploy(address rlcCrosschain, address lzEndpoint, address owner, address pauser, bytes32 createxSalt)
