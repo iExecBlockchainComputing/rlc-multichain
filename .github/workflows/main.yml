@@ -34,7 +34,7 @@ jobs:
         run: forge build --sizes && cp .env.template .env
 
       - name: Run Tests coverage
-        run: make e2e-test
+        run: forge test -vvv --match-path "./test/e2e/**" --force
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
