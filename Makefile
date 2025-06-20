@@ -25,9 +25,16 @@ unit-test:
 e2e-test:
 	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**" --force
 
+# Basic coverage for CI (fast)
+ci-coverage:
+	FOUNDRY_PROFILE=test forge coverage \
+		--ir-minimum \
+		--no-match-coverage "script|src/mocks|test"
+
+# Full coverage with HTML report
 generate-coverage:
 	rm -rf coverage lcov.info lcov.src.info && \
-	forge coverage \
+	FOUNDRY_PROFILE=test forge coverage \
 		--ir-minimum \
 		--report lcov \
 		--no-match-coverage "script|src/mocks|test" && \
