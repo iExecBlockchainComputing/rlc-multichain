@@ -35,13 +35,12 @@ jobs:
 
       - name: Run Forge unit tests
         run: make unit-test
-        env:
-          FORGE_EXTRA_ARGS: "--junit"
 
       - name: Run Forge e2e tests
         run: make e2e-test
-        env:
-          FORGE_EXTRA_ARGS: "--junit"
+
+      - name: Generate coverage reports
+        run: make generate-coverage
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
