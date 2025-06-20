@@ -9,9 +9,8 @@ generate-coverage:
 	forge coverage \
 		--ir-minimum \
 		--report lcov \
-		--no-match-coverage "script|src/mocks" && \
-	lcov --extract lcov.info "src/*" -o lcov.src.info && \
-	genhtml lcov.src.info --branch-coverage --output-dir coverage
+		--no-match-coverage "script|src/mocks|test" && \
+	genhtml lcov.info --branch-coverage --output-dir coverage
 
 #
 # Test and utility targets

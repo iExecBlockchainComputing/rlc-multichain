@@ -10,7 +10,6 @@ import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
 import {RLCAdapter} from "../../../src/bridges/layerZero/RLCAdapter.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {UpgradeUtils} from "../../../script/lib/UpgradeUtils.sol";
 
 library TestUtils {
     using OptionsBuilder for bytes;

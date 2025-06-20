@@ -3,7 +3,6 @@
 pragma solidity ^0.8.22;
 
 import {IexecLayerZeroBridge} from "../bridges/layerZero/IexecLayerZeroBridge.sol";
-import {ICrosschainRLC} from "../interfaces/ICrosschainRLC.sol";
 
 /**
  * @title IexecLayerZeroBridgeV2 - V2 implementation with additional features
@@ -13,11 +12,11 @@ import {ICrosschainRLC} from "../interfaces/ICrosschainRLC.sol";
  * @custom:oz-upgrades-from src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge
  */
 contract IexecLayerZeroBridgeV2 is IexecLayerZeroBridge {
-    // NEW STATE VARIABLES FOR V2
+    /// NEW STATE VARIABLES FOR V2
     uint256 public newStateVariable;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(ICrosschainRLC _token, address _lzEndpoint) IexecLayerZeroBridge(_token, _lzEndpoint) {}
+    constructor(address _token, address _lzEndpoint) IexecLayerZeroBridge(_token, _lzEndpoint) {}
 
     /**
      * @notice Initializes V2 features (called after upgrade)

@@ -12,7 +12,7 @@ import {RLCAdapter} from "../bridges/layerZero/RLCAdapter.sol";
  * @custom:oz-upgrades-from src/bridges/layerZero/RLCAdapter.sol:RLCAdapter
  */
 contract RLCAdapterV2 is RLCAdapter {
-    // NEW STATE VARIABLES FOR V2
+    /// NEW STATE VARIABLES FOR V2
     uint256 public newStateVariable;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
