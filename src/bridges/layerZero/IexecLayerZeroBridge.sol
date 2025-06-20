@@ -42,7 +42,7 @@ contract IexecLayerZeroBridge is
     /**
      * @dev The RLC token contract that this bridge operates on
      * Must implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) interface.
-     * 
+     *
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
     ICrosschainRLC public immutable RLC_TOKEN;
