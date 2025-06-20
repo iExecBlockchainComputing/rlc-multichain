@@ -32,9 +32,6 @@ unit-test:
 e2e-test:
 	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/e2e/**"
 
-upgrade-test:
-	FOUNDRY_PROFILE=test forge test -vvv --match-path "./test/units/upgrade/**"
-
 clean:
 	forge clean
 
@@ -65,7 +62,7 @@ upgrade-on-testnets:
 
 deploy-adapter:
 	@echo "Deploying RLCAdapter (UUPS Proxy) on: $(RPC_URL)"
-	forge script script/RLCAdapter.s.sol:Deploy \
+	forge script script/bridges/layerZero/RLCAdapter.s.sol:Deploy \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -82,7 +79,7 @@ deploy-rlc-crosschain-token:
 
 deploy-layerzero-bridge:
 	@echo "Deploying IexecLayerZeroBridge (UUPS Proxy) on: $(RPC_URL)"
-	forge script script/IexecLayerZeroBridge.s.sol:Deploy \
+	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Deploy \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -90,7 +87,7 @@ deploy-layerzero-bridge:
 
 configure-adapter:
 	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
-	forge script script/RLCAdapter.s.sol:Configure \
+	forge script script/bridges/layerZero/RLCAdapter.s.sol:Configure \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -98,7 +95,7 @@ configure-adapter:
 
 configure-layerzero-bridge:
 	@echo "Configuring RLCOFT on: $(RPC_URL)"
-	forge script script/IexecLayerZeroBridge.s.sol:Configure \
+	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Configure \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -110,20 +107,20 @@ configure-layerzero-bridge:
 
 validate-adapter-upgrade:
 	@echo "Validating RLCAdapter upgrade on: $(RPC_URL)"
-	forge script script/RLCAdapter.s.sol:ValidateUpgrade \
+	forge script script/bridges/layerZero/RLCAdapter.s.sol:ValidateUpgrade \
         --rpc-url $(RPC_URL) \
         -vvv
 
 validate-layerZero-bridge-upgrade:
 	@echo "Validating RLC LayerZero upgrade on: $(RPC_URL)"
-	forge script script/IexecLayerZeroBridge.s.sol:ValidateUpgrade \
+	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:ValidateUpgrade \
         --rpc-url $(RPC_URL) \
         -vvv
 
 upgrade-adapter:
 	@echo "Upgrading RLCAdapter on: $(RPC_URL)"
 	$(MAKE) validate-adapter-upgrade
-	forge script script/RLCAdapter.s.sol:Upgrade \
+	forge script script/bridges/layerZero/RLCAdapter.s.sol:Upgrade \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -132,7 +129,7 @@ upgrade-adapter:
 upgrade-layerzero-bridge:
 	@echo "Upgrading RLC LayerZero Bridge on: $(RPC_URL)"
 	$(MAKE) validate-layerZero-bridge-upgrade
-	forge script script/IexecLayerZeroBridge.s.sol:Upgrade \
+	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Upgrade \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
@@ -171,7 +168,7 @@ verify-adapter-impl:
         --constructor-args $(shell cast abi-encode "constructor(address,address)" $(RLC_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS)) \
         --etherscan-api-key $(ETHERSCAN_API_KEY) \
         $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) \
-        src/RLCAdapter.sol:RLCAdapter
+        src/bridges/layerZero/RLCAdapter.sol:RLCAdapter
 
 verify-layerzero-bridge-impl:
 	@echo "Verifying RLCOFT Implementation on Arbitrum Sepolia Etherscan..."
@@ -180,8 +177,8 @@ verify-layerzero-bridge-impl:
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address)" $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS)) \
         --etherscan-api-key $(ARBISCAN_API_KEY) \
-        $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) \
-        src/RLCOFT.sol:RLCOFT
+        $(LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS) \
+        src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge
 
 # Proxy verification
 verify-adapter-proxy:
@@ -191,7 +188,7 @@ verify-adapter-proxy:
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
         --etherscan-api-key $(ETHERSCAN_API_KEY) \
-        $(RLC_SEPOLIA_ADAPTER_PROXY_ADDRESS) \
+        $(RLC_ADAPTER_PROXY_ADDRESS) \
         lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
 verify-layerzero-bridge-proxy:
@@ -201,7 +198,7 @@ verify-layerzero-bridge-proxy:
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
         --etherscan-api-key $(ARBISCAN_API_KEY) \
-        $(RLC_ARBITRUM_SEPOLIA_OFT_PROXY_ADDRESS) \
+        $(LAYERZERO_BRIDGE_PROXY_ADDRESS) \
         lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
 # Combined verification targets

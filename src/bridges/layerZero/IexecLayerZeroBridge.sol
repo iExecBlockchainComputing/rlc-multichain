@@ -9,9 +9,9 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {IIexecLayerZeroBridge} from "./interfaces/IIexecLayerZeroBridge.sol";
-import {IERC7802} from "./interfaces/IERC7802.sol";
-import {DualPausableUpgradeable} from "./utils/DualPausableUpgradeable.sol";
+import {DualPausableUpgradeable} from "../common/DualPausableUpgradeable.sol";
+import {IIexecLayerZeroBridge} from "../../interfaces/IIexecLayerZeroBridge.sol";
+import {IERC7802} from "../../interfaces/IERC7802.sol";
 
 /**
  * @title IexecLayerZeroBridge

@@ -7,9 +7,9 @@ import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfac
 import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
-import {RLCAdapter} from "../../../src/RLCAdapter.sol";
+import {RLCAdapter} from "../../../src/bridges/layerZero/RLCAdapter.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
-import {IexecLayerZeroBridge} from "../../../src/IexecLayerZeroBridge.sol";
+import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 
 library TestUtils {
     using OptionsBuilder for bytes;

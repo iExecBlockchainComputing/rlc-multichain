@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.22;
 
-import {RLCAdapter} from "../RLCAdapter.sol";
+import {RLCAdapter} from "../bridges/layerZero/RLCAdapter.sol";
 
 /**
  * @notice RLCAdapterV2 - V2 implementation with additional features
