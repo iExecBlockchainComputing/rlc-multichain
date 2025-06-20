@@ -68,6 +68,11 @@ library UpgradeUtils {
      */
     function _buildOptions(UpgradeParams memory params) private pure returns (Options memory opts) {
         opts.constructorData = abi.encode(params.rlcToken, params.lzEndpoint);
+        // Ignore check related to LayerZero contracts:
+        // - OAppSenderUpgradeable
+        // - OAppReceiverUpgradeable
+        // - OFTCoreUpgradeable
+        // - OAppCoreUpgradeable
         opts.unsafeAllow = "constructor,state-variable-immutable,missing-initializer-call";
     }
 }
