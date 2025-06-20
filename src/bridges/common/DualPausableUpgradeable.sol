@@ -18,7 +18,6 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
  *
  * @custom:storage-location erc7201:iexec.storage.DualPausable
  */
-// TODO remove `is PausableUpgradeable` since it is not needed anymore.
 abstract contract DualPausableUpgradeable is PausableUpgradeable {
     // ============ STORAGE ============
 
