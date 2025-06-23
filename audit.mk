@@ -201,6 +201,6 @@ clean-audit:
 	rm -rf audit-report/
 	@echo "✅ Audit reports cleaned!"
 
-.PHONY: audit audit-report audit-install install-audit-deps clean-audit 
+.PHONY: audit audit-report audit-install clean-audit 
 
 
