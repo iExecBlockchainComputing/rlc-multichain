@@ -62,35 +62,35 @@ audit-report:
 	fi
 	@echo "" | tee -a audit/audit-report.txt
 
-# @echo "5. STATIC ANALYSIS" | tee -a audit/audit-report.txt
-# @echo "==================" | tee -a audit/audit-report.txt
+	@echo "5. STATIC ANALYSIS" | tee -a audit/audit-report.txt
+	@echo "==================" | tee -a audit/audit-report.txt
 
-# @echo "🐍 Slither Analysis" | tee -a audit/audit-report.txt
-# @echo "  Running Slither analysis..." | tee -a audit/audit-report.txt
-# @slither . --checklist 2>&1 | grep -A 10000 "THIS CHECKLIST IS NOT COMPLETE" | tee audit/slither-report.md
-# @echo "  ✅ Slither report saved to audit/slither-report.md" | tee -a audit/audit-report.txt
-# @echo "" | tee -a audit/audit-report.txt
+	@echo "🐍 Slither Analysis" | tee -a audit/audit-report.txt
+	@echo "  Running Slither analysis..." | tee -a audit/audit-report.txt
+	@slither . --checklist 2>&1 | grep -A 10000 "THIS CHECKLIST IS NOT COMPLETE" | tee audit/slither-report.md
+	@echo "  ✅ Slither report saved to audit/slither-report.md" | tee -a audit/audit-report.txt
+	@echo "" | tee -a audit/audit-report.txt
 
-# @echo "🔍 Aderyn Analysis" | tee -a audit/audit-report.txt
-# @echo "  Running Aderyn analysis..." | tee -a audit/audit-report.txt
-# @aderyn --output audit/aderyn-report.md 2>&1 | grep -E "(High|Medium|Low|Found|issues)" | tee -a audit/audit-report.txt
-# @echo "  ✅ Aderyn report saved to audit/aderyn-report.md" | tee -a audit/audit-report.txt
-# @echo "" | tee -a audit/audit-report.txt
-	
-# @echo "⚡ Mythril Analysis" | tee -a audit/audit-report.txt
-# @echo "  Running Mythril analysis..." | tee -a audit/audit-report.txt
-# @mkdir -p audit/mythril
-# @for file in $$(find src/ -name '*.sol' -not -path "*/mocks/*" -not -path "*/interfaces/*"); do \
-# 	echo "    Analyzing $$file..." | tee -a audit/audit-report.txt; \
-# 	filename=$$(basename "$$file" .sol); \
-# 	if [ -f mythril.config.json ]; then \
-# 		myth analyze "$$file" --solc-json mythril.config.json -o markdown 2>/dev/null > "audit/mythril/$$filename-mythril.md" || echo "    ⚠️  Failed to analyze $$file" | tee -a audit/audit-report.txt; \
-# 	else \
-# 		myth analyze "$$file" -o markdown 2>/dev/null > "audit/mythril/$$filename-mythril.md" || echo "    ⚠️  Failed to analyze $$file" | tee -a audit/audit-report.txt; \
-# 	fi; \
-# done
-# @echo "  ✅ Individual reports saved in audit/mythril/" | tee -a audit/audit-report.txt
-# @echo "" | tee -a audit/audit-report.txt
+	@echo "🔍 Aderyn Analysis" | tee -a audit/audit-report.txt
+	@echo "  Running Aderyn analysis..." | tee -a audit/audit-report.txt
+	@aderyn --output audit/aderyn-report.md 2>&1 | grep -E "(High|Medium|Low|Found|issues)" | tee -a audit/audit-report.txt
+	@echo "  ✅ Aderyn report saved to audit/aderyn-report.md" | tee -a audit/audit-report.txt
+	@echo "" | tee -a audit/audit-report.txt
+		
+	@echo "⚡ Mythril Analysis" | tee -a audit/audit-report.txt
+	@echo "  Running Mythril analysis..." | tee -a audit/audit-report.txt
+	@mkdir -p audit/mythril
+	@for file in $$(find src/ -name '*.sol' -not -path "*/mocks/*" -not -path "*/interfaces/*"); do \
+		echo "    Analyzing $$file..." | tee -a audit/audit-report.txt; \
+		filename=$$(basename "$$file" .sol); \
+		if [ -f mythril.config.json ]; then \
+			myth analyze "$$file" --solc-json mythril.config.json -o markdown 2>/dev/null > "audit/mythril/$$filename-mythril.md" || echo "    ⚠️  Failed to analyze $$file" | tee -a audit/audit-report.txt; \
+		else \
+			myth analyze "$$file" -o markdown 2>/dev/null > "audit/mythril/$$filename-mythril.md" || echo "    ⚠️  Failed to analyze $$file" | tee -a audit/audit-report.txt; \
+		fi; \
+	done
+	@echo "  ✅ Individual reports saved in audit/mythril/" | tee -a audit/audit-report.txt
+	@echo "" | tee -a audit/audit-report.txt
 
 # @echo "6. COVERAGE ANALYSIS" | tee -a audit/audit-report.txt
 # @echo "====================" | tee -a audit/audit-report.txt
