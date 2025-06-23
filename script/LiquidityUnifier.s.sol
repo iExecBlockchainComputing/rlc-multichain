@@ -5,21 +5,21 @@ pragma solidity ^0.8.22;
 
 import "forge-std/StdJson.sol";
 import {Script} from "forge-std/Script.sol";
-import {RLCCrosschainToken} from "../src/token/RLCCrosschainToken.sol";
+import {LiquidityUnifier} from "../src/LiquidityUnifier.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
 
 /**
- * Deployment script for the RLCCrosschainToken contract.
+ * Deployment script for the LiquidityUnifier contract.
  * It reads configuration from a JSON file and deploys the contract using CreateX.
  */
 contract Deploy is Script {
     using stdJson for string;
 
     /**
-     * Reads configuration from a JSON file and deploys RLCCrosschainToken contract.
+     * Reads configuration from a JSON file and deploys LiquidityUnifier contract.
      *
-     * @return address of the deployed RLCCrosschainToken proxy contract.
+     * @return address of the deployed LiquidityUnifier proxy contract.
      */
     function run() external returns (address) {
         // TODO put inside a shared utility function.
@@ -29,40 +29,35 @@ contract Deploy is Script {
         address createxFactory = config.readAddress(".createxFactory");
         string memory chain = vm.envString("CHAIN"); // the same name as the config file.
         string memory prefix = string.concat(".chains.", chain);
-        bytes32 createxSalt = config.readBytes32(string.concat(prefix, ".rlcCrossChainTokenCreatexSalt"));
+        address rlcToken = config.readAddress(string.concat(prefix, ".rlcAddress"));
+        bytes32 createxSalt = config.readBytes32(string.concat(prefix, ".liquidityUnifierCreatexSalt"));
         vm.startBroadcast();
-        address rlcCrosschainTokenProxy =
-            deploy("RLC Crosschain Token", "RLC", admin, upgrader, createxFactory, createxSalt);
+        address liquidityUnifierProxy = deploy(rlcToken, admin, upgrader, createxFactory, createxSalt);
         vm.stopBroadcast();
 
         //TODO: use config file to store addresses.
-        EnvUtils.updateEnvVariable("RLC_CROSSCHAIN_ADDRESS", rlcCrosschainTokenProxy);
-        return rlcCrosschainTokenProxy;
+        EnvUtils.updateEnvVariable("LIQUIDITY_UNIFIER_PROXY_ADDRESS", liquidityUnifierProxy);
+        return liquidityUnifierProxy;
     }
 
     /**
-     * Deploys the RLCCrosschainToken proxy using CreateX.
+     * Deploys the LiquidityUnifier proxy using CreateX.
      *
-     * @param name The name of the token.
-     * @param symbol The symbol of the token.
+     * * @param rlcToken The address of the RLC token contract.
      * @param admin The address of the admin.
      * @param upgrader The address with upgrade permissions.
      * @param createxFactory The CreateX factory address.
      * @param createxSalt The salt for CreateX deployment.
-     * @return address of the deployed RLCCrosschainToken proxy contract.
+     * @return address of the deployed LiquidityUnifier proxy contract.
      */
-    function deploy(
-        string memory name,
-        string memory symbol,
-        address admin,
-        address upgrader,
-        address createxFactory,
-        bytes32 createxSalt
-    ) public returns (address) {
-        bytes memory initData =
-            abi.encodeWithSelector(RLCCrosschainToken.initialize.selector, name, symbol, admin, upgrader);
+    function deploy(address rlcToken, address admin, address upgrader, address createxFactory, bytes32 createxSalt)
+        public
+        returns (address)
+    {
+        bytes memory constructorData = abi.encode(rlcToken);
+        bytes memory initData = abi.encodeWithSelector(LiquidityUnifier.initialize.selector, admin, upgrader);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-            "RLCCrosschainToken", "", initData, createxFactory, createxSalt
+            "LiquidityUnifier", constructorData, initData, createxFactory, createxSalt
         );
     }
 }
