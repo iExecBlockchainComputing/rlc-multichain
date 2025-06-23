@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Deploy as RLCAdapterDeploy} from "../../script/bridges/layerZero/RLCAdapter.s.sol";
 import {RLCAdapter} from "../../src/bridges/layerZero/RLCAdapter.sol";
 
@@ -29,12 +30,18 @@ contract RLCAdapterScriptTest is Test {
 
         assertEq(rlcAdapter.owner(), owner);
         assertEq(rlcAdapter.token(), RLC_TOKEN);
-        // TODO check all roles.
-        // TODO check that the contract is not paused by default.
-        // TODO check that the contract has been initialized and cannot be re-initialized.
+        // Check all roles.
+        assertTrue(rlcAdapter.hasRole(rlcAdapter.DEFAULT_ADMIN_ROLE(), owner), "Owner should have DEFAULT_ADMIN_ROLE");
+        // TODO assertTrue(rlcAdapter.hasRole(rlcAdapter.UPGRADER_ROLE(), owner), "Owner should have UPGRADER_ROLE");
+        assertTrue(rlcAdapter.hasRole(rlcAdapter.PAUSER_ROLE(), pauser), "Pauser should have PAUSER_ROLE");
+        // Make sure the contract is not paused by default.
+        assertFalse(rlcAdapter.paused(), "Contract should not be paused by default");
+        // Make sure the contract has been initialized and cannot be re-initialized.
+        vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
+        rlcAdapter.initialize(owner, pauser);
         // TODO check that the contract has the correct LayerZero endpoint.
         // TODO check that the proxy address is saved.
-
+    }
 
     // Makes sure create2 deployment is well implemented.
     function test_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
