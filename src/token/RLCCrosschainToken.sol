@@ -6,7 +6,6 @@ pragma solidity ^0.8.22;
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {ERC20PermitUpgradeable} from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import {IERC7802} from "../interfaces/IERC7802.sol";
@@ -24,7 +23,6 @@ import {IERC7802} from "../interfaces/IERC7802.sol";
  * https://github.com/OpenZeppelin/openzeppelin-community-contracts/blob/075587479556632d3dd9e9e3b37417cabf3e26a3/contracts/token/ERC20/extensions/ERC20Bridgeable.sol
  */
 contract RLCCrosschainToken is
-    ERC20Upgradeable,
     ERC20PermitUpgradeable,
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
