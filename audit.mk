@@ -32,12 +32,12 @@ audit-report:
 	@find src/ -name '*.sol' -not -path "*/mocks/*" -exec shasum -a 256 {} \; | tee -a audit/audit-report.txt
 	@echo "" | tee -a audit/audit-report.txt
 
-# @echo "2. SOLIDITY CODE METRICS" | tee -a audit/audit-report.txt
-# @echo "========================" | tee -a audit/audit-report.txt
-# $(eval SOL_FILES := $(shell find src/ -name '*.sol' -not -path "*/mocks/*"))
-# @solidity-code-metrics $(SOL_FILES) --html > audit/code-metrics.html
-# @echo "✅ Detailed code metrics saved to audit/code-metrics.html" | tee -a audit/audit-report.txt
-# @echo "" | tee -a audit/audit-report.txt
+	@echo "2. SOLIDITY CODE METRICS" | tee -a audit/audit-report.txt
+	@echo "========================" | tee -a audit/audit-report.txt
+	$(eval SOL_FILES := $(shell find src/ -name '*.sol' -not -path "*/mocks/*"))
+	@solidity-code-metrics $(SOL_FILES) --html > audit/code-metrics.html
+	@echo "✅ Detailed code metrics saved to audit/code-metrics.html" | tee -a audit/audit-report.txt
+	@echo "" | tee -a audit/audit-report.txt
 
 # @echo "3. EXTERNAL CALLS ANALYSIS" | tee -a audit/audit-report.txt
 # @echo "==========================" | tee -a audit/audit-report.txt
