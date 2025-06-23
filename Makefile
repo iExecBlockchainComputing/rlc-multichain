@@ -27,12 +27,15 @@ e2e-test:
 
 # Full coverage with HTML report
 generate-coverage:
+	generate-coverage:
 	rm -rf coverage lcov.info lcov.src.info && \
 	FOUNDRY_PROFILE=test forge coverage \
 		--ir-minimum \
 		--report lcov \
-		--no-match-coverage "script|src/mocks|test";
-	[ "$CI" != "true" ] && genhtml lcov.info --branch-coverage --output-dir coverage
+		--no-match-coverage "script|src/mocks|test"
+	@if [ "$$CI" != "true" ]; then \
+		genhtml lcov.info --branch-coverage --output-dir coverage; \
+	fi
 
 clean:
 	forge clean
