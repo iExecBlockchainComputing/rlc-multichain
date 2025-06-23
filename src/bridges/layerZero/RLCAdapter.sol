@@ -55,6 +55,7 @@ contract RLCAdapter is
      * @param _owner Address that will receive owner and default admin roles
      * @param _pauser Address that will receive the pauser role
      */
+    // TODO add upgrader role.
     function initialize(address _owner, address _pauser) public initializer {
         __Ownable_init(_owner);
         __OFTAdapter_init(_owner);

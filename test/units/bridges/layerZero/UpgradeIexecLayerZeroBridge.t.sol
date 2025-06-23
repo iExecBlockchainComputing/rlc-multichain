@@ -5,16 +5,16 @@ pragma solidity ^0.8.22;
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {IexecLayerZeroBridgeV2} from "../../../../src/mocks/IexecLayerZeroBridgeV2Mock.sol";
 import {TestUtils} from "./../../utils/TestUtils.sol";
-import {RLCMock} from "../../mocks/RLCMock.sol";
 import {UpgradeUtils} from "../../../../script/lib/UpgradeUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {RLCCrosschainToken} from "../../../../src/token/RLCCrosschainToken.sol";
 
 contract UpgradeRLCOFTTest is TestHelperOz5 {
     using TestUtils for *;
 
     IexecLayerZeroBridge public iexecLayerZeroBridgeV1;
     IexecLayerZeroBridgeV2 public iexecLayerZeroBridgeV2;
-    RLCMock private rlcCrosschainToken;
+    RLCCrosschainToken private rlcCrosschainToken;
 
     address public mockEndpoint;
     address public owner = makeAddr("owner");
