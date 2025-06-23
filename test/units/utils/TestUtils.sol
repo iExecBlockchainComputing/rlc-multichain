@@ -36,7 +36,7 @@ library TestUtils {
         rlcToken = new RLCMock(name, symbol);
 
         // salt for createX
-        bytes32 salt = keccak256("RLCAdapter_SALT");
+        bytes32 salt = keccak256("salt");
 
         // Deploy Liquidity Unifier
         LiquidityUnifier liquidityUnifier = LiquidityUnifier(
