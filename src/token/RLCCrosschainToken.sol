@@ -76,7 +76,6 @@ contract RLCCrosschainToken is
 
     /**
      * @dev See {IERC7802-crosschainBurn}.
-     *
      * Does not burn if `from` is the zero address.
      * Reverts if the caller does not have the `TOKEN_BRIDGE_ROLE`.
      * Emits a {CrosschainBurn} event.
