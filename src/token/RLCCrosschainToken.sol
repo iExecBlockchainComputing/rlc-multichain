@@ -64,7 +64,6 @@ contract RLCCrosschainToken is
 
     /**
      * @dev See {IERC7802-crosschainMint}.
-     *
      * Does not mint if `to` is the zero address.
      * Reverts if the caller does not have the `TOKEN_BRIDGE_ROLE`.
      * Emits a {CrosschainMint} event.
@@ -83,6 +82,13 @@ contract RLCCrosschainToken is
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
         _burn(from, value);
         emit CrosschainBurn(from, value, _msgSender());
+    }
+
+    /**
+     * Uses the same decimals number as the original RLC token.
+     */
+    function decimals() public pure override returns (uint8) {
+        return 9;
     }
 
     /**

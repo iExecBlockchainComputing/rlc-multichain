@@ -43,7 +43,7 @@ contract Deploy is Script {
     /**
      * Deploys the LiquidityUnifier proxy using CreateX.
      *
-     * * @param rlcToken The address of the RLC token contract.
+     * @param rlcToken The address of the RLC token contract.
      * @param admin The address of the admin.
      * @param upgrader The address with upgrade permissions.
      * @param createxFactory The CreateX factory address.
