@@ -47,9 +47,10 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         (iexecLayerZeroBridgeChainA, iexecLayerZeroBridgeChainB,, rlcCrosschainToken) =
             TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, pauser);
 
+        address iexecLayerZeroBridgeChainBAddress = address(iexecLayerZeroBridgeChainB);
         // Wire the contracts
         address[] memory contracts = new address[](2);
-        contracts[0] = address(iexecLayerZeroBridgeChainB);
+        contracts[0] = iexecLayerZeroBridgeChainBAddress;
         contracts[1] = address(iexecLayerZeroBridgeChainA);
         vm.startPrank(owner);
         wireOApps(contracts);
@@ -57,11 +58,11 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
         // Authorize the bridge to mint/burn tokens.
         vm.startPrank(owner);
-        rlcCrosschainToken.grantRole(rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), address(iexecLayerZeroBridgeChainB));
+        rlcCrosschainToken.grantRole(rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), iexecLayerZeroBridgeChainBAddress);
         vm.stopPrank();
 
         // Mint RLC tokens to user1
-        vm.prank(address(iexecLayerZeroBridgeChainB));
+        vm.prank(iexecLayerZeroBridgeChainBAddress);
         rlcCrosschainToken.crosschainMint(user1, INITIAL_BALANCE);
     }
 
