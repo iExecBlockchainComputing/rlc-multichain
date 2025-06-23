@@ -42,36 +42,42 @@ contract LiquidityUnifierTest is Test {
         bridgeTokenRoleId = liquidityUnifier.TOKEN_BRIDGE_ROLE();
     }
 
-    // // ============ initialize ============
+    // ============ initialize ============
 
-    // function test_RevertWhen_InitializedMoreThanOnce() public {
-    //     vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
-    //     liquidityUnifier.initialize(admin, upgrader);
-    // }
+    function test_RevertWhen_InitializedMoreThanOnce() public {
+        vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
+        liquidityUnifier.initialize(admin, upgrader);
+    }
 
-    // // ============ supportsInterface ============
+    // ============ supportsInterface ============
 
-    // function test_SupportErc7802Interface() public view {
-    //     assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
-    //     assertTrue(liquidityUnifier.supportsInterface(type(IERC7802).interfaceId));
-    // }
+    function test_SupportErc7802Interface() public view {
+        assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
+        assertTrue(liquidityUnifier.supportsInterface(type(IERC7802).interfaceId));
+    }
 
     // ============ crosschainMint ============
 
     function test_MintForOneUserFromOneBridge() public {
         _authorizeBridge(bridge);
-        // Check the initial state.
         assertEq(rlcToken.totalSupply(), rlcToken.INITIAL_SUPPLY());
-        // Expect events to be emitted.
-        // vm.expectEmit(true, true, true, true);
-        // emit IERC20.Transfer(address(0), user, amount);
-        // vm.expectEmit(true, true, true, true);
-        // emit IERC7802.CrosschainMint(user, amount, bridge);
-        // Send mint request from the bridge.
-        _mintForUser(user, amount);
-        // Check that tokens are minted.
-        // assertEq(rlcToken.balanceOf(address(liquidityUnifier)), amount);
-        // assertEq(rlcToken.balanceOf(address(this)), rlcToken.INITIAL_SUPPLY() - amount);
+
+        rlcToken.transfer(address(liquidityUnifier), amount);
+
+        // Expect the correct transfer and crosschainMint events
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Transfer(address(liquidityUnifier), user, amount);
+
+        vm.expectEmit(true, true, true, true);
+        emit IERC7802.CrosschainMint(user, amount, bridge);
+
+        // Act
+        vm.prank(bridge);
+        liquidityUnifier.crosschainMint(user, amount);
+
+        // Assert
+        assertEq(rlcToken.balanceOf(user), amount);
+        assertEq(rlcToken.balanceOf(address(liquidityUnifier)), 0);
     }
 
     // function test_MintForOneUserFromOneBridgeMultipleTimes() public {
@@ -398,20 +404,20 @@ contract LiquidityUnifierTest is Test {
     //     assertEq(rlcToken.balanceOf(user), amount);
     // }
 
-    // // ============ upgradeToAndCall ============
+    // ============ upgradeToAndCall ============
 
-    // function test_RevertWhen_UnauthorizedUpgrader() public {
-    //     address unauthorizedUpgrader = makeAddr("unauthorized");
-    //     vm.expectRevert(
-    //         abi.encodeWithSelector(
-    //             IAccessControl.AccessControlUnauthorizedAccount.selector,
-    //             unauthorizedUpgrader,
-    //             liquidityUnifier.UPGRADER_ROLE()
-    //         )
-    //     );
-    //     vm.prank(unauthorizedUpgrader);
-    //     liquidityUnifier.upgradeToAndCall(makeAddr("newImpl"), "");
-    // }
+    function test_RevertWhen_UnauthorizedUpgrader() public {
+        address unauthorizedUpgrader = makeAddr("unauthorized");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                unauthorizedUpgrader,
+                liquidityUnifier.UPGRADER_ROLE()
+            )
+        );
+        vm.prank(unauthorizedUpgrader);
+        liquidityUnifier.upgradeToAndCall(makeAddr("newImpl"), "");
+    }
 
     // Helper functions
 
@@ -430,9 +436,6 @@ contract LiquidityUnifierTest is Test {
      * @param mintAmount Amount of tokens to mint.
      */
     function _mintForUser(address userAddress, uint256 mintAmount) internal {
-        rlcToken.transfer(userAddress, mintAmount);
-        vm.prank(userAddress);
-        rlcToken.approve(address(liquidityUnifier), mintAmount);
         vm.prank(bridge);
         liquidityUnifier.crosschainMint(userAddress, mintAmount);
     }
@@ -444,9 +447,6 @@ contract LiquidityUnifierTest is Test {
      * @param mintAmount Amount of tokens to mint.
      */
     function _mintForUserWithBridge(address bridgeAddress, address userAddress, uint256 mintAmount) internal {
-        rlcToken.transfer(userAddress, mintAmount);
-        vm.prank(userAddress);
-        rlcToken.approve(address(liquidityUnifier), mintAmount);
         vm.prank(bridgeAddress);
         liquidityUnifier.crosschainMint(userAddress, mintAmount);
     }
