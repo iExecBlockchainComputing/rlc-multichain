@@ -34,7 +34,7 @@ contract SendTokensToArbitrumSepolia is Script {
 
         // First, approve the adapter to spend your tokens
         IERC20 rlcToken = IERC20(rlcTokenAddress);
-        console.log("Approving IexecLayerZeroBridge to spend %s RLC", amount / 10 ** 9);
+        console.log("Approving LiquidityUnifier contract to spend %s RLC", amount / 10 ** 9);
         rlcToken.approve(liquidityUnifierAddress, amount);
 
         // Then, send tokens cross-chain

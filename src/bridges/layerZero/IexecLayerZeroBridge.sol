@@ -138,7 +138,8 @@ contract IexecLayerZeroBridge is
 
     /**
      * @notice Indicates whether the OFT contract requires approval to send tokens
-     * @return requiresApproval Returns true if deployed on Ethereum, false otherwise
+     * Approval is only required on the Ethereum Mainnet where the original RLC contract is deployed.
+     * @return requiresApproval Returns true if deployed on Ethereum Mainnet, false otherwise
      */
     function approvalRequired() external view virtual returns (bool) {
         return block.chainid == 1;
