@@ -53,10 +53,10 @@ audit-report:
 	@echo "" | tee -a audit-report/audit-report.txt
 
 	@echo "🧪 Running test suite..." | tee -a audit-report/audit-report.txt
-	@forge test 2>&1 | grep -E "^(Ran [0-9]+.*:|Suite result:|Encountered.*failing|tests passed)" | tee -a audit-report/audit-report.txt
-	@if forge test 2>&1 | grep -q "FAILED"; then \
+	@forge test 2>&1 | tee audit-report/test-output.txt | grep -E "^(Ran [0-9]+.*:|Suite result:|Encountered.*failing|tests passed)" | tee -a audit-report/audit-report.txt
+	@if grep -q "FAILED" audit-report/test-output.txt; then \
 		echo "❌ Some tests are failing - see details below:" | tee -a audit-report/audit-report.txt; \
-		forge test 2>&1 | grep "FAIL:" | head -5 | tee -a audit-report/audit-report.txt; \
+		grep "FAIL:" audit-report/test-output.txt | head -5 | tee -a audit-report/audit-report.txt; \
 	else \
 		echo "✅ All tests passed!" | tee -a audit-report/audit-report.txt; \
 	fi
@@ -84,9 +84,9 @@ audit-report:
 		echo "    Analyzing $$file..." | tee -a audit-report/audit-report.txt; \
 		filename=$$(basename "$$file" .sol); \
 		if [ -f mythril.config.json ]; then \
-			myth analyze "$$file" --solc-json mythril.config.json -o markdown 2>/dev/null > "audit-report/mythril/$$filename-mythril.md"; \
+			myth analyze "$$file" --solc-json mythril.config.json -o markdown 2>/dev/null > "audit-report/mythril/$$filename-mythril.md" || echo "    ⚠️  Failed to analyze $$file" | tee -a audit-report/audit-report.txt; \
 		else \
-			myth analyze "$$file" -o markdown 2>/dev/null > "audit-report/mythril/$$filename-mythril.md"; \
+			myth analyze "$$file" -o markdown 2>/dev/null > "audit-report/mythril/$$filename-mythril.md" || echo "    ⚠️  Failed to analyze $$file" | tee -a audit-report/audit-report.txt; \
 		fi; \
 	done
 	@echo "  ✅ Individual reports saved in audit-report/mythril/" | tee -a audit-report/audit-report.txt
@@ -125,6 +125,9 @@ audit-report:
 	@echo "✅ AUDIT REPORT COMPLETED" | tee -a audit-report/audit-report.txt
 	@echo "=========================" | tee -a audit-report/audit-report.txt
 	@echo "📁 Main report: audit-report/audit-report.txt" | tee -a audit-report/audit-report.txt
+	@echo "📊 Files generated:" | tee -a audit-report/audit-report.txt
+	@ls -la audit-report/ | tee -a audit-report/audit-report.txt
+
 
 # Smart installer - checks then installs what it can
 audit-install:
