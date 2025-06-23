@@ -6,7 +6,7 @@ include audit.mk
 -include .env
 
 generate-coverage:
-	rm -rf coverage lcov.info lcov.src.info && \
+	rm -rf coverage lcov.info && \
 	forge coverage \
 		--ir-minimum \
 		--report lcov \
