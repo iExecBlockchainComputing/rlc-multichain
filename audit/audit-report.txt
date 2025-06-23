@@ -1,4 +1,4 @@
-📊 Report generated on: Fri Jun 20 15:32:29 CEST 2025
+📊 Report generated on: Mon Jun 23 12:17:13 CEST 2025
 
 1. PROJECT SCOPE ANALYSIS
 =========================
@@ -6,7 +6,7 @@
        7
 
 📏 Lines of Code Analysis (SLOC):
-github.com/AlDanial/cloc v 2.04  T=0.01 s (984.4 files/s, 90999.8 lines/s)
+github.com/AlDanial/cloc v 2.04  T=0.01 s (943.8 files/s, 87248.1 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ SUM:                             9             97            452            283
 
 2. SOLIDITY CODE METRICS
 ========================
-✅ Detailed code metrics saved to audit-report/code-metrics.html
+✅ Detailed code metrics saved to audit/code-metrics.html
 
 3. EXTERNAL CALLS ANALYSIS
 ==========================
@@ -58,45 +58,37 @@ Compiler run successful!
 
 🧪 Running test suite...
 Ran 12 tests for test/units/bridges/common/DualPausableUpgradeableTest.t.sol:DualPausableUpgradeableTest
-Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 6.35ms (2.41ms CPU time)
-Ran 10 tests for test/units/token/RLCCrosschainToken.t.sol:RLCCrosschainTokenTest
-Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 7.49ms (1.19ms CPU time)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 5.87ms (1.46ms CPU time)
 Ran 2 tests for test/units/token/RLCCrosschainTokenScript.t.sol:RLCCrosschainTokenTest
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.50ms (5.65ms CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.15ms (4.71ms CPU time)
+Ran 10 tests for test/units/token/RLCCrosschainToken.t.sol:RLCCrosschainTokenTest
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 7.17ms (1.38ms CPU time)
 Ran 2 tests for test/units/bridges/layerZero/UpgradeIexecLayerZeroBridge.t.sol:UpgradeRLCOFTTest
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 11.44ms (2.01ms CPU time)
-Ran 2 tests for test/units/bridges/layerZero/UpgradeRLCAdapter.t.sol:UpgradeRLCAdapterTest
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 12.21ms (1.72ms CPU time)
-Ran 8 tests for test/units/bridges/layerZero/RLCAdapter.t.sol:RLCAdapterTest
-Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 12.34ms (3.85ms CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 10.61ms (2.43ms CPU time)
 Ran 8 tests for test/units/bridges/layerZero/IexecLayerZeroBridge.t.sol:IexecLayerZeroBridgeTest
-Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 12.35ms (3.52ms CPU time)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 12.17ms (3.10ms CPU time)
+Ran 8 tests for test/units/bridges/layerZero/RLCAdapter.t.sol:RLCAdapterTest
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 12.29ms (5.19ms CPU time)
+Ran 2 tests for test/units/bridges/layerZero/UpgradeRLCAdapter.t.sol:UpgradeRLCAdapterTest
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 12.30ms (1.33ms CPU time)
 Ran 5 tests for test/e2e/IexecLayerZeroBridgeScript.t.sol:IexecLayerZeroBridgeScriptTest
-Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.61s (846.17ms CPU time)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.12s (620.93ms CPU time)
 Ran 6 tests for test/e2e/RLCAdapterScript.t.sol:RLCAdapterScriptTest
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 78.35s (117.37s CPU time)
-Ran 9 test suites in 78.36s (80.03s CPU time): 55 tests passed, 0 failed, 0 skipped (55 total tests)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 55.46s (83.26s CPU time)
+Ran 9 test suites in 55.47s (56.64s CPU time): 55 tests passed, 0 failed, 0 skipped (55 total tests)
 ✅ All tests passed!
 
 5. STATIC ANALYSIS
 ==================
 🐍 Slither Analysis
   Running Slither analysis...
-  ✅ Slither report saved to audit-report/slither-report.md
+  ✅ Slither report saved to audit/slither-report.md
 
 🔍 Aderyn Analysis
   Running Aderyn analysis...
 Detectors run, processing found issues
 Found issues processed. Printing report
-  ✅ Aderyn report saved to audit-report/aderyn-report.md
-
-⚡ Mythril Analysis
-  Running Mythril analysis...
-    Analyzing src/token/RLCCrosschainToken.sol...
-    Analyzing src/bridges/layerZero/RLCAdapter.sol...
-    Analyzing src/bridges/layerZero/IexecLayerZeroBridge.sol...
-    Analyzing src/bridges/common/DualPausableUpgradeable.sol...
-  ✅ Individual reports saved in audit-report/mythril/
+  ✅ Aderyn report saved to audit/aderyn-report.md
 
 6. COVERAGE ANALYSIS
 ====================
@@ -109,7 +101,7 @@ Overall coverage rate:
   functions...: 87.2% (34 of 39 functions)
   branches....: 66.7% (2 of 3 branches)
 Message summary:
-✅ Coverage data saved to audit-report/
+✅ Coverage data saved to audit/
 📈 HTML report generated in ./coverage/
 
 7. SECURITY PATTERNS CHECK
@@ -124,4 +116,18 @@ Message summary:
 
 ✅ AUDIT REPORT COMPLETED
 =========================
-📁 Main report: audit-report/audit-report.txt
+📁 Main report: audit/audit-report.txt
+📊 Files generated:
+total 5496
+drwxr-xr-x  12 gabriel  staff      384 Jun 23 12:18 .
+drwxr-xr-x  30 gabriel  staff      960 Jun 23 12:21 ..
+-rw-r--r--   1 gabriel  staff    13214 Jun 23 12:18 aderyn-report.md
+-rw-r--r--   1 gabriel  staff     5180 Jun 23 12:05 audit-report.md
+-rw-r--r--   1 gabriel  staff     5996 Jun 23 12:21 audit-report.txt
+-rw-r--r--   1 gabriel  staff     3300 Jun 23 12:16 audit.txt
+-rw-r--r--   1 gabriel  staff  2763423 Jun 23 12:17 code-metrics.html
+drwxr-xr-x   6 gabriel  staff      192 Jun 23 10:00 mythril
+drwxr-xr-x   2 gabriel  staff       64 Jun 23 12:13 scripts
+-rw-r--r--   1 gabriel  staff     2273 Jun 23 12:18 slither-report.md
+drwxr-xr-x   2 gabriel  staff       64 Jun 23 12:13 templates
+-rw-r--r--   1 gabriel  staff     5256 Jun 23 12:18 test-output.txt
