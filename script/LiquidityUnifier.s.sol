@@ -32,7 +32,7 @@ contract Deploy is Script {
         address rlcToken = config.readAddress(string.concat(prefix, ".rlcAddress"));
         bytes32 createxSalt = config.readBytes32(string.concat(prefix, ".liquidityUnifierCreatexSalt"));
         vm.startBroadcast();
-        address liquidityUnifierProxy = deploy(rlcToken,admin, upgrader, createxFactory, createxSalt);
+        address liquidityUnifierProxy = deploy(rlcToken, admin, upgrader, createxFactory, createxSalt);
         vm.stopBroadcast();
 
         //TODO: use config file to store addresses.
@@ -50,13 +50,14 @@ contract Deploy is Script {
      * @param createxSalt The salt for CreateX deployment.
      * @return address of the deployed LiquidityUnifier proxy contract.
      */
-    function deploy(address rlcToken,address admin, address upgrader, address createxFactory, bytes32 createxSalt)
+    function deploy(address rlcToken, address admin, address upgrader, address createxFactory, bytes32 createxSalt)
         public
         returns (address)
     {
         bytes memory constructorData = abi.encode(rlcToken);
         bytes memory initData = abi.encodeWithSelector(LiquidityUnifier.initialize.selector, admin, upgrader);
-        return
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX("LiquidityUnifier", constructorData, initData, createxFactory, createxSalt);
+        return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+            "LiquidityUnifier", constructorData, initData, createxFactory, createxSalt
+        );
     }
 }

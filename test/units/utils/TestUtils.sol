@@ -19,7 +19,7 @@ library TestUtils {
         string memory symbol,
         address lzEndpointAdapter,
         address lzEndpointBridge,
-        address owner,
+        address admin,
         address pauser
     )
         internal
@@ -43,7 +43,7 @@ library TestUtils {
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "LiquidityUnifier",
                 abi.encode(rlcToken),
-                abi.encodeWithSelector(LiquidityUnifier.initialize.selector, owner),
+                abi.encodeWithSelector(LiquidityUnifier.initialize.selector, admin, admin), //TODO: fix IexecLayerZeroBridge contract to make distinction between admin and upgrader & add a new param to this function
                 createXFactory,
                 salt
             )
@@ -54,7 +54,7 @@ library TestUtils {
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(liquidityUnifier, lzEndpointAdapter),
-                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, admin, pauser),
                 createXFactory,
                 salt
             )
@@ -68,7 +68,7 @@ library TestUtils {
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(rlcCrosschainToken, lzEndpointBridge),
-                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, admin, pauser),
                 createXFactory,
                 salt
             )
