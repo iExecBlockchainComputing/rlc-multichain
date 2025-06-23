@@ -81,14 +81,13 @@ contract LiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgr
      *
      * Locks RLC tokens by transferring them from the sender to this contract's reserve.
      * This function is called when tokens are being sent to another chain via the bridge.
+     * Emits a {CrosschainBurn} event indicating tokens were locked for cross-chain transfer.
      *
-     * Cross-chain Flow:
-     * 1. User initiates cross-chain transfer through the bridge
-     * 2. Bridge calls this function to lock tokens on the source chain
-     * 3. Tokens are transferred from sender to this contract (locked in reserve)
-     *
-     * @param from The address to lock RLC tokens from (must have approved this contract)
-     * @param value The amount of RLC tokens to lock in this contract
+     * Cross-chain flow:
+     * 1. The user approves this contract to spend RLC tokens on their behalf.
+     * 2. The user initiates a cross-chain transfer through the bridge.
+     * 3. The bridge calls this function to lock tokens on the source chain.
+     * 4. Tokens are transferred from the sender's account to this contract (locked).
      *
      * Requirements:
      * - Caller must have TOKEN_BRIDGE_ROLE (typically the LayerZero bridge contract)
@@ -96,9 +95,9 @@ contract LiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgr
      * - `from` address must have sufficient RLC token balance
      *
      * @custom:security Only authorized bridge contracts can call this function
-     * @custom:security Requires prior token approval from the `from` address for this contract
      *
-     * Emits a {CrosschainBurn} event indicating tokens were locked for cross-chain transfer.
+     * @param from The address to lock RLC tokens from (must have approved this contract)
+     * @param value The amount of RLC tokens to lock in this contract
      */
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
         RLC_TOKEN.safeTransferFrom(from, address(this), value);
