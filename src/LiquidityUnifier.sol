@@ -40,6 +40,22 @@ contract LiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgr
         _grantRole(UPGRADER_ROLE, upgrader);
     }
 
+    // ============ FOR LAYERZERO BRIDGE ============
+    /**
+     * @notice Returns the number of decimal places used by the underlying RLC token
+     * @return The decimal places of the RLC token (typically 9 for RLC)
+     *
+     * @dev This function provides LayerZero bridge compatibility by exposing the decimal
+     * precision of the underlying RLC token. LayerZero's OFT (Omnichain Fungible Token)
+     * standard requires this information to properly handle token amounts across different
+     * chains with potentially different decimal representations.
+     *
+     * @custom:bridge-compatibility Required by LayerZero OFT standard
+     */
+    function decimals() external view returns (uint8) {
+        return RLC_TOKEN.decimals();
+    }
+
     /**
      * @dev See {IERC165-supportsInterface}.
      */
@@ -102,25 +118,11 @@ contract LiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgr
         emit CrosschainBurn(from, value, _msgSender());
     }
 
+    // ============ FOR UUPS UPGRADES ============
+
     /**
      * @dev Authorizes upgrades of the proxy. It can only be called by
      * an account with the UPGRADER_ROLE.
      */
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
-
-    // ============ FOR LAYERZERO BRIDGE ============
-    /**
-     * @notice Returns the number of decimal places used by the underlying RLC token
-     * @return The decimal places of the RLC token (typically 9 for RLC)
-     *
-     * @dev This function provides LayerZero bridge compatibility by exposing the decimal
-     * precision of the underlying RLC token. LayerZero's OFT (Omnichain Fungible Token)
-     * standard requires this information to properly handle token amounts across different
-     * chains with potentially different decimal representations.
-     *
-     * @custom:bridge-compatibility Required by LayerZero OFT standard
-     */
-    function decimals() external view returns (uint8) {
-        return RLC_TOKEN.decimals();
-    }
 }
