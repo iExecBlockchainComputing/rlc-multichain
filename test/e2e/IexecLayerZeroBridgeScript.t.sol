@@ -23,7 +23,8 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     function setUp() public {
         vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
         deployer = new IexecLayerZeroBridgeDeploy();
-        rlcAddress = new RLCCrosschainTokenDeployScript().deploy("RLC Crosschain Token", "RLC", owner, owner, CREATEX, salt);
+        rlcAddress =
+            new RLCCrosschainTokenDeployScript().deploy("RLC Crosschain Token", "RLC", owner, owner, CREATEX, salt);
         vm.setEnv("CREATE_X_FACTORY", vm.toString(CREATEX));
     }
 
