@@ -43,7 +43,7 @@ library TestUtils {
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "LiquidityUnifier",
                 abi.encode(rlcToken),
-                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner),
+                abi.encodeWithSelector(LiquidityUnifier.initialize.selector, owner),
                 createXFactory,
                 salt
             )
