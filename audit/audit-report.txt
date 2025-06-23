@@ -1,4 +1,4 @@
-📊 Report generated on: Mon Jun 23 12:28:43 CEST 2025
+📊 Report generated on: Mon Jun 23 13:46:04 CEST 2025
 
 1. PROJECT SCOPE ANALYSIS
 =========================
@@ -6,134 +6,39 @@
        7
 
 📏 Lines of Code Analysis (SLOC):
-github.com/AlDanial/cloc v 2.04  T=0.01 s (986.1 files/s, 91156.7 lines/s)
+github.com/AlDanial/cloc v 2.04  T=0.01 s (840.5 files/s, 78912.3 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Solidity                         9             97            452            283
+Solidity                         9             97            463            285
 -------------------------------------------------------------------------------
-SUM:                             9             97            452            283
+SUM:                             9             97            463            285
 -------------------------------------------------------------------------------
 
 📋 Lines per Solidity File:
-      92 src/token/RLCCrosschainToken.sol
+      93 src/token/RLCCrosschainToken.sol
      189 src/bridges/layerZero/RLCAdapter.sol
-     270 src/bridges/layerZero/IexecLayerZeroBridge.sol
+     274 src/bridges/layerZero/IexecLayerZeroBridge.sol
      152 src/bridges/common/DualPausableUpgradeable.sol
       42 src/interfaces/IERC7802.sol
        7 src/interfaces/ITokenSpender.sol
       28 src/interfaces/IIexecLayerZeroBridge.sol
-     780 total
+     785 total
 
 🔐 SHA256 Hash of Contract Files:
-4f9412482bef217ede8fd03f359613ae7ca9b4f472334ed532e076921cab339f  src/token/RLCCrosschainToken.sol
+e71f79339ee8563853ca05475ccd996479e3f47b86a9a6a0f32988c44c96a7ce  src/token/RLCCrosschainToken.sol
 3d4e4e9a0dfd4508b094f625b91690d71a74409486d5d8eadfd0fe7a5423675c  src/bridges/layerZero/RLCAdapter.sol
-581bd69de0f04a984161cde371a23cd03b3113bf894454544f6f41111d0cc52b  src/bridges/layerZero/IexecLayerZeroBridge.sol
-41f6193c966f372429df0f2175bdc1f9f7cc1fccbc62497e43baba329d1c0a5f  src/bridges/common/DualPausableUpgradeable.sol
+58d054f0a3f4ac5b27bf192ffbff54525786559cf9c1ad8e2c11973a1c2c5a15  src/bridges/layerZero/IexecLayerZeroBridge.sol
+eecbbf1fc2429ebd4b578d19ee23615a703a512971a9d5243f89b79c240f0a50  src/bridges/common/DualPausableUpgradeable.sol
 5611901f2e63adfcbbdad0ec436eda20fb33b7a7b46323db8886c53909a2f755  src/interfaces/IERC7802.sol
 12c59391fe407fb0fcade24fd30e62dc173f13b944cc4be0a40e3a12e1ad3f85  src/interfaces/ITokenSpender.sol
 3d6ab0ab18112a926e62d9ee58f375ff19c1d34e4277245292a2e44139c559cf  src/interfaces/IIexecLayerZeroBridge.sol
-
-2. SOLIDITY CODE METRICS
-========================
-✅ Detailed code metrics saved to audit/code-metrics.html
-
-3. EXTERNAL CALLS ANALYSIS
-==========================
-🔍 External function calls found:
-src/token/RLCCrosschainToken.sol:62:        return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
-src/bridges/layerZero/RLCAdapter.sol:130:        return OwnableUpgradeable.owner();
-src/bridges/layerZero/RLCAdapter.sol:156:        return super._debit(_from, _amountLD, _minAmountLD, _dstEid);
-src/bridges/layerZero/RLCAdapter.sol:178:        return super._credit(_to, _amountLD, _srcEid);
-src/bridges/layerZero/IexecLayerZeroBridge.sol:60:        OFTCoreUpgradeable(IERC20Metadata(_token).decimals(), _lzEndpoint)
-src/bridges/layerZero/IexecLayerZeroBridge.sol:166:        return OwnableUpgradeable.owner();
-src/bridges/layerZero/IexecLayerZeroBridge.sol:209:        RLC_TOKEN.crosschainBurn(_from, amountSentLD);
-src/bridges/layerZero/IexecLayerZeroBridge.sol:251:        RLC_TOKEN.crosschainMint(_to, _amountLD);
-src/bridges/common/DualPausableUpgradeable.sol:30:    // keccak256(abi.encode(uint256(keccak256("iexec.storage.DualPausable")) - 1)) & ~bytes32(uint256(0xff))
-
-4. COMPILATION & TESTING
-========================
-🔨 Running forge build...
-Compiler run successful!
-
-🧪 Running test suite...
-Ran 12 tests for test/units/bridges/common/DualPausableUpgradeableTest.t.sol:DualPausableUpgradeableTest
-Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 7.02ms (2.47ms CPU time)
-Ran 2 tests for test/units/token/RLCCrosschainTokenScript.t.sol:RLCCrosschainTokenTest
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.83ms (5.95ms CPU time)
-Ran 2 tests for test/units/bridges/layerZero/UpgradeIexecLayerZeroBridge.t.sol:UpgradeRLCOFTTest
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 8.92ms (770.71µs CPU time)
-Ran 2 tests for test/units/bridges/layerZero/UpgradeRLCAdapter.t.sol:UpgradeRLCAdapterTest
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 9.28ms (743.50µs CPU time)
-Ran 8 tests for test/units/bridges/layerZero/RLCAdapter.t.sol:RLCAdapterTest
-Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 9.32ms (2.41ms CPU time)
-Ran 10 tests for test/units/token/RLCCrosschainToken.t.sol:RLCCrosschainTokenTest
-Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 10.15ms (2.62ms CPU time)
-Ran 8 tests for test/units/bridges/layerZero/IexecLayerZeroBridge.t.sol:IexecLayerZeroBridgeTest
-Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 10.22ms (1.84ms CPU time)
-Ran 5 tests for test/e2e/IexecLayerZeroBridgeScript.t.sol:IexecLayerZeroBridgeScriptTest
-Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.16s (620.42ms CPU time)
-Ran 6 tests for test/e2e/RLCAdapterScript.t.sol:RLCAdapterScriptTest
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 54.70s (82.66s CPU time)
-Ran 9 test suites in 54.71s (55.92s CPU time): 55 tests passed, 0 failed, 0 skipped (55 total tests)
-✅ All tests passed!
-
-5. STATIC ANALYSIS
-==================
-🐍 Slither Analysis
-  Running Slither analysis...
-  ✅ Slither report saved to audit/slither-report.md
-
-🔍 Aderyn Analysis
-  Running Aderyn analysis...
-Detectors run, processing found issues
-Found issues processed. Printing report
-  ✅ Aderyn report saved to audit/aderyn-report.md
-
-⚡ Mythril Analysis
-  Running Mythril analysis...
-    Analyzing src/token/RLCCrosschainToken.sol...
-    ⚠️  Failed to analyze src/token/RLCCrosschainToken.sol
-    Analyzing src/bridges/layerZero/RLCAdapter.sol...
-    Analyzing src/bridges/layerZero/IexecLayerZeroBridge.sol...
-    Analyzing src/bridges/common/DualPausableUpgradeable.sol...
-  ✅ Individual reports saved in audit/mythril/
-
-6. COVERAGE ANALYSIS
-====================
-📊 Test coverage report:
-Wrote LCOV report.
-🔍 Processing coverage data...
-Overall coverage rate:
-  source files: 4
-  lines.......: 70.6% (72 of 102 lines)
-  functions...: 87.2% (34 of 39 functions)
-  branches....: 66.7% (2 of 3 branches)
-Message summary:
-✅ Coverage data saved to audit/
-📈 HTML report generated in ./coverage/
-
-7. SECURITY PATTERNS CHECK
-===========================
-🔒 Checking for common patterns:
-- Reentrancy guards:
-       0
-- Access control:
-      24
-- SafeMath usage:
-       0
 
 ✅ AUDIT REPORT COMPLETED
 =========================
 📁 Main report: audit/audit-report.txt
 📊 Files generated:
-total 5488
-drwxr-xr-x   9 gabriel  staff      288 Jun 23 12:30 .
-drwxr-xr-x  30 gabriel  staff      960 Jun 23 12:52 ..
--rw-r--r--   1 gabriel  staff    13214 Jun 23 12:30 aderyn-report.md
--rw-r--r--   1 gabriel  staff     5180 Jun 23 12:05 audit-report.md
--rw-r--r--   1 gabriel  staff     6396 Jun 23 12:52 audit-report.txt
--rw-r--r--   1 gabriel  staff  2763423 Jun 23 12:28 code-metrics.html
-drwxr-xr-x   6 gabriel  staff      192 Jun 23 10:00 mythril
--rw-r--r--   1 gabriel  staff     2273 Jun 23 12:30 slither-report.md
--rw-r--r--   1 gabriel  staff     5260 Jun 23 12:30 test-output.txt
+total 8
+drwxr-xr-x   3 gabriel  staff    96 Jun 23 13:46 .
+drwxr-xr-x  30 gabriel  staff   960 Jun 23 13:46 ..
+-rw-r--r--   1 gabriel  staff  2074 Jun 23 13:46 audit-report.txt
