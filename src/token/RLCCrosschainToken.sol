@@ -84,6 +84,9 @@ contract RLCCrosschainToken is
         emit CrosschainBurn(from, value, _msgSender());
     }
 
+    /**
+     * Uses the same decimals number as the original RLC token.
+     */
     function decimals() public pure override returns (uint8) {
         return 9;
     }
