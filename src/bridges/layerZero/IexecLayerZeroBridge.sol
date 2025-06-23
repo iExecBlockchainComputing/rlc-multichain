@@ -55,16 +55,16 @@ contract IexecLayerZeroBridge is
 
     /**
      * @dev Constructor for the LayerZero bridge contract
-     * @param _bridgeable_token The RLC token contract address that implements IERC7802 interface
+     * @param _bridgeableToken The RLC token contract address that implements IERC7802 interface
      * @param _lzEndpoint The LayerZero endpoint address for this chain
      *
      * @custom:oz-upgrades-unsafe-allow constructor
      */
-    constructor(address _bridgeable_token, address _lzEndpoint)
-        OFTCoreUpgradeable(IERC20Metadata(_bridgeable_token).decimals(), _lzEndpoint)
+    constructor(address _bridgeableToken, address _lzEndpoint)
+        OFTCoreUpgradeable(IERC20Metadata(_bridgeableToken).decimals(), _lzEndpoint)
     {
         _disableInitializers();
-        BRIDGEABLE_TOKEN = IERC7802(_bridgeable_token);
+        BRIDGEABLE_TOKEN = IERC7802(_bridgeableToken);
     }
 
     // ============ INITIALIZATION ============
