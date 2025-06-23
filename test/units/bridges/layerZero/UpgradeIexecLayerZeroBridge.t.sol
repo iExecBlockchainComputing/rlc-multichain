@@ -59,7 +59,6 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
             lzEndpoint: mockEndpoint,
             rlcToken: address(rlcCrosschainToken),
             newStateVariable: NEW_STATE_VARIABLE,
-            skipChecks: true, // Allow for testing with mocks
             validateOnly: false
         });
 
@@ -105,7 +104,6 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
             lzEndpoint: mockEndpoint,
             rlcToken: address(rlcCrosschainToken),
             newStateVariable: NEW_STATE_VARIABLE,
-            skipChecks: true,
             validateOnly: false
         });
 

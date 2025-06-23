@@ -78,7 +78,6 @@ contract Upgrade is Script {
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
             lzEndpoint: lzEndpoint,
             newStateVariable: newStateVariable,
-            skipChecks: true, // TODO: Remove when validation issues are fixed opts.unsafeAllow
             validateOnly: false
         });
 
@@ -100,7 +99,6 @@ contract ValidateUpgrade is Script {
             rlcToken: rlcCrosschain,
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             newStateVariable: 1000000 * 10 ** 9,
-            skipChecks: true, // TODO: Remove this when validation issues are fixed opts.unsafeAllow
             validateOnly: true
         });
 
