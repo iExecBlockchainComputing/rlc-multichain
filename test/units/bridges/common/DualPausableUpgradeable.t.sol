@@ -140,11 +140,13 @@ contract DualPausableUpgradeableTest is Test {
 
     // ============ dual pause workflow tests ============
 
+    // Make sure `pause()` does not impact `pauseSend()`.
     function test_DualPause_PauseFromSendToFull() public {
         // Start with send pause
         vm.startPrank(OWNER);
         dualPausable.pauseSend();
         assertTrue(dualPausable.sendPaused());
+        assertFalse(dualPausable.paused());
 
         dualPausable.pause();
         vm.stopPrank();
@@ -153,11 +155,13 @@ contract DualPausableUpgradeableTest is Test {
         assertTrue(dualPausable.sendPaused());
     }
 
+    // Make sure `pauseSend()` does not impact `pause()`.
     function test_DualPause_PauseFromFullToSend() public {
         // pause
         vm.startPrank(OWNER);
         dualPausable.pause();
         assertTrue(dualPausable.paused());
+        assertFalse(dualPausable.sendPaused());
         // pauseSend
         dualPausable.pauseSend();
         vm.stopPrank();

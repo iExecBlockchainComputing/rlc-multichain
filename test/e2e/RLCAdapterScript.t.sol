@@ -10,10 +10,11 @@ import {RLCAdapter} from "../../src/bridges/layerZero/RLCAdapter.sol";
 
 contract RLCAdapterScriptTest is Test {
     // Unique instance of the deployment script
-    address lzEndpoint = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
     address owner = makeAddr("OWNER_ADDRESS");
     address pauser = makeAddr("PAUSER_ADDRESS");
+    // TODO read value from config.json file.
     address RLC_TOKEN = 0x26A738b6D33EF4D94FF084D3552961b8f00639Cd;
+    address lzEndpoint = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
     address createx = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
 
     RLCAdapterDeploy public deployer;
