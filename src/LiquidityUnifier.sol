@@ -56,13 +56,8 @@ contract LiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgr
         return RLC_TOKEN.decimals();
     }
 
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
-        return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
-    }
 
+    // ============ CROSS-CHAIN FUNCTIONS ============
     /**
      * @dev See {IERC7802-crosschainMint}.
      *
@@ -116,6 +111,15 @@ contract LiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgr
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
         RLC_TOKEN.safeTransferFrom(from, address(this), value);
         emit CrosschainBurn(from, value, _msgSender());
+    }
+
+    // ============ FOR ERC165 INTERFACE DETECTION ============
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
     }
 
     // ============ FOR UUPS UPGRADES ============
