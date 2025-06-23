@@ -167,7 +167,7 @@ verify-adapter-impl:
         --watch \
         --constructor-args $(shell cast abi-encode "constructor(address,address)" $(RLC_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS)) \
         --etherscan-api-key $(ETHERSCAN_API_KEY) \
-        $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) \
+        $(LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS) \
         src/bridges/layerZero/RLCAdapter.sol:RLCAdapter
 
 verify-layerzero-bridge-impl:
@@ -186,9 +186,9 @@ verify-adapter-proxy:
 	forge verify-contract \
         --chain-id 11155111 \
         --watch \
-        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
+        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
         --etherscan-api-key $(ETHERSCAN_API_KEY) \
-        $(RLC_ADAPTER_PROXY_ADDRESS) \
+        $(LAYERZERO_BRIDGE_ADAPTER_PROXY_ADDRESS) \
         lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
 verify-layerzero-bridge-proxy:

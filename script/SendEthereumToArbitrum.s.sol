@@ -3,7 +3,7 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {RLCAdapter} from "../src/bridges/layerZero/RLCAdapter.sol";
+import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 // import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
@@ -23,7 +23,7 @@ contract SendTokensToArbitrumSepolia is Script {
         vm.startBroadcast();
 
         // Contract addresses
-        address adapterAddress = vm.envAddress("RLC_ADAPTER_PROXY_ADDRESS"); // Your RLCAdapter address
+        address iexecLayerZeroBridgeAddress = vm.envAddress("LAYERZERO_BRIDGE_ADAPTER_PROXY_ADDRESS"); // Your IexecLayerZeroBridge address
         address rlcTokenAddress = vm.envAddress("RLC_ADDRESS"); // RLC token address on sepolia testnet
 
         // Transfer parameters
@@ -33,11 +33,11 @@ contract SendTokensToArbitrumSepolia is Script {
 
         // First, approve the adapter to spend your tokens
         IERC20 rlcToken = IERC20(rlcTokenAddress);
-        console.log("Approving RLCAdapter to spend %s RLC", amount / 10 ** 9);
-        rlcToken.approve(adapterAddress, amount);
+        console.log("Approving IexecLayerZeroBridge to spend %s RLC", amount / 10 ** 9);
+        rlcToken.approve(iexecLayerZeroBridgeAddress, amount);
 
         // Then, send tokens cross-chain
-        RLCAdapter adapter = RLCAdapter(adapterAddress);
+        IexecLayerZeroBridge adapter = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
         console.log("Sending %s RLC to Arbitrum Sepolia", amount / 10 ** 9);
         console.log("Recipient: %s", recipientAddress);
 

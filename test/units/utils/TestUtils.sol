@@ -7,9 +7,9 @@ import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfac
 import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
-import {RLCAdapter} from "../../../src/bridges/layerZero/RLCAdapter.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {LiquidityUnifier} from "../../../src/LiquidityUnifier.sol";
 
 library TestUtils {
     using OptionsBuilder for bytes;
@@ -24,7 +24,7 @@ library TestUtils {
     )
         internal
         returns (
-            RLCAdapter rlcAdapter,
+            IexecLayerZeroBridge iexecLayerZeroBridgeAdapter,
             IexecLayerZeroBridge iexecLayerZeroBridge,
             RLCMock rlcToken,
             RLCMock rlcCrosschainToken
@@ -35,13 +35,26 @@ library TestUtils {
         // Deploy RLC token mock for Ethereum
         rlcToken = new RLCMock(name, symbol);
 
-        // Deploy RLCAdapter
+        // salt for createX
         bytes32 salt = keccak256("RLCAdapter_SALT");
-        rlcAdapter = RLCAdapter(
+
+        // Deploy Liquidity Unifier
+        LiquidityUnifier liquidityUnifier = LiquidityUnifier(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "RLCAdapter",
-                abi.encode(rlcToken, lzEndpointAdapter),
-                abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser),
+                "LiquidityUnifier",
+                abi.encode(rlcToken),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner),
+                createXFactory,
+                salt
+            )
+        );
+
+        // Deploy IexecLayerZeroBridgeAdapter
+        iexecLayerZeroBridgeAdapter = IexecLayerZeroBridge(
+            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+                "IexecLayerZeroBridge",
+                abi.encode(liquidityUnifier, lzEndpointAdapter),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser),
                 createXFactory,
                 salt
             )

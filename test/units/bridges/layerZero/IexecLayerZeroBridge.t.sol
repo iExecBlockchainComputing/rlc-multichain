@@ -7,7 +7,6 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {RLCMock} from "../../mocks/RLCMock.sol";
-import {RLCAdapter} from "../../../../src/bridges/layerZero/RLCAdapter.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {DualPausableUpgradeable} from "../../../../src/bridges/common/DualPausableUpgradeable.sol";
 import {TestUtils} from "../../utils/TestUtils.sol";
@@ -18,7 +17,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     // ============ STATE VARIABLES ============
     IexecLayerZeroBridge private iexecLayerZeroBridge;
-    RLCAdapter private adapterMock;
+    IexecLayerZeroBridge private iexecLayerZeroBridgeAdapter;
     RLCMock private rlcCrosschainToken;
 
     uint32 private constant SOURCE_EID = 1;
@@ -43,13 +42,13 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address lzEndpointBridge = address(endpoints[SOURCE_EID]);
         address lzEndpointAdapter = address(endpoints[DEST_EID]);
 
-        (adapterMock, iexecLayerZeroBridge,, rlcCrosschainToken) =
+        (iexecLayerZeroBridgeAdapter, iexecLayerZeroBridge,, rlcCrosschainToken) =
             TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, pauser);
 
         // Wire the contracts
         address[] memory contracts = new address[](2);
         contracts[0] = address(iexecLayerZeroBridge);
-        contracts[1] = address(adapterMock);
+        contracts[1] = address(iexecLayerZeroBridgeAdapter);
         vm.startPrank(owner);
         wireOApps(contracts);
         vm.stopPrank();
