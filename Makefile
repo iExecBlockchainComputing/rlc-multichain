@@ -32,8 +32,8 @@ generate-coverage:
 		--ir-minimum \
 		--report lcov \
 		--no-match-coverage "script|src/mocks|test";
-	[[ CI != true]] genhtml lcov.info --branch-coverage --output-dir coverage
-	
+	[[ "$$CI" != "true" ]] && genhtml lcov.info --branch-coverage --output-dir coverage
+
 clean:
 	forge clean
 
