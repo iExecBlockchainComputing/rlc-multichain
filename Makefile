@@ -2,6 +2,7 @@
 
 MAKEFLAGS += --no-print-directory
 
+include report.mk
 -include .env
 
 
