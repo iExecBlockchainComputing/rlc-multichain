@@ -29,6 +29,7 @@ e2e-test:
 generate-coverage:
 	rm -rf coverage lcov.info && \
 	FOUNDRY_PROFILE=test forge coverage \
+		--ir-minimum \
 		--report lcov \
 		--no-match-coverage "script|src/mocks|test"
 	@if [ "$$CI" != "true" ]; then \
