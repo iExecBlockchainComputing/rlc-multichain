@@ -56,13 +56,6 @@ contract RLCCrosschainToken is
     }
 
     /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
-        return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
-    }
-
-    /**
      * @dev See {IERC7802-crosschainMint}.
      * Does not mint if `to` is the zero address.
      * Reverts if the caller does not have the `TOKEN_BRIDGE_ROLE`.
@@ -82,6 +75,13 @@ contract RLCCrosschainToken is
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
         _burn(from, value);
         emit CrosschainBurn(from, value, _msgSender());
+    }
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**

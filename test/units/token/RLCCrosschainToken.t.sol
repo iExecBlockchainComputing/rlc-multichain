@@ -46,13 +46,6 @@ contract RLCCrosschainTokenTest is Test {
         crossChainToken.initialize("Foo", "BAR", owner, upgrader);
     }
 
-    // ============ supportsInterface ============
-
-    function test_SupportErc7802Interface() public view {
-        assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
-        assertTrue(crossChainToken.supportsInterface(type(IERC7802).interfaceId));
-    }
-
     // ============ crosschainMint ============
 
     function test_MintForOneUserFromOneBridge() public {
@@ -407,6 +400,13 @@ contract RLCCrosschainTokenTest is Test {
         vm.prank(bridge);
         crossChainToken.crosschainBurn(user, amount + 1);
         assertEq(crossChainToken.balanceOf(user), amount);
+    }
+
+    // ============ supportsInterface ============
+
+    function test_SupportErc7802Interface() public view {
+        assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
+        assertTrue(crossChainToken.supportsInterface(type(IERC7802).interfaceId));
     }
 
     // ============ upgradeToAndCall ============
