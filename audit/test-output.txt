@@ -1,0 +1,163 @@
+Warning: This is a nightly build of Foundry. It is recommended to use the latest stable version. To mute this warning set `FOUNDRY_DISABLE_NIGHTLY_WARNING` in your environment. 
+
+No files changed, compilation skipped
+
+Ran 2 tests for test/units/token/RLCCrosschainTokenScript.t.sol:RLCCrosschainTokenTest
+[PASS] test_Deploy() (gas: 2658232)
+[PASS] test_RevertWhen_TwoDeploymentsWithTheSameSalt() (gas: 1024298174)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.91ms (4.82ms CPU time)
+
+Ran 8 tests for test/units/bridges/layerZero/RLCAdapter.t.sol:RLCAdapterTest
+[PASS] test_PauseSend_BlocksOutgoingOnly() (gas: 191282)
+[PASS] test_PauseSend_OnlyPauserRole() (gas: 18258)
+[PASS] test_Pause_BlocksOutgoingTransfers() (gas: 187289)
+[PASS] test_Pause_OnlyPauserRole() (gas: 18237)
+[PASS] test_SendToken_WhenOperational() (gas: 549873)
+[PASS] test_UnpauseSend_RestoresOutgoingTransfers() (gas: 566191)
+[PASS] test_Unpause_RestoresFullFunctionality() (gas: 564376)
+[PASS] test_sendRLCWhenSourceAdapterUnpaused() (gas: 557651)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 10.23ms (2.96ms CPU time)
+
+Ran 8 tests for test/units/bridges/layerZero/IexecLayerZeroBridge.t.sol:IexecLayerZeroBridgeTest
+[PASS] test_PauseSend_BlocksOutgoingOnly() (gas: 187630)
+[PASS] test_PauseSend_OnlyPauserRole() (gas: 18258)
+[PASS] test_Pause_BlocksOutgoingTransfers() (gas: 181888)
+[PASS] test_Pause_OnlyPauserRole() (gas: 18215)
+[PASS] test_SendToken_WhenOperational() (gas: 523411)
+[PASS] test_UnpauseSend_RestoresOutgoingTransfers() (gas: 537990)
+[PASS] test_Unpause_RestoresFullFunctionality() (gas: 534515)
+[PASS] test_sendRLCWhenSourceLayerZeroBridgeUnpaused() (gas: 532893)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 10.24ms (1.68ms CPU time)
+
+Ran 5 tests for test/e2e/IexecLayerZeroBridgeScript.t.sol:IexecLayerZeroBridgeScriptTest
+[PASS] testFork_ConfigureContractCorrectly() (gas: 208)
+[PASS] testFork_Deployment() (gas: 4103623)
+[PASS] testFork_RevertWhenAnyConfigurationVariableIsMissing() (gas: 163)
+[PASS] testFork_RevertWhenPeerIsAlreadySet() (gas: 143)
+[PASS] testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() (gas: 1024367317)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.50s (655.95ms CPU time)
+
+Ran 12 tests for test/units/bridges/common/DualPausableUpgradeableTest.t.sol:DualPausableUpgradeableTest
+[PASS] test_DualPause_PauseFromSendToFull() (gas: 62544)
+[PASS] test_RevertWhen_pauseSend_AlreadyPaused() (gas: 35656)
+[PASS] test_RevertWhen_unpauseSend_NotPaused() (gas: 10647)
+[PASS] test_RevertWhen_whenSendNotPaused_SendIsPaused() (gas: 35275)
+[PASS] test_initialize_SetsCorrectInitialStates() (gas: 16096)
+[PASS] test_pauseSend_BlocksOperations() (gas: 37119)
+[PASS] test_pauseSend_EmitsCorrectEvent() (gas: 35573)
+[PASS] test_pauseStatus_ReturnsCorrectStatesInAllScenarios() (gas: 67751)
+[PASS] test_unpauseSend_EmitsCorrectEvent() (gas: 26362)
+[PASS] test_unpauseSend_RestoresOperations() (gas: 29458)
+[PASS] test_unpause_RestoresFullOperationality() (gas: 32409)
+[PASS] test_whenSendNotPaused_AllowsOperationWhenOperational() (gas: 11084)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 3.33s (2.22ms CPU time)
+
+Ran 19 tests for test/units/token/RLCCrosschainToken.t.sol:RLCCrosschainTokenTest
+[PASS] test_BurnForMultipleUsersFromMultipleBridges() (gas: 202710)
+[PASS] test_BurnForMultipleUsersFromOneBridge() (gas: 162150)
+[PASS] test_BurnForOneUserFromMultipleBridges() (gas: 128576)
+[PASS] test_BurnForOneUserFromOneBridge() (gas: 94987)
+[PASS] test_BurnForOneUserFromOneBridgeMultipleTimes() (gas: 96772)
+[PASS] test_BurnForUserEvenWhenMintIsDoneByDifferentBridge() (gas: 120827)
+[PASS] test_MintForMultipleUsersFromMultipleBridges() (gas: 245697)
+[PASS] test_MintForMultipleUsersFromOneBridge() (gas: 199742)
+[PASS] test_MintForOneUserFromMultipleBridges() (gas: 164825)
+[PASS] test_MintForOneUserFromOneBridge() (gas: 118890)
+[PASS] test_MintForOneUserFromOneBridgeMultipleTimes() (gas: 120967)
+[PASS] test_RevertWhen_BurnFromZeroAddress() (gas: 54608)
+[PASS] test_RevertWhen_BurnMoreThanBalance() (gas: 110761)
+[PASS] test_RevertWhen_InitializedMoreThanOnce() (gas: 21595)
+[PASS] test_RevertWhen_MintToZeroAddress() (gas: 65923)
+[PASS] test_RevertWhen_UnauthorizedBurnCaller() (gas: 116356)
+[PASS] test_RevertWhen_UnauthorizedCaller() (gas: 37083)
+[PASS] test_RevertWhen_UnauthorizedUpgrader() (gas: 22051)
+[PASS] test_SupportErc7802Interface() (gas: 13865)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 3.33s (1.14ms CPU time)
+
+Ran 2 tests for test/units/bridges/layerZero/UpgradeIexecLayerZeroBridge.t.sol:UpgradeRLCOFTTest
+[FAIL: Upgrade safety validation failed:
+✘  src/mocks/IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2 (upgrades from src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge)
+
+      src/mocks/IexecLayerZeroBridgeV2Mock.sol:14: Missing initializer
+          Define an initializer function and use it to call the initializers of parent contracts
+          https://zpl.in/upgrades/error-001
+
+FAILED] test_RevertWhen_InitializeV2Twice() (gas: 25020783)
+[FAIL: Upgrade safety validation failed:
+✘  src/mocks/IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2 (upgrades from src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge)
+
+      src/mocks/IexecLayerZeroBridgeV2Mock.sol:14: Missing initializer
+          Define an initializer function and use it to call the initializers of parent contracts
+          https://zpl.in/upgrades/error-001
+
+FAILED] test_UpgradeCorrectly() (gas: 25070226)
+Suite result: FAILED. 0 passed; 2 failed; 0 skipped; finished in 3.35s (6.67s CPU time)
+
+Ran 2 tests for test/units/bridges/layerZero/UpgradeRLCAdapter.t.sol:UpgradeRLCAdapterTest
+[FAIL: Upgrade safety validation failed:
+✘  src/mocks/RLCAdapterV2Mock.sol:RLCAdapterV2 (upgrades from src/bridges/layerZero/RLCAdapter.sol:RLCAdapter)
+
+      src/mocks/RLCAdapterV2Mock.sol:14: Missing initializer
+          Define an initializer function and use it to call the initializers of parent contracts
+          https://zpl.in/upgrades/error-001
+
+FAILED] test_RevertWhen_InitializeV2Twice() (gas: 24945281)
+[FAIL: Upgrade safety validation failed:
+✘  src/mocks/RLCAdapterV2Mock.sol:RLCAdapterV2 (upgrades from src/bridges/layerZero/RLCAdapter.sol:RLCAdapter)
+
+      src/mocks/RLCAdapterV2Mock.sol:14: Missing initializer
+          Define an initializer function and use it to call the initializers of parent contracts
+          https://zpl.in/upgrades/error-001
+
+FAILED] test_UpgradeCorrectly() (gas: 24996409)
+Suite result: FAILED. 0 passed; 2 failed; 0 skipped; finished in 3.35s (6.67s CPU time)
+
+Ran 6 tests for test/e2e/RLCAdapterScript.t.sol:RLCAdapterScriptTest
+[PASS] testForkFuzz_DifferentSaltsProduceDifferentAddresses(bytes32,bytes32) (runs: 256, μ: 8127502, ~: 8127472)
+[PASS] testForkFuzz_RevertIfSecondDeploymentWithSameSalt(bytes32) (runs: 256, μ: 1024365587, ~: 1024365465)
+[PASS] testFork_CheckDeployment() (gas: 4080081)
+[PASS] testFork_ConfigureContractCorrectly() (gas: 164)
+[PASS] testFork_RevertWhenAnyConfigurationVariableIsMissing() (gas: 141)
+[PASS] testFork_RevertWhenPeerIsAlreadySet() (gas: 143)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 56.30s (84.24s CPU time)
+
+Ran 9 test suites in 56.32s (71.21s CPU time): 60 tests passed, 4 failed, 0 skipped (64 total tests)
+
+Failing tests:
+Encountered 2 failing tests in test/units/bridges/layerZero/UpgradeIexecLayerZeroBridge.t.sol:UpgradeRLCOFTTest
+[FAIL: Upgrade safety validation failed:
+✘  src/mocks/IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2 (upgrades from src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge)
+
+      src/mocks/IexecLayerZeroBridgeV2Mock.sol:14: Missing initializer
+          Define an initializer function and use it to call the initializers of parent contracts
+          https://zpl.in/upgrades/error-001
+
+FAILED] test_RevertWhen_InitializeV2Twice() (gas: 25020783)
+[FAIL: Upgrade safety validation failed:
+✘  src/mocks/IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2 (upgrades from src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge)
+
+      src/mocks/IexecLayerZeroBridgeV2Mock.sol:14: Missing initializer
+          Define an initializer function and use it to call the initializers of parent contracts
+          https://zpl.in/upgrades/error-001
+
+FAILED] test_UpgradeCorrectly() (gas: 25070226)
+
+Encountered 2 failing tests in test/units/bridges/layerZero/UpgradeRLCAdapter.t.sol:UpgradeRLCAdapterTest
+[FAIL: Upgrade safety validation failed:
+✘  src/mocks/RLCAdapterV2Mock.sol:RLCAdapterV2 (upgrades from src/bridges/layerZero/RLCAdapter.sol:RLCAdapter)
+
+      src/mocks/RLCAdapterV2Mock.sol:14: Missing initializer
+          Define an initializer function and use it to call the initializers of parent contracts
+          https://zpl.in/upgrades/error-001
+
+FAILED] test_RevertWhen_InitializeV2Twice() (gas: 24945281)
+[FAIL: Upgrade safety validation failed:
+✘  src/mocks/RLCAdapterV2Mock.sol:RLCAdapterV2 (upgrades from src/bridges/layerZero/RLCAdapter.sol:RLCAdapter)
+
+      src/mocks/RLCAdapterV2Mock.sol:14: Missing initializer
+          Define an initializer function and use it to call the initializers of parent contracts
+          https://zpl.in/upgrades/error-001
+
+FAILED] test_UpgradeCorrectly() (gas: 24996409)
+
+Encountered a total of 4 failing tests, 60 tests succeeded

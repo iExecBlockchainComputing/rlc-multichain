@@ -1,4 +1,4 @@
-📊 Report generated on: Mon Jun 23 13:48:24 CEST 2025
+📊 Report generated on: Mon Jun 23 13:49:43 CEST 2025
 
 1. PROJECT SCOPE ANALYSIS
 =========================
@@ -6,7 +6,7 @@
        7
 
 📏 Lines of Code Analysis (SLOC):
-github.com/AlDanial/cloc v 2.04  T=0.01 s (932.5 files/s, 87554.0 lines/s)
+github.com/AlDanial/cloc v 2.04  T=0.01 s (1218.5 files/s, 114406.1 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
@@ -38,12 +38,61 @@ eecbbf1fc2429ebd4b578d19ee23615a703a512971a9d5243f89b79c240f0a50  src/bridges/co
 ========================
 ✅ Detailed code metrics saved to audit/code-metrics.html
 
+3. EXTERNAL CALLS ANALYSIS
+==========================
+🔍 External function calls found:
+src/token/RLCCrosschainToken.sol:62:        return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
+src/bridges/layerZero/RLCAdapter.sol:130:        return OwnableUpgradeable.owner();
+src/bridges/layerZero/RLCAdapter.sol:156:        return super._debit(_from, _amountLD, _minAmountLD, _dstEid);
+src/bridges/layerZero/RLCAdapter.sol:178:        return super._credit(_to, _amountLD, _srcEid);
+src/bridges/layerZero/IexecLayerZeroBridge.sol:64:        OFTCoreUpgradeable(IERC20Metadata(_token).decimals(), _lzEndpoint)
+src/bridges/layerZero/IexecLayerZeroBridge.sol:170:        return OwnableUpgradeable.owner();
+src/bridges/layerZero/IexecLayerZeroBridge.sol:213:        RLC_TOKEN.crosschainBurn(_from, amountSentLD);
+src/bridges/layerZero/IexecLayerZeroBridge.sol:255:        RLC_TOKEN.crosschainMint(_to, _amountLD);
+src/bridges/common/DualPausableUpgradeable.sol:30:    /// keccak256(abi.encode(uint256(keccak256("iexec.storage.DualPausable")) - 1)) & ~bytes32(uint256(0xff))
+
+4. COMPILATION & TESTING
+========================
+🔨 Running forge build...
+Compiler run successful!
+
+🧪 Running test suite...
+Ran 2 tests for test/units/token/RLCCrosschainTokenScript.t.sol:RLCCrosschainTokenTest
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.91ms (4.82ms CPU time)
+Ran 8 tests for test/units/bridges/layerZero/RLCAdapter.t.sol:RLCAdapterTest
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 10.23ms (2.96ms CPU time)
+Ran 8 tests for test/units/bridges/layerZero/IexecLayerZeroBridge.t.sol:IexecLayerZeroBridgeTest
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 10.24ms (1.68ms CPU time)
+Ran 5 tests for test/e2e/IexecLayerZeroBridgeScript.t.sol:IexecLayerZeroBridgeScriptTest
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.50s (655.95ms CPU time)
+Ran 12 tests for test/units/bridges/common/DualPausableUpgradeableTest.t.sol:DualPausableUpgradeableTest
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 3.33s (2.22ms CPU time)
+Ran 19 tests for test/units/token/RLCCrosschainToken.t.sol:RLCCrosschainTokenTest
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 3.33s (1.14ms CPU time)
+Ran 2 tests for test/units/bridges/layerZero/UpgradeIexecLayerZeroBridge.t.sol:UpgradeRLCOFTTest
+Suite result: FAILED. 0 passed; 2 failed; 0 skipped; finished in 3.35s (6.67s CPU time)
+Ran 2 tests for test/units/bridges/layerZero/UpgradeRLCAdapter.t.sol:UpgradeRLCAdapterTest
+Suite result: FAILED. 0 passed; 2 failed; 0 skipped; finished in 3.35s (6.67s CPU time)
+Ran 6 tests for test/e2e/RLCAdapterScript.t.sol:RLCAdapterScriptTest
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 56.30s (84.24s CPU time)
+Ran 9 test suites in 56.32s (71.21s CPU time): 60 tests passed, 4 failed, 0 skipped (64 total tests)
+Encountered 2 failing tests in test/units/bridges/layerZero/UpgradeIexecLayerZeroBridge.t.sol:UpgradeRLCOFTTest
+Encountered 2 failing tests in test/units/bridges/layerZero/UpgradeRLCAdapter.t.sol:UpgradeRLCAdapterTest
+Encountered a total of 4 failing tests, 60 tests succeeded
+❌ Some tests are failing - see details below:
+[FAIL: Upgrade safety validation failed:
+[FAIL: Upgrade safety validation failed:
+[FAIL: Upgrade safety validation failed:
+[FAIL: Upgrade safety validation failed:
+[FAIL: Upgrade safety validation failed:
+
 ✅ AUDIT REPORT COMPLETED
 =========================
 📁 Main report: audit/audit-report.txt
 📊 Files generated:
-total 5408
-drwxr-xr-x   4 gabriel  staff      128 Jun 23 13:48 .
-drwxr-xr-x  30 gabriel  staff      960 Jun 23 13:48 ..
--rw-r--r--   1 gabriel  staff     2184 Jun 23 13:48 audit-report.txt
--rw-r--r--   1 gabriel  staff  2763505 Jun 23 13:48 code-metrics.html
+total 5440
+drwxr-xr-x   5 gabriel  staff      160 Jun 23 13:50 .
+drwxr-xr-x  30 gabriel  staff      960 Jun 23 13:50 ..
+-rw-r--r--   1 gabriel  staff     5626 Jun 23 13:51 audit-report.txt
+-rw-r--r--   1 gabriel  staff  2763505 Jun 23 13:49 code-metrics.html
+-rw-r--r--   1 gabriel  staff     9408 Jun 23 13:51 test-output.txt

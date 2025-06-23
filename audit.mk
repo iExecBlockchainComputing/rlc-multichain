@@ -39,28 +39,28 @@ audit-report:
 	@echo "✅ Detailed code metrics saved to audit/code-metrics.html" | tee -a audit/audit-report.txt
 	@echo "" | tee -a audit/audit-report.txt
 
-# @echo "3. EXTERNAL CALLS ANALYSIS" | tee -a audit/audit-report.txt
-# @echo "==========================" | tee -a audit/audit-report.txt
-# @echo "🔍 External function calls found:" | tee -a audit/audit-report.txt
-# @find src/ -name '*.sol' -not -path "*/mocks/*" -exec grep -Hn '\.[a-zA-Z_][a-zA-Z0-9_]*(' {} \; | head -50 | tee -a audit/audit-report.txt || echo "No external calls found" | tee -a audit/audit-report.txt
-# @echo "" | tee -a audit/audit-report.txt
+	@echo "3. EXTERNAL CALLS ANALYSIS" | tee -a audit/audit-report.txt
+	@echo "==========================" | tee -a audit/audit-report.txt
+	@echo "🔍 External function calls found:" | tee -a audit/audit-report.txt
+	@find src/ -name '*.sol' -not -path "*/mocks/*" -exec grep -Hn '\.[a-zA-Z_][a-zA-Z0-9_]*(' {} \; | head -50 | tee -a audit/audit-report.txt || echo "No external calls found" | tee -a audit/audit-report.txt
+	@echo "" | tee -a audit/audit-report.txt
 
-# @echo "4. COMPILATION & TESTING" | tee -a audit/audit-report.txt
-# @echo "========================" | tee -a audit/audit-report.txt
-# @echo "🔨 Running forge build..." | tee -a audit/audit-report.txt
-# @forge clean
-# @forge build 2>&1 | tail -1 | tee -a audit/audit-report.txt
-# @echo "" | tee -a audit/audit-report.txt
+	@echo "4. COMPILATION & TESTING" | tee -a audit/audit-report.txt
+	@echo "========================" | tee -a audit/audit-report.txt
+	@echo "🔨 Running forge build..." | tee -a audit/audit-report.txt
+	@forge clean
+	@forge build 2>&1 | tail -1 | tee -a audit/audit-report.txt
+	@echo "" | tee -a audit/audit-report.txt
 
-# @echo "🧪 Running test suite..." | tee -a audit/audit-report.txt
-# @forge test 2>&1 | tee audit/test-output.txt | grep -E "^(Ran [0-9]+.*:|Suite result:|Encountered.*failing|tests passed)" | tee -a audit/audit-report.txt
-# @if grep -q "FAILED" audit/test-output.txt; then \
-# 	echo "❌ Some tests are failing - see details below:" | tee -a audit/audit-report.txt; \
-# 	grep "FAIL:" audit/test-output.txt | head -5 | tee -a audit/audit-report.txt; \
-# else \
-# 	echo "✅ All tests passed!" | tee -a audit/audit-report.txt; \
-# fi
-# @echo "" | tee -a audit/audit-report.txt
+	@echo "🧪 Running test suite..." | tee -a audit/audit-report.txt
+	@forge test 2>&1 | tee audit/test-output.txt | grep -E "^(Ran [0-9]+.*:|Suite result:|Encountered.*failing|tests passed)" | tee -a audit/audit-report.txt
+	@if grep -q "FAILED" audit/test-output.txt; then \
+		echo "❌ Some tests are failing - see details below:" | tee -a audit/audit-report.txt; \
+		grep "FAIL:" audit/test-output.txt | head -5 | tee -a audit/audit-report.txt; \
+	else \
+		echo "✅ All tests passed!" | tee -a audit/audit-report.txt; \
+	fi
+	@echo "" | tee -a audit/audit-report.txt
 
 # @echo "5. STATIC ANALYSIS" | tee -a audit/audit-report.txt
 # @echo "==================" | tee -a audit/audit-report.txt
