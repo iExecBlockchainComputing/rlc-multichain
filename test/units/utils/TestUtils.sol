@@ -64,6 +64,7 @@ library TestUtils {
                 salt
             )
         );
+        // TODO see if it's possible to authorize the bridge here.
     }
 
     /**
