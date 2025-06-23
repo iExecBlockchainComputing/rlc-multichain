@@ -24,8 +24,8 @@ library TestUtils {
     )
         internal
         returns (
-            IexecLayerZeroBridge iexecLayerZeroBridgeAdapter,
-            IexecLayerZeroBridge iexecLayerZeroBridge,
+            IexecLayerZeroBridge iexecLayerZeroBridgeChainA,
+            IexecLayerZeroBridge iexecLayerZeroBridgeChainB,
             RLCMock rlcToken,
             RLCMock rlcCrosschainToken
         )
@@ -50,7 +50,7 @@ library TestUtils {
         );
 
         // Deploy IexecLayerZeroBridgeAdapter
-        iexecLayerZeroBridgeAdapter = IexecLayerZeroBridge(
+        iexecLayerZeroBridgeChainA = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(liquidityUnifier, lzEndpointAdapter),
@@ -64,7 +64,7 @@ library TestUtils {
         rlcCrosschainToken = new RLCMock(name, symbol);
 
         // Deploy IexecLayerZeroBridge
-        iexecLayerZeroBridge = IexecLayerZeroBridge(
+        iexecLayerZeroBridgeChainB = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(rlcCrosschainToken, lzEndpointBridge),
