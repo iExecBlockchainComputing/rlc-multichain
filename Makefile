@@ -97,7 +97,6 @@ deploy-layerzero-bridge:
         --account $(ACCOUNT) \
         --broadcast \
         -vvv
-		
 configure-adapter:
 	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
 	forge script script/bridges/layerZero/RLCAdapter.s.sol:Configure \
