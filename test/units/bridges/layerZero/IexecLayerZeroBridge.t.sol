@@ -6,11 +6,11 @@ import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfac
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
-import {RLCMock} from "../../mocks/RLCMock.sol";
 import {RLCAdapter} from "../../../../src/bridges/layerZero/RLCAdapter.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {DualPausableUpgradeable} from "../../../../src/bridges/common/DualPausableUpgradeable.sol";
 import {TestUtils} from "../../utils/TestUtils.sol";
+import {RLCCrosschainToken} from "../../../../src/token/RLCCrosschainToken.sol";
 
 contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
@@ -19,7 +19,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     // ============ STATE VARIABLES ============
     IexecLayerZeroBridge private iexecLayerZeroBridge;
     RLCAdapter private adapterMock;
-    RLCMock private rlcCrosschainToken;
+    RLCCrosschainToken private rlcCrosschainToken;
 
     uint32 private constant SOURCE_EID = 1;
     uint32 private constant DEST_EID = 2;
@@ -54,7 +54,13 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         wireOApps(contracts);
         vm.stopPrank();
 
+        // Authorize the bridge to mint/burn tokens.
+        vm.startPrank(owner);
+        rlcCrosschainToken.grantRole(rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), address(iexecLayerZeroBridge));
+        vm.stopPrank();
+
         // Mint RLC tokens to user1
+        vm.prank(address(iexecLayerZeroBridge));
         rlcCrosschainToken.crosschainMint(user1, INITIAL_BALANCE);
     }
 

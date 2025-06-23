@@ -1,11 +1,13 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-FileCopyrightText: 2025 IEXEC BLOCKCHAIN TECH <contact@iex.ec>
+// SPDX-License-Identifier: Apache-2.0
+
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Deploy as IexecLayerZeroBridgeDeploy} from "../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
 import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-//TODO: To remove when RLC_ERC20 contract will be developed
-import {RLCMock} from "../units/mocks/RLCMock.sol";
+import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosschainToken.s.sol";
 
 contract IexecLayerZeroBridgeScriptTest is Test {
     address LAYERZERO_ENDPOINT = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
@@ -21,8 +23,7 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     function setUp() public {
         vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
         deployer = new IexecLayerZeroBridgeDeploy();
-        //TODO: To remove when RLC_ERC20 contract will be developed
-        rlcAddress = address(new RLCMock("TokenChainX", "RLC"));
+        rlcAddress = new RLCCrosschainTokenDeployScript().deploy("RLC Crosschain Token", "RLC", owner, owner, CREATEX, salt);
         vm.setEnv("CREATE_X_FACTORY", vm.toString(CREATEX));
     }
 
@@ -32,9 +33,15 @@ contract IexecLayerZeroBridgeScriptTest is Test {
 
         assertEq(iexecLayerZeroBridge.owner(), owner);
         assertEq(iexecLayerZeroBridge.token(), address(rlcAddress));
-        // TODO check all roles.
-        // TODO check that the contract is not paused by default.
-        // TODO check that the contract has been initialized and cannot be re-initialized.
+        // Check all roles.
+        assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.DEFAULT_ADMIN_ROLE(), owner));
+        assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.PAUSER_ROLE(), pauser));
+        assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.UPGRADER_ROLE(), owner));
+        // Make sure the contract is not paused by default.
+        assertFalse(iexecLayerZeroBridge.paused(), "Contract should not be paused by default");
+        // Make sure the contract has been initialized and cannot be re-initialized.
+        vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
+        iexecLayerZeroBridge.initialize(owner, pauser);
         // TODO check that the contract has the correct LayerZero endpoint.
         // TODO check that the proxy address is saved.
     }
