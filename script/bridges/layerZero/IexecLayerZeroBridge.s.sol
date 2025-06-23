@@ -52,7 +52,7 @@ contract Configure is Script {
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
 
         // RLCAdapter on Ethereum Sepolia
-        address adapterAddress = vm.envAddress("RLC_ADAPTER_PROXY_ADDRESS"); // Read this variable from .env file
+        address adapterAddress = vm.envAddress("LAYERZERO_BRIDGE_ADAPTER_PROXY_ADDRESS"); // Read this variable from .env file
         uint16 ethereumSepoliaChainId = uint16(vm.envUint("LAYER_ZERO_SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Ethereum Sepolia - TODO: remove or make it chain agnostic
 
         // Set trusted remote

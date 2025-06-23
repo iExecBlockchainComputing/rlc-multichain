@@ -7,9 +7,9 @@ import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/Option
 import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
-import {RLCAdapter} from "../../../src/bridges/layerZero/RLCAdapter.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {LiquidityUnifier} from "../../../src/LiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../../../src/token/RLCCrosschainToken.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
 
@@ -21,13 +21,13 @@ library TestUtils {
         string memory symbol,
         address lzEndpointAdapter,
         address lzEndpointBridge,
-        address owner,
+        address admin,
         address pauser
     )
         internal
         returns (
-            RLCAdapter rlcAdapter,
-            IexecLayerZeroBridge iexecLayerZeroBridge,
+            IexecLayerZeroBridge iexecLayerZeroBridgeChainA,
+            IexecLayerZeroBridge iexecLayerZeroBridgeChainB,
             RLCMock rlcToken,
             RLCCrosschainToken rlcCrosschainToken
         )
@@ -37,13 +37,26 @@ library TestUtils {
         // Deploy RLC token mock for L1
         rlcToken = new RLCMock(name, symbol);
 
-        // Deploy RLCAdapter
-        bytes32 salt = keccak256("RLCAdapter_SALT");
-        rlcAdapter = RLCAdapter(
+        // salt for createX
+        bytes32 salt = keccak256("salt");
+
+        // Deploy Liquidity Unifier
+        LiquidityUnifier liquidityUnifier = LiquidityUnifier(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "RLCAdapter",
-                abi.encode(rlcToken, lzEndpointAdapter),
-                abi.encodeWithSelector(RLCAdapter.initialize.selector, owner, pauser),
+                "LiquidityUnifier",
+                abi.encode(rlcToken),
+                abi.encodeWithSelector(LiquidityUnifier.initialize.selector, admin, admin), //TODO: fix IexecLayerZeroBridge contract to make distinction between admin and upgrader & add a new param to this current function
+                createXFactory,
+                salt
+            )
+        );
+
+        // Deploy IexecLayerZeroBridgeAdapter
+        iexecLayerZeroBridgeChainA = IexecLayerZeroBridge(
+            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+                "IexecLayerZeroBridge",
+                abi.encode(liquidityUnifier, lzEndpointAdapter),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, admin, pauser),
                 createXFactory,
                 salt
             )
@@ -52,14 +65,14 @@ library TestUtils {
         // Deploy RLC Crosschain token (for L2)
         // TODO use upgrader instead of owner for the second argument
         rlcCrosschainToken = RLCCrosschainToken(
-            new RLCCrosschainTokenDeployScript().deploy(name, symbol, owner, owner, createXFactory, salt)
+            new RLCCrosschainTokenDeployScript().deploy(name, symbol, admin, admin, createXFactory, salt)
         );
         // Deploy IexecLayerZeroBridge
-        iexecLayerZeroBridge = IexecLayerZeroBridge(
+        iexecLayerZeroBridgeChainB = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(rlcCrosschainToken, lzEndpointBridge),
-                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, admin, pauser),
                 createXFactory,
                 salt
             )

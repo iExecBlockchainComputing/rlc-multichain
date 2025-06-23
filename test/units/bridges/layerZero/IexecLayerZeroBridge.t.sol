@@ -8,7 +8,6 @@ import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfac
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
-import {RLCAdapter} from "../../../../src/bridges/layerZero/RLCAdapter.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {DualPausableUpgradeable} from "../../../../src/bridges/common/DualPausableUpgradeable.sol";
 import {TestUtils} from "../../utils/TestUtils.sol";
@@ -19,8 +18,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     using TestUtils for *;
 
     // ============ STATE VARIABLES ============
-    IexecLayerZeroBridge private iexecLayerZeroBridge;
-    RLCAdapter private adapterMock;
+    IexecLayerZeroBridge private iexecLayerZeroBridgeChainA;
+    IexecLayerZeroBridge private iexecLayerZeroBridgeChainB;
     RLCCrosschainToken private rlcCrosschainToken;
 
     uint32 private constant SOURCE_EID = 1;
@@ -45,24 +44,25 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address lzEndpointBridge = address(endpoints[SOURCE_EID]);
         address lzEndpointAdapter = address(endpoints[DEST_EID]);
 
-        (adapterMock, iexecLayerZeroBridge,, rlcCrosschainToken) =
+        (iexecLayerZeroBridgeChainA, iexecLayerZeroBridgeChainB,, rlcCrosschainToken) =
             TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, pauser);
 
+        address iexecLayerZeroBridgeChainBAddress = address(iexecLayerZeroBridgeChainB);
         // Wire the contracts
         address[] memory contracts = new address[](2);
-        contracts[0] = address(iexecLayerZeroBridge);
-        contracts[1] = address(adapterMock);
+        contracts[0] = iexecLayerZeroBridgeChainBAddress;
+        contracts[1] = address(iexecLayerZeroBridgeChainA);
         vm.startPrank(owner);
         wireOApps(contracts);
         vm.stopPrank();
 
         // Authorize the bridge to mint/burn tokens.
         vm.startPrank(owner);
-        rlcCrosschainToken.grantRole(rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), address(iexecLayerZeroBridge));
+        rlcCrosschainToken.grantRole(rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), iexecLayerZeroBridgeChainBAddress);
         vm.stopPrank();
 
         // Mint RLC tokens to user1
-        vm.prank(address(iexecLayerZeroBridge));
+        vm.prank(iexecLayerZeroBridgeChainBAddress);
         rlcCrosschainToken.crosschainMint(user1, INITIAL_BALANCE);
     }
 
@@ -74,38 +74,40 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(iexecLayerZeroBridgeChainB, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        iexecLayerZeroBridgeChainB.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be burned
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
+    //TODO: Add more tests for send functionality, in both directions
+
     // ============ LEVEL 1 PAUSE TESTS (Complete Pause) ============
     function test_Pause_OnlyPauserRole() public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
-        iexecLayerZeroBridge.pause();
+        iexecLayerZeroBridgeChainB.pause();
     }
 
     function test_Pause_BlocksOutgoingTransfers() public {
         // Pause the bridge
         vm.prank(pauser);
-        iexecLayerZeroBridge.pause();
+        iexecLayerZeroBridgeChainB.pause();
 
         // Prepare send parameters
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(iexecLayerZeroBridgeChainB, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Attempt to send tokens - should revert
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
         vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        iexecLayerZeroBridgeChainB.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify no tokens were burned
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
@@ -114,9 +116,9 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function test_Unpause_RestoresFullFunctionality() public {
         // Pause then unpause the bridge
         vm.startPrank(pauser);
-        iexecLayerZeroBridge.pause();
+        iexecLayerZeroBridgeChainB.pause();
 
-        iexecLayerZeroBridge.unpause();
+        iexecLayerZeroBridgeChainB.unpause();
         vm.stopPrank();
 
         // Should now work normally
@@ -126,18 +128,18 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function test_sendRLCWhenSourceLayerZeroBridgeUnpaused() public {
         // Pause then unpause the bridge
         vm.startPrank(pauser);
-        iexecLayerZeroBridge.pause();
-        iexecLayerZeroBridge.unpause();
+        iexecLayerZeroBridgeChainB.pause();
+        iexecLayerZeroBridgeChainB.unpause();
         vm.stopPrank();
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(iexecLayerZeroBridgeChainB, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        iexecLayerZeroBridgeChainB.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify source state - tokens should be burned
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
@@ -148,27 +150,27 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function test_PauseSend_OnlyPauserRole() public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
-        iexecLayerZeroBridge.pauseSend();
+        iexecLayerZeroBridgeChainB.pauseSend();
     }
 
     function test_PauseSend_BlocksOutgoingOnly() public {
         // Pause send
         vm.prank(pauser);
-        iexecLayerZeroBridge.pauseSend();
+        iexecLayerZeroBridgeChainB.pauseSend();
 
         // Verify state
-        assertFalse(iexecLayerZeroBridge.paused());
-        assertTrue(iexecLayerZeroBridge.sendPaused());
+        assertFalse(iexecLayerZeroBridgeChainB.paused());
+        assertTrue(iexecLayerZeroBridgeChainB.sendPaused());
 
         // Prepare send parameters
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(iexecLayerZeroBridgeChainB, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Attempt to send tokens - should revert with EnforcedSendPause
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
         vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
-        iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        iexecLayerZeroBridgeChainB.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify no tokens were burned
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
@@ -177,14 +179,14 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function test_UnpauseSend_RestoresOutgoingTransfers() public {
         // Pause then unpause send
         vm.startPrank(pauser);
-        iexecLayerZeroBridge.pauseSend();
+        iexecLayerZeroBridgeChainB.pauseSend();
 
-        iexecLayerZeroBridge.unpauseSend();
+        iexecLayerZeroBridgeChainB.unpauseSend();
         vm.stopPrank();
 
         // Should now work normally
-        assertFalse(iexecLayerZeroBridge.paused());
-        assertFalse(iexecLayerZeroBridge.sendPaused());
+        assertFalse(iexecLayerZeroBridgeChainB.paused());
+        assertFalse(iexecLayerZeroBridgeChainB.sendPaused());
 
         test_SendToken_WhenOperational();
     }

@@ -82,6 +82,14 @@ deploy-rlc-crosschain-token:
 		--broadcast \
 		-vvv
 
+deploy-liquidity-unifier:
+	@echo "Deploying LiquidityUnifier (UUPS Proxy) on: $(RPC_URL)"
+	CHAIN=sepolia forge script script/LiquidityUnifier.s.sol:Deploy \
+		--rpc-url $(RPC_URL) \
+		--account $(ACCOUNT) \
+		--broadcast \
+		-vvv
+
 deploy-layerzero-bridge:
 	@echo "Deploying IexecLayerZeroBridge (UUPS Proxy) on: $(RPC_URL)"
 	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Deploy \
@@ -89,7 +97,6 @@ deploy-layerzero-bridge:
         --account $(ACCOUNT) \
         --broadcast \
         -vvv
-
 configure-adapter:
 	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
 	forge script script/bridges/layerZero/RLCAdapter.s.sol:Configure \
