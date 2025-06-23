@@ -24,6 +24,7 @@ contract SendTokensToArbitrumSepolia is Script {
 
         // Contract addresses
         address iexecLayerZeroBridgeAddress = vm.envAddress("LAYERZERO_BRIDGE_ADAPTER_PROXY_ADDRESS"); // Your IexecLayerZeroBridge address
+        address liquidityUnifierAddress = vm.envAddress("LIQUIDITY_UNIFIER_PROXY_ADDRESS"); // Your LiquidityUnifier address
         address rlcTokenAddress = vm.envAddress("RLC_ADDRESS"); // RLC token address on sepolia testnet
 
         // Transfer parameters
@@ -34,7 +35,7 @@ contract SendTokensToArbitrumSepolia is Script {
         // First, approve the adapter to spend your tokens
         IERC20 rlcToken = IERC20(rlcTokenAddress);
         console.log("Approving IexecLayerZeroBridge to spend %s RLC", amount / 10 ** 9);
-        rlcToken.approve(iexecLayerZeroBridgeAddress, amount);
+        rlcToken.approve(liquidityUnifierAddress, amount);
 
         // Then, send tokens cross-chain
         IexecLayerZeroBridge adapter = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
