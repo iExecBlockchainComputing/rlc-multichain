@@ -86,6 +86,10 @@ contract RLCCrosschainToken is
         emit CrosschainBurn(from, value, _msgSender());
     }
 
+    function decimals() public pure override returns (uint8) {
+        return 9;
+    }
+
     /**
      * @dev Authorizes upgrades of the proxy. It can only be called by
      * an account with the UPGRADER_ROLE.
