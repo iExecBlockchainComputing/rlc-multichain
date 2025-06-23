@@ -92,35 +92,35 @@ audit-report:
 	@echo "  ✅ Individual reports saved in audit/mythril/" | tee -a audit/audit-report.txt
 	@echo "" | tee -a audit/audit-report.txt
 
-# @echo "6. COVERAGE ANALYSIS" | tee -a audit/audit-report.txt
-# @echo "====================" | tee -a audit/audit-report.txt
-# @echo "📊 Test coverage report:" | tee -a audit/audit-report.txt
-# @FOUNDRY_DISABLE_NIGHTLY_WARNING=true rm -rf coverage lcov.info lcov.src.info && \
-# forge coverage --ir-minimum --report lcov --no-match-coverage "script|src/mocks|test" 2>&1 | \
-# 	grep -E "(File|Overall coverage|Wrote LCOV)" | grep -v "^$$" | tee -a audit/audit-report.txt
-# @if [ -f lcov.info ]; then \
-# 	echo "🔍 Processing coverage data..." | tee -a audit/audit-report.txt; \
-# 	genhtml lcov.info --branch-coverage --output-dir coverage 2>&1 | \
-# 		grep -E "(Overall coverage rate|source files|lines\.\.\.\.\.\.\.|functions\.\.\.|branches\.\.\.|Message summary)" | \
-# 		grep -v "^$$" | tee -a audit/audit-report.txt; \
-# 	echo "✅ Coverage data saved to audit/" | tee -a audit/audit-report.txt; \
-# 	echo "📈 HTML report generated in ./coverage/" | tee -a audit/audit-report.txt; \
-# 	rm -f lcov.info 2>/dev/null || true; \
-# else \
-# 	echo "❌ Coverage analysis failed" | tee -a audit/audit-report.txt; \
-# fi
-# @echo "" | tee -a audit/audit-report.txt
+	@echo "6. COVERAGE ANALYSIS" | tee -a audit/audit-report.txt
+	@echo "====================" | tee -a audit/audit-report.txt
+	@echo "📊 Test coverage report:" | tee -a audit/audit-report.txt
+	@FOUNDRY_DISABLE_NIGHTLY_WARNING=true rm -rf coverage lcov.info lcov.src.info && \
+	forge coverage --ir-minimum --report lcov --no-match-coverage "script|src/mocks|test" 2>&1 | \
+		grep -E "(File|Overall coverage|Wrote LCOV)" | grep -v "^$$" | tee -a audit/audit-report.txt
+	@if [ -f lcov.info ]; then \
+		echo "🔍 Processing coverage data..." | tee -a audit/audit-report.txt; \
+		genhtml lcov.info --branch-coverage --output-dir coverage 2>&1 | \
+			grep -E "(Overall coverage rate|source files|lines\.\.\.\.\.\.\.|functions\.\.\.|branches\.\.\.|Message summary)" | \
+			grep -v "^$$" | tee -a audit/audit-report.txt; \
+		echo "✅ Coverage data saved to audit/" | tee -a audit/audit-report.txt; \
+		echo "📈 HTML report generated in ./coverage/" | tee -a audit/audit-report.txt; \
+		rm -f lcov.info 2>/dev/null || true; \
+	else \
+		echo "❌ Coverage analysis failed" | tee -a audit/audit-report.txt; \
+	fi
+	@echo "" | tee -a audit/audit-report.txt
 
-# @echo "7. SECURITY PATTERNS CHECK" | tee -a audit/audit-report.txt
-# @echo "===========================" | tee -a audit/audit-report.txt
-# @echo "🔒 Checking for common patterns:" | tee -a audit/audit-report.txt
-# @echo "- Reentrancy guards:" | tee -a audit/audit-report.txt
-# @grep -r "nonReentrant\|ReentrancyGuard" src/ --include="*.sol" | wc -l | tee -a audit/audit-report.txt
-# @echo "- Access control:" | tee -a audit/audit-report.txt
-# @grep -r "onlyOwner\|AccessControl\|modifier" src/ --include="*.sol" | wc -l | tee -a audit/audit-report.txt
-# @echo "- SafeMath usage:" | tee -a audit/audit-report.txt
-# @grep -r "SafeMath\|using.*for" src/ --include="*.sol" | wc -l | tee -a audit/audit-report.txt
-# @echo "" | tee -a audit/audit-report.txt
+	@echo "7. SECURITY PATTERNS CHECK" | tee -a audit/audit-report.txt
+	@echo "===========================" | tee -a audit/audit-report.txt
+	@echo "🔒 Checking for common patterns:" | tee -a audit/audit-report.txt
+	@echo "- Reentrancy guards:" | tee -a audit/audit-report.txt
+	@grep -r "nonReentrant\|ReentrancyGuard" src/ --include="*.sol" | wc -l | tee -a audit/audit-report.txt
+	@echo "- Access control:" | tee -a audit/audit-report.txt
+	@grep -r "onlyOwner\|AccessControl\|modifier" src/ --include="*.sol" | wc -l | tee -a audit/audit-report.txt
+	@echo "- SafeMath usage:" | tee -a audit/audit-report.txt
+	@grep -r "SafeMath\|using.*for" src/ --include="*.sol" | wc -l | tee -a audit/audit-report.txt
+	@echo "" | tee -a audit/audit-report.txt
 
 	@echo "✅ AUDIT REPORT COMPLETED" | tee -a audit/audit-report.txt
 	@echo "=========================" | tee -a audit/audit-report.txt
