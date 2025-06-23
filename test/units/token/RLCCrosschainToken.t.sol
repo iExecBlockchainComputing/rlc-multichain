@@ -409,6 +409,12 @@ contract RLCCrosschainTokenTest is Test {
         assertTrue(crossChainToken.supportsInterface(type(IERC7802).interfaceId));
     }
 
+    // ============ decimals ============
+
+    function test_DecimalsShouldBeTheSameAsTheRlcToken() public view {
+        assertEq(crossChainToken.decimals(), 9, "Decimals should be the same as the RLC token (9)");
+    }
+
     // ============ upgradeToAndCall ============
 
     function test_RevertWhen_UnauthorizedUpgrader() public {
