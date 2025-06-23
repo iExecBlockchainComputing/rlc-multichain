@@ -9,6 +9,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {ERC20PermitUpgradeable} from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import {IERC7802} from "../interfaces/IERC7802.sol";
+import {ITokenSpender} from "../interfaces/ITokenSpender.sol";
 
 /**
  * This contract is an upgradeable (UUPS) ERC20 token with cross-chain capabilities.
@@ -51,6 +52,27 @@ contract RLCCrosschainToken is
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, admin);
         _grantRole(UPGRADER_ROLE, upgrader);
+    }
+
+    /**
+     * Approves the spender to spend the specified amount of tokens and calls the `receiveApproval`
+     * function on the spender contract. Original code can be found in the RLC token project:
+     * https://github.com/iExecBlockchainComputing/rlc-token/blob/master/contracts/RLC.sol#L84-L89
+     *
+     * @dev The ERC1363 is not used because it is not compatible with the original RLC token contract:
+     *  - The RLC uses `receiveApproval` while the ERC1363 uses `onTransferReceived`.
+     *  - Openzeppelin's implementation of ERC1363 uses Solidity custom errors.
+     * This could be changed in the future, but for now, we keep the original interface to insure
+     * compatibility with existing Dapps and SDKs.
+     *
+     * @param spender address of the spender
+     * @param value amount of tokens to approve
+     * @param data additional data to pass to the spender
+     */
+    function approveAndCall(address spender, uint256 value, bytes calldata data) external {
+        if (approve(spender, value)) {
+            ITokenSpender(spender).receiveApproval(msg.sender, value, address(this), data);
+        }
     }
 
     /**
