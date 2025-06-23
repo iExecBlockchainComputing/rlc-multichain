@@ -74,6 +74,7 @@ contract IexecLayerZeroBridge is
      * @param _owner Address that will receive owner and default admin roles
      * @param _pauser Address that will receive the pauser role
      */
+    // TODO add upgrader role.
     function initialize(address _owner, address _pauser) external initializer {
         __Ownable_init(_owner);
         __OFTCore_init(_owner);
