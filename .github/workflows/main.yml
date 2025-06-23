@@ -34,7 +34,9 @@ jobs:
         run: forge build --sizes && cp .env.template .env
 
       - name: Run Foundry coverage
-        run: make ci-coverage
+        run: make generate-coverage
+        env:
+          CI: true
         
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
