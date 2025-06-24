@@ -121,17 +121,13 @@ contract RLCCrosschainTokenTest is Test {
     function test_ApproveAndCall_GasComparisonWithSeparateApproveAndCall() public {}
 
     function test_RevertWhen_ApproveAndCallWithZeroSpenderAddress() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(IERC20Errors.ERC20InvalidSpender.selector, address(0))
-        );
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidSpender.selector, address(0)));
         vm.prank(user);
         crossChainToken.approveAndCall(address(0), allowance, approveAndCallData);
     }
 
     function test_RevertWhen_ApproveAndCallFromZeroAddress() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(IERC20Errors.ERC20InvalidApprover.selector, address(0))
-        );
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidApprover.selector, address(0)));
         vm.prank(address(0));
         crossChainToken.approveAndCall(spender, allowance, approveAndCallData);
     }
@@ -139,7 +135,9 @@ contract RLCCrosschainTokenTest is Test {
     function test_RevertWhen_CallToTheSpenderReverts() public {
         vm.mockCallRevert(
             spender,
-            abi.encodeWithSelector(ITokenSpender.receiveApproval.selector, user, allowance, address(crossChainToken), approveAndCallData),
+            abi.encodeWithSelector(
+                ITokenSpender.receiveApproval.selector, user, allowance, address(crossChainToken), approveAndCallData
+            ),
             new bytes(0)
         );
         vm.expectRevert();
@@ -566,7 +564,9 @@ contract RLCCrosschainTokenTest is Test {
         // Set up a mock spender contract.
         vm.mockCall(
             spender,
-            abi.encodeWithSelector(ITokenSpender.receiveApproval.selector, user, allowance, address(crossChainToken), data),
+            abi.encodeWithSelector(
+                ITokenSpender.receiveApproval.selector, user, allowance, address(crossChainToken), data
+            ),
             new bytes(0) // No return data expected.
         );
     }
