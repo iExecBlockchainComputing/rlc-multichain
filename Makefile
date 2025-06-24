@@ -116,9 +116,9 @@ configure-layerzero-bridge:
 # Upgrade targets
 #
 
-validate-adapter-upgrade:
-	@echo "Validating RLCAdapter upgrade on: $(RPC_URL)"
-	forge script script/bridges/layerZero/RLCAdapter.s.sol:ValidateUpgrade \
+validate-liquidity-unifier-upgrade:
+	@echo "Validating RLCLiquidityUnifier upgrade on: $(RPC_URL)"
+	forge script script/RLCLiquidityUnifier.s.sol:ValidateUpgrade \
         --rpc-url $(RPC_URL) \
         -vvv
 
@@ -128,10 +128,10 @@ validate-layerZero-bridge-upgrade:
         --rpc-url $(RPC_URL) \
         -vvv
 
-upgrade-adapter:
-	@echo "Upgrading RLCAdapter on: $(RPC_URL)"
-	$(MAKE) validate-adapter-upgrade
-	forge script script/bridges/layerZero/RLCAdapter.s.sol:Upgrade \
+upgrade-liquidity-unifier:
+	@echo "Upgrading RLCLiquidityUnifier on: $(RPC_URL)"
+	$(MAKE) validate-liquidity-unifier-upgrade
+	forge script script/RLCLiquidityUnifier.s.sol:Upgrade \
         --rpc-url $(RPC_URL) \
         --account $(ACCOUNT) \
         --broadcast \
