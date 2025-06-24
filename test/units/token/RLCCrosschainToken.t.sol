@@ -88,10 +88,6 @@ contract RLCCrosschainTokenTest is Test {
         assertEq(crossChainToken.allowance(user, spender), 0);
     }
 
-    function test_ShoudNotCallSpenderIfApproveReturnsFalse() public {
-        // TODO
-    }
-
     function test_RevertWhen_ApproveAndCallWithZeroSpenderAddress() public {
         vm.expectRevert(
             abi.encodeWithSelector(IERC20Errors.ERC20InvalidSpender.selector, address(0))
@@ -116,7 +112,14 @@ contract RLCCrosschainTokenTest is Test {
 
 
     function test_RevertWhen_CallToTheSpenderReverts() public {
-        // TODO
+        vm.mockCallRevert(
+            spender,
+            abi.encodeWithSelector(ITokenSpender.receiveApproval.selector, user, allowance, address(crossChainToken), approveAndCallData),
+            new bytes(0)
+        );
+        vm.expectRevert();
+        vm.prank(user);
+        crossChainToken.approveAndCall(spender, allowance, approveAndCallData);
     }
 
     // ============ crosschainMint ============
@@ -523,12 +526,25 @@ contract RLCCrosschainTokenTest is Test {
         crossChainToken.crosschainMint(userAddress, mintAmount);
     }
 
+    /**
+     * Mocks the call to the spender contract's receiveApproval function with no return data.
+     * @param data The data to pass to the spender contract's receiveApproval function.
+     */
     function _mockSpenderCall(bytes memory data) internal {
+        _mockSpenderCall(data, new bytes(0)); // No return data.
+    }
+
+    /**
+     * Mock the call to the spender contract's receiveApproval function.
+     * @param data The data to pass to the spender contract.
+     * @param returnData The data to return from the spender contract.
+     */
+    function _mockSpenderCall(bytes memory data, bytes memory returnData) internal {
         // Set up a mock spender contract.
         vm.mockCall(
             spender,
             abi.encodeWithSelector(ITokenSpender.receiveApproval.selector, user, allowance, address(crossChainToken), data),
-            "" // No return value expected
+            returnData
         );
     }
 }
