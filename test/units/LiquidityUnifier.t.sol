@@ -52,7 +52,10 @@ contract LiquidityUnifierTest is Test {
     // ============ decimals ============
 
     function test_DecimalsShouldBeTheSameAsTheRlcToken() public view {
-        assertEq(rlcToken.decimals(), 9, "Decimals should be the same as the RLC token (9)");
+        uint8 expectedDecimals = rlcToken.decimals();
+        uint8 actualDecimals = liquidityUnifier.decimals();
+        assertEq(actualDecimals, expectedDecimals, "decimals() should return the same value as RLC_TOKEN.decimals()");
+        assertEq(actualDecimals, 9, "Decimals should equal 9");
     }
 
     // ============ supportsInterface ============
