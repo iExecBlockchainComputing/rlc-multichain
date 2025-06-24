@@ -73,6 +73,7 @@ contract IexecLayerZeroBridge is
     /**
      * @notice Initializes the contract after proxy deployment
      * @param initialAdmin Address that will receive owner and default admin roles
+     * @param initialUpgrader Address that will receive the upgrader role
      * @param initialPauser Address that will receive the pauser role
      */
     function initialize(address initialAdmin, address initialUpgrader, address initialPauser) external initializer {
