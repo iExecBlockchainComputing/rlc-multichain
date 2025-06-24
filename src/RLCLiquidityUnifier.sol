@@ -6,13 +6,10 @@ pragma solidity ^0.8.22;
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IERC7802} from "./interfaces/IERC7802.sol";
 
 contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, IERC7802 {
-    using SafeERC20 for IERC20Metadata;
-
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant TOKEN_BRIDGE_ROLE = keccak256("TOKEN_BRIDGE_ROLE");
 
@@ -65,7 +62,7 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
      * @param value The amount of RLC tokens to unlock and transfer
      */
     function crosschainMint(address to, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
-        RLC_TOKEN.safeTransfer(to, value);
+        RLC_TOKEN.transfer(to, value);
         emit CrosschainMint(to, value, _msgSender());
     }
 
@@ -94,7 +91,7 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
      */
     // slither-disable-next-line arbitrary-send-erc20
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
-        RLC_TOKEN.safeTransferFrom(from, address(this), value);
+        RLC_TOKEN.transferFrom(from, address(this), value);
         emit CrosschainBurn(from, value, _msgSender());
     }
 
@@ -110,8 +107,8 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
      *
      * @custom:bridge-compatibility Required by LayerZero OFT standard
      */
-    function decimals() external view returns (uint8) {
-        return RLC_TOKEN.decimals();
+    function decimals() external pure returns (uint8) {
+        return 9;
     }
 
     // ============ FOR ERC165 INTERFACE DETECTION ============
