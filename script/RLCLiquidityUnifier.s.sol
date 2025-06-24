@@ -71,7 +71,7 @@ contract Upgrade is Script {
     function run() external {
         vm.startBroadcast();
 
-        address proxyAddress = vm.envAddress("RLCLIQUIDITY_UNIFIER_PROXY_ADDRESS");
+        address proxyAddress = vm.envAddress("RLC_LIQUIDITY_UNIFIER_PROXY_ADDRESS");
         address rlcToken = vm.envAddress("RLC_ADDRESS");
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
@@ -86,7 +86,7 @@ contract Upgrade is Script {
 
         vm.stopBroadcast();
 
-        EnvUtils.updateEnvVariable("LIQUIDITY_UNIFIER_IMPLEMENTATION_ADDRESS", newImplementationAddress);
+        EnvUtils.updateEnvVariable("RLC_LIQUIDITY_UNIFIER_IMPLEMENTATION_ADDRESS", newImplementationAddress);
     }
 }
 
