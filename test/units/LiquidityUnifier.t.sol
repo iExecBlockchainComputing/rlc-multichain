@@ -343,6 +343,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), 0);
         assertEq(rlcToken.balanceOf(user2), 0);
         assertEq(rlcToken.balanceOf(user3), 0);
+        assertEq(rlcToken.balanceOf(liquidityUnifierAddress), amount + amount2 + amount3);
     }
 
     function test_BurnForMultipleUsersFromMultipleBridges() public {
