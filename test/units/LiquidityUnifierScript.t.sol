@@ -22,6 +22,7 @@ contract LiquidityUnifierTest is Test {
         address liquidityUnifierAddress = deployer.deploy(rlcToken, admin, upgrader, createx, salt);
         LiquidityUnifier liquidityUnifier = LiquidityUnifier(liquidityUnifierAddress);
         assertEq(liquidityUnifier.owner(), admin);
+        assertEq(liquidityUnifier.RLC_TOKEN(), rlcToken);
         assertEq(liquidityUnifier.hasRole(liquidityUnifier.DEFAULT_ADMIN_ROLE(), admin), true);
         assertEq(liquidityUnifier.hasRole(liquidityUnifier.UPGRADER_ROLE(), upgrader), true);
         // TODO check that the proxy address is saved.
