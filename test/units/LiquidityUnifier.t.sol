@@ -54,7 +54,7 @@ contract LiquidityUnifierTest is Test {
 
     // ============ crosschainMint ============
 
-    function test_MintForOneUserFromOneBridge() public {
+    function test_CrosschainMintForOneUserFromOneBridge() public {
         _authorizeBridge(bridge);
 
         rlcToken.transfer(liquidityUnifierAddress, amount);
@@ -76,7 +76,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(bridge), 0);
     }
 
-    function test_MintForOneUserFromOneBridgeMultipleTimes() public {
+    function test_CrosschainMintForOneUserFromOneBridgeMultipleTimes() public {
         _authorizeBridge(bridge);
         // Check the initial state.
 
@@ -91,7 +91,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(bridge), 0);
     }
 
-    function test_MintForOneUserFromMultipleBridges() public {
+    function test_CrosschainMintForOneUserFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
 
@@ -117,7 +117,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(bridge2), 0);
     }
 
-    function test_MintForMultipleUsersFromOneBridge() public {
+    function test_CrosschainMintForMultipleUsersFromOneBridge() public {
         _authorizeBridge(bridge);
 
         // User 1
@@ -149,7 +149,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(bridge), 0);
     }
 
-    function test_MintForMultipleUsersFromMultipleBridges() public {
+    function test_CrosschainMintForMultipleUsersFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
 
@@ -218,7 +218,7 @@ contract LiquidityUnifierTest is Test {
 
     // ============ crosschainBurn ============
 
-    function test_BurnForOneUserFromOneBridge() public {
+    function test_CrosschainBurnForOneUserFromOneBridge() public {
         _authorizeBridge(bridge);
         rlcToken.transfer(user, amount);
 
@@ -239,7 +239,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(liquidityUnifierAddress), amount);
     }
 
-    function test_BurnForOneUserFromOneBridgeMultipleTimes() public {
+    function test_CrosschainBurnForOneUserFromOneBridgeMultipleTimes() public {
         _authorizeBridge(bridge);
         rlcToken.transfer(user, 2 * amount);
 
@@ -271,7 +271,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(liquidityUnifierAddress), 2 * amount);
     }
 
-    function test_BurnForOneUserFromMultipleBridges() public {
+    function test_CrosschainBurnForOneUserFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
         rlcToken.transfer(user, 2 * amount);
@@ -302,7 +302,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(liquidityUnifierAddress), 2 * amount);
     }
 
-    function test_BurnForMultipleUsersFromOneBridge() public {
+    function test_CrosschainBurnForMultipleUsersFromOneBridge() public {
         _authorizeBridge(bridge);
         rlcToken.transfer(user, amount);
         rlcToken.transfer(user2, amount2);
@@ -345,7 +345,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(liquidityUnifierAddress), amount + amount2 + amount3);
     }
 
-    function test_BurnForMultipleUsersFromMultipleBridges() public {
+    function test_CrosschainBurnForMultipleUsersFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
         rlcToken.transfer(user, 2 * amount);
@@ -400,7 +400,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(liquidityUnifierAddress), 2 * amount + amount2 + amount3);
     }
 
-    function test_BurnForUserEvenWhenMintIsDoneByDifferentBridge() public {
+    function test_CrosschainBurnForUserEvenWhenMintIsDoneByDifferentBridge() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
 
