@@ -122,7 +122,7 @@ Always validate upgrades before execution:
 # Validate RLCAdapter upgrade
 make validate-adapter-upgrade RPC_URL=$(SEPOLIA_RPC_URL)
 
-# Validate RLCOFT upgrade  
+# Validate RLCOFT upgrade
 make validate-layerzero-bridge-upgrade RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 ```
 
@@ -249,3 +249,4 @@ The scripts automatically calculate these fees and include them in the transacti
 ## TODO
 
 - Use an entreprise RPC URL for `secrets.SEPOLIA_RPC_URL` in Github environment `ci`.
+- Add git pre-commit hook to format code locally.
