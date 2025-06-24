@@ -32,7 +32,7 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
         0xcfbc5ec03206ba5826cf1103520b82c735e9bad14c6d8ed92dff9144ead3f400;
 
     function _getDualPausableStorage() private pure returns (DualPausableStorage storage $) {
-        //slither-disable-next-line naming-convention
+        //slither-disable-next-line assembly
         assembly {
             $.slot := DUAL_PAUSABLE_STORAGE_LOCATION
         }
