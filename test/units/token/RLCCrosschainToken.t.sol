@@ -12,6 +12,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
 import {IERC7802} from "../../../src/interfaces/IERC7802.sol";
 import {RLCCrosschainToken} from "../../../src/token/RLCCrosschainToken.sol";
+import {ITokenSpender} from "../../../src/interfaces/ITokenSpender.sol";
 
 contract RLCCrosschainTokenTest is Test {
     address owner = makeAddr("owner");
@@ -22,9 +23,12 @@ contract RLCCrosschainTokenTest is Test {
     address user2 = makeAddr("user2");
     address user3 = makeAddr("user3");
     address anyone = makeAddr("anyone");
+    address spender = makeAddr("spender");
     uint256 amount = 100e9; // 100 RLC
     uint256 amount2 = 200e9; // 200 RLC
     uint256 amount3 = 300e9; // 300 RLC
+    uint256 allowance = 123e9; // 123 RLC
+    bytes approveAndCallData = bytes("data");
 
     bytes32 private bridgeTokenRoleId;
 
@@ -46,11 +50,103 @@ contract RLCCrosschainTokenTest is Test {
         crossChainToken.initialize("Foo", "BAR", owner, upgrader);
     }
 
-    // ============ supportsInterface ============
+    // ============ approveAndCall ============
 
-    function test_SupportErc7802Interface() public view {
-        assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
-        assertTrue(crossChainToken.supportsInterface(type(IERC7802).interfaceId));
+    function test_ApproveAndCall() public {
+        _mockSpenderCall(approveAndCallData);
+        // Expect approval event.
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Approval(user, spender, allowance);
+        // Approve the spender to spend tokens and call its receiveApproval function.
+        vm.prank(user);
+        crossChainToken.approveAndCall(spender, allowance, approveAndCallData);
+        // Check allowance.
+        assertEq(crossChainToken.allowance(user, spender), allowance);
+    }
+
+    function test_ApproveAndCallWithEmptyData() public {
+        _mockSpenderCall(new bytes(0));
+        // Expect approval event.
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Approval(user, spender, allowance);
+        // Approve the spender to spend tokens and call its receiveApproval function.
+        vm.prank(user);
+        crossChainToken.approveAndCall(spender, allowance, "");
+        // Check allowance.
+        assertEq(crossChainToken.allowance(user, spender), allowance);
+    }
+
+    function test_ApproveAndCallWithZeroAllowance() public {
+        _mockSpenderCall(approveAndCallData);
+        // Expect approval event.
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Approval(user, spender, 0);
+        // Approve the spender.
+        vm.prank(user);
+        crossChainToken.approveAndCall(spender, 0, approveAndCallData);
+        // Check allowance.
+        assertEq(crossChainToken.allowance(user, spender), 0);
+    }
+
+    function test_ApproveAndCallWithMaxUintAllowance() public {
+        _mockSpenderCall(approveAndCallData);
+        // Expect approval event.
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Approval(user, spender, type(uint256).max);
+        // Approve the spender with max uint allowance.
+        vm.prank(user);
+        crossChainToken.approveAndCall(spender, type(uint256).max, approveAndCallData);
+        // Check allowance.
+        assertEq(crossChainToken.allowance(user, spender), type(uint256).max);
+    }
+
+    function test_ApproveAndCallShouldOverrideAllowanceAmount() public {
+        uint256 allowance2 = 456e9; // 456 RLC
+        _mockSpenderCall(approveAndCallData);
+        vm.startPrank(user);
+        // 1st call
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Approval(user, spender, allowance);
+        crossChainToken.approveAndCall(spender, allowance, approveAndCallData);
+        assertEq(crossChainToken.allowance(user, spender), allowance);
+        // 2nd call
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Approval(user, spender, allowance2);
+        crossChainToken.approveAndCall(spender, allowance2, approveAndCallData);
+        assertEq(crossChainToken.allowance(user, spender), allowance2);
+        vm.stopPrank();
+    }
+
+    function test_RevertWhen_ApproveAndCallWithZeroSpenderAddress() public {
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidSpender.selector, address(0)));
+        vm.prank(user);
+        crossChainToken.approveAndCall(address(0), allowance, approveAndCallData);
+    }
+
+    function test_RevertWhen_ApproveAndCallFromZeroAddress() public {
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidApprover.selector, address(0)));
+        vm.prank(address(0));
+        crossChainToken.approveAndCall(spender, allowance, approveAndCallData);
+    }
+
+    function test_RevertWhen_CallToTheSpenderReverts() public {
+        vm.mockCallRevert(
+            spender,
+            abi.encodeWithSelector(
+                ITokenSpender.receiveApproval.selector, user, allowance, address(crossChainToken), approveAndCallData
+            ),
+            new bytes(0)
+        );
+        vm.expectRevert();
+        vm.prank(user);
+        crossChainToken.approveAndCall(spender, allowance, approveAndCallData);
+    }
+
+    function test_RevertWhen_SpenderIsNotAContract() public {
+        address eoaSpender = makeAddr("EOA"); // No mocking to simulate an EOA.
+        vm.expectRevert();
+        vm.prank(user);
+        crossChainToken.approveAndCall(eoaSpender, allowance, approveAndCallData);
     }
 
     // ============ crosschainMint ============
@@ -409,6 +505,19 @@ contract RLCCrosschainTokenTest is Test {
         assertEq(crossChainToken.balanceOf(user), amount);
     }
 
+    // ============ supportsInterface ============
+
+    function test_SupportErc7802Interface() public view {
+        assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
+        assertTrue(crossChainToken.supportsInterface(type(IERC7802).interfaceId));
+    }
+
+    // ============ decimals ============
+
+    function test_DecimalsShouldBeTheSameAsTheRlcToken() public view {
+        assertEq(crossChainToken.decimals(), 9, "Decimals should be the same as the RLC token (9)");
+    }
+
     // ============ upgradeToAndCall ============
 
     function test_RevertWhen_UnauthorizedUpgrader() public {
@@ -442,5 +551,20 @@ contract RLCCrosschainTokenTest is Test {
     function _mintForUser(address userAddress, uint256 mintAmount) internal {
         vm.prank(bridge);
         crossChainToken.crosschainMint(userAddress, mintAmount);
+    }
+
+    /**
+     * Mocks the call to the spender contract's receiveApproval function with no return data.
+     * @param data The data to pass to the spender contract.
+     */
+    function _mockSpenderCall(bytes memory data) internal {
+        // Set up a mock spender contract.
+        vm.mockCall(
+            spender,
+            abi.encodeWithSelector(
+                ITokenSpender.receiveApproval.selector, user, allowance, address(crossChainToken), data
+            ),
+            new bytes(0) // No return data expected.
+        );
     }
 }
