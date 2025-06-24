@@ -22,7 +22,7 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
     address public pauser = makeAddr("pauser");
 
     address public proxyAddress;
-    string public name = "RLC Crosschain Token";
+    string private name = "iEx.ec Network Token";
     string public symbol = "RLC";
     uint256 public constant NEW_STATE_VARIABLE = 2;
 
