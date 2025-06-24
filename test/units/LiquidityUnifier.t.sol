@@ -472,6 +472,24 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), amount);
     }
 
+    function test_RevertWhen_CrosschainBurn_BurnMoreThanAllowance() public {
+        _authorizeBridge(bridge);
+        rlcToken.transfer(user, amount + 1);
+
+        // User approves less than they have
+        _approveLiquidityUnifier(user, amount);
+
+        // Attempt to burn more than allowance
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IERC20Errors.ERC20InsufficientAllowance.selector, liquidityUnifierAddress, amount, amount + 1
+            )
+        );
+        vm.prank(bridge);
+        liquidityUnifier.crosschainBurn(user, amount + 1);
+        assertEq(rlcToken.balanceOf(user), amount + 1);
+    }
+
     function test_RevertWhen_CrosschainBurn_BurnWithoutUserApprove() public {
         _authorizeBridge(bridge);
         rlcToken.transfer(user, amount);
