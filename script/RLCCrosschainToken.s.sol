@@ -32,7 +32,7 @@ contract Deploy is Script {
         bytes32 createxSalt = config.readBytes32(string.concat(prefix, ".rlcCrossChainTokenCreatexSalt"));
         vm.startBroadcast();
         address rlcCrosschainTokenProxy =
-            deploy("RLC Crosschain Token", "RLC", admin, upgrader, createxFactory, createxSalt);
+            deploy("iEx.ec Network Token", "RLC", admin, upgrader, createxFactory, createxSalt);
         vm.stopBroadcast();
 
         //TODO: use config file to store addresses.

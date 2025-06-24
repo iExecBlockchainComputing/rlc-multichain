@@ -33,7 +33,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     uint256 private constant INITIAL_BALANCE = 100 * 10 ** 9; // 100 RLC tokens with 9 decimals
     uint256 private constant TRANSFER_AMOUNT = 1 * 10 ** 9; // 1 RLC token with 9 decimals
-    string private name = "RLC Crosschain Token";
+    string private name = "iEx.ec Network Token";
     string private symbol = "RLC";
 
     function setUp() public virtual override {

@@ -37,7 +37,7 @@ contract RLCCrosschainTokenTest is Test {
     function setUp() public {
         crossChainToken = RLCCrosschainToken(
             new RLCCrosschainTokenDeployScript().deploy(
-                "RLC Crosschain Token", "RLC", owner, upgrader, address(new CreateX()), keccak256("salt")
+                "iEx.ec Network Token", "RLC", owner, upgrader, address(new CreateX()), keccak256("salt")
             )
         );
         bridgeTokenRoleId = crossChainToken.TOKEN_BRIDGE_ROLE();
