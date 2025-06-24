@@ -43,15 +43,18 @@ contract RLCCrosschainToken is
      * Initializes the contract with the given parameters.
      * @param name name of the token
      * @param symbol symbol of the token
-     * @param admin address of the admin wallet
-     * @param upgrader address of the upgrader wallet
+     * @param initialAdmin address of the admin wallet
+     * @param initialUpgrader address of the upgrader wallet
      */
-    function initialize(string memory name, string memory symbol, address admin, address upgrader) public initializer {
+    function initialize(string memory name, string memory symbol, address initialAdmin, address initialUpgrader)
+        public
+        initializer
+    {
         __ERC20_init(name, symbol);
         __ERC20Permit_init(name);
         __UUPSUpgradeable_init();
-        __AccessControlDefaultAdminRules_init(0, admin);
-        _grantRole(UPGRADER_ROLE, upgrader);
+        __AccessControlDefaultAdminRules_init(0, initialAdmin);
+        _grantRole(UPGRADER_ROLE, initialUpgrader);
     }
 
     /**
