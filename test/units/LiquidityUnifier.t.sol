@@ -14,6 +14,7 @@ import {IERC7802} from "../../src/interfaces/IERC7802.sol";
 import {LiquidityUnifier} from "../../src/LiquidityUnifier.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 
+//TODO: Reduce number of asserts make on event - redundant
 contract LiquidityUnifierTest is Test {
     address admin = makeAddr("admin");
     address upgrader = makeAddr("upgrader");
