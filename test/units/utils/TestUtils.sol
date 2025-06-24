@@ -67,7 +67,9 @@ library TestUtils {
 
         // Deploy RLC Crosschain token (for L2)
         rlcCrosschainToken = RLCCrosschainToken(
-            new RLCCrosschainTokenDeployScript().deploy(name, symbol, initialAdmin, initialUpgrader, createXFactory, salt)
+            new RLCCrosschainTokenDeployScript().deploy(
+                name, symbol, initialAdmin, initialUpgrader, createXFactory, salt
+            )
         );
         // Deploy IexecLayerZeroBridge
         iexecLayerZeroBridgeChainB = IexecLayerZeroBridge(
