@@ -51,7 +51,7 @@ deploy-on-anvil:
 	$(MAKE) configure-layerzero-bridge RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
 upgrade-on-anvil:
-	$(MAKE) upgrade-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
+	$(MAKE) upgrade-liquidity-unifier RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
 	$(MAKE) upgrade-layerzero-bridge RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
 deploy-on-testnets:
@@ -61,7 +61,7 @@ deploy-on-testnets:
 	$(MAKE) configure-layerzero-bridge RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 
 upgrade-on-testnets:
-	$(MAKE) upgrade-adapter RPC_URL=$(SEPOLIA_RPC_URL)
+	$(MAKE) upgrade-liquidity-unifier RPC_URL=$(SEPOLIA_RPC_URL)
 	$(MAKE) upgrade-layerzero-bridge RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 
 # deploy-rlc-crosschain-token RPC_URL=https://...
