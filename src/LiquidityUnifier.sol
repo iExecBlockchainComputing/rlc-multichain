@@ -92,6 +92,7 @@ contract LiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgr
      * @param from The address to lock RLC tokens from (must have approved this contract)
      * @param value The amount of RLC tokens to lock in this contract
      */
+    // slither-disable-next-line arbitrary-send-erc20
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
         RLC_TOKEN.safeTransferFrom(from, address(this), value);
         emit CrosschainBurn(from, value, _msgSender());
