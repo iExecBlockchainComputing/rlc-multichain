@@ -32,6 +32,7 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
         0xcfbc5ec03206ba5826cf1103520b82c735e9bad14c6d8ed92dff9144ead3f400;
 
     function _getDualPausableStorage() private pure returns (DualPausableStorage storage $) {
+        //slither-disable-next-line naming-convention
         assembly {
             $.slot := DUAL_PAUSABLE_STORAGE_LOCATION
         }
@@ -82,18 +83,20 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
     }
 
     // ============ INITIALIZATION ============
-
+    
+    //slither-disable-next-line naming-convention
     function __DualPausable_init() internal onlyInitializing {
         __Pausable_init();
     }
 
-    ///slither-disable-next-line naming-convention
+    //slither-disable-next-line naming-convention
     function __DualPausable_init_unchained() internal onlyInitializing {}
 
     // ============ VIEW FUNCTIONS ============
 
     /**
      * @dev Returns true if send operations are paused, false otherwise
+     * 
      */
     function sendPaused() public view virtual returns (bool) {
         DualPausableStorage storage $ = _getDualPausableStorage();

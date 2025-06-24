@@ -51,6 +51,7 @@ contract IexecLayerZeroBridge is
      *
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
+    // slither-disable-next-line naming-convention
     IERC7802 public immutable BRIDGEABLE_TOKEN;
 
     /**

@@ -18,8 +18,8 @@ contract LiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgr
 
     /**
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
-     * slither-disable-next-line naming-convention
      */
+    // slither-disable-next-line naming-convention
     IERC20Metadata public immutable RLC_TOKEN;
 
     /**
