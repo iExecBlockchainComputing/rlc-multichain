@@ -49,22 +49,6 @@ contract LiquidityUnifierTest is Test {
         liquidityUnifier.initialize(admin, upgrader);
     }
 
-    // ============ decimals ============
-
-    function test_DecimalsShouldBeTheSameAsTheRlcToken() public view {
-        uint8 expectedDecimals = rlcToken.decimals();
-        uint8 actualDecimals = liquidityUnifier.decimals();
-        assertEq(actualDecimals, expectedDecimals, "decimals() should return the same value as RLC_TOKEN.decimals()");
-        assertEq(actualDecimals, 9, "Decimals should equal 9");
-    }
-
-    // ============ supportsInterface ============
-
-    function test_SupportErc7802Interface() public view {
-        assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
-        assertTrue(liquidityUnifier.supportsInterface(type(IERC7802).interfaceId));
-    }
-
     // ============ crosschainMint ============
 
     function test_MintForOneUserFromOneBridge() public {
@@ -484,6 +468,22 @@ contract LiquidityUnifierTest is Test {
         vm.prank(bridge);
         liquidityUnifier.crosschainBurn(user, amount + 1);
         assertEq(rlcToken.balanceOf(user), amount);
+    }
+
+    // ============ decimals ============
+
+    function test_DecimalsShouldBeTheSameAsTheRlcToken() public view {
+        uint8 expectedDecimals = rlcToken.decimals();
+        uint8 actualDecimals = liquidityUnifier.decimals();
+        assertEq(actualDecimals, expectedDecimals, "decimals() should return the same value as RLC_TOKEN.decimals()");
+        assertEq(actualDecimals, 9, "Decimals should equal 9");
+    }
+
+    // ============ supportsInterface ============
+
+    function test_SupportErc7802Interface() public view {
+        assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
+        assertTrue(liquidityUnifier.supportsInterface(type(IERC7802).interfaceId));
     }
 
     // ============ upgradeToAndCall ============
