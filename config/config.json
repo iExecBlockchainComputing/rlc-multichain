@@ -7,12 +7,19 @@
     "sepolia": {
       "rlcAddress": "0x26A738b6D33EF4D94FF084D3552961b8f00639Cd",
       "liquidityUnifierAddress": "",
-      "liquidityUnifierCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000"
-
+      "liquidityUnifierCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "iexecLayerZeroBridgeAddress": "",
+      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "layerZeroEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
+      "layerZeroChainId": 11155111
     },
     "arbitrum_sepolia": {
       "rlcCrossChainTokenAddress": "",
-      "rlcCrossChainTokenCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      "rlcCrossChainTokenCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "iexecLayerZeroBridgeAddress": "",
+      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "layerZeroEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f", 
+      "layerZeroChainId": 11155111
     }
   }
 }
