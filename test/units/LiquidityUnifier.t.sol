@@ -237,8 +237,7 @@ contract LiquidityUnifierTest is Test {
         _mintForUser(user, amount);
         // Check the initial state.
         assertEq(rlcToken.balanceOf(user), amount);
-        vm.prank(user);
-        rlcToken.approve(address(liquidityUnifier), amount);
+        _approveForUser(user, amount);
         // Expect events to be emitted.
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user, address(liquidityUnifier), amount);
@@ -260,8 +259,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), 2 * amount);
 
         // Approve the liquidityUnifier to spend tokens
-        vm.prank(user);
-        rlcToken.approve(address(liquidityUnifier), 2 * amount);
+        _approveForUser(user, 2 * amount);
 
         // Burn 1
         vm.expectEmit(true, true, true, true);
@@ -292,8 +290,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), 2 * amount);
 
         // Approve the liquidityUnifier to spend tokens
-        vm.prank(user);
-        rlcToken.approve(address(liquidityUnifier), 2 * amount);
+        _approveForUser(user, 2 * amount);
 
         // Bridge 1
         vm.expectEmit(true, true, true, true);
@@ -324,12 +321,9 @@ contract LiquidityUnifierTest is Test {
         _mintForUser(user3, amount3);
 
         // Approve the liquidityUnifier to spend tokens for each user
-        vm.prank(user);
-        rlcToken.approve(address(liquidityUnifier), amount);
-        vm.prank(user2);
-        rlcToken.approve(address(liquidityUnifier), amount2);
-        vm.prank(user3);
-        rlcToken.approve(address(liquidityUnifier), amount3);
+        _approveForUser(user, amount);
+        _approveForUser(user2, amount2);
+        _approveForUser(user3, amount3);
 
         // User 1
         vm.expectEmit(true, true, true, true);
@@ -374,12 +368,9 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user3), amount3);
 
         // Approve the liquidityUnifier to spend tokens for each user
-        vm.prank(user);
-        rlcToken.approve(address(liquidityUnifier), 2 * amount);
-        vm.prank(user2);
-        rlcToken.approve(address(liquidityUnifier), amount2);
-        vm.prank(user3);
-        rlcToken.approve(address(liquidityUnifier), amount3);
+        _approveForUser(user, 2 * amount);
+        _approveForUser(user2, amount2);
+        _approveForUser(user3, amount3);
 
         // Bridge 1, user 1
         vm.expectEmit(true, true, true, true);
@@ -435,8 +426,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), amount);
 
         // User approves liquidityUnifier to spend tokens
-        vm.prank(user);
-        rlcToken.approve(address(liquidityUnifier), amount);
+        _approveForUser(user, amount);
 
         // Bridge 2 burns
         vm.expectEmit(true, true, true, true);
@@ -487,8 +477,7 @@ contract LiquidityUnifierTest is Test {
         _mintForUser(user, amount);
 
         // User approves more than they have
-        vm.prank(user);
-        rlcToken.approve(address(liquidityUnifier), amount + 1);
+        _approveForUser(user, amount + 1);
 
         // Attempt to burn more than balance
         vm.expectRevert(
@@ -514,7 +503,8 @@ contract LiquidityUnifierTest is Test {
         liquidityUnifier.upgradeToAndCall(makeAddr("newImpl"), "");
     }
 
-    // Helper functions
+    // ============ helper functions ============
+    //TODO: refactor this file to share test and helper functions with RLCCrosschain tests
 
     /**
      * Grant the TOKEN_BRIDGE_ROLE to the specified bridge address.
@@ -544,5 +534,15 @@ contract LiquidityUnifierTest is Test {
     function _mintForUserWithBridge(address bridgeAddress, address userAddress, uint256 mintAmount) internal {
         vm.prank(bridgeAddress);
         liquidityUnifier.crosschainMint(userAddress, mintAmount);
+    }
+
+    /**
+     * Approve the LiquidityUnifier to spend tokens on behalf of a user.
+     * @param userAddress Address of the user approving.
+     * @param approveAmount Amount of tokens to approve.
+     */
+    function _approveForUser(address userAddress, uint256 approveAmount) internal {
+        vm.prank(userAddress);
+        rlcToken.approve(address(liquidityUnifier), approveAmount);
     }
 }
