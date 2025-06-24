@@ -11,19 +11,19 @@ import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
 contract RLCCrosschainTokenTest is Test {
     address private createx = address(new CreateX());
     bytes32 private salt = keccak256("salt");
-    address private owner = makeAddr("owner");
+    address private admin = makeAddr("admin");
     address private upgrader = makeAddr("upgrader");
     RLCCrosschainTokenDeployScript private deployer = new RLCCrosschainTokenDeployScript();
 
     function setUp() public {}
 
     function test_Deploy() public {
-        address crosschainTokenAddress = deployer.deploy("iEx.ec Network Token", "RLC", owner, upgrader, createx, salt);
+        address crosschainTokenAddress = deployer.deploy("iEx.ec Network Token", "RLC", admin, upgrader, createx, salt);
         RLCCrosschainToken crossChainToken = RLCCrosschainToken(crosschainTokenAddress);
         assertEq(crossChainToken.name(), "iEx.ec Network Token");
         assertEq(crossChainToken.symbol(), "RLC");
-        assertEq(crossChainToken.owner(), owner);
-        assertEq(crossChainToken.hasRole(crossChainToken.DEFAULT_ADMIN_ROLE(), owner), true);
+        assertEq(crossChainToken.owner(), admin);
+        assertEq(crossChainToken.hasRole(crossChainToken.DEFAULT_ADMIN_ROLE(), admin), true);
         assertEq(crossChainToken.hasRole(crossChainToken.UPGRADER_ROLE(), upgrader), true);
         // TODO check that the proxy address is saved.
     }
@@ -31,7 +31,7 @@ contract RLCCrosschainTokenTest is Test {
     // Makes sure create2 deployment is well implemented.
     function test_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
         address random = makeAddr("random");
-        deployer.deploy("iEx.ec Network Token", "RLC", owner, upgrader, createx, salt);
+        deployer.deploy("iEx.ec Network Token", "RLC", admin, upgrader, createx, salt);
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", createx));
         deployer.deploy("Foo", "BAR", random, random, createx, salt);
     }

@@ -51,6 +51,7 @@ contract IexecLayerZeroBridge is
      *
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
+    // slither-disable-next-line naming-convention
     IERC7802 public immutable BRIDGEABLE_TOKEN;
 
     /**
@@ -71,18 +72,18 @@ contract IexecLayerZeroBridge is
 
     /**
      * @notice Initializes the contract after proxy deployment
-     * @param _owner Address that will receive owner and default admin roles
-     * @param _pauser Address that will receive the pauser role
+     * @param initialAdmin Address that will receive owner and default admin roles
+     * @param initialPauser Address that will receive the pauser role
      */
     // TODO add upgrader role.
-    function initialize(address _owner, address _pauser) external initializer {
-        __Ownable_init(_owner);
-        __OFTCore_init(_owner);
+    function initialize(address initialAdmin, address initialPauser) external initializer {
+        __Ownable_init(initialAdmin);
+        __OFTCore_init(initialAdmin);
         __UUPSUpgradeable_init();
-        __AccessControlDefaultAdminRules_init(0, _owner);
+        __AccessControlDefaultAdminRules_init(0, initialAdmin);
         __DualPausable_init();
-        _grantRole(UPGRADER_ROLE, _owner);
-        _grantRole(PAUSER_ROLE, _pauser);
+        _grantRole(UPGRADER_ROLE, initialAdmin);
+        _grantRole(PAUSER_ROLE, initialPauser);
     }
 
     // ============ EMERGENCY CONTROLS ============

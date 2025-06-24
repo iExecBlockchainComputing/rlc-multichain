@@ -24,15 +24,15 @@ contract Deploy is Script {
     function run() external returns (address) {
         // TODO put inside a shared utility function.
         string memory config = vm.readFile("config/config.json");
-        address admin = config.readAddress(".admin");
-        address upgrader = config.readAddress(".upgrader");
+        address initialAdmin = config.readAddress(".initialAdmin");
+        address initialUpgrader = config.readAddress(".initialUpgrader");
         address createxFactory = config.readAddress(".createxFactory");
         string memory chain = vm.envString("CHAIN"); // the same name as the config file.
         string memory prefix = string.concat(".chains.", chain);
         bytes32 createxSalt = config.readBytes32(string.concat(prefix, ".rlcCrossChainTokenCreatexSalt"));
         vm.startBroadcast();
         address rlcCrosschainTokenProxy =
-            deploy("iEx.ec Network Token", "RLC", admin, upgrader, createxFactory, createxSalt);
+            deploy("iEx.ec Network Token", "RLC", initialAdmin, initialUpgrader, createxFactory, createxSalt);
         vm.stopBroadcast();
 
         //TODO: use config file to store addresses.
@@ -45,8 +45,8 @@ contract Deploy is Script {
      *
      * @param name The name of the token.
      * @param symbol The symbol of the token.
-     * @param admin The address of the admin.
-     * @param upgrader The address with upgrade permissions.
+     * @param initialAdmin The address of the admin.
+     * @param initialUpgrader The address with upgrade permissions.
      * @param createxFactory The CreateX factory address.
      * @param createxSalt The salt for CreateX deployment.
      * @return address of the deployed RLCCrosschainToken proxy contract.
@@ -54,13 +54,13 @@ contract Deploy is Script {
     function deploy(
         string memory name,
         string memory symbol,
-        address admin,
-        address upgrader,
+        address initialAdmin,
+        address initialUpgrader,
         address createxFactory,
         bytes32 createxSalt
     ) public returns (address) {
         bytes memory initData =
-            abi.encodeWithSelector(RLCCrosschainToken.initialize.selector, name, symbol, admin, upgrader);
+            abi.encodeWithSelector(RLCCrosschainToken.initialize.selector, name, symbol, initialAdmin, initialUpgrader);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "RLCCrosschainToken", "", initData, createxFactory, createxSalt
         );

@@ -15,7 +15,7 @@ import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
 import {ITokenSpender} from "../../src/interfaces/ITokenSpender.sol";
 
 contract RLCCrosschainTokenTest is Test {
-    address owner = makeAddr("owner");
+    address admin = makeAddr("admin");
     address upgrader = makeAddr("upgrader");
     address bridge = makeAddr("bridge");
     address bridge2 = makeAddr("bridge2");
@@ -37,7 +37,7 @@ contract RLCCrosschainTokenTest is Test {
     function setUp() public {
         crossChainToken = RLCCrosschainToken(
             new RLCCrosschainTokenDeployScript().deploy(
-                "iEx.ec Network Token", "RLC", owner, upgrader, address(new CreateX()), keccak256("salt")
+                "iEx.ec Network Token", "RLC", admin, upgrader, address(new CreateX()), keccak256("salt")
             )
         );
         bridgeTokenRoleId = crossChainToken.TOKEN_BRIDGE_ROLE();
@@ -47,7 +47,7 @@ contract RLCCrosschainTokenTest is Test {
 
     function test_RevertWhen_InitializedMoreThanOnce() public {
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
-        crossChainToken.initialize("Foo", "BAR", owner, upgrader);
+        crossChainToken.initialize("Foo", "BAR", admin, upgrader);
     }
 
     // ============ approveAndCall ============
@@ -540,7 +540,7 @@ contract RLCCrosschainTokenTest is Test {
      * @param bridgeAddress Address of the bridge to authorize.
      */
     function _authorizeBridge(address bridgeAddress) internal {
-        vm.prank(owner);
+        vm.prank(admin);
         crossChainToken.grantRole(bridgeTokenRoleId, bridgeAddress);
     }
 
