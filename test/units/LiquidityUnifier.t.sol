@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.22;
 
-import {Test, console} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
@@ -468,6 +468,19 @@ contract LiquidityUnifierTest is Test {
         );
         vm.prank(bridge);
         liquidityUnifier.crosschainBurn(user, amount + 1);
+        assertEq(rlcToken.balanceOf(user), amount);
+    }
+
+    function test_RevertWhen_BurnWithoutUserApprove() public {
+        _authorizeBridge(bridge);
+        rlcToken.transfer(user, amount);
+
+        // Attempt to burn without user approval
+        vm.expectRevert(
+            abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector, liquidityUnifierAddress, 0, amount)
+        );
+        vm.prank(bridge);
+        liquidityUnifier.crosschainBurn(user, amount);
         assertEq(rlcToken.balanceOf(user), amount);
     }
 
