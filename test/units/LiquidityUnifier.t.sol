@@ -153,10 +153,8 @@ contract LiquidityUnifierTest is Test {
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user3, amount3, bridge);
         _mintForUser(user3, amount3);
+
         // Check that tokens are minted.
-        assertEq(
-            rlcToken.balanceOf(user) + rlcToken.balanceOf(user2) + rlcToken.balanceOf(user3), amount + amount2 + amount3
-        );
         assertEq(rlcToken.balanceOf(user), amount);
         assertEq(rlcToken.balanceOf(user2), amount2);
         assertEq(rlcToken.balanceOf(user3), amount3);
@@ -195,11 +193,8 @@ contract LiquidityUnifierTest is Test {
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user3, amount3, bridge2);
         _mintForUserWithBridge(bridge2, user3, amount3);
+
         // Check that tokens are minted.
-        assertEq(
-            rlcToken.balanceOf(user) + rlcToken.balanceOf(user2) + rlcToken.balanceOf(user3),
-            2 * amount + amount2 + amount3
-        );
         assertEq(rlcToken.balanceOf(user), 2 * amount); // Bridge 1 and bridge 2
         assertEq(rlcToken.balanceOf(user2), amount2); // Bridge 1
         assertEq(rlcToken.balanceOf(user3), amount3); // Bridge 2
