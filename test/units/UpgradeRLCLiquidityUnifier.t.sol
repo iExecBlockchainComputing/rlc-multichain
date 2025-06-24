@@ -3,23 +3,24 @@
 pragma solidity ^0.8.22;
 
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {LiquidityUnifierV2} from "../../../../src/mocks/LiquidityUnifierV2Mock.sol";
-import {LiquidityUnifier} from "../../../../src/LiquidityUnifier.sol";
+import {RLCLiquidityUnifierV2} from "../../../../src/mocks/RLCLiquidityUnifierV2Mock.sol";
+import {RLCLiquidityUnifier} from "../../../../src/RLCLiquidityUnifier.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 import {UpgradeUtils} from "../../../../script/lib/UpgradeUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 
-contract UpgradeLiquidityUnifier is TestHelperOz5 {
+contract UpgradeRLCLiquidityUnifier is TestHelperOz5 {
     using TestUtils for *;
 
-    LiquidityUnifier private liquidityUnifierV1;
-    LiquidityUnifierV2 private liquidityUnifierV2;
+    RLCLiquidityUnifier private rlcLiquidityUnifierV1;
+    RLCLiquidityUnifierV2 private rlcLiquidityUnifierV2;
     RLCMock private rlcToken;
 
     address public mockEndpoint;
     address public owner = makeAddr("owner");
     address public pauser = makeAddr("pauser");
+    address private upgrader = makeAddr("upgrader");
 
     address public proxyAddress;
     string private name = "iEx.ec Network Token";
@@ -31,9 +32,9 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-        (,, rlcToken,, liquidityUnifierV1) =
-            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
-        proxyAddress = address(liquidityUnifierV1);
+        (,, rlcToken,, rlcLiquidityUnifierV1) =
+            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, upgrader, pauser);
+        proxyAddress = address(rlcLiquidityUnifierV1);
     }
 
     function test_UpgradeCorrectly() public {
@@ -45,10 +46,10 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
         assertFalse(success2, "V1 should not have initializeV2() function");
 
         // 2. Store V1 state for comparison
-        address originalOwner = liquidityUnifierV1.owner();
+        address originalOwner = rlcLiquidityUnifierV1.owner();
 
-        assertTrue(liquidityUnifierV1.hasRole(liquidityUnifierV1.DEFAULT_ADMIN_ROLE(), owner));
-        assertTrue(liquidityUnifierV1.hasRole(liquidityUnifierV1.UPGRADER_ROLE(), owner));
+        assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.DEFAULT_ADMIN_ROLE(), owner));
+        assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.UPGRADER_ROLE(), owner));
 
         // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(owner);
@@ -56,7 +57,7 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             constructorData: abi.encode(rlcToken),
-            contractName: "LiquidityUnifierV2Mock.sol:LiquidityUnifierV2",
+            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
             newStateVariable: NEW_STATE_VARIABLE,
             validateOnly: false
         });
@@ -65,21 +66,22 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
 
         vm.stopPrank();
 
-        liquidityUnifierV2 = LiquidityUnifierV2(proxyAddress);
+        rlcLiquidityUnifierV2 = RLCLiquidityUnifierV2(proxyAddress);
 
         // 5. Verify state preservation
-        assertEq(liquidityUnifierV2.owner(), originalOwner, "Owner should be preserved");
+        assertEq(rlcLiquidityUnifierV2.owner(), originalOwner, "Owner should be preserved");
         assertTrue(
-            liquidityUnifierV2.hasRole(liquidityUnifierV2.DEFAULT_ADMIN_ROLE(), owner),
+            rlcLiquidityUnifierV2.hasRole(rlcLiquidityUnifierV2.DEFAULT_ADMIN_ROLE(), owner),
             "Default admin role should be preserved"
         );
         assertTrue(
-            liquidityUnifierV2.hasRole(liquidityUnifierV2.UPGRADER_ROLE(), owner), "Upgrader role should be preserved"
+            rlcLiquidityUnifierV2.hasRole(rlcLiquidityUnifierV2.UPGRADER_ROLE(), owner),
+            "Upgrader role should be preserved"
         );
 
         // 6. Verify new V2 functionality
         assertEq(
-            liquidityUnifierV2.newStateVariable(),
+            rlcLiquidityUnifierV2.newStateVariable(),
             NEW_STATE_VARIABLE,
             "New state variable should be initialized correctly"
         );
@@ -95,7 +97,7 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             constructorData: abi.encode(rlcToken),
-            contractName: "LiquidityUnifierV2Mock.sol:LiquidityUnifierV2",
+            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
             newStateVariable: NEW_STATE_VARIABLE,
             validateOnly: false
         });
@@ -104,14 +106,14 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
 
         vm.stopPrank();
 
-        liquidityUnifierV2 = LiquidityUnifierV2(proxyAddress);
+        rlcLiquidityUnifierV2 = RLCLiquidityUnifierV2(proxyAddress);
 
         // Verify it was initialized correctly
-        assertEq(liquidityUnifierV2.newStateVariable(), NEW_STATE_VARIABLE);
+        assertEq(rlcLiquidityUnifierV2.newStateVariable(), NEW_STATE_VARIABLE);
 
         // Attempt to initialize again should revert
         vm.prank(owner);
         vm.expectRevert();
-        liquidityUnifierV2.initializeV2(999); // Different value to ensure it's not a duplicate
+        rlcLiquidityUnifierV2.initializeV2(999); // Different value to ensure it's not a duplicate
     }
 }

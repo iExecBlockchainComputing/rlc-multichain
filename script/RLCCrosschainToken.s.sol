@@ -5,7 +5,7 @@ pragma solidity ^0.8.22;
 
 import "forge-std/StdJson.sol";
 import {Script} from "forge-std/Script.sol";
-import {RLCCrosschainToken} from "../src/token/RLCCrosschainToken.sol";
+import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
 
@@ -32,7 +32,7 @@ contract Deploy is Script {
         bytes32 createxSalt = config.readBytes32(string.concat(prefix, ".rlcCrossChainTokenCreatexSalt"));
         vm.startBroadcast();
         address rlcCrosschainTokenProxy =
-            deploy("RLC Crosschain Token", "RLC", initialAdmin, initialUpgrader, createxFactory, createxSalt);
+            deploy("iEx.ec Network Token", "RLC", initialAdmin, initialUpgrader, createxFactory, createxSalt);
         vm.stopBroadcast();
 
         //TODO: use config file to store addresses.

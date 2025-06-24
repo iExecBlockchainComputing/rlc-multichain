@@ -2,21 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {LiquidityUnifier} from "../LiquidityUnifier.sol";
+import {RLCLiquidityUnifier} from "../RLCLiquidityUnifier.sol";
 
 /**
- * @title LiquidityUnifierV2 - V2 implementation with additional features
+ * @title RLCLiquidityUnifierV2 - V2 implementation with additional features
  * @author IEXEC BLOCKCHAIN TECH
- * @notice This contract inherits from LiquidityUnifier (V1) and adds new functionality
+ * @notice This contract inherits from RLCLiquidityUnifier (V1) and adds new functionality
  *
- * @custom:oz-upgrades-from src/LiquidityUnifier.sol:LiquidityUnifier
+ * @custom:oz-upgrades-from src/RLCLiquidityUnifier.sol:RLCLiquidityUnifier
  */
-contract LiquidityUnifierV2 is LiquidityUnifier {
+contract RLCLiquidityUnifierV2 is RLCLiquidityUnifier {
     /// NEW STATE VARIABLES FOR V2
     uint256 public newStateVariable;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(address _token) LiquidityUnifier(_token) {}
+    constructor(address _token) RLCLiquidityUnifier(_token) {}
 
     /**
      * @notice Initializes V2 features (called after upgrade)

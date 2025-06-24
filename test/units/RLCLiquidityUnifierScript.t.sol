@@ -6,8 +6,8 @@ pragma solidity ^0.8.22;
 import {Test} from "forge-std/Test.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
-import {Deploy as LiquidityUnifierDeployScript} from "../../script/LiquidityUnifier.s.sol";
-import {LiquidityUnifier} from "../../src/LiquidityUnifier.sol";
+import {Deploy as RLCLiquidityUnifierDeployScript} from "../../script/RLCLiquidityUnifier.s.sol";
+import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 
 contract LiquidityUnifierTest is Test {
     address private rlcToken = makeAddr("RLC Token");
@@ -15,13 +15,13 @@ contract LiquidityUnifierTest is Test {
     bytes32 private salt = keccak256("salt");
     address private admin = makeAddr("admin");
     address private upgrader = makeAddr("upgrader");
-    LiquidityUnifierDeployScript private deployer = new LiquidityUnifierDeployScript();
+    RLCLiquidityUnifierDeployScript private deployer = new RLCLiquidityUnifierDeployScript();
 
     function setUp() public {}
 
     function test_Deploy() public {
         address liquidityUnifierAddress = deployer.deploy(rlcToken, admin, upgrader, createx, salt);
-        LiquidityUnifier liquidityUnifier = LiquidityUnifier(liquidityUnifierAddress);
+        RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(liquidityUnifierAddress);
         assertEq(liquidityUnifier.owner(), admin);
         assertEq(address(liquidityUnifier.RLC_TOKEN()), rlcToken);
         assertEq(liquidityUnifier.hasRole(liquidityUnifier.DEFAULT_ADMIN_ROLE(), admin), true);

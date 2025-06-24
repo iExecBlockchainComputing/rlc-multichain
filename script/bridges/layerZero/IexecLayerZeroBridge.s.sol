@@ -17,10 +17,12 @@ contract Deploy is Script {
         address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address initialAdmin = vm.envAddress("ADMIN_ADDRESS");
+        address initialUpgrader = vm.envAddress("UPGRADER_ADDRESS");
         address initialPauser = vm.envAddress("PAUSER_ADDRESS");
         bytes32 createxSalt = vm.envBytes32("SALT");
 
-        address iexecLayerZeroBridgeProxy = deploy(rlcCrosschain, lzEndpoint, initialAdmin, initialPauser, createxSalt);
+        address iexecLayerZeroBridgeProxy =
+            deploy(rlcCrosschain, lzEndpoint, initialAdmin, initialUpgrader, initialPauser, createxSalt);
 
         vm.stopBroadcast();
 
@@ -34,14 +36,16 @@ contract Deploy is Script {
         address rlcCrosschain,
         address lzEndpoint,
         address initialAdmin,
+        address initialUpgrader,
         address initialPauser,
         bytes32 createxSalt
     ) public returns (address) {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
 
         bytes memory constructorData = abi.encode(rlcCrosschain, lzEndpoint);
-        bytes memory initializeData =
-            abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialPauser);
+        bytes memory initializeData = abi.encodeWithSelector(
+            IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
+        );
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "IexecLayerZeroBridge", constructorData, initializeData, createXFactory, createxSalt
         );

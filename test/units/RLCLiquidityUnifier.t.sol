@@ -9,9 +9,9 @@ import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol"
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {Deploy as LiquidityUnifierDeployScript} from "../../script/LiquidityUnifier.s.sol";
+import {Deploy as RLCLiquidityUnifierDeployScript} from "../../script/RLCLiquidityUnifier.s.sol";
 import {IERC7802} from "../../src/interfaces/IERC7802.sol";
-import {LiquidityUnifier} from "../../src/LiquidityUnifier.sol";
+import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 
 //TODO: Reduce number of asserts make on event - redundant
@@ -30,14 +30,14 @@ contract LiquidityUnifierTest is Test {
 
     bytes32 private bridgeTokenRoleId;
 
-    LiquidityUnifier private liquidityUnifier;
+    RLCLiquidityUnifier private liquidityUnifier;
     address private liquidityUnifierAddress;
     RLCMock private rlcToken;
 
     function setUp() public {
         rlcToken = new RLCMock("iEx.ec Network Token", "RLC");
-        liquidityUnifier = LiquidityUnifier(
-            new LiquidityUnifierDeployScript().deploy(
+        liquidityUnifier = RLCLiquidityUnifier(
+            new RLCLiquidityUnifierDeployScript().deploy(
                 address(rlcToken), admin, upgrader, address(new CreateX()), keccak256("salt")
             )
         );
@@ -567,7 +567,7 @@ contract LiquidityUnifierTest is Test {
     }
 
     /**
-     * Approve the LiquidityUnifier to spend tokens on behalf of a user.
+     * Approve the RLCLiquidityUnifier to spend tokens on behalf of a user.
      * @param sender Address of the user approving.
      * @param approveAmount Amount of tokens to approve.
      */
