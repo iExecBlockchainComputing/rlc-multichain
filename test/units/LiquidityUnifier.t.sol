@@ -533,8 +533,7 @@ contract LiquidityUnifierTest is Test {
      * @param mintAmount Amount of tokens to mint.
      */
     function _mintForUser(address userAddress, uint256 mintAmount) internal {
-        vm.prank(bridge);
-        liquidityUnifier.crosschainMint(userAddress, mintAmount);
+        _mintForUser(bridge, userAddress, mintAmount);
     }
 
     /**
