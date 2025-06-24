@@ -44,7 +44,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address lzEndpointBridge = address(endpoints[SOURCE_EID]);
         address lzEndpointAdapter = address(endpoints[DEST_EID]);
 
-        //TODO: make tests when with iexecLayerZeroBridgeChainA connected to liquidity unifier
+        //TODO: make tests when with iexecLayerZeroBridgeChainA - iexecLayerZeroBridge is connected to liquidity unifier
         (iexecLayerZeroBridgeChainA, iexecLayerZeroBridgeChainB,, rlcCrosschainToken) =
             TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, pauser);
 
