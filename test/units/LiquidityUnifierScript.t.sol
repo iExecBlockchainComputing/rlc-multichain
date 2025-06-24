@@ -4,6 +4,7 @@
 pragma solidity ^0.8.22;
 
 import {Test} from "forge-std/Test.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {Deploy as LiquidityUnifierDeployScript} from "../../script/LiquidityUnifier.s.sol";
 import {LiquidityUnifier} from "../../src/LiquidityUnifier.sol";
@@ -27,7 +28,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(liquidityUnifier.hasRole(liquidityUnifier.UPGRADER_ROLE(), upgrader), true);
         // Make sure the contract has been initialized.
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
-        rlcAdapter.initialize(owner, upgrader);
+        liquidityUnifier.initialize(admin, upgrader);
         // TODO check that the proxy address is saved.
     }
 
