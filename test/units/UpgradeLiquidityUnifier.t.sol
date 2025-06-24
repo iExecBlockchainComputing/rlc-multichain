@@ -3,18 +3,20 @@
 pragma solidity ^0.8.22;
 
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {IexecLayerZeroBridgeV2} from "../../../../src/mocks/IexecLayerZeroBridgeV2Mock.sol";
-import {TestUtils} from "./../../utils/TestUtils.sol";
+import {LiquidityUnifierV2Mock} from "../../../../src/mocks/LiquidityUnifierV2Mock.sol";
+import {LiquidityUnifier} from "../../../../src/LiquidityUnifier.sol";
+import {TestUtils} from "./utils/TestUtils.sol";
 import {UpgradeUtils} from "../../../../script/lib/UpgradeUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {RLCCrosschainToken} from "../../../../src/token/RLCCrosschainToken.sol";
+import {RLCMock} from "./mocks/RLCMock.sol";
 
-contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
+contract UpgradeLiquidityUnifier is TestHelperOz5 {
     using TestUtils for *;
 
-    IexecLayerZeroBridge public iexecLayerZeroBridgeV1;
-    IexecLayerZeroBridgeV2 public iexecLayerZeroBridgeV2;
-    RLCCrosschainToken private rlcCrosschainToken;
+    IexecLayerZeroBridge private iexecLayerZeroBridgeChainA;
+    LiquidityUnifier private liquidityUnifierV1;
+    LiquidityUnifierV2Mock private liquidityUnifierV2;
+    RLCMock private rlcToken;
 
     address public mockEndpoint;
     address public owner = makeAddr("owner");
@@ -30,9 +32,9 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-        (, iexecLayerZeroBridgeV1,, rlcCrosschainToken,) =
+        (iexecLayerZeroBridgeChainA,, rlcToken,, liquidityUnifierV1) =
             TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
-        proxyAddress = address(iexecLayerZeroBridgeV1);
+        proxyAddress = address(liquidityUnifierV1);
     }
 
     function test_UpgradeCorrectly() public {
@@ -44,19 +46,18 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         assertFalse(success2, "V1 should not have initializeV2() function");
 
         // 2. Store V1 state for comparison
-        address originalOwner = iexecLayerZeroBridgeV1.owner();
+        address originalOwner = liquidityUnifierV1.owner();
 
-        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.DEFAULT_ADMIN_ROLE(), owner));
-        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.UPGRADER_ROLE(), owner));
-        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.PAUSER_ROLE(), pauser));
+        assertTrue(liquidityUnifierV1.hasRole(liquidityUnifierV1.DEFAULT_ADMIN_ROLE(), owner));
+        assertTrue(liquidityUnifierV1.hasRole(liquidityUnifierV1.UPGRADER_ROLE(), owner));
 
         // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(owner);
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
-            constructorData: abi.encode(rlcCrosschainToken, mockEndpoint),
-            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
+            constructorData: abi.encode(rlcToken),
+            contractName: "liquidityUnifierV2Mock.sol:LiquidityUnifierV2Mock",
             newStateVariable: NEW_STATE_VARIABLE,
             validateOnly: false
         });
@@ -65,26 +66,21 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
 
         vm.stopPrank();
 
-        iexecLayerZeroBridgeV2 = IexecLayerZeroBridgeV2(proxyAddress);
+        liquidityUnifierV2 = LiquidityUnifierV2Mock(proxyAddress);
 
         // 5. Verify state preservation
-        assertEq(iexecLayerZeroBridgeV2.owner(), originalOwner, "Owner should be preserved");
+        assertEq(liquidityUnifierV2.owner(), originalOwner, "Owner should be preserved");
         assertTrue(
-            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.DEFAULT_ADMIN_ROLE(), owner),
+            liquidityUnifierV2.hasRole(liquidityUnifierV2.DEFAULT_ADMIN_ROLE(), owner),
             "Default admin role should be preserved"
         );
         assertTrue(
-            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.UPGRADER_ROLE(), owner),
-            "Upgrader role should be preserved"
-        );
-        assertTrue(
-            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.PAUSER_ROLE(), pauser),
-            "Pauser role should be preserved"
+            liquidityUnifierV2.hasRole(liquidityUnifierV2.UPGRADER_ROLE(), owner), "Upgrader role should be preserved"
         );
 
         // 6. Verify new V2 functionality
         assertEq(
-            iexecLayerZeroBridgeV2.newStateVariable(),
+            liquidityUnifierV2.newStateVariable(),
             NEW_STATE_VARIABLE,
             "New state variable should be initialized correctly"
         );
@@ -99,8 +95,8 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
-            constructorData: abi.encode(rlcCrosschainToken, mockEndpoint),
-            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
+            constructorData: abi.encode(rlcToken),
+            contractName: "liquidityUnifierV2Mock.sol:liquidityUnifierV2",
             newStateVariable: NEW_STATE_VARIABLE,
             validateOnly: false
         });
@@ -109,14 +105,14 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
 
         vm.stopPrank();
 
-        iexecLayerZeroBridgeV2 = IexecLayerZeroBridgeV2(proxyAddress);
+        liquidityUnifierV2 = LiquidityUnifierV2Mock(proxyAddress);
 
         // Verify it was initialized correctly
-        assertEq(iexecLayerZeroBridgeV2.newStateVariable(), NEW_STATE_VARIABLE);
+        assertEq(liquidityUnifierV2.newStateVariable(), NEW_STATE_VARIABLE);
 
         // Attempt to initialize again should revert
         vm.prank(owner);
         vm.expectRevert();
-        iexecLayerZeroBridgeV2.initializeV2(999); // Different value to ensure it's not a duplicate
+        liquidityUnifierV2.initializeV2(999); // Different value to ensure it's not a duplicate
     }
 }

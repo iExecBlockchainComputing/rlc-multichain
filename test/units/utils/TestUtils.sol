@@ -29,7 +29,8 @@ library TestUtils {
             IexecLayerZeroBridge iexecLayerZeroBridgeChainA,
             IexecLayerZeroBridge iexecLayerZeroBridgeChainB,
             RLCMock rlcToken,
-            RLCCrosschainToken rlcCrosschainToken
+            RLCCrosschainToken rlcCrosschainToken,
+            LiquidityUnifier liquidityUnifier
         )
     {
         address createXFactory = address(new CreateX());
@@ -41,7 +42,7 @@ library TestUtils {
         bytes32 salt = keccak256("salt");
 
         // Deploy Liquidity Unifier
-        LiquidityUnifier liquidityUnifier = LiquidityUnifier(
+        liquidityUnifier = LiquidityUnifier(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "LiquidityUnifier",
                 abi.encode(rlcToken),
