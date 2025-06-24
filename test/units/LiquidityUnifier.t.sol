@@ -33,7 +33,7 @@ contract LiquidityUnifierTest is Test {
     RLCMock private rlcToken;
 
     function setUp() public {
-        rlcToken = new RLCMock("TokenChainX", "RLC");
+        rlcToken = new RLCMock("iEx.ec Network Token", "RLC");
         liquidityUnifier = LiquidityUnifier(
             new LiquidityUnifierDeployScript().deploy(
                 address(rlcToken), admin, upgrader, address(new CreateX()), keccak256("salt")
