@@ -77,11 +77,11 @@ contract IexecLayerZeroBridge is
      */
     function initialize(address initialAdmin, address initialUpgrader, address initialPauser) external initializer {
         __UUPSUpgradeable_init();
-        __Ownable_init(initialAdmin);
-        __OFTCore_init(initialAdmin);
         __AccessControlDefaultAdminRules_init(0, initialAdmin);
         _grantRole(UPGRADER_ROLE, initialUpgrader);
         _grantRole(PAUSER_ROLE, initialPauser);
+        __Ownable_init(initialAdmin);
+        __OFTCore_init(initialAdmin);
         __DualPausable_init();
     }
 

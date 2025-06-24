@@ -24,9 +24,9 @@ import {ITokenSpender} from "./interfaces/ITokenSpender.sol";
  * https://github.com/OpenZeppelin/openzeppelin-community-contracts/blob/075587479556632d3dd9e9e3b37417cabf3e26a3/contracts/token/ERC20/extensions/ERC20Bridgeable.sol
  */
 contract RLCCrosschainToken is
-    ERC20PermitUpgradeable,
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
+    ERC20PermitUpgradeable,
     IERC7802
 {
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -50,11 +50,11 @@ contract RLCCrosschainToken is
         public
         initializer
     {
-        __ERC20_init(name, symbol);
-        __ERC20Permit_init(name);
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, initialAdmin);
         _grantRole(UPGRADER_ROLE, initialUpgrader);
+        __ERC20_init(name, symbol);
+        __ERC20Permit_init(name);
     }
 
     /**
