@@ -89,8 +89,11 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
         __Pausable_init();
     }
 
-    //slither-disable-next-line naming-convention
+    //slither-disable-start naming-convention 
+    //slither-disable-start dead-code
     function __DualPausable_init_unchained() internal onlyInitializing {}
+    //slither-disable-end naming-convention
+    //slither-disable-end dead-code
 
     // ============ VIEW FUNCTIONS ============
 
