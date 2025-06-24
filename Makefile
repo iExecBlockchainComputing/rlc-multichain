@@ -197,7 +197,7 @@ verify-adapter-proxy:
 	forge verify-contract \
         --chain-id 11155111 \
         --watch \
-        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
+        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(ADMIN_ADDRESS) $(PAUSER_ADDRESS))) \
         --etherscan-api-key $(ETHERSCAN_API_KEY) \
         $(RLC_ADAPTER_PROXY_ADDRESS) \
         lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
@@ -207,7 +207,7 @@ verify-layerzero-bridge-proxy:
 	forge verify-contract \
         --chain-id 421614 \
         --watch \
-        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(OWNER_ADDRESS) $(PAUSER_ADDRESS))) \
+        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(ADMIN_ADDRESS) $(PAUSER_ADDRESS))) \
         --etherscan-api-key $(ARBISCAN_API_KEY) \
         $(LAYERZERO_BRIDGE_PROXY_ADDRESS) \
         lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
