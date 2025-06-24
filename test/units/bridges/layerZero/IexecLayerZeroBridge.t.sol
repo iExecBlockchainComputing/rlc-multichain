@@ -11,7 +11,7 @@ import {CreateX} from "@createx/contracts/CreateX.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {DualPausableUpgradeable} from "../../../../src/bridges/utils/DualPausableUpgradeable.sol";
 import {TestUtils} from "../../utils/TestUtils.sol";
-import {RLCCrosschainToken} from "../../../../src/token/RLCCrosschainToken.sol";
+import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
 
 contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     using OptionsBuilder for bytes;

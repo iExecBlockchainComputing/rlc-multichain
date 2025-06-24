@@ -7,7 +7,7 @@ import {IexecLayerZeroBridgeV2} from "../../../../src/_mocks/IexecLayerZeroBridg
 import {TestUtils} from "./../../utils/TestUtils.sol";
 import {UpgradeUtils} from "../../../../script/lib/UpgradeUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {RLCCrosschainToken} from "../../../../src/token/RLCCrosschainToken.sol";
+import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
 
 contract UpgradeRLCOFTTest is TestHelperOz5 {
     using TestUtils for *;

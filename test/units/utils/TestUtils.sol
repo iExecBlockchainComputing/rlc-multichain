@@ -10,7 +10,7 @@ import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {LiquidityUnifier} from "../../../src/LiquidityUnifier.sol";
-import {RLCCrosschainToken} from "../../../src/token/RLCCrosschainToken.sol";
+import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
 
 library TestUtils {

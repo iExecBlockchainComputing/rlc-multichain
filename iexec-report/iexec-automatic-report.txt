@@ -16,7 +16,7 @@ SUM:                             9             97            463            285
 -------------------------------------------------------------------------------
 
 📋 Lines per Solidity File:
-      93 src/token/RLCCrosschainToken.sol
+      93 src/RLCCrosschainToken.sol
      189 src/bridges/layerZero/RLCAdapter.sol
      274 src/bridges/layerZero/IexecLayerZeroBridge.sol
      152 src/bridges/common/DualPausableUpgradeable.sol
@@ -26,7 +26,7 @@ SUM:                             9             97            463            285
      785 total
 
 🔐 SHA256 Hash of Contract Files:
-e71f79339ee8563853ca05475ccd996479e3f47b86a9a6a0f32988c44c96a7ce  src/token/RLCCrosschainToken.sol
+e71f79339ee8563853ca05475ccd996479e3f47b86a9a6a0f32988c44c96a7ce  src/RLCCrosschainToken.sol
 3d4e4e9a0dfd4508b094f625b91690d71a74409486d5d8eadfd0fe7a5423675c  src/bridges/layerZero/RLCAdapter.sol
 58d054f0a3f4ac5b27bf192ffbff54525786559cf9c1ad8e2c11973a1c2c5a15  src/bridges/layerZero/IexecLayerZeroBridge.sol
 eecbbf1fc2429ebd4b578d19ee23615a703a512971a9d5243f89b79c240f0a50  src/bridges/common/DualPausableUpgradeable.sol

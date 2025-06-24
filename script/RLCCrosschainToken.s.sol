@@ -5,7 +5,7 @@ pragma solidity ^0.8.22;
 
 import "forge-std/StdJson.sol";
 import {Script} from "forge-std/Script.sol";
-import {RLCCrosschainToken} from "../src/token/RLCCrosschainToken.sol";
+import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
 
