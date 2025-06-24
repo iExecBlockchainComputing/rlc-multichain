@@ -12,6 +12,21 @@ library BridgeConfigLib {
     using stdJson for string;
 
     /**
+     * @dev Common configuration parameters structure
+     */
+    struct CommonConfigParams {
+        address initialAdmin;
+        address initialPauser;
+        address initialUpgrader;
+        address createxFactory;
+        bytes32 createxSalt;
+        address lzEndpoint;
+        uint32 layerZeroChainId;
+        address bridgeableToken;
+        address bridgeAddress;
+    }
+
+    /**
      * @dev Gets the appropriate bridgeable token address based on the chain
      * @param config The JSON configuration string
      * @param chain The current chain identifier
@@ -43,29 +58,14 @@ library BridgeConfigLib {
     {
         string memory prefix = string.concat(".chains.", chain);
 
-        params.admin = config.readAddress(".admin");
-        params.pauser = config.readAddress(".pauser");
+        params.initialAdmin = config.readAddress(".initialAdmin");
+        params.initialPauser = config.readAddress(".initialPauser");
+        params.initialUpgrader = config.readAddress(".initialUpgrader");
         params.createxFactory = config.readAddress(".createxFactory");
-        params.prefix = prefix;
         params.bridgeableToken = getBridgeableTokenAddress(config, chain, prefix);
         params.lzEndpoint = config.readAddress(string.concat(prefix, ".layerZeroEndpointAddress"));
         params.createxSalt = config.readBytes32(string.concat(prefix, ".iexecLayerZeroBridgeCreatexSalt"));
         params.bridgeAddress = config.readAddress(string.concat(prefix, ".iexecLayerZeroBridgeAddress"));
         params.layerZeroChainId = uint32(config.readUint(string.concat(prefix, ".layerZeroChainId")));
-    }
-
-    /**
-     * @dev Common configuration parameters structure
-     */
-    struct CommonConfigParams {
-        address admin;
-        address pauser;
-        address createxFactory;
-        string prefix;
-        address bridgeableToken;
-        address lzEndpoint;
-        bytes32 createxSalt;
-        address bridgeAddress;
-        uint32 layerZeroChainId;
     }
 }
