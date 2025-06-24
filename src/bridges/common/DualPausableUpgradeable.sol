@@ -99,7 +99,6 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
 
     /**
      * @dev Returns true if send operations are paused, false otherwise
-     *
      */
     function sendPaused() public view virtual returns (bool) {
         DualPausableStorage storage $ = _getDualPausableStorage();

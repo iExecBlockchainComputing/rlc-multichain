@@ -50,12 +50,16 @@ contract Deploy is Script {
      * @param createxSalt The salt for CreateX deployment.
      * @return address of the deployed LiquidityUnifier proxy contract.
      */
-    function deploy(address rlcToken, address initialAdmin, address initialUpgrader, address createxFactory, bytes32 createxSalt)
-        public
-        returns (address)
-    {
+    function deploy(
+        address rlcToken,
+        address initialAdmin,
+        address initialUpgrader,
+        address createxFactory,
+        bytes32 createxSalt
+    ) public returns (address) {
         bytes memory constructorData = abi.encode(rlcToken);
-        bytes memory initData = abi.encodeWithSelector(LiquidityUnifier.initialize.selector, initialAdmin, initialUpgrader);
+        bytes memory initData =
+            abi.encodeWithSelector(LiquidityUnifier.initialize.selector, initialAdmin, initialUpgrader);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "LiquidityUnifier", constructorData, initData, createxFactory, createxSalt
         );
