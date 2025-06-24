@@ -29,14 +29,18 @@ contract Deploy is Script {
         return iexecLayerZeroBridgeProxy;
     }
 
-    function deploy(address rlcCrosschain, address lzEndpoint, address initialAdmin, address initialPauser, bytes32 createxSalt)
-        public
-        returns (address)
-    {
+    function deploy(
+        address rlcCrosschain,
+        address lzEndpoint,
+        address initialAdmin,
+        address initialPauser,
+        bytes32 createxSalt
+    ) public returns (address) {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
 
         bytes memory constructorData = abi.encode(rlcCrosschain, lzEndpoint);
-        bytes memory initializeData = abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialPauser);
+        bytes memory initializeData =
+            abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialPauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "IexecLayerZeroBridge", constructorData, initializeData, createXFactory, createxSalt
         );
