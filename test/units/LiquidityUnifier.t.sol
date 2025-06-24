@@ -540,7 +540,7 @@ contract LiquidityUnifierTest is Test {
      * @param userAddress Address of the user approving.
      * @param approveAmount Amount of tokens to approve.
      */
-    function _approveForUser(address userAddress, uint256 approveAmount) internal {
+    function _approveLiquidityUnifier(address sender, uint256 approveAmount) internal {
         vm.prank(userAddress);
         rlcToken.approve(liquidityUnifierAddress, approveAmount);
     }
