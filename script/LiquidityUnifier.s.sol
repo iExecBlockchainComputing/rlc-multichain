@@ -73,7 +73,7 @@ contract Upgrade is Script {
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             constructorData: abi.encode(rlcToken),
-            contractName: "LiquidityUnifierV2Mock.sol:LiquidityUnifierV2Mock", // Would be production contract in real deployment
+            contractName: "LiquidityUnifierV2Mock.sol:LiquidityUnifier", // Would be production contract in real deployment
             newStateVariable: 1000000 * 10 ** 9,
             validateOnly: false
         });
@@ -92,7 +92,7 @@ contract ValidateUpgrade is Script {
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: address(0),
             constructorData: abi.encode(rlcToken),
-            contractName: "LiquidityUnifierV2Mock.sol:LiquidityUnifierV2Mock",
+            contractName: "LiquidityUnifierV2Mock.sol:LiquidityUnifierV2",
             newStateVariable: 1000000 * 10 ** 9,
             validateOnly: true
         });
