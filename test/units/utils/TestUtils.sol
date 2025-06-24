@@ -21,8 +21,8 @@ library TestUtils {
         string memory symbol,
         address lzEndpointAdapter,
         address lzEndpointBridge,
-        address admin,
-        address pauser
+        address initialAdmin,
+        address initialPauser
     )
         internal
         returns (
@@ -46,7 +46,7 @@ library TestUtils {
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "LiquidityUnifier",
                 abi.encode(rlcToken),
-                abi.encodeWithSelector(LiquidityUnifier.initialize.selector, admin, admin), //TODO: fix IexecLayerZeroBridge contract to make distinction between admin and upgrader & add a new param to this current function
+                abi.encodeWithSelector(LiquidityUnifier.initialize.selector, initialAdmin, initialAdmin), //TODO: fix IexecLayerZeroBridge contract to make distinction between admin and upgrader & add a new param to this current function
                 createXFactory,
                 salt
             )
@@ -57,7 +57,7 @@ library TestUtils {
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(liquidityUnifier, lzEndpointAdapter),
-                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, admin, pauser),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialPauser),
                 createXFactory,
                 salt
             )
@@ -66,14 +66,14 @@ library TestUtils {
         // Deploy RLC Crosschain token (for L2)
         // TODO use upgrader instead of owner for the second argument
         rlcCrosschainToken = RLCCrosschainToken(
-            new RLCCrosschainTokenDeployScript().deploy(name, symbol, admin, admin, createXFactory, salt)
+            new RLCCrosschainTokenDeployScript().deploy(name, symbol, initialAdmin, initialAdmin, createXFactory, salt)
         );
         // Deploy IexecLayerZeroBridge
         iexecLayerZeroBridgeChainB = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(rlcCrosschainToken, lzEndpointBridge),
-                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, admin, pauser),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialPauser),
                 createXFactory,
                 salt
             )

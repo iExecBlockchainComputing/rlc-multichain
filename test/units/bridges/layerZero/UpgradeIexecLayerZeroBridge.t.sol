@@ -17,7 +17,7 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
     RLCCrosschainToken private rlcCrosschainToken;
 
     address public mockEndpoint;
-    address public owner = makeAddr("owner");
+    address public admin = makeAddr("admin");
     address public pauser = makeAddr("pauser");
 
     address public proxyAddress;
@@ -31,7 +31,7 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         mockEndpoint = address(endpoints[1]);
 
         (, iexecLayerZeroBridgeV1,, rlcCrosschainToken,) =
-            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
+            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, admin, pauser);
         proxyAddress = address(iexecLayerZeroBridgeV1);
     }
 
@@ -46,12 +46,12 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         // 2. Store V1 state for comparison
         address originalOwner = iexecLayerZeroBridgeV1.owner();
 
-        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.DEFAULT_ADMIN_ROLE(), owner));
-        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.UPGRADER_ROLE(), owner));
+        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.DEFAULT_ADMIN_ROLE(), admin));
+        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.UPGRADER_ROLE(), admin));
         assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.PAUSER_ROLE(), pauser));
 
         // 3. Perform upgrade using UpgradeUtils directly
-        vm.startPrank(owner);
+        vm.startPrank(admin);
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
@@ -70,11 +70,11 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         // 5. Verify state preservation
         assertEq(iexecLayerZeroBridgeV2.owner(), originalOwner, "Owner should be preserved");
         assertTrue(
-            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.DEFAULT_ADMIN_ROLE(), owner),
+            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.DEFAULT_ADMIN_ROLE(), admin),
             "Default admin role should be preserved"
         );
         assertTrue(
-            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.UPGRADER_ROLE(), owner),
+            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.UPGRADER_ROLE(), admin),
             "Upgrader role should be preserved"
         );
         assertTrue(
@@ -95,7 +95,7 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     function test_RevertWhen_InitializeV2Twice() public {
-        vm.startPrank(owner);
+        vm.startPrank(admin);
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
@@ -115,7 +115,7 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(iexecLayerZeroBridgeV2.newStateVariable(), NEW_STATE_VARIABLE);
 
         // Attempt to initialize again should revert
-        vm.prank(owner);
+        vm.prank(admin);
         vm.expectRevert();
         iexecLayerZeroBridgeV2.initializeV2(999); // Different value to ensure it's not a duplicate
     }
