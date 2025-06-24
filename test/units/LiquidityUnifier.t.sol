@@ -49,6 +49,14 @@ contract LiquidityUnifierTest is Test {
         liquidityUnifier.initialize(admin, upgrader);
     }
 
+    // ============ decimals ============
+
+    function test_MatchRLCTokenDecimals() public view {
+        uint8 expectedDecimals = rlcToken.decimals();
+        uint8 actualDecimals = liquidityUnifier.decimals();
+        assertEq(actualDecimals, expectedDecimals, "decimals() should return the same value as RLC_TOKEN.decimals()");
+    }
+
     // ============ supportsInterface ============
 
     function test_SupportErc7802Interface() public view {
