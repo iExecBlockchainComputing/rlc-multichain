@@ -46,7 +46,7 @@ library TestUtils {
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "RLCLiquidityUnifier",
                 abi.encode(rlcToken),
-                abi.encodeWithSelector(RLCLiquidityUnifier.initialize.selector, initialAdmin, initialAdmin), //TODO: fix IexecLayerZeroBridge contract to make distinction between admin and upgrader & add a new param to this current function
+                abi.encodeWithSelector(RLCLiquidityUnifier.initialize.selector, initialAdmin, initialUpgrader),
                 createXFactory,
                 salt
             )
@@ -66,9 +66,10 @@ library TestUtils {
         );
 
         // Deploy RLC Crosschain token (for L2)
-        // TODO use upgrader instead of owner for the second argument
         rlcCrosschainToken = RLCCrosschainToken(
-            new RLCCrosschainTokenDeployScript().deploy(name, symbol, initialAdmin, initialAdmin, createXFactory, salt)
+            new RLCCrosschainTokenDeployScript().deploy(
+                name, symbol, initialAdmin, initialUpgrader, createXFactory, salt
+            )
         );
         // Deploy IexecLayerZeroBridge
         iexecLayerZeroBridgeChainB = IexecLayerZeroBridge(
