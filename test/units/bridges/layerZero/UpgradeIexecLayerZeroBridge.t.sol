@@ -48,12 +48,11 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         address originalOwner = iexecLayerZeroBridgeV1.owner();
 
         assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.DEFAULT_ADMIN_ROLE(), admin));
-        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.UPGRADER_ROLE(), admin));
+        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.UPGRADER_ROLE(), upgrader));
         assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.PAUSER_ROLE(), pauser));
 
         // 3. Perform upgrade using UpgradeUtils directly
-        vm.startPrank(admin);
-
+        vm.startPrank(upgrader);
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
@@ -97,8 +96,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
     }
 
     function test_RevertWhen_InitializeV2Twice() public {
-        vm.startPrank(admin);
-
+        vm.startPrank(upgrader);
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
@@ -118,7 +116,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         assertEq(iexecLayerZeroBridgeV2.newStateVariable(), NEW_STATE_VARIABLE);
 
         // Attempt to initialize again should revert
-        vm.prank(admin);
+        vm.prank(upgrader);
         vm.expectRevert();
         iexecLayerZeroBridgeV2.initializeV2(999); // Different value to ensure it's not a duplicate
     }
