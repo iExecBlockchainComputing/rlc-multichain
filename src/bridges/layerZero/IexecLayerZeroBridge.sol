@@ -51,20 +51,20 @@ contract IexecLayerZeroBridge is
      *
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
-    IERC7802 public immutable RLC_TOKEN;
+    IERC7802 public immutable BRIDGEABLE_TOKEN;
 
     /**
      * @dev Constructor for the LayerZero bridge contract
-     * @param _token The RLC token contract address that implements IERC7802 interface
+     * @param _bridgeableToken The RLC token contract address that implements IERC7802 interface
      * @param _lzEndpoint The LayerZero endpoint address for this chain
      *
      * @custom:oz-upgrades-unsafe-allow constructor
      */
-    constructor(address _token, address _lzEndpoint)
-        OFTCoreUpgradeable(IERC20Metadata(_token).decimals(), _lzEndpoint)
+    constructor(address _bridgeableToken, address _lzEndpoint)
+        OFTCoreUpgradeable(IERC20Metadata(_bridgeableToken).decimals(), _lzEndpoint)
     {
         _disableInitializers();
-        RLC_TOKEN = IERC7802(_token);
+        BRIDGEABLE_TOKEN = IERC7802(_bridgeableToken);
     }
 
     // ============ INITIALIZATION ============
@@ -138,10 +138,11 @@ contract IexecLayerZeroBridge is
 
     /**
      * @notice Indicates whether the OFT contract requires approval to send tokens
-     * @return requiresApproval Always returns false for this implementation
+     * Approval is only required on the Ethereum Mainnet where the original RLC contract is deployed.
+     * @return requiresApproval Returns true if deployed on Ethereum Mainnet, false otherwise
      */
-    function approvalRequired() external pure virtual returns (bool) {
-        return false;
+    function approvalRequired() external view virtual returns (bool) {
+        return block.chainid == 1;
     }
 
     /**
@@ -149,7 +150,7 @@ contract IexecLayerZeroBridge is
      * @return The address of the RLC token contract
      */
     function token() external view returns (address) {
-        return address(RLC_TOKEN);
+        return address(BRIDGEABLE_TOKEN);
     }
 
     // ============ ACCESS CONTROL OVERRIDES ============
@@ -189,7 +190,7 @@ contract IexecLayerZeroBridge is
      *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token burned = 1 token minted)
-     * - If RLC_TOKEN implements transfer fees, burn fees, or any other fee mechanism,
+     * - If BRIDGEABLE_TOKEN implements transfer fees, burn fees, or any other fee mechanism,
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
      * @dev This function is called for OUTGOING transfers (when sending to another chain)
@@ -211,7 +212,7 @@ contract IexecLayerZeroBridge is
         (amountSentLD, amountReceivedLD) = _debitView(_amountLD, _minAmountLD, _dstEid);
 
         // Burn the tokens from the sender's balance
-        RLC_TOKEN.crosschainBurn(_from, amountSentLD);
+        BRIDGEABLE_TOKEN.crosschainBurn(_from, amountSentLD);
     }
 
     /**
@@ -228,7 +229,7 @@ contract IexecLayerZeroBridge is
      *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token received = 1 token minted)
-     * - If RLC_TOKEN implements minting fees or any other fee mechanism,
+     * - If BRIDGEABLE_TOKEN implements minting fees or any other fee mechanism,
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
      *
@@ -253,7 +254,7 @@ contract IexecLayerZeroBridge is
 
         // Mint the tokens to the recipient
         // This assumes crosschainMint doesn't apply any fees
-        RLC_TOKEN.crosschainMint(_to, _amountLD);
+        BRIDGEABLE_TOKEN.crosschainMint(_to, _amountLD);
 
         // Return the amount minted (assuming no fees)
         return _amountLD;
