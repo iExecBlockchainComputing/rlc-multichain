@@ -100,7 +100,6 @@ contract LiquidityUnifierTest is Test {
         _mintForUser(user, amount);
         // Check that tokens are minted.
         assertEq(rlcToken.balanceOf(user), 2 * amount);
-        assertEq(rlcToken.balanceOf(user), 2 * amount);
         assertEq(rlcToken.balanceOf(bridge), 0);
     }
 
@@ -125,7 +124,6 @@ contract LiquidityUnifierTest is Test {
         // Send mint request from the bridge.
         _mintForUserWithBridge(bridge2, user, amount);
         // Check that tokens are minted.
-        assertEq(rlcToken.balanceOf(user), 2 * amount);
         assertEq(rlcToken.balanceOf(user), 2 * amount);
         assertEq(rlcToken.balanceOf(bridge), 0);
         assertEq(rlcToken.balanceOf(bridge2), 0);
