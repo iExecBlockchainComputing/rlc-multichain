@@ -31,7 +31,7 @@ generate-coverage:
 	FOUNDRY_PROFILE=test forge coverage \
 		--ir-minimum \
 		--report lcov \
-		--no-match-coverage "script|src/_mocks|test"
+		--no-match-coverage "script|src/mocks|test"
 	@if [ "$$CI" != "true" ]; then \
 		genhtml lcov.info --branch-coverage --output-dir coverage; \
 	fi
