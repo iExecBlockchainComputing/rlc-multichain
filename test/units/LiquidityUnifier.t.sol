@@ -219,8 +219,8 @@ contract LiquidityUnifierTest is Test {
 
     function test_BurnForOneUserFromOneBridge() public {
         _authorizeBridge(bridge);
-        rlcToken.transfer(liquidityUnifierAddress, amount);
-        _mintForUser(user, amount);
+        rlcToken.transfer(user, amount);
+
         // Check the initial state.
         assertEq(rlcToken.balanceOf(user), amount);
         _approveForUser(user, amount);
@@ -240,8 +240,8 @@ contract LiquidityUnifierTest is Test {
 
     function test_BurnForOneUserFromOneBridgeMultipleTimes() public {
         _authorizeBridge(bridge);
-        rlcToken.transfer(liquidityUnifierAddress, 2 * amount);
-        _mintForUser(user, 2 * amount);
+        rlcToken.transfer(user, 2 * amount);
+
         // Check the initial state.
         assertEq(rlcToken.balanceOf(user), 2 * amount);
 
@@ -273,8 +273,7 @@ contract LiquidityUnifierTest is Test {
     function test_BurnForOneUserFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
-        rlcToken.transfer(liquidityUnifierAddress, 2 * amount);
-        _mintForUser(user, 2 * amount);
+        rlcToken.transfer(user, 2 * amount);
         assertEq(rlcToken.balanceOf(user), 2 * amount);
 
         // Approve the liquidityUnifier to spend tokens
@@ -304,10 +303,9 @@ contract LiquidityUnifierTest is Test {
 
     function test_BurnForMultipleUsersFromOneBridge() public {
         _authorizeBridge(bridge);
-        rlcToken.transfer(liquidityUnifierAddress, amount + amount2 + amount3);
-        _mintForUser(user, amount);
-        _mintForUser(user2, amount2);
-        _mintForUser(user3, amount3);
+        rlcToken.transfer(user, amount);
+        rlcToken.transfer(user2, amount2);
+        rlcToken.transfer(user3, amount3);
 
         // Approve the liquidityUnifier to spend tokens for each user
         _approveForUser(user, amount);
@@ -349,10 +347,9 @@ contract LiquidityUnifierTest is Test {
     function test_BurnForMultipleUsersFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
-        rlcToken.transfer(liquidityUnifierAddress, 2 * amount + amount2 + amount3);
-        _mintForUser(user, 2 * amount);
-        _mintForUser(user2, amount2);
-        _mintForUser(user3, amount3);
+        rlcToken.transfer(user, 2 * amount);
+        rlcToken.transfer(user2, amount2);
+        rlcToken.transfer(user3, amount3);
         assertEq(rlcToken.balanceOf(user), 2 * amount);
         assertEq(rlcToken.balanceOf(user2), amount2);
         assertEq(rlcToken.balanceOf(user3), amount3);
@@ -433,8 +430,7 @@ contract LiquidityUnifierTest is Test {
 
     function test_RevertWhen_UnauthorizedBurnCaller() public {
         _authorizeBridge(bridge);
-        rlcToken.transfer(liquidityUnifierAddress, amount);
-        _mintForUser(user, amount);
+        rlcToken.transfer(user, amount);
         assertEq(rlcToken.balanceOf(user), amount);
 
         // Attempt to burn tokens from an unauthorized account.
@@ -461,8 +457,7 @@ contract LiquidityUnifierTest is Test {
 
     function test_RevertWhen_BurnMoreThanBalance() public {
         _authorizeBridge(bridge);
-        rlcToken.transfer(liquidityUnifierAddress, amount);
-        _mintForUser(user, amount);
+        rlcToken.transfer(user, amount);
 
         // User approves more than they have
         _approveForUser(user, amount + 1);
