@@ -46,14 +46,14 @@ contract LiquidityUnifierTest is Test {
 
     // ============ initialize ============
 
-    function test_RevertWhen_InitializedMoreThanOnce() public {
+    function test_RevertWhen_Initialize_InitializedMoreThanOnce() public {
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
         liquidityUnifier.initialize(admin, upgrader);
     }
 
     // ============ crosschainMint ============
 
-    function test_MintForOneUserFromOneBridge() public {
+    function test_CrosschainMint_MintForOneUserFromOneBridge() public {
         _authorizeBridge(bridge);
 
         rlcToken.transfer(liquidityUnifierAddress, amount);
@@ -75,7 +75,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(bridge), 0);
     }
 
-    function test_MintForOneUserFromOneBridgeMultipleTimes() public {
+    function test_CrosschainMint_MintForOneUserFromOneBridgeMultipleTimes() public {
         _authorizeBridge(bridge);
         // Check the initial state.
 
@@ -90,7 +90,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(bridge), 0);
     }
 
-    function test_MintForOneUserFromMultipleBridges() public {
+    function test_CrosschainMint_MintForOneUserFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
 
@@ -116,7 +116,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(bridge2), 0);
     }
 
-    function test_MintForMultipleUsersFromOneBridge() public {
+    function test_CrosschainMint_MintForMultipleUsersFromOneBridge() public {
         _authorizeBridge(bridge);
 
         // User 1
@@ -148,7 +148,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(bridge), 0);
     }
 
-    function test_MintForMultipleUsersFromMultipleBridges() public {
+    function test_CrosschainMint_MintForMultipleUsersFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
 
@@ -189,7 +189,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(bridge2), 0);
     }
 
-    function test_RevertWhen_UnauthorizedCaller() public {
+    function test_CrosschainMint_RevertWhen_UnauthorizedCaller() public {
         assertEq(rlcToken.balanceOf(user), 0);
 
         // Attempt to mint tokens from an unauthorized account.
@@ -202,7 +202,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), 0);
     }
 
-    function test_RevertWhen_MintToZeroAddress() public {
+    function test_CrosschainMint_RevertWhen_MintToZeroAddress() public {
         _authorizeBridge(bridge);
         assertEq(rlcToken.balanceOf(address(0)), 0);
 
@@ -217,7 +217,7 @@ contract LiquidityUnifierTest is Test {
 
     // ============ crosschainBurn ============
 
-    function test_BurnForOneUserFromOneBridge() public {
+    function test_CrosschainBurn_BurnForOneUserFromOneBridge() public {
         _authorizeBridge(bridge);
         rlcToken.transfer(user, amount);
 
@@ -238,7 +238,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(liquidityUnifierAddress), amount);
     }
 
-    function test_BurnForOneUserFromOneBridgeMultipleTimes() public {
+    function test_CrosschainBurn_BurnForOneUserFromOneBridgeMultipleTimes() public {
         _authorizeBridge(bridge);
         rlcToken.transfer(user, 2 * amount);
 
@@ -270,7 +270,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(liquidityUnifierAddress), 2 * amount);
     }
 
-    function test_BurnForOneUserFromMultipleBridges() public {
+    function test_CrosschainBurn_BurnForOneUserFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
         rlcToken.transfer(user, 2 * amount);
@@ -301,7 +301,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(liquidityUnifierAddress), 2 * amount);
     }
 
-    function test_BurnForMultipleUsersFromOneBridge() public {
+    function test_CrosschainBurn_BurnForMultipleUsersFromOneBridge() public {
         _authorizeBridge(bridge);
         rlcToken.transfer(user, amount);
         rlcToken.transfer(user2, amount2);
@@ -344,7 +344,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(liquidityUnifierAddress), amount + amount2 + amount3);
     }
 
-    function test_BurnForMultipleUsersFromMultipleBridges() public {
+    function test_CrosschainBurn_BurnForMultipleUsersFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
         rlcToken.transfer(user, 2 * amount);
@@ -399,7 +399,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(liquidityUnifierAddress), 2 * amount + amount2 + amount3);
     }
 
-    function test_BurnForUserEvenWhenMintIsDoneByDifferentBridge() public {
+    function test_CrosschainBurn_BurnForUserEvenWhenMintIsDoneByDifferentBridge() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
 
@@ -428,7 +428,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), 0);
     }
 
-    function test_RevertWhen_UnauthorizedBurnCaller() public {
+    function test_RevertWhen_CrosschainBurn_UnauthorizedBurnCaller() public {
         _authorizeBridge(bridge);
         rlcToken.transfer(user, amount);
         assertEq(rlcToken.balanceOf(user), amount);
@@ -444,7 +444,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), amount);
     }
 
-    function test_RevertWhen_BurnFromZeroAddress() public {
+    function test_RevertWhen_CrosschainBurn_BurnFromZeroAddress() public {
         _authorizeBridge(bridge);
         // Attempt to burn tokens from the zero address.
         // This should revert with ERC20InsufficientAllowance because zero address has no allowance
@@ -455,7 +455,7 @@ contract LiquidityUnifierTest is Test {
         liquidityUnifier.crosschainBurn(address(0), amount);
     }
 
-    function test_RevertWhen_BurnMoreThanBalance() public {
+    function test_RevertWhen_CrosschainBurn_BurnMoreThanBalance() public {
         _authorizeBridge(bridge);
         rlcToken.transfer(user, amount);
 
@@ -471,7 +471,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), amount);
     }
 
-    function test_RevertWhen_BurnWithoutUserApprove() public {
+    function test_RevertWhen_CrosschainBurn_BurnWithoutUserApprove() public {
         _authorizeBridge(bridge);
         rlcToken.transfer(user, amount);
 
@@ -486,7 +486,7 @@ contract LiquidityUnifierTest is Test {
 
     // ============ decimals ============
 
-    function test_DecimalsShouldBeTheSameAsTheRlcToken() public view {
+    function test_Decimals_DecimalsShouldBeTheSameAsTheRlcToken() public view {
         uint8 expectedDecimals = rlcToken.decimals();
         uint8 actualDecimals = liquidityUnifier.decimals();
         assertEq(actualDecimals, expectedDecimals, "decimals() should return the same value as RLC_TOKEN.decimals()");
@@ -495,14 +495,14 @@ contract LiquidityUnifierTest is Test {
 
     // ============ supportsInterface ============
 
-    function test_SupportErc7802Interface() public view {
+    function test_SupportsInterface_SupportErc7802Interface() public view {
         assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
         assertTrue(liquidityUnifier.supportsInterface(type(IERC7802).interfaceId));
     }
 
     // ============ upgradeToAndCall ============
 
-    function test_RevertWhen_UnauthorizedUpgrader() public {
+    function test_UpgradeToAndCall_RevertWhen_UnauthorizedUpgrader() public {
         address unauthorizedUpgrader = makeAddr("unauthorized");
         vm.expectRevert(
             abi.encodeWithSelector(
