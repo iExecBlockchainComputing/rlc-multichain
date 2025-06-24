@@ -45,7 +45,7 @@ contract RLCAdapterTest is TestHelperOz5 {
         address lzEndpointBridge = address(endpoints[DEST_EID]);
 
         (adapter, layerZeroBridgeMock, rlcToken,) =
-            TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, pauser);
+            TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, upgrader, pauser);
 
         // Wire the contracts
         address[] memory contracts = new address[](2);

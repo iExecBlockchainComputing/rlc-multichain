@@ -26,6 +26,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     uint32 private constant DEST_EID = 2;
 
     address private admin = makeAddr("admin");
+    address private upgrader = makeAddr("upgrader");
     address private pauser = makeAddr("pauser");
     address private user1 = makeAddr("user1");
     address private user2 = makeAddr("user2");
@@ -45,7 +46,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address lzEndpointAdapter = address(endpoints[DEST_EID]);
 
         (iexecLayerZeroBridgeChainA, iexecLayerZeroBridgeChainB,, rlcCrosschainToken) =
-            TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, admin, pauser);
+            TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, admin, upgrader, pauser);
 
         address iexecLayerZeroBridgeChainBAddress = address(iexecLayerZeroBridgeChainB);
         // Wire the contracts

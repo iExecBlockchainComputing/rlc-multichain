@@ -22,6 +22,7 @@ library TestUtils {
         address lzEndpointAdapter,
         address lzEndpointBridge,
         address initialAdmin,
+        address initialUpgrader,
         address initialPauser
     )
         internal
@@ -56,7 +57,7 @@ library TestUtils {
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(liquidityUnifier, lzEndpointAdapter),
-                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialPauser),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser),
                 createXFactory,
                 salt
             )
@@ -72,7 +73,7 @@ library TestUtils {
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(rlcCrosschainToken, lzEndpointBridge),
-                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialPauser),
+                abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser),
                 createXFactory,
                 salt
             )

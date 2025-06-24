@@ -18,6 +18,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
 
     address public mockEndpoint;
     address public admin = makeAddr("admin");
+    address public upgrader = makeAddr("upgrader");
     address public pauser = makeAddr("pauser");
 
     address public proxyAddress;
@@ -31,7 +32,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
         mockEndpoint = address(endpoints[1]);
 
         (, iexecLayerZeroBridgeV1,, rlcCrosschainToken) =
-            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, admin, pauser);
+            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, admin, upgrader, pauser);
         proxyAddress = address(iexecLayerZeroBridgeV1);
     }
 

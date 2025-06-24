@@ -29,7 +29,7 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-        (adapterV1,, rlcToken,) = TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
+        (adapterV1,, rlcToken,) = TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, upgrader, pauser);
         proxyAddress = address(adapterV1);
     }
 
