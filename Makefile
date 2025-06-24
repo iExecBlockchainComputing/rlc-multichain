@@ -1,4 +1,3 @@
-# Makefile for RLC OFT Project
 
 MAKEFLAGS += --no-print-directory
 
