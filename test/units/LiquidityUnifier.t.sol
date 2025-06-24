@@ -223,7 +223,7 @@ contract LiquidityUnifierTest is Test {
 
         // Check the initial state.
         assertEq(rlcToken.balanceOf(user), amount);
-        _approveForUser(user, amount);
+        _approveLiquidityUnifier(user, amount);
         // Expect events to be emitted.
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user, liquidityUnifierAddress, amount);
@@ -246,7 +246,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), 2 * amount);
 
         // Approve the liquidityUnifier to spend tokens
-        _approveForUser(user, 2 * amount);
+        _approveLiquidityUnifier(user, 2 * amount);
 
         // Burn 1
         vm.expectEmit(true, true, true, true);
@@ -277,7 +277,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), 2 * amount);
 
         // Approve the liquidityUnifier to spend tokens
-        _approveForUser(user, 2 * amount);
+        _approveLiquidityUnifier(user, 2 * amount);
 
         // Bridge 1
         vm.expectEmit(true, true, true, true);
@@ -308,9 +308,9 @@ contract LiquidityUnifierTest is Test {
         rlcToken.transfer(user3, amount3);
 
         // Approve the liquidityUnifier to spend tokens for each user
-        _approveForUser(user, amount);
-        _approveForUser(user2, amount2);
-        _approveForUser(user3, amount3);
+        _approveLiquidityUnifier(user, amount);
+        _approveLiquidityUnifier(user2, amount2);
+        _approveLiquidityUnifier(user3, amount3);
 
         // User 1
         vm.expectEmit(true, true, true, true);
@@ -355,9 +355,9 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user3), amount3);
 
         // Approve the liquidityUnifier to spend tokens for each user
-        _approveForUser(user, 2 * amount);
-        _approveForUser(user2, amount2);
-        _approveForUser(user3, amount3);
+        _approveLiquidityUnifier(user, 2 * amount);
+        _approveLiquidityUnifier(user2, amount2);
+        _approveLiquidityUnifier(user3, amount3);
 
         // Bridge 1, user 1
         vm.expectEmit(true, true, true, true);
@@ -413,7 +413,7 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user), amount);
 
         // User approves liquidityUnifier to spend tokens
-        _approveForUser(user, amount);
+        _approveLiquidityUnifier(user, amount);
 
         // Bridge 2 burns
         vm.expectEmit(true, true, true, true);
@@ -460,7 +460,7 @@ contract LiquidityUnifierTest is Test {
         rlcToken.transfer(user, amount);
 
         // User approves more than they have
-        _approveForUser(user, amount + 1);
+        _approveLiquidityUnifier(user, amount + 1);
 
         // Attempt to burn more than balance
         vm.expectRevert(
@@ -537,11 +537,11 @@ contract LiquidityUnifierTest is Test {
 
     /**
      * Approve the LiquidityUnifier to spend tokens on behalf of a user.
-     * @param userAddress Address of the user approving.
+     * @param sender Address of the user approving.
      * @param approveAmount Amount of tokens to approve.
      */
     function _approveLiquidityUnifier(address sender, uint256 approveAmount) internal {
-        vm.prank(userAddress);
+        vm.prank(sender);
         rlcToken.approve(liquidityUnifierAddress, approveAmount);
     }
 }
