@@ -19,7 +19,7 @@ SUM:                             9             97            463            285
       93 src/RLCCrosschainToken.sol
      189 src/bridges/layerZero/RLCAdapter.sol
      274 src/bridges/layerZero/IexecLayerZeroBridge.sol
-     152 src/bridges/common/DualPausableUpgradeable.sol
+     152 src/bridges/utils/DualPausableUpgradeable.sol
       42 src/interfaces/IERC7802.sol
        7 src/interfaces/ITokenSpender.sol
       28 src/interfaces/IIexecLayerZeroBridge.sol
