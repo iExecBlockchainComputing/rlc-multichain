@@ -8,8 +8,8 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ERC20PermitUpgradeable} from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
-import {IERC7802} from "../interfaces/IERC7802.sol";
-import {ITokenSpender} from "../interfaces/ITokenSpender.sol";
+import {IERC7802} from "./interfaces/IERC7802.sol";
+import {ITokenSpender} from "./interfaces/ITokenSpender.sol";
 
 /**
  * This contract is an upgradeable (UUPS) ERC20 token with cross-chain capabilities.
