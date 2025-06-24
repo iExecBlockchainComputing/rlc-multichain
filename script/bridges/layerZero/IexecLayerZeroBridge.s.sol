@@ -9,7 +9,7 @@ import {BridgeConfigLib} from "./BridgeConfigLib.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "../../lib/UpdateEnvUtils.sol";
-import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
+import {UpgradeUtils} from "../../lib/UpgradeUtils.sol"; 
 
 contract Deploy is Script {
     using stdJson for string;
@@ -25,8 +25,8 @@ contract Deploy is Script {
         address iexecLayerZeroBridgeProxy = deploy(
             params.bridgeableToken,
             params.lzEndpoint,
-            params.admin,
-            params.pauser,
+            params.initialAdmin,
+            params.initialPauser,
             params.createxFactory,
             params.createxSalt
         );
@@ -42,13 +42,13 @@ contract Deploy is Script {
     function deploy(
         address bridgeableToken,
         address lzEndpoint,
-        address owner,
-        address pauser,
+        address initialAdmin,
+        address initialPauser,
         address createxFactory,
         bytes32 createxSalt
     ) public returns (address) {
         bytes memory constructorData = abi.encode(bridgeableToken, lzEndpoint);
-        bytes memory initializeData = abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, owner, pauser);
+        bytes memory initializeData = abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialPauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "IexecLayerZeroBridge", constructorData, initializeData, createxFactory, createxSalt
         );
@@ -68,13 +68,9 @@ contract Configure is Script {
         BridgeConfigLib.CommonConfigParams memory sourceParams = BridgeConfigLib.readCommonConfig(config, sourceChain);
         BridgeConfigLib.CommonConfigParams memory targetParams = BridgeConfigLib.readCommonConfig(config, targetChain);
 
-        // Configure source -> target
+        // Configure one bridge to another
         IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.bridgeAddress);
         sourceBridge.setPeer(targetParams.layerZeroChainId, bytes32(uint256(uint160(targetParams.bridgeAddress))));
-
-        // Configure target -> source (bidirectional)
-        IexecLayerZeroBridge targetBridge = IexecLayerZeroBridge(targetParams.bridgeAddress);
-        targetBridge.setPeer(sourceParams.layerZeroChainId, bytes32(uint256(uint160(sourceParams.bridgeAddress))));
 
         vm.stopBroadcast();
     }
