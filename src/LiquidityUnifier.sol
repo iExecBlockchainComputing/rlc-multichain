@@ -31,13 +31,13 @@ contract LiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgr
 
     /**
      * Initializes the contract with the given parameters.
-     * @param admin address of the admin wallet
-     * @param upgrader address of the upgrader wallet
+     * @param initialAdmin address of the admin wallet
+     * @param initialUpgrader address of the upgrader wallet
      */
-    function initialize(address admin, address upgrader) public initializer {
+    function initialize(address initialAdmin, address initialUpgrader) public initializer {
         __UUPSUpgradeable_init();
-        __AccessControlDefaultAdminRules_init(0, admin);
-        _grantRole(UPGRADER_ROLE, upgrader);
+        __AccessControlDefaultAdminRules_init(0, initialAdmin);
+        _grantRole(UPGRADER_ROLE, initialUpgrader);
     }
 
     // ============ CROSS-CHAIN FUNCTIONS ============
