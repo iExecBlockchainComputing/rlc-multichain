@@ -71,18 +71,18 @@ contract IexecLayerZeroBridge is
 
     /**
      * @notice Initializes the contract after proxy deployment
-     * @param _owner Address that will receive owner and default admin roles
-     * @param _pauser Address that will receive the pauser role
+     * @param initialOwner Address that will receive owner and default admin roles
+     * @param initialPauser Address that will receive the pauser role
      */
     // TODO add upgrader role.
-    function initialize(address _owner, address _pauser) external initializer {
-        __Ownable_init(_owner);
-        __OFTCore_init(_owner);
+    function initialize(address initialOwner, address initialPauser) external initializer {
+        __Ownable_init(initialOwner);
+        __OFTCore_init(initialOwner);
         __UUPSUpgradeable_init();
-        __AccessControlDefaultAdminRules_init(0, _owner);
+        __AccessControlDefaultAdminRules_init(0, initialOwner);
         __DualPausable_init();
-        _grantRole(UPGRADER_ROLE, _owner);
-        _grantRole(PAUSER_ROLE, _pauser);
+        _grantRole(UPGRADER_ROLE, initialOwner);
+        _grantRole(PAUSER_ROLE, initialPauser);
     }
 
     // ============ EMERGENCY CONTROLS ============
