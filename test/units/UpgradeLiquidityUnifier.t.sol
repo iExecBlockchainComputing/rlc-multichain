@@ -13,7 +13,6 @@ import {RLCMock} from "./mocks/RLCMock.sol";
 contract UpgradeLiquidityUnifier is TestHelperOz5 {
     using TestUtils for *;
 
-    IexecLayerZeroBridge private iexecLayerZeroBridgeChainA;
     LiquidityUnifier private liquidityUnifierV1;
     LiquidityUnifierV2 private liquidityUnifierV2;
     RLCMock private rlcToken;
@@ -32,7 +31,7 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-        (iexecLayerZeroBridgeChainA,, rlcToken,, liquidityUnifierV1) =
+        (,, rlcToken,, liquidityUnifierV1) =
             TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, pauser);
         proxyAddress = address(liquidityUnifierV1);
     }
