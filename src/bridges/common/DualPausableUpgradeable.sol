@@ -83,13 +83,13 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
     }
 
     // ============ INITIALIZATION ============
-    
+
     //slither-disable-next-line naming-convention
     function __DualPausable_init() internal onlyInitializing {
         __Pausable_init();
     }
 
-    //slither-disable-start naming-convention 
+    //slither-disable-start naming-convention
     //slither-disable-start dead-code
     function __DualPausable_init_unchained() internal onlyInitializing {}
     //slither-disable-end naming-convention
@@ -99,7 +99,7 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
 
     /**
      * @dev Returns true if send operations are paused, false otherwise
-     * 
+     *
      */
     function sendPaused() public view virtual returns (bool) {
         DualPausableStorage storage $ = _getDualPausableStorage();
