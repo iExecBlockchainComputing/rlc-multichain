@@ -233,6 +233,7 @@ contract LiquidityUnifierTest is Test {
         // Check that tokens are burned.
 
         assertEq(rlcToken.balanceOf(user), 0);
+        assertEq(rlcToken.balanceOf(liquidityUnifierAddress), amount);
     }
 
     function test_BurnForOneUserFromOneBridgeMultipleTimes() public {
