@@ -10,7 +10,6 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {IERC7802} from "./interfaces/IERC7802.sol";
 
 contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, IERC7802 {
-
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant TOKEN_BRIDGE_ROLE = keccak256("TOKEN_BRIDGE_ROLE");
 
