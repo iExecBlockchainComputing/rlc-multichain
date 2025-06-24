@@ -75,7 +75,7 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
             "Default admin role should be preserved"
         );
         assertTrue(
-            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.UPGRADER_ROLE(), admin),
+            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.UPGRADER_ROLE(), upgrader),
             "Upgrader role should be preserved"
         );
         assertTrue(
