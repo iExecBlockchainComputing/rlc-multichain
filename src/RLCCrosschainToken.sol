@@ -64,6 +64,7 @@ contract RLCCrosschainToken is
      *
      * @dev The ERC1363 is not used because it is not compatible with the original RLC token contract:
      *  - The RLC uses `receiveApproval` while the ERC1363 uses `onTransferReceived`.
+     *  - The PoCo exposes `receiveApproval` in its interface.
      *  - Openzeppelin's implementation of ERC1363 uses Solidity custom errors.
      * This could be changed in the future, but for now, we keep the original interface to insure
      * compatibility with existing Dapps and SDKs.
