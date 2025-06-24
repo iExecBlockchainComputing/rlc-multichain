@@ -70,6 +70,7 @@ contract LiquidityUnifierTest is Test {
         // Assert
         assertEq(rlcToken.balanceOf(user), amount);
         assertEq(rlcToken.balanceOf(address(liquidityUnifier)), 0);
+        assertEq(rlcToken.balanceOf(bridge), 0);
     }
 
     function test_MintForOneUserFromOneBridgeMultipleTimes() public {
