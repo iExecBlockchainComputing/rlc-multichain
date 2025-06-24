@@ -3,7 +3,7 @@
 pragma solidity ^0.8.22;
 
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {IexecLayerZeroBridgeV2} from "../../../../src/_mocks/IexecLayerZeroBridgeV2Mock.sol";
+import {IexecLayerZeroBridgeV2} from "../../../../src/mocks/IexecLayerZeroBridgeV2Mock.sol";
 import {TestUtils} from "./../../utils/TestUtils.sol";
 import {UpgradeUtils} from "../../../../script/lib/UpgradeUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
