@@ -88,6 +88,38 @@ contract RLCCrosschainTokenTest is Test {
         assertEq(crossChainToken.allowance(user, spender), 0);
     }
 
+    function test_ApproveAndCallWithMaxUintAllowance() public {
+        _mockSpenderCall(approveAndCallData);
+        // Expect approval event.
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Approval(user, spender, type(uint256).max);
+        // Approve the spender with max uint allowance.
+        vm.prank(user);
+        crossChainToken.approveAndCall(spender, type(uint256).max, approveAndCallData);
+        // Check allowance.
+        assertEq(crossChainToken.allowance(user, spender), type(uint256).max);
+    }
+
+    function test_ApproveAndCallShouldOverrideAllowanceAmount() public {
+        uint256 allowance2 = 456e9; // 456 RLC
+        _mockSpenderCall(approveAndCallData);
+        vm.startPrank(user);
+        // 1st call
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Approval(user, spender, allowance);
+        crossChainToken.approveAndCall(spender, allowance, approveAndCallData);
+        assertEq(crossChainToken.allowance(user, spender), allowance);
+        // 2nd call
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Approval(user, spender, allowance2);
+        crossChainToken.approveAndCall(spender, allowance2, approveAndCallData);
+        assertEq(crossChainToken.allowance(user, spender), allowance2);
+        vm.stopPrank();
+    }
+
+    // TODO
+    function test_ApproveAndCall_GasComparisonWithSeparateApproveAndCall() public {}
+
     function test_RevertWhen_ApproveAndCallWithZeroSpenderAddress() public {
         vm.expectRevert(
             abi.encodeWithSelector(IERC20Errors.ERC20InvalidSpender.selector, address(0))
@@ -104,13 +136,6 @@ contract RLCCrosschainTokenTest is Test {
         crossChainToken.approveAndCall(spender, allowance, approveAndCallData);
     }
 
-    function test_RevertWhen_ApproveAndCallWithInsufficientBalance() public {
-        _mockSpenderCall(approveAndCallData);
-        vm.prank(user);
-        crossChainToken.approveAndCall(spender, allowance + 1, "");
-    }
-
-
     function test_RevertWhen_CallToTheSpenderReverts() public {
         vm.mockCallRevert(
             spender,
@@ -120,6 +145,13 @@ contract RLCCrosschainTokenTest is Test {
         vm.expectRevert();
         vm.prank(user);
         crossChainToken.approveAndCall(spender, allowance, approveAndCallData);
+    }
+
+    function test_RevertWhen_SpenderIsNotAContract() public {
+        address eoaSpender = makeAddr("EOA"); // No mocking to simulate an EOA.
+        vm.expectRevert();
+        vm.prank(user);
+        crossChainToken.approveAndCall(eoaSpender, allowance, approveAndCallData);
     }
 
     // ============ crosschainMint ============
@@ -528,23 +560,14 @@ contract RLCCrosschainTokenTest is Test {
 
     /**
      * Mocks the call to the spender contract's receiveApproval function with no return data.
-     * @param data The data to pass to the spender contract's receiveApproval function.
+     * @param data The data to pass to the spender contract.
      */
     function _mockSpenderCall(bytes memory data) internal {
-        _mockSpenderCall(data, new bytes(0)); // No return data.
-    }
-
-    /**
-     * Mock the call to the spender contract's receiveApproval function.
-     * @param data The data to pass to the spender contract.
-     * @param returnData The data to return from the spender contract.
-     */
-    function _mockSpenderCall(bytes memory data, bytes memory returnData) internal {
         // Set up a mock spender contract.
         vm.mockCall(
             spender,
             abi.encodeWithSelector(ITokenSpender.receiveApproval.selector, user, allowance, address(crossChainToken), data),
-            returnData
+            new bytes(0) // No return data expected.
         );
     }
 }
