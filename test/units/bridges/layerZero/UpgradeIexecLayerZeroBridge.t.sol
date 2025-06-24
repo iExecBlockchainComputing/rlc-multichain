@@ -55,9 +55,8 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
+            constructorData: abi.encode(rlcCrosschainToken, mockEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
-            lzEndpoint: mockEndpoint,
-            rlcToken: address(rlcCrosschainToken),
             newStateVariable: NEW_STATE_VARIABLE,
             validateOnly: false
         });
@@ -100,9 +99,8 @@ contract UpgradeRLCOFTTest is TestHelperOz5 {
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
+            constructorData: abi.encode(rlcCrosschainToken, mockEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
-            lzEndpoint: mockEndpoint,
-            rlcToken: address(rlcCrosschainToken),
             newStateVariable: NEW_STATE_VARIABLE,
             validateOnly: false
         });

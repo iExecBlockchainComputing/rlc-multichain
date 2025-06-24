@@ -8,6 +8,7 @@ import {Script} from "forge-std/Script.sol";
 import {LiquidityUnifier} from "../src/LiquidityUnifier.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
+import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 
 /**
  * Deployment script for the LiquidityUnifier contract.
@@ -59,5 +60,43 @@ contract Deploy is Script {
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "LiquidityUnifier", constructorData, initData, createxFactory, createxSalt
         );
+    }
+}
+
+contract Upgrade is Script {
+    function run() external {
+        vm.startBroadcast();
+
+        address proxyAddress = vm.envAddress("LAYERZERO_BRIDGE_PROXY_ADDRESS");
+        address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
+
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: proxyAddress,
+            constructorData: abi.encode(rlcCrosschain),
+            contractName: "LiquidityUnifierV2Mock.sol:LiquidityUnifierV2Mock", // Would be production contract in real deployment
+            newStateVariable: 1000000 * 10 ** 9,
+            validateOnly: false
+        });
+
+        address newImplementationAddress = UpgradeUtils.executeUpgrade(params);
+
+        vm.stopBroadcast();
+
+        EnvUtils.updateEnvVariable("LIQUIDITY_UNIFIER_IMPLEMENTATION_ADDRESS", newImplementationAddress);
+    }
+}
+
+contract ValidateUpgrade is Script {
+    function run() external {
+        address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: address(0),
+            constructorData: abi.encode(rlcCrosschain),
+            contractName: "LiquidityUnifierV2Mock.sol:LiquidityUnifierV2Mock",
+            newStateVariable: 1000000 * 10 ** 9,
+            validateOnly: true
+        });
+
+        UpgradeUtils.validateUpgrade(params);
     }
 }
