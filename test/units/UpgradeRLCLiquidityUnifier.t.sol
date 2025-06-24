@@ -18,7 +18,7 @@ contract UpgradeRLCLiquidityUnifier is TestHelperOz5 {
     RLCMock private rlcToken;
 
     address public mockEndpoint;
-    address public owner = makeAddr("owner");
+    address public admin = makeAddr("admin");
     address public pauser = makeAddr("pauser");
     address private upgrader = makeAddr("upgrader");
 
@@ -33,7 +33,7 @@ contract UpgradeRLCLiquidityUnifier is TestHelperOz5 {
         mockEndpoint = address(endpoints[1]);
 
         (,, rlcToken,, rlcLiquidityUnifierV1) =
-            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, owner, upgrader, pauser);
+            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, admin, upgrader, pauser);
         proxyAddress = address(rlcLiquidityUnifierV1);
     }
 
@@ -48,11 +48,11 @@ contract UpgradeRLCLiquidityUnifier is TestHelperOz5 {
         // 2. Store V1 state for comparison
         address originalOwner = rlcLiquidityUnifierV1.owner();
 
-        assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.DEFAULT_ADMIN_ROLE(), owner));
-        assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.UPGRADER_ROLE(), owner));
+        assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.DEFAULT_ADMIN_ROLE(), admin));
+        assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.UPGRADER_ROLE(), admin));
 
         // 3. Perform upgrade using UpgradeUtils directly
-        vm.startPrank(owner);
+        vm.startPrank(admin);
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
@@ -69,13 +69,13 @@ contract UpgradeRLCLiquidityUnifier is TestHelperOz5 {
         rlcLiquidityUnifierV2 = RLCLiquidityUnifierV2(proxyAddress);
 
         // 5. Verify state preservation
-        assertEq(rlcLiquidityUnifierV2.owner(), originalOwner, "Owner should be preserved");
+        assertEq(rlcLiquidityUnifierV2.owner(), originalOwner, "Admin should be preserved");
         assertTrue(
-            rlcLiquidityUnifierV2.hasRole(rlcLiquidityUnifierV2.DEFAULT_ADMIN_ROLE(), owner),
+            rlcLiquidityUnifierV2.hasRole(rlcLiquidityUnifierV2.DEFAULT_ADMIN_ROLE(), admin),
             "Default admin role should be preserved"
         );
         assertTrue(
-            rlcLiquidityUnifierV2.hasRole(rlcLiquidityUnifierV2.UPGRADER_ROLE(), owner),
+            rlcLiquidityUnifierV2.hasRole(rlcLiquidityUnifierV2.UPGRADER_ROLE(), admin),
             "Upgrader role should be preserved"
         );
 
@@ -92,7 +92,7 @@ contract UpgradeRLCLiquidityUnifier is TestHelperOz5 {
     }
 
     function test_RevertWhen_InitializeV2Twice() public {
-        vm.startPrank(owner);
+        vm.startPrank(admin);
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
@@ -112,7 +112,7 @@ contract UpgradeRLCLiquidityUnifier is TestHelperOz5 {
         assertEq(rlcLiquidityUnifierV2.newStateVariable(), NEW_STATE_VARIABLE);
 
         // Attempt to initialize again should revert
-        vm.prank(owner);
+        vm.prank(admin);
         vm.expectRevert();
         rlcLiquidityUnifierV2.initializeV2(999); // Different value to ensure it's not a duplicate
     }
