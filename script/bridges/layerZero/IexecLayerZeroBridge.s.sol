@@ -13,6 +13,7 @@ contract Deploy is Script {
     function run() external returns (address) {
         vm.startBroadcast();
 
+        //TODO migrate to read from config file and split deployment based on chain target.
         address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
         address initialAdmin = vm.envAddress("Admin_ADDRESS");
