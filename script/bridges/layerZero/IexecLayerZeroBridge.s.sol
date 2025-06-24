@@ -9,7 +9,7 @@ import {BridgeConfigLib} from "./BridgeConfigLib.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "../../lib/UpdateEnvUtils.sol";
-import {UpgradeUtils} from "../../lib/UpgradeUtils.sol"; 
+import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
     using stdJson for string;
@@ -48,7 +48,8 @@ contract Deploy is Script {
         bytes32 createxSalt
     ) public returns (address) {
         bytes memory constructorData = abi.encode(bridgeableToken, lzEndpoint);
-        bytes memory initializeData = abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialPauser);
+        bytes memory initializeData =
+            abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialPauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "IexecLayerZeroBridge", constructorData, initializeData, createxFactory, createxSalt
         );
