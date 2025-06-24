@@ -6,10 +6,10 @@ pragma solidity ^0.8.22;
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {ERC20PermitUpgradeable} from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import {IERC7802} from "../interfaces/IERC7802.sol";
+import {ITokenSpender} from "../interfaces/ITokenSpender.sol";
 
 /**
  * This contract is an upgradeable (UUPS) ERC20 token with cross-chain capabilities.
@@ -24,7 +24,6 @@ import {IERC7802} from "../interfaces/IERC7802.sol";
  * https://github.com/OpenZeppelin/openzeppelin-community-contracts/blob/075587479556632d3dd9e9e3b37417cabf3e26a3/contracts/token/ERC20/extensions/ERC20Bridgeable.sol
  */
 contract RLCCrosschainToken is
-    ERC20Upgradeable,
     ERC20PermitUpgradeable,
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
@@ -59,10 +58,24 @@ contract RLCCrosschainToken is
     }
 
     /**
-     * @dev See {IERC165-supportsInterface}.
+     * Approves the spender to spend the specified amount of tokens and calls the `receiveApproval`
+     * function on the spender contract. Original code can be found in the RLC token project:
+     * https://github.com/iExecBlockchainComputing/rlc-token/blob/master/contracts/RLC.sol#L84-L89
+     *
+     * @dev The ERC1363 is not used because it is not compatible with the original RLC token contract:
+     *  - The RLC uses `receiveApproval` while the ERC1363 uses `onTransferReceived`.
+     *  - Openzeppelin's implementation of ERC1363 uses Solidity custom errors.
+     * This could be changed in the future, but for now, we keep the original interface to insure
+     * compatibility with existing Dapps and SDKs.
+     *
+     * @param spender address of the spender
+     * @param value amount of tokens to approve
+     * @param data additional data to pass to the spender
      */
-    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
-        return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
+    function approveAndCall(address spender, uint256 value, bytes calldata data) external {
+        if (approve(spender, value)) {
+            ITokenSpender(spender).receiveApproval(msg.sender, value, address(this), data);
+        }
     }
 
     /**
@@ -85,6 +98,13 @@ contract RLCCrosschainToken is
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
         _burn(from, value);
         emit CrosschainBurn(from, value, _msgSender());
+    }
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
