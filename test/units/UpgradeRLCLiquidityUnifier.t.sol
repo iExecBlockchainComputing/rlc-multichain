@@ -49,7 +49,7 @@ contract UpgradeRLCLiquidityUnifier is TestHelperOz5 {
         address originalOwner = rlcLiquidityUnifierV1.owner();
 
         assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.DEFAULT_ADMIN_ROLE(), admin));
-        assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.UPGRADER_ROLE(), admin));
+        assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.UPGRADER_ROLE(), upgrader));
 
         // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(admin);
