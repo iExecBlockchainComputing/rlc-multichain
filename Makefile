@@ -44,7 +44,7 @@ clean:
 #
 
 deploy-on-anvil:
-	$(MAKE) deploy-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
+	$(MAKE) deploy-liquidity-unifier RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
 	$(MAKE) deploy-rlc-crosschain-token RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 	$(MAKE) deploy-layerzero-bridge RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 	$(MAKE) configure-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
@@ -55,7 +55,7 @@ upgrade-on-anvil:
 	$(MAKE) upgrade-layerzero-bridge RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
 deploy-on-testnets:
-	$(MAKE) deploy-adapter RPC_URL=$(SEPOLIA_RPC_URL)
+	$(MAKE) deploy-liquidity-unifier RPC_URL=$(SEPOLIA_RPC_URL)
 	$(MAKE) deploy-layerzero-bridge RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 	$(MAKE) configure-adapter RPC_URL=$(SEPOLIA_RPC_URL)
 	$(MAKE) configure-layerzero-bridge RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
@@ -63,14 +63,6 @@ deploy-on-testnets:
 upgrade-on-testnets:
 	$(MAKE) upgrade-adapter RPC_URL=$(SEPOLIA_RPC_URL)
 	$(MAKE) upgrade-layerzero-bridge RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
-
-deploy-adapter:
-	@echo "Deploying RLCAdapter (UUPS Proxy) on: $(RPC_URL)"
-	forge script script/bridges/layerZero/RLCAdapter.s.sol:Deploy \
-        --rpc-url $(RPC_URL) \
-        --account $(ACCOUNT) \
-        --broadcast \
-        -vvv
 
 # deploy-rlc-crosschain-token RPC_URL=https://...
 deploy-rlc-crosschain-token:
