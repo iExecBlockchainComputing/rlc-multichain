@@ -109,7 +109,7 @@ contract LiquidityUnifierTest is Test {
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge2);
         // Send mint request from the bridge.
-        _mintForUserWithBridge(bridge2, user, amount);
+        _mintForUser(bridge2, user, amount);
         // Check that tokens are minted.
         assertEq(rlcToken.balanceOf(user), 2 * amount);
         assertEq(rlcToken.balanceOf(bridge), 0);
@@ -165,21 +165,21 @@ contract LiquidityUnifierTest is Test {
         emit IERC20.Transfer(liquidityUnifierAddress, user2, amount2);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user2, amount2, bridge2);
-        _mintForUserWithBridge(bridge2, user2, amount2);
+        _mintForUser(bridge2, user2, amount2);
         // Bridge 2, user 1
         rlcToken.transfer(liquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(liquidityUnifierAddress, user, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge2);
-        _mintForUserWithBridge(bridge2, user, amount);
+        _mintForUser(bridge2, user, amount);
         // Bridge 2, user 3
         rlcToken.transfer(liquidityUnifierAddress, amount3);
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(liquidityUnifierAddress, user3, amount3);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user3, amount3, bridge2);
-        _mintForUserWithBridge(bridge2, user3, amount3);
+        _mintForUser(bridge2, user3, amount3);
 
         // Check that tokens are minted.
         assertEq(rlcToken.balanceOf(user), 2 * amount); // Bridge 1 and bridge 2
