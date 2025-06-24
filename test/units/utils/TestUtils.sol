@@ -9,7 +9,7 @@ import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {LiquidityUnifier} from "../../../src/LiquidityUnifier.sol";
+import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
 
@@ -42,11 +42,11 @@ library TestUtils {
         bytes32 salt = keccak256("salt");
 
         // Deploy Liquidity Unifier
-        LiquidityUnifier liquidityUnifier = LiquidityUnifier(
+        RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "LiquidityUnifier",
+                "RLCLiquidityUnifier",
                 abi.encode(rlcToken),
-                abi.encodeWithSelector(LiquidityUnifier.initialize.selector, initialAdmin, initialAdmin), //TODO: fix IexecLayerZeroBridge contract to make distinction between admin and upgrader & add a new param to this current function
+                abi.encodeWithSelector(RLCLiquidityUnifier.initialize.selector, initialAdmin, initialAdmin), //TODO: fix IexecLayerZeroBridge contract to make distinction between admin and upgrader & add a new param to this current function
                 createXFactory,
                 salt
             )
