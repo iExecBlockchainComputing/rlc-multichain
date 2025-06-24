@@ -117,9 +117,6 @@ contract RLCCrosschainTokenTest is Test {
         vm.stopPrank();
     }
 
-    // TODO
-    function test_ApproveAndCall_GasComparisonWithSeparateApproveAndCall() public {}
-
     function test_RevertWhen_ApproveAndCallWithZeroSpenderAddress() public {
         vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidSpender.selector, address(0)));
         vm.prank(user);
