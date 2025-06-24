@@ -16,7 +16,7 @@ contract Deploy is Script {
         //TODO migrate to read from config file and split deployment based on chain target.
         address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
         address lzEndpoint = vm.envAddress("LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS");
-        address initialAdmin = vm.envAddress("Admin_ADDRESS");
+        address initialAdmin = vm.envAddress("ADMIN_ADDRESS");
         address initialPauser = vm.envAddress("PAUSER_ADDRESS");
         bytes32 createxSalt = vm.envBytes32("SALT");
 
