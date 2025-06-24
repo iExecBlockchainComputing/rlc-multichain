@@ -25,6 +25,9 @@ contract LiquidityUnifierTest is Test {
         assertEq(address(liquidityUnifier.RLC_TOKEN()), rlcToken);
         assertEq(liquidityUnifier.hasRole(liquidityUnifier.DEFAULT_ADMIN_ROLE(), admin), true);
         assertEq(liquidityUnifier.hasRole(liquidityUnifier.UPGRADER_ROLE(), upgrader), true);
+        // Make sure the contract has been initialized.
+        vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
+        rlcAdapter.initialize(owner, upgrader);
         // TODO check that the proxy address is saved.
     }
 
