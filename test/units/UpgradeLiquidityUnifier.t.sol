@@ -3,7 +3,7 @@
 pragma solidity ^0.8.22;
 
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {LiquidityUnifierV2Mock} from "../../../../src/mocks/LiquidityUnifierV2Mock.sol";
+import {LiquidityUnifierV2} from "../../../../src/mocks/LiquidityUnifierV2Mock.sol";
 import {LiquidityUnifier} from "../../../../src/LiquidityUnifier.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 import {UpgradeUtils} from "../../../../script/lib/UpgradeUtils.sol";
@@ -15,7 +15,7 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
 
     IexecLayerZeroBridge private iexecLayerZeroBridgeChainA;
     LiquidityUnifier private liquidityUnifierV1;
-    LiquidityUnifierV2Mock private liquidityUnifierV2;
+    LiquidityUnifierV2 private liquidityUnifierV2;
     RLCMock private rlcToken;
 
     address public mockEndpoint;
@@ -57,7 +57,7 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             constructorData: abi.encode(rlcToken),
-            contractName: "liquidityUnifierV2Mock.sol:LiquidityUnifierV2Mock",
+            contractName: "LiquidityUnifierV2Mock.sol:LiquidityUnifierV2",
             newStateVariable: NEW_STATE_VARIABLE,
             validateOnly: false
         });
@@ -66,7 +66,7 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
 
         vm.stopPrank();
 
-        liquidityUnifierV2 = LiquidityUnifierV2Mock(proxyAddress);
+        liquidityUnifierV2 = LiquidityUnifierV2(proxyAddress);
 
         // 5. Verify state preservation
         assertEq(liquidityUnifierV2.owner(), originalOwner, "Owner should be preserved");
@@ -96,7 +96,7 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             constructorData: abi.encode(rlcToken),
-            contractName: "liquidityUnifierV2Mock.sol:liquidityUnifierV2",
+            contractName: "LiquidityUnifierV2Mock.sol:LiquidityUnifierV2",
             newStateVariable: NEW_STATE_VARIABLE,
             validateOnly: false
         });
@@ -105,7 +105,7 @@ contract UpgradeLiquidityUnifier is TestHelperOz5 {
 
         vm.stopPrank();
 
-        liquidityUnifierV2 = LiquidityUnifierV2Mock(proxyAddress);
+        liquidityUnifierV2 = LiquidityUnifierV2(proxyAddress);
 
         // Verify it was initialized correctly
         assertEq(liquidityUnifierV2.newStateVariable(), NEW_STATE_VARIABLE);

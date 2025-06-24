@@ -5,13 +5,13 @@ pragma solidity ^0.8.22;
 import {LiquidityUnifier} from "../LiquidityUnifier.sol";
 
 /**
- * @title LiquidityUnifierV2Mock - V2 implementation with additional features
+ * @title LiquidityUnifierV2 - V2 implementation with additional features
  * @author IEXEC BLOCKCHAIN TECH
  * @notice This contract inherits from LiquidityUnifier (V1) and adds new functionality
  *
  * @custom:oz-upgrades-from src/LiquidityUnifier.sol:LiquidityUnifier
  */
-contract LiquidityUnifierV2Mock is LiquidityUnifier {
+contract LiquidityUnifierV2 is LiquidityUnifier {
     /// NEW STATE VARIABLES FOR V2
     uint256 public newStateVariable;
 
