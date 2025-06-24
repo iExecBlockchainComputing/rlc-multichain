@@ -10,7 +10,7 @@ pragma solidity ^0.8.22;
  * https://github.com/iExecBlockchainComputing/rlc-token/blob/master/contracts/TokenSpender.sol
  *
  * @dev The ERC1363-onTransferReceived is not used because it is not compatible with the original
- * RLC token contract. See {RLCrosschainToken-approveAndCall} for more details.
+ * RLC token contract and the PoCo. See {RLCrosschainToken-approveAndCall} for more details.
  */
 interface ITokenSpender {
     function receiveApproval(address from, uint256 value, address token, bytes memory data) external;

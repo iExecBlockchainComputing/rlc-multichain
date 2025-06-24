@@ -5,6 +5,7 @@ pragma solidity ^0.8.22;
 import {console} from "forge-std/console.sol";
 import {Vm} from "forge-std/Vm.sol";
 
+// TODO replace to save addresses in a json file.
 library EnvUtils {
     Vm constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
