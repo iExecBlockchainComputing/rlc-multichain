@@ -110,8 +110,8 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
      *
      * @custom:bridge-compatibility Required by LayerZero OFT standard
      */
-    function decimals() external view returns (uint8) {
-        return RLC_TOKEN.decimals();
+    function decimals() external pure returns (uint8) {
+        return 9;
     }
 
     // ============ FOR ERC165 INTERFACE DETECTION ============
