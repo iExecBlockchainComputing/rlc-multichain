@@ -3,7 +3,7 @@
 # ===============================================
 
 # Main report command - runs clean then report
-report: 
+report:
 	$(MAKE) clean-report
 	$(MAKE) iexec-internal-report
 
@@ -76,7 +76,7 @@ iexec-internal-report:
 # @aderyn --output iexec-report/aderyn-report.md 2>&1 | grep -E "(High|Medium|Low|Found|issues)" | tee -a iexec-report/iexec-automatic-report.txt
 # @echo "  ✅ Aderyn report saved to iexec-report/aderyn-report.md" | tee -a iexec-report/iexec-automatic-report.txt
 # @echo "" | tee -a iexec-report/iexec-automatic-report.txt
-	
+
 # @echo "⚡ Mythril Analysis" | tee -a iexec-report/iexec-automatic-report.txt
 # @echo "  Running Mythril analysis..." | tee -a iexec-report/iexec-automatic-report.txt
 # @mkdir -p iexec-report/mythril
@@ -96,7 +96,7 @@ iexec-internal-report:
 # @echo "====================" | tee -a iexec-report/iexec-automatic-report.txt
 # @echo "📊 Test coverage report:" | tee -a iexec-report/iexec-automatic-report.txt
 # @FOUNDRY_DISABLE_NIGHTLY_WARNING=true rm -rf coverage lcov.info lcov.src.info && \
-# forge coverage --ir-minimum --report lcov --no-match-coverage "script|src/mocks|test" 2>&1 | \
+# forge coverage --ir-minimum --report lcov --no-match-coverage "script|src/_mocks|test" 2>&1 | \
 # 	grep -E "(File|Overall coverage|Wrote LCOV)" | grep -v "^$$" | tee -a iexec-report/iexec-automatic-report.txt
 # @if [ -f lcov.info ]; then \
 # 	echo "🔍 Processing coverage data..." | tee -a iexec-report/iexec-automatic-report.txt; \
