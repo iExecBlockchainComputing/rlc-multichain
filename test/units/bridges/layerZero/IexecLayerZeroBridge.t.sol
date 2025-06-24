@@ -44,6 +44,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address lzEndpointBridge = address(endpoints[SOURCE_EID]);
         address lzEndpointAdapter = address(endpoints[DEST_EID]);
 
+        //TODO: make tests when with iexecLayerZeroBridgeChainA connected to liquidity unifier
         (iexecLayerZeroBridgeChainA, iexecLayerZeroBridgeChainB,, rlcCrosschainToken) =
             TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, owner, pauser);
 
@@ -189,6 +190,26 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertFalse(iexecLayerZeroBridgeChainB.sendPaused());
 
         test_SendToken_WhenOperational();
+    }
+
+    // ============ token and approvalRequired ============
+    function test_ReturnsBridgeableTokenAddress() public view {
+        address bridgeTokenAddress = iexecLayerZeroBridgeChainB.token();
+        assertEq(bridgeTokenAddress, address(rlcCrosschainToken), "token() should return the RLC token address");
+    }
+
+    function test_ShouldBeTrueOnMainnet() public {
+        // Simulate Ethereum Mainnet chain ID
+        vm.chainId(1);
+        bool requiresApproval = iexecLayerZeroBridgeChainB.approvalRequired();
+        assertTrue(requiresApproval, "approvalRequired() should return true on Ethereum Mainnet");
+    }
+
+    function test_ShouldBeFalseOffMainnet() public {
+        // Simulate non-mainnet chain ID
+        vm.chainId(31337);
+        bool requiresApproval = iexecLayerZeroBridgeChainB.approvalRequired();
+        assertFalse(requiresApproval, "approvalRequired() should return false on non-mainnet chains");
     }
 
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
