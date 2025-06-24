@@ -33,11 +33,11 @@ import {IERC7802} from "../../interfaces/IERC7802.sol";
  * 2. Send Pause: Blocks only outgoing transfers, allows users to receive/withdraw funds
  */
 contract IexecLayerZeroBridge is
-    IIexecLayerZeroBridge,
-    OFTCoreUpgradeable,
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
-    DualPausableUpgradeable
+    OFTCoreUpgradeable,
+    DualPausableUpgradeable,
+    IIexecLayerZeroBridge
 {
     /// @dev Role identifier for accounts authorized to upgrade the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -56,16 +56,16 @@ contract IexecLayerZeroBridge is
 
     /**
      * @dev Constructor for the LayerZero bridge contract
-     * @param _bridgeableToken The RLC token contract address that implements IERC7802 interface
-     * @param _lzEndpoint The LayerZero endpoint address for this chain
+     * @param bridgeableToken The RLC token contract address that implements IERC7802 interface
+     * @param lzEndpoint The LayerZero endpoint address for this chain
      *
      * @custom:oz-upgrades-unsafe-allow constructor
      */
-    constructor(address _bridgeableToken, address _lzEndpoint)
-        OFTCoreUpgradeable(IERC20Metadata(_bridgeableToken).decimals(), _lzEndpoint)
+    constructor(address bridgeableToken, address lzEndpoint)
+        OFTCoreUpgradeable(IERC20Metadata(bridgeableToken).decimals(), lzEndpoint)
     {
         _disableInitializers();
-        BRIDGEABLE_TOKEN = IERC7802(_bridgeableToken);
+        BRIDGEABLE_TOKEN = IERC7802(bridgeableToken);
     }
 
     // ============ INITIALIZATION ============
@@ -75,15 +75,14 @@ contract IexecLayerZeroBridge is
      * @param initialAdmin Address that will receive owner and default admin roles
      * @param initialPauser Address that will receive the pauser role
      */
-    // TODO add upgrader role.
-    function initialize(address initialAdmin, address initialPauser) external initializer {
+    function initialize(address initialAdmin, address initialUpgrader, address initialPauser) external initializer {
+        __UUPSUpgradeable_init();
         __Ownable_init(initialAdmin);
         __OFTCore_init(initialAdmin);
-        __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, initialAdmin);
-        __DualPausable_init();
-        _grantRole(UPGRADER_ROLE, initialAdmin);
+        _grantRole(UPGRADER_ROLE, initialUpgrader);
         _grantRole(PAUSER_ROLE, initialPauser);
+        __DualPausable_init();
     }
 
     // ============ EMERGENCY CONTROLS ============
@@ -176,13 +175,7 @@ contract IexecLayerZeroBridge is
     // ============ CORE BRIDGE FUNCTIONS ============
 
     /**
-     * @notice Burns tokens from the sender's balance as part of cross-chain transfer
-     * @param _from The address to burn tokens from
-     * @param _amountLD The amount of tokens to burn (in local decimals)
-     * @param _minAmountLD The minimum amount to burn (for slippage protection)
-     * @param _dstEid The destination chain endpoint ID
-     * @return amountSentLD The amount of tokens burned on source chain
-     * @return amountReceivedLD The amount that will be minted on destination chain
+     * Burns tokens from the sender's balance as part of cross-chain transfer
      *
      * @dev This function is called by LayerZero's OFT core when sending tokens
      * to another chain. It burns the specified amount from the sender's balance.
@@ -201,8 +194,15 @@ contract IexecLayerZeroBridge is
      * - Uses both whenNotPaused and whenSendNotPaused modifiers
      *
      * @custom:security Requires the RLC token to have granted burn permissions to this contract
+     *
+     * @param from The address to burn tokens from
+     * @param amountLD The amount of tokens to burn (in local decimals)
+     * @param minAmountLD The minimum amount to burn (for slippage protection)
+     * @param dstEid The destination chain endpoint ID
+     * @return amountSentLD The amount of tokens burned on source chain
+     * @return amountReceivedLD The amount that will be minted on destination chain
      */
-    function _debit(address _from, uint256 _amountLD, uint256 _minAmountLD, uint32 _dstEid)
+    function _debit(address from, uint256 amountLD, uint256 minAmountLD, uint32 dstEid)
         internal
         override
         whenNotPaused
@@ -210,17 +210,14 @@ contract IexecLayerZeroBridge is
         returns (uint256 amountSentLD, uint256 amountReceivedLD)
     {
         // Calculate the amounts using the parent's logic (handles slippage protection)
-        (amountSentLD, amountReceivedLD) = _debitView(_amountLD, _minAmountLD, _dstEid);
+        (amountSentLD, amountReceivedLD) = _debitView(amountLD, minAmountLD, dstEid);
 
         // Burn the tokens from the sender's balance
-        BRIDGEABLE_TOKEN.crosschainBurn(_from, amountSentLD);
+        BRIDGEABLE_TOKEN.crosschainBurn(from, amountSentLD);
     }
 
     /**
-     * @notice Mints tokens to the specified account as part of cross-chain transfer.
-     * @param _to The address to mint tokens to
-     * @param _amountLD The amount of tokens to mint (in local decimals)
-     * @return amountReceivedLD The amount of tokens actually minted
+     * Mints tokens to the specified account as part of cross-chain transfer.
      *
      * @dev This function is called by LayerZero's OFT core when receiving tokens
      * from another chain. It mints the specified amount to the recipient's balance.
@@ -242,8 +239,12 @@ contract IexecLayerZeroBridge is
      *
      * @custom:security Requires the RLC token to have granted mint permissions to this contract
      * @custom:security Uses 0xdead address if _to is zero address (minting to zero fails)
+     *
+     * @param to The address to mint tokens to
+     * @param amountLD The amount of tokens to mint (in local decimals)
+     * @return amountReceivedLD The amount of tokens actually minted
      */
-    function _credit(address _to, uint256 _amountLD, uint32 /*_srcEid*/ )
+    function _credit(address to, uint256 amountLD, uint32 /*_srcEid*/ )
         internal
         override
         whenNotPaused
@@ -251,14 +252,14 @@ contract IexecLayerZeroBridge is
     {
         // Handle zero address case - minting to zero address typically fails
         // so we redirect to burn address instead
-        if (_to == address(0x0)) _to = address(0xdead);
+        if (to == address(0x0)) to = address(0xdead);
 
         // Mint the tokens to the recipient
         // This assumes crosschainMint doesn't apply any fees
-        BRIDGEABLE_TOKEN.crosschainMint(_to, _amountLD);
+        BRIDGEABLE_TOKEN.crosschainMint(to, amountLD);
 
         // Return the amount minted (assuming no fees)
-        return _amountLD;
+        return amountLD;
     }
 
     // ============ UPGRADE AUTHORIZATION ============
