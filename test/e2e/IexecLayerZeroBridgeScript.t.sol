@@ -31,8 +31,9 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     }
 
     function testFork_Deployment() public {
-        IexecLayerZeroBridge iexecLayerZeroBridge =
-            IexecLayerZeroBridge(deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt));
+        IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
+            deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt)
+        );
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
         assertEq(iexecLayerZeroBridge.token(), address(rlcAddress));
