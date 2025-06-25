@@ -18,8 +18,8 @@ import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
  * should interact with this contract to perform RLC transfers.
  *
  * The implementation is inspired by the OpenZeppelin ERC20Bridgeable contract
- * without being an ERC20 token itself. Functions are overridden to mint/burn
- * on an external ERC20 contract.
+ * without being an ERC20 token itself. Functions are overridden to lock/unlock
+ * tokens on an external ERC20 contract.
  */
 contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, IERC7802 {
     using SafeERC20 for IERC20Metadata;

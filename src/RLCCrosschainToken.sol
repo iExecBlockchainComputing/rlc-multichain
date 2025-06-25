@@ -107,7 +107,7 @@ contract RLCCrosschainToken is
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     /**
-     * Checks if the caller is a trusted token bridge that is allowed to call
+     * Checks if the caller is a trusted token bridge that is allowed by iExec to call
      * `crosschainMint` or `crosschainBurn` functions.
      * @dev This function is called by the modifier `onlyTokenBridge` in the
      * `ERC20BridgeableUpgradeable` contract.
