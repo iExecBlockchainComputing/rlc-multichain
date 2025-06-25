@@ -57,7 +57,9 @@ upgrade-on-anvil:
 	$(MAKE) upgrade-layerzero-bridge CHAIN=arbitrum_sepolia RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
 deploy-on-testnets:
+	$(MAKE) deploy-liquidity-unifier CHAIN=sepolia RPC_URL=$(SEPOLIA_RPC_URL)
 	$(MAKE) deploy-layerzero-bridge CHAIN=sepolia RPC_URL=$(SEPOLIA_RPC_URL)
+	$(MAKE) deploy-rlc-crosschain-token CHAIN=arbitrum_sepolia RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 	$(MAKE) deploy-layerzero-bridge CHAIN=arbitrum_sepolia RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 	$(MAKE) configure-layerzero-bridge SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=$(SEPOLIA_RPC_URL)
 	$(MAKE) configure-layerzero-bridge SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
