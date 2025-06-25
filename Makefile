@@ -44,6 +44,7 @@ clean:
 #
 
 deploy-on-anvil:
+	$(MAKE) deploy-liquidity-unifier CHAIN=sepolia RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
 	$(MAKE) deploy-layerzero-bridge CHAIN=sepolia RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
 	$(MAKE) deploy-rlc-crosschain-token CHAIN=arbitrum_sepolia RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 	$(MAKE) deploy-layerzero-bridge CHAIN=arbitrum_sepolia RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
@@ -90,7 +91,7 @@ deploy-layerzero-bridge:
 		-vvv
 
 configure-layerzero-bridge:
-    @echo "Configuring IexecLayerZeroBridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN): $(RPC_URL)"
+	@echo "Configuring IexecLayerZeroBridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN): $(RPC_URL)"
 	SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) \
 	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Configure \
 		--rpc-url $(RPC_URL) \
