@@ -22,6 +22,9 @@ import {ITokenSpender} from "./interfaces/ITokenSpender.sol";
  * To whitelist a token bridge contract, the admin (with `DEFAULT_ADMIN_ROLE`) sends
  * a transaction to grant the role `TOKEN_BRIDGE_ROLE` to the bridge contract address
  * using `grantRole` function.
+ *
+ * TODO upgrade openzeppelin packages when the audited version of ERC20BridgeableUpgradeable
+ * is released.
  */
 contract RLCCrosschainToken is
     UUPSUpgradeable,
