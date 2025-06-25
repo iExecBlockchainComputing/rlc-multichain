@@ -82,11 +82,8 @@ contract Upgrade is Script {
             validateOnly: false
         });
 
-        address newImplementationAddress = UpgradeUtils.executeUpgrade(params);
-
+        UpgradeUtils.executeUpgrade(params);
         vm.stopBroadcast();
-
-        EnvUtils.updateEnvVariable("RLC_LIQUIDITY_UNIFIER_IMPLEMENTATION_ADDRESS", newImplementationAddress);
     }
 }
 
