@@ -52,7 +52,7 @@ deploy-on-anvil:
 	$(MAKE) configure-layerzero-bridge SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
 upgrade-on-anvil:
-	$(MAKE) upgrade-layer1-LZ-bridge CHAIN=sepolia RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
+	$(MAKE) upgrade-layerzero-bridge CHAIN=sepolia RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
 	$(MAKE) upgrade-layer2-LZ-bridge CHAIN=arbitrum_sepolia RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
 deploy-on-testnets:
@@ -62,8 +62,8 @@ deploy-on-testnets:
 	$(MAKE) configure-layerzero-bridge SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 
 upgrade-on-testnets:
-	$(MAKE) upgrade-layer1-LZ-bridge CHAIN=sepolia RPC_URL=$(SEPOLIA_RPC_URL)
-	$(MAKE) upgrade-layer2-LZ-bridge CHAIN=arbitrum_sepolia RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) upgrade-layerzero-bridge CHAIN=sepolia RPC_URL=$(SEPOLIA_RPC_URL)
+	$(MAKE) upgrade-layerzero-bridge CHAIN=arbitrum_sepolia RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 
 # Generic deployment targets (works with any chain)
 deploy-liquidity-unifier:
