@@ -50,8 +50,9 @@ contract Deploy is Script {
         bytes32 createxSalt
     ) public returns (address) {
         bytes memory constructorData = abi.encode(bridgeableToken, lzEndpoint);
-        bytes memory initializeData =
-            abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser);
+        bytes memory initializeData = abi.encodeWithSelector(
+            IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
+        );
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "IexecLayerZeroBridge", constructorData, initializeData, createxFactory, createxSalt
         );
