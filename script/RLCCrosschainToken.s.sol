@@ -19,7 +19,6 @@ contract Deploy is Script {
      * @return address of the deployed RLCCrosschainToken proxy contract.
      */
     function run() external returns (address) {
-        // TODO put inside a shared utility function.
         string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
 
