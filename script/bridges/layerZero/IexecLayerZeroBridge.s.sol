@@ -2,25 +2,22 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import "forge-std/StdJson.sol";
 import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {BridgeConfigLib} from "./BridgeConfigLib.sol";
+import {ConfigLib} from "./../../lib/ConfigLib.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "../../lib/UpdateEnvUtils.sol";
 import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
-    using stdJson for string;
-
     function run() external returns (address) {
         vm.startBroadcast();
 
         string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
 
-        BridgeConfigLib.CommonConfigParams memory params = BridgeConfigLib.readCommonConfig(config, chain);
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
 
         address iexecLayerZeroBridgeProxy = deploy(
             params.bridgeableToken,
@@ -60,41 +57,36 @@ contract Deploy is Script {
 }
 
 contract Configure is Script {
-    using stdJson for string;
-
     function run() external {
         string memory config = vm.readFile("config/config.json");
         string memory sourceChain = vm.envString("SOURCE_CHAIN");
         string memory targetChain = vm.envString("TARGET_CHAIN");
 
+        ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(config, sourceChain);
+        ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(config, targetChain);
         vm.startBroadcast();
 
-        BridgeConfigLib.CommonConfigParams memory sourceParams = BridgeConfigLib.readCommonConfig(config, sourceChain);
-        BridgeConfigLib.CommonConfigParams memory targetParams = BridgeConfigLib.readCommonConfig(config, targetChain);
-
         // Configure one bridge to another
-        IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.bridgeAddress);
-        sourceBridge.setPeer(targetParams.layerZeroChainId, bytes32(uint256(uint160(targetParams.bridgeAddress))));
+        IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.layerZeroBridge);
+        sourceBridge.setPeer(targetParams.layerZeroChainId, bytes32(uint256(uint160(targetParams.layerZeroBridge))));
 
         vm.stopBroadcast();
     }
 }
 
 contract Upgrade is Script {
-    using stdJson for string;
-
     function run() external {
         vm.startBroadcast();
 
         string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
 
-        BridgeConfigLib.CommonConfigParams memory commonParams = BridgeConfigLib.readCommonConfig(config, chain);
+        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(config, chain);
         // For testing purpose
         uint256 newStateVariable = 1000000 * 10 ** 9;
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: commonParams.bridgeAddress,
+            proxyAddress: commonParams.layerZeroBridge,
             rlcToken: commonParams.bridgeableToken,
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
             lzEndpoint: commonParams.lzEndpoint,
@@ -111,13 +103,11 @@ contract Upgrade is Script {
 }
 
 contract ValidateUpgrade is Script {
-    using stdJson for string;
-
     function run() external {
         string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
 
-        BridgeConfigLib.CommonConfigParams memory commonParams = BridgeConfigLib.readCommonConfig(config, chain);
+        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(config, chain);
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: address(0), // Not needed for validation
