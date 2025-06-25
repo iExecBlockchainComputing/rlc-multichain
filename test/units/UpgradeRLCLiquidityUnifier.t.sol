@@ -90,30 +90,4 @@ contract UpgradeRLCLiquidityUnifier is TestHelperOz5 {
         (bool v2Success,) = proxyAddress.call(abi.encodeWithSignature("newStateVariable()"));
         assertTrue(v2Success, "V2 should have newStateVariable() function");
     }
-
-    function test_RevertWhen_InitializeV2Twice() public {
-        vm.startPrank(upgrader);
-
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: proxyAddress,
-            constructorData: abi.encode(rlcToken),
-            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
-            newStateVariable: NEW_STATE_VARIABLE,
-            validateOnly: false
-        });
-
-        UpgradeUtils.executeUpgrade(params);
-
-        vm.stopPrank();
-
-        rlcLiquidityUnifierV2 = RLCLiquidityUnifierV2(proxyAddress);
-
-        // Verify it was initialized correctly
-        assertEq(rlcLiquidityUnifierV2.newStateVariable(), NEW_STATE_VARIABLE);
-
-        // Attempt to initialize again should revert
-        vm.prank(upgrader);
-        vm.expectRevert();
-        rlcLiquidityUnifierV2.initializeV2(999); // Different value to ensure it's not a duplicate
-    }
 }

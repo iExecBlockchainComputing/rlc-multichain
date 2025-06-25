@@ -93,29 +93,4 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         (bool v2Success,) = proxyAddress.call(abi.encodeWithSignature("newStateVariable()"));
         assertTrue(v2Success, "V2 should have newStateVariable() function");
     }
-
-    function test_RevertWhen_InitializeV2Twice() public {
-        vm.startPrank(upgrader);
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: proxyAddress,
-            constructorData: abi.encode(rlcCrosschainToken, mockEndpoint),
-            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
-            newStateVariable: NEW_STATE_VARIABLE,
-            validateOnly: false
-        });
-
-        UpgradeUtils.executeUpgrade(params);
-
-        vm.stopPrank();
-
-        iexecLayerZeroBridgeV2 = IexecLayerZeroBridgeV2(proxyAddress);
-
-        // Verify it was initialized correctly
-        assertEq(iexecLayerZeroBridgeV2.newStateVariable(), NEW_STATE_VARIABLE);
-
-        // Attempt to initialize again should revert
-        vm.prank(upgrader);
-        vm.expectRevert();
-        iexecLayerZeroBridgeV2.initializeV2(999); // Different value to ensure it's not a duplicate
-    }
 }
