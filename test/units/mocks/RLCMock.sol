@@ -14,8 +14,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  */
 contract RLCMock is IERC20 {
     uint256 public totalSupply;
-    mapping(address => uint) balances;
-    mapping(address => mapping(address => uint)) allowed;
+    mapping(address => uint256) balances;
+    mapping(address => mapping(address => uint256)) allowed;
 
     constructor() {
         totalSupply = 87_000_000 * 10 ** 9; // 87 million tokens with 9 decimals
@@ -43,7 +43,7 @@ contract RLCMock is IERC20 {
     }
 
     // Does not check the spender address.
-    function approve(address spender, uint value) external override returns (bool) {
+    function approve(address spender, uint256 value) external override returns (bool) {
         allowed[msg.sender][spender] = value;
         emit Approval(msg.sender, spender, value);
         return true;
@@ -57,10 +57,7 @@ contract RLCMock is IERC20 {
         return balances[account];
     }
 
-    function allowance(
-        address owner,
-        address spender
-    ) external view override returns (uint256) {
+    function allowance(address owner, address spender) external view override returns (uint256) {
         return allowed[owner][spender];
     }
 }
