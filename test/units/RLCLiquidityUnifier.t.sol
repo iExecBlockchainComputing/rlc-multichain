@@ -209,9 +209,7 @@ contract LiquidityUnifierTest is Test {
 
         // Attempt to mint tokens the zero address.
         rlcToken.transfer(liquidityUnifierAddress, amount);
-        vm.expectRevert(
-            abi.encodeWithSelector(RLCLiquidityUnifier.ERC7802InvalidToAddress.selector, address(0))
-        );
+        vm.expectRevert(abi.encodeWithSelector(RLCLiquidityUnifier.ERC7802InvalidToAddress.selector, address(0)));
         vm.prank(bridge);
         liquidityUnifier.crosschainMint(address(0), amount);
         // Check that no tokens were minted.
@@ -450,9 +448,7 @@ contract LiquidityUnifierTest is Test {
     function test_RevertWhen_BurnFromZeroAddress() public {
         _authorizeBridge(bridge);
         // Attempt to burn tokens from the zero address.
-        vm.expectRevert(
-            abi.encodeWithSelector(RLCLiquidityUnifier.ERC7802InvalidFromAddress.selector, address(0))
-        );
+        vm.expectRevert(abi.encodeWithSelector(RLCLiquidityUnifier.ERC7802InvalidFromAddress.selector, address(0)));
         vm.prank(bridge);
         liquidityUnifier.crosschainBurn(address(0), amount);
     }
