@@ -26,7 +26,6 @@ library ConfigLib {
         address bridgeableToken;
         address rlcLiquidityUnifier;
         address layerZeroBridge;
-        string chainName;
     }
 
     /**
