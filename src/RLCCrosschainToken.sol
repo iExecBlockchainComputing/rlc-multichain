@@ -8,8 +8,8 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ERC20PermitUpgradeable} from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
-import {IERC7802} from "../interfaces/IERC7802.sol";
-import {ITokenSpender} from "../interfaces/ITokenSpender.sol";
+import {IERC7802} from "./interfaces/IERC7802.sol";
+import {ITokenSpender} from "./interfaces/ITokenSpender.sol";
 
 /**
  * This contract is an upgradeable (UUPS) ERC20 token with cross-chain capabilities.
@@ -24,9 +24,9 @@ import {ITokenSpender} from "../interfaces/ITokenSpender.sol";
  * https://github.com/OpenZeppelin/openzeppelin-community-contracts/blob/075587479556632d3dd9e9e3b37417cabf3e26a3/contracts/token/ERC20/extensions/ERC20Bridgeable.sol
  */
 contract RLCCrosschainToken is
-    ERC20PermitUpgradeable,
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
+    ERC20PermitUpgradeable,
     IERC7802
 {
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -50,11 +50,11 @@ contract RLCCrosschainToken is
         public
         initializer
     {
-        __ERC20_init(name, symbol);
-        __ERC20Permit_init(name);
         __UUPSUpgradeable_init();
         __AccessControlDefaultAdminRules_init(0, initialAdmin);
         _grantRole(UPGRADER_ROLE, initialUpgrader);
+        __ERC20_init(name, symbol);
+        __ERC20Permit_init(name);
     }
 
     /**
@@ -64,6 +64,7 @@ contract RLCCrosschainToken is
      *
      * @dev The ERC1363 is not used because it is not compatible with the original RLC token contract:
      *  - The RLC uses `receiveApproval` while the ERC1363 uses `onTransferReceived`.
+     *  - The PoCo exposes `receiveApproval` in its interface.
      *  - Openzeppelin's implementation of ERC1363 uses Solidity custom errors.
      * This could be changed in the future, but for now, we keep the original interface to insure
      * compatibility with existing Dapps and SDKs.

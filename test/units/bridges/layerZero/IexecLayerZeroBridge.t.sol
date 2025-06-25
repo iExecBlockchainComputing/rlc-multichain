@@ -9,9 +9,9 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {DualPausableUpgradeable} from "../../../../src/bridges/common/DualPausableUpgradeable.sol";
+import {DualPausableUpgradeable} from "../../../../src/bridges/utils/DualPausableUpgradeable.sol";
 import {TestUtils} from "../../utils/TestUtils.sol";
-import {RLCCrosschainToken} from "../../../../src/token/RLCCrosschainToken.sol";
+import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
 
 contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
@@ -26,6 +26,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     uint32 private constant DEST_EID = 2;
 
     address private admin = makeAddr("admin");
+    address private upgrader = makeAddr("upgrader");
     address private pauser = makeAddr("pauser");
     address private user1 = makeAddr("user1");
     address private user2 = makeAddr("user2");
@@ -33,7 +34,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     uint256 private constant INITIAL_BALANCE = 100 * 10 ** 9; // 100 RLC tokens with 9 decimals
     uint256 private constant TRANSFER_AMOUNT = 1 * 10 ** 9; // 1 RLC token with 9 decimals
-    string private name = "RLC Crosschain Token";
+    string private name = "iEx.ec Network Token";
     string private symbol = "RLC";
 
     function setUp() public virtual override {
@@ -46,7 +47,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
         //TODO: make tests with iexecLayerZeroBridgeChainA - when iexecLayerZeroBridge is connected to liquidity unifier
         (iexecLayerZeroBridgeChainA, iexecLayerZeroBridgeChainB,, rlcCrosschainToken) =
-            TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, admin, pauser);
+            TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, admin, upgrader, pauser);
 
         address iexecLayerZeroBridgeChainBAddress = address(iexecLayerZeroBridgeChainB);
         // Wire the contracts

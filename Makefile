@@ -1,4 +1,3 @@
-# Makefile for RLC OFT Project
 
 MAKEFLAGS += --no-print-directory
 
@@ -66,8 +65,8 @@ upgrade-on-testnets:
 	$(MAKE) upgrade-layer2-LZ-bridge RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
 
 deploy-liquidity-unifier:
-	@echo "Deploying LiquidityUnifier (UUPS Proxy) on: $(RPC_URL)"
-	CHAIN=sepolia forge script script/LiquidityUnifier.s.sol:Deploy \
+	@echo "Deploying RLCLiquidityUnifier (UUPS Proxy) on: $(RPC_URL)"
+	CHAIN=sepolia forge script script/RLCLiquidityUnifier.s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \

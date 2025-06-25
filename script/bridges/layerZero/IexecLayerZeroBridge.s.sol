@@ -26,6 +26,7 @@ contract Deploy is Script {
             params.bridgeableToken,
             params.lzEndpoint,
             params.initialAdmin,
+            params.initialUpgrader,
             params.initialPauser,
             params.createxFactory,
             params.createxSalt
@@ -43,13 +44,14 @@ contract Deploy is Script {
         address bridgeableToken,
         address lzEndpoint,
         address initialAdmin,
+        address initialUpgrader,
         address initialPauser,
         address createxFactory,
         bytes32 createxSalt
     ) public returns (address) {
         bytes memory constructorData = abi.encode(bridgeableToken, lzEndpoint);
         bytes memory initializeData =
-            abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialPauser);
+            abi.encodeWithSelector(IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser);
         return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
             "IexecLayerZeroBridge", constructorData, initializeData, createxFactory, createxSalt
         );

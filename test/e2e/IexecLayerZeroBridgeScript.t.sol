@@ -14,8 +14,9 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     address LAYERZERO_ENDPOINT = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
     address CREATEX = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
 
-    address admin = makeAddr("ADMIN_ADDRESS");
-    address pauser = makeAddr("PAUSER_ADDRESS");
+    address admin = makeAddr("admin");
+    address upgrader = makeAddr("upgrader");
+    address pauser = makeAddr("pauser");
     address rlcAddress; // This will be set to a mock token address for testing
     bytes32 salt = keccak256("salt");
 
@@ -25,33 +26,33 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
         deployer = new IexecLayerZeroBridgeDeploy();
         rlcAddress =
-            new RLCCrosschainTokenDeployScript().deploy("RLC Crosschain Token", "RLC", admin, admin, CREATEX, salt);
+            new RLCCrosschainTokenDeployScript().deploy("iEx.ec Network Token", "RLC", admin, admin, CREATEX, salt);
         vm.setEnv("CREATE_X_FACTORY", vm.toString(CREATEX));
     }
 
     function testFork_Deployment() public {
         IexecLayerZeroBridge iexecLayerZeroBridge =
-            IexecLayerZeroBridge(deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, pauser, CREATEX, salt));
+            IexecLayerZeroBridge(deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, salt));
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
         assertEq(iexecLayerZeroBridge.token(), address(rlcAddress));
         // Check all roles.
         assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.DEFAULT_ADMIN_ROLE(), admin));
+        assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.UPGRADER_ROLE(), upgrader));
         assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.PAUSER_ROLE(), pauser));
-        assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.UPGRADER_ROLE(), admin));
         // Make sure the contract is not paused by default.
         assertFalse(iexecLayerZeroBridge.paused(), "Contract should not be paused by default");
         // Make sure the contract has been initialized and cannot be re-initialized.
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
-        iexecLayerZeroBridge.initialize(admin, pauser);
+        iexecLayerZeroBridge.initialize(admin, upgrader, pauser);
         // TODO check that the contract has the correct LayerZero endpoint.
         // TODO check that the proxy address is saved.
     }
 
     function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, pauser, CREATEX, salt);
+        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, salt);
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", CREATEX));
-        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, pauser, CREATEX, salt);
+        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, salt);
     }
 
     // TODO add tests for the configuration script.

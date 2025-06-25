@@ -3,7 +3,7 @@
 # ===============================================
 
 # Main report command - runs clean then report
-report: 
+report:
 	$(MAKE) clean-report
 	$(MAKE) iexec-internal-report
 
@@ -76,7 +76,7 @@ iexec-internal-report:
 # @aderyn --output iexec-report/aderyn-report.md 2>&1 | grep -E "(High|Medium|Low|Found|issues)" | tee -a iexec-report/iexec-automatic-report.txt
 # @echo "  ✅ Aderyn report saved to iexec-report/aderyn-report.md" | tee -a iexec-report/iexec-automatic-report.txt
 # @echo "" | tee -a iexec-report/iexec-automatic-report.txt
-	
+
 # @echo "⚡ Mythril Analysis" | tee -a iexec-report/iexec-automatic-report.txt
 # @echo "  Running Mythril analysis..." | tee -a iexec-report/iexec-automatic-report.txt
 # @mkdir -p iexec-report/mythril
