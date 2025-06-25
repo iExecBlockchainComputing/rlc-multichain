@@ -9,8 +9,18 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import {IRLCLiquidityUnifier, IERC7802} from "./interfaces/IRLCLiquidityUnifier.sol";
 
+/**
+ * @dev This contract facilitates cross-chain liquidity unification by allowing
+ * the minting and burning of tokens on the RLC token contract. All bridges
+ * should interact with this contract to perform RLC transfers.
+ *
+ * The implementation is inspired by the OpenZeppelin ERC20Bridgeable contract
+ * without being an ERC20 token itself. Functions are overridden to lock/unlock
+ * tokens on an external ERC20 contract.
+ */
 contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, IRLCLiquidityUnifier {
     using SafeERC20 for IERC20Metadata;
 
@@ -129,7 +139,12 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(AccessControlDefaultAdminRulesUpgradeable, IERC165)
+        returns (bool)
+    {
         return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
     }
 
