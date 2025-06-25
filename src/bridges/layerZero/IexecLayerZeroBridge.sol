@@ -11,7 +11,7 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {DualPausableUpgradeable} from "../utils/DualPausableUpgradeable.sol";
 import {IIexecLayerZeroBridge} from "../../interfaces/IIexecLayerZeroBridge.sol";
-import {IERC7802} from "../../interfaces/IERC7802.sol";
+import {IRLCLiquidityUnifier} from "../../interfaces/IRLCLiquidityUnifier.sol";
 
 /**
  * @title IexecLayerZeroBridge
@@ -52,7 +52,7 @@ contract IexecLayerZeroBridge is
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
     // slither-disable-next-line naming-convention
-    IERC7802 public immutable BRIDGEABLE_TOKEN;
+    IRLCLiquidityUnifier public immutable BRIDGEABLE_TOKEN;
 
     /**
      * @dev Constructor for the LayerZero bridge contract
@@ -65,7 +65,7 @@ contract IexecLayerZeroBridge is
         OFTCoreUpgradeable(IERC20Metadata(bridgeableToken).decimals(), lzEndpoint)
     {
         _disableInitializers();
-        BRIDGEABLE_TOKEN = IERC7802(bridgeableToken);
+        BRIDGEABLE_TOKEN = IRLCLiquidityUnifier(bridgeableToken);
     }
 
     // ============ INITIALIZATION ============
@@ -214,7 +214,7 @@ contract IexecLayerZeroBridge is
         (amountSentLD, amountReceivedLD) = _debitView(amountLD, minAmountLD, dstEid);
 
         // Burn the tokens from the sender's balance
-        BRIDGEABLE_TOKEN.crosschainBurn(from, amountSentLD);
+        IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN().transferFrom(from, address(BRIDGEABLE_TOKEN), amountSentLD);
     }
 
     /**
