@@ -9,9 +9,10 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {DualPausableUpgradeable} from "../utils/DualPausableUpgradeable.sol";
 import {IIexecLayerZeroBridge} from "../../interfaces/IIexecLayerZeroBridge.sol";
-import {IRLCLiquidityUnifier} from "../../interfaces/IRLCLiquidityUnifier.sol";
+import {IRLCLiquidityUnifier, IERC7802} from "../../interfaces/IRLCLiquidityUnifier.sol";
 
 /**
  * @title IexecLayerZeroBridge
@@ -39,6 +40,8 @@ contract IexecLayerZeroBridge is
     DualPausableUpgradeable,
     IIexecLayerZeroBridge
 {
+    using SafeERC20 for IERC20Metadata;
+
     /// @dev Role identifier for accounts authorized to upgrade the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
@@ -52,7 +55,7 @@ contract IexecLayerZeroBridge is
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
     // slither-disable-next-line naming-convention
-    IRLCLiquidityUnifier public immutable BRIDGEABLE_TOKEN;
+    IERC7802 public immutable BRIDGEABLE_TOKEN;
 
     /**
      * @dev Constructor for the LayerZero bridge contract
@@ -65,7 +68,7 @@ contract IexecLayerZeroBridge is
         OFTCoreUpgradeable(IERC20Metadata(bridgeableToken).decimals(), lzEndpoint)
     {
         _disableInitializers();
-        BRIDGEABLE_TOKEN = IRLCLiquidityUnifier(bridgeableToken);
+        BRIDGEABLE_TOKEN = IERC7802(bridgeableToken);
     }
 
     // ============ INITIALIZATION ============
@@ -183,6 +186,12 @@ contract IexecLayerZeroBridge is
      * It overrides the `_debit` function
      * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L56-L69
      *
+     * @notice CHAIN-SPECIFIC BEHAVIOR:
+     * - Ethereum Mainnet (chainId 1): Transfers RLC tokens to the LiquidityUnifier contract
+     *   for Stargate UI compatibility as UI can't approve directly LiquidityUnifier
+     *   (UI approves this contract, not LiquidityUnifier directly)
+     * - Other chains: Mint/Burn tokens directly via crosschainMint/crosschainBurn functions
+     *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token burned = 1 token minted)
      * - If BRIDGEABLE_TOKEN implements transfer fees, burn fees, or any other fee mechanism,
@@ -213,8 +222,17 @@ contract IexecLayerZeroBridge is
         // Calculate the amounts using the parent's logic (handles slippage protection)
         (amountSentLD, amountReceivedLD) = _debitView(amountLD, minAmountLD, dstEid);
 
-        // Burn the tokens from the sender's balance
-        IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN().transferFrom(from, address(BRIDGEABLE_TOKEN), amountSentLD);
+        if (block.chainid == 1) {
+            // Ethereum Mainnet: Transfer RLC tokens to LiquidityUnifier
+            // Workaround for Stargate UI compatibility - UI approves this contract
+            // instead of approving LiquidityUnifier directly
+            IRLCLiquidityUnifier(address(BRIDGEABLE_TOKEN)).RLC_TOKEN().safeTransferFrom(
+                from, address(BRIDGEABLE_TOKEN), amountSentLD
+            );
+        } else {
+            // Non-Ethereum chains: Burn tokens directly
+            BRIDGEABLE_TOKEN.crosschainBurn(from, amountSentLD);
+        }
     }
 
     /**
