@@ -218,6 +218,7 @@ verify-arbitrum-sepolia-layerzero-bridge-proxy:
 #
 # RLC Liquidity Unifier verification (Sepolia)
 #
+
 verify-sepolia-rlc-liquidity-unifier-impl:
 	@echo "Verifying RLC Liquidity Unifier Implementation on Sepolia..."
 	forge verify-contract \
@@ -240,6 +241,7 @@ verify-sepolia-rlc-liquidity-unifier-proxy:
 #
 # RLC Crosschain Token verification
 #
+
 verify-rlc-crosschain-token-impl:
 	@echo "Verifying RLC Crosschain Token Implementation on $(CHAIN_NAME)..."
 	forge verify-contract \
@@ -259,8 +261,9 @@ verify-rlc-crosschain-token-proxy:
 		$(RLC_CROSSCHAIN_TOKEN_PROXY_ADDRESS) \
 		lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 #
-# Chain-specific verification targets
+# Chain-specific RLC Crosschain Token verification targets
 #
+
 # Arbitrum Sepolia verification
 verify-arbitrum-sepolia-rlc-crosschain-token-impl:
 	$(MAKE) verify-rlc-crosschain-token-impl \
@@ -279,3 +282,27 @@ verify-arbitrum-sepolia-rlc-crosschain-token-proxy:
 		INITIAL_ADMIN_ADDRESS=$(INITIAL_ADMIN_ADDRESS) \
 		INITIAL_UPGRADER_ADDRESS=$(INITIAL_UPGRADER_ADDRESS) \
 		INITIAL_PAUSER_ADDRESS=$(INITIAL_PAUSER_ADDRESS)
+
+#
+# Complete contract verification targets
+#
+
+# LayerZero Bridge complete verification
+verify-sepolia-layerzero-bridge: verify-sepolia-layerzero-bridge-impl verify-sepolia-layerzero-bridge-proxy
+verify-arbitrum-sepolia-layerzero-bridge: verify-arbitrum-sepolia-layerzero-bridge-impl verify-arbitrum-sepolia-layerzero-bridge-proxy
+
+# RLC Crosschain Token complete verification
+verify-arbitrum-sepolia-rlc-crosschain-token: verify-arbitrum-sepolia-rlc-crosschain-token-impl verify-arbitrum-sepolia-rlc-crosschain-token-proxy
+
+# RLC Liquidity Unifier complete verification
+verify-sepolia-rlc-liquidity-unifier: verify-sepolia-rlc-liquidity-unifier-impl verify-sepolia-rlc-liquidity-unifier-proxy
+
+#
+# Chain complete verification targets
+#
+
+# Sepolia complete (LayerZero Bridge + RLC Liquidity Unifier)
+verify-sepolia-complete: verify-sepolia-layerzero-bridge verify-sepolia-rlc-liquidity-unifier
+
+# Arbitrum Sepolia complete (LayerZero Bridge + RLC Crosschain Token)
+verify-arbitrum-sepolia-complete: verify-arbitrum-sepolia-layerzero-bridge verify-arbitrum-sepolia-rlc-crosschain-token
