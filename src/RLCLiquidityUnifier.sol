@@ -13,6 +13,9 @@ import {IERC7802} from "./interfaces/IERC7802.sol";
 contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, IERC7802 {
     using SafeERC20 for IERC20Metadata;
 
+    error InvalidToAddressForCrosschainMint(address addr);
+    error InvalidFromAddressForCrosschainBurn(address addr);
+
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant TOKEN_BRIDGE_ROLE = keccak256("TOKEN_BRIDGE_ROLE");
 
@@ -65,6 +68,10 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
      * @param value The amount of RLC tokens to unlock and transfer
      */
     function crosschainMint(address to, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
+        // The RLC contract does not check for zero addresses.
+        if (to == address(0)) {
+            revert InvalidToAddressForCrosschainMint(address(0));
+        }
         // Re-entrancy safe because the RLC contract is controlled and does not do external calls.
         RLC_TOKEN.safeTransfer(to, value);
         emit CrosschainMint(to, value, _msgSender());
@@ -95,6 +102,10 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
      */
     // slither-disable-next-line arbitrary-send-erc20
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
+        // The RLC contract does not check for zero addresses.
+        if (from == address(0)) {
+            revert InvalidFromAddressForCrosschainBurn(address(0));
+        }
         // Re-entrancy safe because the RLC contract is controlled and does not do external calls.
         RLC_TOKEN.safeTransferFrom(from, address(this), value);
         emit CrosschainBurn(from, value, _msgSender());
