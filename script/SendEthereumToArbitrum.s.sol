@@ -29,7 +29,7 @@ contract SendTokensToArbitrumSepolia is Script {
 
         // Transfer parameters
         uint16 destinationChainId = uint16(vm.envUint("LAYER_ZERO_ARBITRUM_SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Arbitrum Sepolia
-        address recipientAddress = vm.envAddress("OWNER_ADDRESS"); // Recipient on Arbitrum (your address)
+        address recipientAddress = vm.envAddress("ADMIN_ADDRESS"); // Recipient on Arbitrum (your address)
         uint256 amount = 5 * 10 ** 9; //  RLC tokens (adjust the amount as needed)
 
         // First, approve the adapter to spend your tokens

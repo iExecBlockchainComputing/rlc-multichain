@@ -83,9 +83,8 @@ contract Upgrade is Script {
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
-            rlcToken: rlcCrosschain,
+            constructorData: abi.encode(rlcCrosschain, lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
-            lzEndpoint: lzEndpoint,
             newStateVariable: newStateVariable,
             validateOnly: false
         });
@@ -104,8 +103,7 @@ contract ValidateUpgrade is Script {
         address rlcCrosschain = vm.envAddress("RLC_CROSSCHAIN_ADDRESS");
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: address(0),
-            lzEndpoint: lzEndpoint,
-            rlcToken: rlcCrosschain,
+            constructorData: abi.encode(rlcCrosschain, lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             newStateVariable: 1000000 * 10 ** 9,
             validateOnly: true
