@@ -31,7 +31,7 @@ library BridgeConfigLib {
      * @param config The JSON configuration string
      * @param chain The current chain identifier
      * @param prefix The JSON path prefix for the current chain
-     * @return The address of the bridgeable token (LiquidityUnifier on mainnet, RLC CrossChain on L2s)
+     * @return The address of the bridgeable token (RLCLiquidityUnifier on mainnet, RLC CrossChain on L2s)
      */
     function getBridgeableTokenAddress(string memory config, string memory chain, string memory prefix)
         internal
