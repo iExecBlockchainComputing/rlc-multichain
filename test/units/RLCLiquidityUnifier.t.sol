@@ -4,13 +4,14 @@
 pragma solidity ^0.8.22;
 
 import {Test} from "forge-std/Test.sol";
+import {stdError} from "forge-std/StdError.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Deploy as RLCLiquidityUnifierDeployScript} from "../../script/RLCLiquidityUnifier.s.sol";
 import {IERC7802} from "../../src/interfaces/IERC7802.sol";
+import {IRLCLiquidityUnifier} from "../../src/interfaces/IRLCLiquidityUnifier.sol";
 import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 
@@ -35,7 +36,7 @@ contract LiquidityUnifierTest is Test {
     RLCMock private rlcToken;
 
     function setUp() public {
-        rlcToken = new RLCMock("iEx.ec Network Token", "RLC");
+        rlcToken = new RLCMock();
         liquidityUnifier = RLCLiquidityUnifier(
             new RLCLiquidityUnifierDeployScript().deploy(
                 address(rlcToken), admin, upgrader, address(new CreateX()), keccak256("salt")
@@ -209,7 +210,7 @@ contract LiquidityUnifierTest is Test {
 
         // Attempt to mint tokens the zero address.
         rlcToken.transfer(liquidityUnifierAddress, amount);
-        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidReceiver.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(IRLCLiquidityUnifier.ERC7802InvalidToAddress.selector, address(0)));
         vm.prank(bridge);
         liquidityUnifier.crosschainMint(address(0), amount);
         // Check that no tokens were minted.
@@ -448,10 +449,7 @@ contract LiquidityUnifierTest is Test {
     function test_RevertWhen_BurnFromZeroAddress() public {
         _authorizeBridge(bridge);
         // Attempt to burn tokens from the zero address.
-        // This should revert with ERC20InsufficientAllowance because zero address has no allowance
-        vm.expectRevert(
-            abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector, liquidityUnifierAddress, 0, amount)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IRLCLiquidityUnifier.ERC7802InvalidFromAddress.selector, address(0)));
         vm.prank(bridge);
         liquidityUnifier.crosschainBurn(address(0), amount);
     }
@@ -464,9 +462,7 @@ contract LiquidityUnifierTest is Test {
         _approveLiquidityUnifier(user, amount + 1);
 
         // Attempt to burn more than balance
-        vm.expectRevert(
-            abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, user, amount, amount + 1)
-        );
+        vm.expectRevert(stdError.arithmeticError);
         vm.prank(bridge);
         liquidityUnifier.crosschainBurn(user, amount + 1);
         assertEq(rlcToken.balanceOf(user), amount);
@@ -480,11 +476,7 @@ contract LiquidityUnifierTest is Test {
         _approveLiquidityUnifier(user, amount);
 
         // Attempt to burn more than allowance
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IERC20Errors.ERC20InsufficientAllowance.selector, liquidityUnifierAddress, amount, amount + 1
-            )
-        );
+        vm.expectRevert(stdError.arithmeticError);
         vm.prank(bridge);
         liquidityUnifier.crosschainBurn(user, amount + 1);
         assertEq(rlcToken.balanceOf(user), amount + 1);
@@ -495,9 +487,7 @@ contract LiquidityUnifierTest is Test {
         rlcToken.transfer(user, amount);
 
         // Attempt to burn without user approval
-        vm.expectRevert(
-            abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector, liquidityUnifierAddress, 0, amount)
-        );
+        vm.expectRevert(stdError.arithmeticError);
         vm.prank(bridge);
         liquidityUnifier.crosschainBurn(user, amount);
         assertEq(rlcToken.balanceOf(user), amount);

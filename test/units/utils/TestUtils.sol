@@ -37,7 +37,7 @@ library TestUtils {
         address createXFactory = address(new CreateX());
 
         // Deploy RLC token mock for L1
-        rlcToken = new RLCMock(name, symbol);
+        rlcToken = new RLCMock();
 
         // salt for createX
         bytes32 salt = keccak256("salt");

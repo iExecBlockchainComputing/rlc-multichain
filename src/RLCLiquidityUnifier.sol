@@ -3,6 +3,8 @@
 
 pragma solidity ^0.8.22;
 
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -10,6 +12,8 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {IRLCLiquidityUnifier, IERC7802} from "./interfaces/IRLCLiquidityUnifier.sol";
 
 contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, IRLCLiquidityUnifier {
+    using SafeERC20 for IERC20Metadata;
+
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant TOKEN_BRIDGE_ROLE = keccak256("TOKEN_BRIDGE_ROLE");
 
@@ -62,7 +66,12 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
      * @param value The amount of RLC tokens to unlock and transfer
      */
     function crosschainMint(address to, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
-        RLC_TOKEN.transfer(to, value);
+        // The RLC contract does not check for zero addresses.
+        if (to == address(0)) {
+            revert ERC7802InvalidToAddress(address(0));
+        }
+        // Re-entrancy safe because the RLC contract is controlled and does not make external calls.
+        RLC_TOKEN.safeTransfer(to, value);
         emit CrosschainMint(to, value, _msgSender());
     }
 
@@ -91,7 +100,12 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
      */
     // slither-disable-next-line arbitrary-send-erc20
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
-        RLC_TOKEN.transferFrom(from, address(this), value);
+        // The RLC contract does not check for zero addresses.
+        if (from == address(0)) {
+            revert ERC7802InvalidFromAddress(address(0));
+        }
+        // Re-entrancy safe because the RLC contract is controlled and does not make external calls.
+        RLC_TOKEN.safeTransferFrom(from, address(this), value);
         emit CrosschainBurn(from, value, _msgSender());
     }
 

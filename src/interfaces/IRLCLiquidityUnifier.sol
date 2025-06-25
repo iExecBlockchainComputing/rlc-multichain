@@ -21,9 +21,21 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
  */
 interface IRLCLiquidityUnifier is IERC7802 {
     /**
+     * @dev Error indicating that the provided 'to' address is invalid for ERC-7802 operations.
+     * @param addr The invalid address.
+     */
+    error ERC7802InvalidToAddress(address addr);
+
+    /**
+     * @dev Error indicating that the provided 'from' address is invalid for ERC-7802 operations.
+     * @param addr The invalid address.
+     */
+    error ERC7802InvalidFromAddress(address addr);
+    /**
      * @dev Returns the address of the RLC token contract
      * @return The contract address of the RLC token
      */
+
     function RLC_TOKEN() external view returns (IERC20Metadata);
 
     /**
