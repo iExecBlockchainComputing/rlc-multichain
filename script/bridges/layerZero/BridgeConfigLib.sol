@@ -39,7 +39,7 @@ library BridgeConfigLib {
         returns (address)
     {
         if (keccak256(abi.encodePacked(chain)) == keccak256(abi.encodePacked("sepolia"))) {
-            return config.readAddress(string.concat(prefix, ".liquidityUnifierAddress"));
+            return config.readAddress(string.concat(prefix, ".rlcLiquidityUnifierAddress"));
         } else {
             return config.readAddress(string.concat(prefix, ".rlcCrossChainTokenAddress"));
         }
