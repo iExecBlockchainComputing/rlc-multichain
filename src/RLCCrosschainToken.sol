@@ -3,7 +3,6 @@
 
 pragma solidity ^0.8.22;
 
-import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
