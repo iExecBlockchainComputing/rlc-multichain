@@ -7,6 +7,8 @@ import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 
+import {ConfigLib} from "./lib/ConfigLib.sol";
+
 contract SendTokensToSepolia is Script {
     /**
      * @dev Converts an address to bytes32.
@@ -20,12 +22,19 @@ contract SendTokensToSepolia is Script {
     function run() external {
         vm.startBroadcast();
 
+        string memory config = vm.readFile("config/config.json");
+        string memory sourceChain = vm.envString("SOURCE_CHAIN");
+        string memory targetChain = vm.envString("TARGET_CHAIN");
+
+        ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(config, sourceChain);
+        ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(config, targetChain);
+
         // Contract addresses
-        address iexecLayerZeroBridgeAddress = vm.envAddress("LAYERZERO_BRIDGE_PROXY_ADDRESS");
+        address iexecLayerZeroBridgeAddress = sourceParams.layerZeroBridge;
 
         // Transfer parameters
-        uint16 destinationChainId = uint16(vm.envUint("LAYER_ZERO_SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Ethereum Sepolia
-        address recipientAddress = vm.envAddress("OWNER_ADDRESS"); // Recipient on Ethereum Sepolia
+        uint16 destinationChainId = uint16(targetParams.layerZeroChainId); // LayerZero chain ID for Ethereum Sepolia
+        address recipientAddress = sourceParams.initialAdmin; // Replace with the actual recipient address
         console.log("Recipient: %s", recipientAddress);
 
         uint256 amount = 5 * 10 ** 18; // RLC tokens (adjust the amount as needed)
