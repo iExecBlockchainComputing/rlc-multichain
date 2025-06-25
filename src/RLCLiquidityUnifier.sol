@@ -13,8 +13,8 @@ import {IERC7802} from "./interfaces/IERC7802.sol";
 contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, IERC7802 {
     using SafeERC20 for IERC20Metadata;
 
-    error InvalidToAddressForCrosschainMint(address addr);
-    error InvalidFromAddressForCrosschainBurn(address addr);
+    error ERC7802InvalidToAddress(address addr);
+    error ERC7802InvalidFromAddress(address addr);
 
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant TOKEN_BRIDGE_ROLE = keccak256("TOKEN_BRIDGE_ROLE");
@@ -70,7 +70,7 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
     function crosschainMint(address to, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
         // The RLC contract does not check for zero addresses.
         if (to == address(0)) {
-            revert InvalidToAddressForCrosschainMint(address(0));
+            revert ERC7802InvalidToAddress(address(0));
         }
         // Re-entrancy safe because the RLC contract is controlled and does not make external calls.
         RLC_TOKEN.safeTransfer(to, value);
@@ -104,7 +104,7 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
     function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
         // The RLC contract does not check for zero addresses.
         if (from == address(0)) {
-            revert InvalidFromAddressForCrosschainBurn(address(0));
+            revert ERC7802InvalidFromAddress(address(0));
         }
         // Re-entrancy safe because the RLC contract is controlled and does not make external calls.
         RLC_TOKEN.safeTransferFrom(from, address(this), value);

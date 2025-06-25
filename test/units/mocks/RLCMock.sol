@@ -43,7 +43,7 @@ contract RLCMock is IERC20 {
     }
 
     // Does not check the spender address.
-    function approve(address spender, uint256 value) external override returns (bool) {
+    function approve(address spender, uint256 value) external returns (bool) {
         allowed[msg.sender][spender] = value;
         emit Approval(msg.sender, spender, value);
         return true;
@@ -53,11 +53,11 @@ contract RLCMock is IERC20 {
         return 9;
     }
 
-    function balanceOf(address account) external view override returns (uint256) {
+    function balanceOf(address account) external view returns (uint256) {
         return balances[account];
     }
 
-    function allowance(address owner, address spender) external view override returns (uint256) {
+    function allowance(address owner, address spender) external view returns (uint256) {
         return allowed[owner][spender];
     }
 }
