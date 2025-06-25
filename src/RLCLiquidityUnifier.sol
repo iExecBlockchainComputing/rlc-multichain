@@ -72,7 +72,7 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
         if (to == address(0)) {
             revert InvalidToAddressForCrosschainMint(address(0));
         }
-        // Re-entrancy safe because the RLC contract is controlled and does not do external calls.
+        // Re-entrancy safe because the RLC contract is controlled and does not make external calls.
         RLC_TOKEN.safeTransfer(to, value);
         emit CrosschainMint(to, value, _msgSender());
     }
@@ -106,7 +106,7 @@ contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesU
         if (from == address(0)) {
             revert InvalidFromAddressForCrosschainBurn(address(0));
         }
-        // Re-entrancy safe because the RLC contract is controlled and does not do external calls.
+        // Re-entrancy safe because the RLC contract is controlled and does not make external calls.
         RLC_TOKEN.safeTransferFrom(from, address(this), value);
         emit CrosschainBurn(from, value, _msgSender());
     }
