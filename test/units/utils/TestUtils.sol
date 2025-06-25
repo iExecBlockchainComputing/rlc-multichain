@@ -16,6 +16,7 @@ import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCross
 library TestUtils {
     using OptionsBuilder for bytes;
 
+    // TODO declare name and symbol inside the function.
     function setupDeployment(
         string memory name,
         string memory symbol,
