@@ -3,24 +3,61 @@
 
 pragma solidity ^0.8.22;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract RLCMock is ERC20 {
-    uint256 public constant INITIAL_SUPPLY = 87_000_000 * 10 ** 9; // 87 million tokens with 9 decimals
+/**
+ * Simulates the RLC token behavior for testing purposes.
+ * Cannot directly import the original RLC contract because of solidity version mismatch.
+ * Don't use OZ ERC20 as the implementation differs:
+ * - The RLC does not revert when transferring to the zero address.
+ * - The RLC reverts with arithmetic panic error instead of ERC20InsufficientAllowance (for e.g.).
+ */
+contract RLCMock is IERC20 {
+    uint256 public totalSupply;
+    mapping(address => uint256) balances;
+    mapping(address => mapping(address => uint256)) allowed;
 
-    constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {
-        _mint(msg.sender, INITIAL_SUPPLY);
+    constructor() {
+        totalSupply = 87_000_000 * 10 ** 9; // 87 million tokens with 9 decimals
+        balances[msg.sender] = totalSupply;
     }
 
-    function decimals() public view virtual override returns (uint8) {
+    // Does not check the to address.
+    // Reverts with arithmetic panic error for balance issues.
+    function transfer(address to, uint256 value) external returns (bool) {
+        balances[msg.sender] = balances[msg.sender] - value;
+        balances[to] = balances[to] + value;
+        emit Transfer(msg.sender, to, value);
+        return true;
+    }
+
+    // Does not check the from and to addresses.
+    // Reverts with arithmetic panic error for allowance issues.
+    function transferFrom(address from, address to, uint256 value) external returns (bool) {
+        uint256 _allowance = allowed[from][msg.sender];
+        balances[to] = balances[to] + value;
+        balances[from] = balances[from] - value;
+        allowed[from][msg.sender] = _allowance - value;
+        emit Transfer(from, to, value);
+        return true;
+    }
+
+    // Does not check the spender address.
+    function approve(address spender, uint256 value) external returns (bool) {
+        allowed[msg.sender][spender] = value;
+        emit Approval(msg.sender, spender, value);
+        return true;
+    }
+
+    function decimals() public pure returns (uint8) {
         return 9;
     }
 
-    function crosschainMint(address _to, uint256 _amount) public {
-        _mint(_to, _amount);
+    function balanceOf(address account) external view returns (uint256) {
+        return balances[account];
     }
 
-    function crosschainBurn(address _from, uint256 _amount) public {
-        _burn(_from, _amount);
+    function allowance(address owner, address spender) external view returns (uint256) {
+        return allowed[owner][spender];
     }
 }
