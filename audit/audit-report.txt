@@ -1,4 +1,4 @@
-📊 Report generated on: Mon Jun 23 16:21:11 CEST 2025
+📊 Report generated on: Mon Jun 23 13:48:24 CEST 2025
 
 1. PROJECT SCOPE ANALYSIS
 =========================
@@ -6,7 +6,7 @@
        7
 
 📏 Lines of Code Analysis (SLOC):
-github.com/AlDanial/cloc v 2.04  T=0.01 s (826.9 files/s, 77636.6 lines/s)
+github.com/AlDanial/cloc v 2.04  T=0.01 s (932.5 files/s, 87554.0 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
@@ -16,17 +16,17 @@ SUM:                             9             97            463            285
 -------------------------------------------------------------------------------
 
 📋 Lines per Solidity File:
-      93 src/RLCCrosschainToken.sol
+      93 src/token/RLCCrosschainToken.sol
      189 src/bridges/layerZero/RLCAdapter.sol
      274 src/bridges/layerZero/IexecLayerZeroBridge.sol
-     152 src/bridges/utils/DualPausableUpgradeable.sol
+     152 src/bridges/common/DualPausableUpgradeable.sol
       42 src/interfaces/IERC7802.sol
        7 src/interfaces/ITokenSpender.sol
       28 src/interfaces/IIexecLayerZeroBridge.sol
      785 total
 
 🔐 SHA256 Hash of Contract Files:
-e71f79339ee8563853ca05475ccd996479e3f47b86a9a6a0f32988c44c96a7ce  src/RLCCrosschainToken.sol
+e71f79339ee8563853ca05475ccd996479e3f47b86a9a6a0f32988c44c96a7ce  src/token/RLCCrosschainToken.sol
 3d4e4e9a0dfd4508b094f625b91690d71a74409486d5d8eadfd0fe7a5423675c  src/bridges/layerZero/RLCAdapter.sol
 58d054f0a3f4ac5b27bf192ffbff54525786559cf9c1ad8e2c11973a1c2c5a15  src/bridges/layerZero/IexecLayerZeroBridge.sol
 eecbbf1fc2429ebd4b578d19ee23615a703a512971a9d5243f89b79c240f0a50  src/bridges/common/DualPausableUpgradeable.sol
@@ -34,11 +34,16 @@ eecbbf1fc2429ebd4b578d19ee23615a703a512971a9d5243f89b79c240f0a50  src/bridges/co
 12c59391fe407fb0fcade24fd30e62dc173f13b944cc4be0a40e3a12e1ad3f85  src/interfaces/ITokenSpender.sol
 3d6ab0ab18112a926e62d9ee58f375ff19c1d34e4277245292a2e44139c559cf  src/interfaces/IIexecLayerZeroBridge.sol
 
-✅ REPORT COMPLETED
+2. SOLIDITY CODE METRICS
+========================
+✅ Detailed code metrics saved to audit/code-metrics.html
+
+✅ AUDIT REPORT COMPLETED
 =========================
-📁 Main report: iexec-report/iexec-automatic-report.txt
+📁 Main report: audit/audit-report.txt
 📊 Files generated:
-total 8
-drwxr-xr-x   3 gabriel  staff    96 Jun 23 16:21 .
-drwxr-xr-x  30 gabriel  staff   960 Jun 23 16:21 ..
--rw-r--r--   1 gabriel  staff  2085 Jun 23 16:21 iexec-automatic-report.txt
+total 5408
+drwxr-xr-x   4 gabriel  staff      128 Jun 23 13:48 .
+drwxr-xr-x  30 gabriel  staff      960 Jun 23 13:48 ..
+-rw-r--r--   1 gabriel  staff     2184 Jun 23 13:48 audit-report.txt
+-rw-r--r--   1 gabriel  staff  2763505 Jun 23 13:48 code-metrics.html
