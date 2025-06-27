@@ -4,10 +4,10 @@
 pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
+import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCLiquidityUnifier} from "../src/RLCLiquidityUnifier.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
-import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
-import {ConfigLib} from "./lib/ConfigLib.sol";
+import {ConfigLib, ConfigUtils} from "./lib/ConfigLib.sol";
 /**
  * Deployment script for the RLCLiquidityUnifier contract.
  * It reads configuration from a JSON file and deploys the contract using CreateX.
@@ -29,8 +29,9 @@ contract Deploy is Script {
         );
         vm.stopBroadcast();
 
-        //TODO: use config file to store addresses.
-        EnvUtils.updateEnvVariable("RLC_LIQUIDITY_UNIFIER_PROXY_ADDRESS", liquidityUnifierProxy);
+        address implementationAddress = Upgrades.getImplementationAddress(liquidityUnifierProxy);
+        ConfigUtils.updateConfigAddress(chain, "rlcLiquidityUnifierAddress", liquidityUnifierProxy);
+        ConfigUtils.updateConfigAddress(chain, "rlcLiquidityUnifierImplementation", implementationAddress);
         return liquidityUnifierProxy;
     }
 

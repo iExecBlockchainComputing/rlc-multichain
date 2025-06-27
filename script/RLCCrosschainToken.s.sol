@@ -4,10 +4,10 @@
 pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
+import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
-import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
-import {ConfigLib} from "./lib/ConfigLib.sol";
+import {ConfigLib, ConfigUtils} from "./lib/ConfigLib.sol";
 
 /**
  * Deployment script for the RLCCrosschainToken contract.
@@ -34,8 +34,19 @@ contract Deploy is Script {
         );
         vm.stopBroadcast();
 
-        //TODO: use config file to store addresses.
-        EnvUtils.updateEnvVariable("RLC_CROSSCHAIN_ADDRESS", rlcCrosschainTokenProxy);
+        address implementationAddress = Upgrades.getImplementationAddress(rlcCrosschainTokenProxy);
+        ConfigUtils.updateConfigAddress(chain, "rlcCrosschainTokenAddress", rlcCrosschainTokenProxy);
+        ConfigUtils.updateConfigAddress(chain, "rlcCrosschainTokenImplementation", implementationAddress);
+//          Updating config.json: .chains.arbitrum_sepolia.rlcCrosschainTokenAddress
+//    Updated config.json:
+//      Chain: arbitrum_sepolia
+//      Field: rlcCrosschainTokenAddress
+//      Address: 0xA6b3Da1010f00c55cfd899BE23B8Ece1130DeF85
+//   Updating config.json: .chains.arbitrum_sepolia.rlcCrosschainTokenImplementation
+//    Updated config.json:
+//      Chain: arbitrum_sepolia
+//      Field: rlcCrosschainTokenImplementation
+//      Address: 0x63E0CE477361f0923E94B225975cC1DF8be33910
         return rlcCrosschainTokenProxy;
     }
 

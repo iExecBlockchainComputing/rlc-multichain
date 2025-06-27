@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
+import "forge-std/Vm.sol";
+import "forge-std/console.sol";
 import "forge-std/StdJson.sol";
+
 
 /**
  * @title ConfigLib
@@ -119,5 +122,74 @@ library ConfigLib {
         params.createxSalt = config.readBytes32(string.concat(prefix, ".iexecLayerZeroBridgeCreatexSalt"));
         params.layerZeroBridge = config.readAddress(string.concat(prefix, ".iexecLayerZeroBridgeAddress"));
         params.layerZeroChainId = uint32(config.readUint(string.concat(prefix, ".layerZeroChainId")));
+    }
+}
+
+/**
+ * @title ConfigUtils
+ * @dev Library for updating configuration files with deployed addresses using proper JSON serialization
+ */
+library ConfigUtils {
+    using stdJson for string;
+    
+    Vm constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+
+    /**
+     * @dev Updates the config.json file with a new address for a specific chain
+     * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia")
+     * @param fieldName The field name to update (e.g., "iexecLayerZeroBridgeAddress")
+     * @param value The address value to set
+     */
+    function updateConfigAddress(string memory chain, string memory fieldName, address value) internal {
+        updateConfigAddress(chain, fieldName, value, "config/config.json");
+    }
+
+    /**
+     * @dev Updates the config file with a new address for a specific chain
+     * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia")
+     * @param fieldName The field name to update (e.g., "iexecLayerZeroBridgeAddress")
+     * @param value The address value to set
+     * @param configPath The path to the config file
+     */
+    function updateConfigAddress(string memory chain, string memory fieldName, address value, string memory configPath) internal {
+        // Check if file exists
+        if (!vm.exists(configPath)) {
+            console.log("Config file not found at:", configPath);
+            revert("Config file not found");
+        }
+
+        // Read and validate JSON
+        string memory content = vm.readFile(configPath);
+        _validateJsonContent(content);
+
+        // Convert address to string and create JSON value
+        string memory addressString = vm.toString(value);
+        string memory jsonValue = string.concat('"', addressString, '"');
+        
+        // Create the JSON path: .chains.sepolia.iexecLayerZeroBridgeAddress
+        string memory jsonPath = string.concat(".chains.", chain, ".", fieldName);
+        
+        console.log("Updating config.json:", jsonPath);
+        
+        // Update the JSON file using vm.writeJson
+        vm.writeJson(jsonValue, configPath, jsonPath);
+        
+        console.log(" Updated config.json:");
+        console.log("   Chain:", chain);
+        console.log("   Field:", fieldName);
+        console.log("   Address:", addressString);
+    }
+
+    /**
+     * @dev Validates JSON content by attempting to parse it
+     * @param content The JSON content to validate
+     */
+    function _validateJsonContent(string memory content) private pure {
+        try vm.parseJson(content) {
+            // JSON is valid, proceed
+        } catch {
+            console.log("Invalid JSON in config file");
+            revert("Invalid JSON format");
+        }
     }
 }
