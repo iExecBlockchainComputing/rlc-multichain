@@ -71,7 +71,7 @@ contract IexecLayerZeroBridge is
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
     // slither-disable-next-line naming-convention
-    IERC7802 public immutable BRIDGEABLE_TOKEN;
+    address public immutable BRIDGEABLE_TOKEN;
 
     /**
      * @dev Indicates the token transfer mechanism required for this deployment.
@@ -97,7 +97,7 @@ contract IexecLayerZeroBridge is
         OFTCoreUpgradeable(IERC20Metadata(bridgeableToken).decimals(), lzEndpoint)
     {
         _disableInitializers();
-        BRIDGEABLE_TOKEN = IERC7802(bridgeableToken);
+        BRIDGEABLE_TOKEN = bridgeableToken;
         APPROVAL_REQUIRED = approvalRequired_;
     }
 
@@ -184,9 +184,7 @@ contract IexecLayerZeroBridge is
      * @return The address of the RLC token contract
      */
     function token() external view returns (address) {
-        return APPROVAL_REQUIRED
-            ? address(BRIDGEABLE_TOKEN)
-            : address(IRLCLiquidityUnifier(address(BRIDGEABLE_TOKEN)).RLC_TOKEN());
+        return APPROVAL_REQUIRED ? BRIDGEABLE_TOKEN : address(IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN());
     }
 
     // ============ ACCESS CONTROL OVERRIDES ============
@@ -255,12 +253,10 @@ contract IexecLayerZeroBridge is
             // Ethereum Mainnet: Transfer RLC tokens to LiquidityUnifier
             // Workaround for Stargate UI compatibility - UI approves this contract
             // instead of approving LiquidityUnifier directly
-            IRLCLiquidityUnifier(address(BRIDGEABLE_TOKEN)).RLC_TOKEN().safeTransferFrom(
-                from, address(BRIDGEABLE_TOKEN), amountSentLD
-            );
+            IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN().safeTransferFrom(from, BRIDGEABLE_TOKEN, amountSentLD);
         } else {
             // Non-Ethereum-Mainnet chains: Burn tokens directly using crosschainBurn
-            BRIDGEABLE_TOKEN.crosschainBurn(from, amountSentLD);
+            IERC7802(BRIDGEABLE_TOKEN).crosschainBurn(from, amountSentLD);
         }
     }
 
@@ -305,7 +301,7 @@ contract IexecLayerZeroBridge is
 
         // Mint the tokens to the recipient
         // This assumes crosschainMint doesn't apply any fees
-        BRIDGEABLE_TOKEN.crosschainMint(to, amountLD);
+        IERC7802(BRIDGEABLE_TOKEN).crosschainMint(to, amountLD);
 
         // Return the amount minted (assuming no fees)
         return amountLD;
