@@ -72,7 +72,7 @@ contract Configure is Script {
         BridgeConfigLib.CommonConfigParams memory sourceParams = BridgeConfigLib.readCommonConfig(config, sourceChain);
         BridgeConfigLib.CommonConfigParams memory targetParams = BridgeConfigLib.readCommonConfig(config, targetChain);
 
-        // Configure one bridge to another
+    // Peer one bridge to another
         IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.bridgeAddress);
         sourceBridge.setPeer(targetParams.lzChainId, bytes32(uint256(uint160(targetParams.bridgeAddress))));
 
