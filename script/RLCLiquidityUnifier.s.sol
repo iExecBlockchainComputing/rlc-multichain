@@ -60,3 +60,44 @@ contract Deploy is Script {
         );
     }
 }
+
+contract Upgrade is Script {
+    function run() external {
+        vm.startBroadcast();
+
+        string memory config = vm.readFile("config/config.json");
+        string memory chain = vm.envString("CHAIN");
+
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
+
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: params.rlcLiquidityUnifier,
+            constructorData: abi.encode(params.rlcToken),
+            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2", // Would be production contract in real deployment
+            newStateVariable: 1000000 * 10 ** 9,
+            validateOnly: false
+        });
+
+        UpgradeUtils.executeUpgrade(params);
+        vm.stopBroadcast();
+    }
+}
+
+contract ValidateUpgrade is Script {
+    function run() external {
+        string memory config = vm.readFile("config/config.json");
+        string memory chain = vm.envString("CHAIN");
+
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
+
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: address(0),
+            constructorData: abi.encode(params.rlcToken),
+            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
+            newStateVariable: 1000000 * 10 ** 9,
+            validateOnly: true
+        });
+
+        UpgradeUtils.validateUpgrade(params);
+    }
+}

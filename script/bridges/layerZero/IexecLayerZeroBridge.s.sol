@@ -87,9 +87,8 @@ contract Upgrade is Script {
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: commonParams.layerZeroBridge,
-            rlcToken: commonParams.bridgeableToken,
+            constructorData: abi.encode(commonParams.bridgeableToken, commonParams.lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
-            lzEndpoint: commonParams.lzEndpoint,
             newStateVariable: newStateVariable,
             validateOnly: false
         });
@@ -109,9 +108,8 @@ contract ValidateUpgrade is Script {
         ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(config, chain);
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: address(0), // Not needed for validation
-            lzEndpoint: commonParams.lzEndpoint,
-            rlcToken: commonParams.bridgeableToken,
+            proxyAddress: address(0),
+            constructorData: abi.encode(commonParams.bridgeableToken, commonParams.lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             newStateVariable: 1000000 * 10 ** 9,
             validateOnly: true
