@@ -5,7 +5,7 @@ sequenceDiagram
     box
         participant rlc as RLC
         participant rlcLu as RLC Liquidity Unifier (LU)
-        participant ethAdapter as LZ Adapter
+        participant ethBridge as LZ Bridge
         participant ethEndpoint as LZ Ethereum Endpoint
     end
     box LayerZero off-chain services
@@ -14,36 +14,35 @@ sequenceDiagram
     end
     box Arbitrum
         participant arbEndpoint as LZ Arbitrum Endpoint
-        participant arbAdapter as LZ Adapter
+        participant arbBridge as LZ Bridge
         participant arbitrumRlc as RLC Crosschain Token
     end
     actor aUser as User on Arbitrum
 
     rect rgb(204, 235, 255)
-        ethUser ->> rlc: approve(LU, amount)
-        ethUser ->> ethAdapter: send(sendParam, fee, refundAddress)
-        ethAdapter ->> rlcLu: _debit(): crosschainBurn()
-        rlcLu ->> rlc : transferFrom()
-        ethAdapter ->> ethEndpoint: send(messagingParams, refundAddress)
+        ethUser ->> rlc: approve(lzBridge, amount)
+        ethUser ->> ethBridge: send(sendParam, fee, refundAddress)
+        ethBridge ->> rlc: _debit(): transferFrom(user, LU, amount)
+        ethBridge ->> ethEndpoint: send(messagingParams, refundAddress)
         ethEndpoint ->> ethEndpoint: emit PacketSent event
         ethEndpoint -->> ethUser: Request submitted
         dvn ->> ethEndpoint: detect event
         dvn ->> arbEndpoint: verify()
         executors ->> arbEndpoint: lzReceive()
-        arbEndpoint ->> arbAdapter: lzReceive()
-        arbAdapter ->> arbitrumRlc: _credit(): corsschainMint()
+        arbEndpoint ->> arbBridge: lzReceive()
+        arbBridge ->> arbitrumRlc: _credit(): corsschainMint()
         arbitrumRlc ->> arbitrumRlc: _mint()
     end
     rect rgb(255, 255, 204)
-        aUser ->> arbAdapter: send()
-        arbAdapter ->> arbitrumRlc: _debit(): crosschainBurn()
+        aUser ->> arbBridge: send()
+        arbBridge ->> arbitrumRlc: _debit(): crosschainBurn()
         arbitrumRlc ->> arbitrumRlc: _burn()
-        arbAdapter ->> arbEndpoint: send(messagingParams, refundAddress)
+        arbBridge ->> arbEndpoint: send(messagingParams, refundAddress)
         arbEndpoint ->> arbEndpoint: emit PacketSent event
         dvn ->> arbEndpoint: detect event
         dvn ->> ethEndpoint: verify()
         executors ->> ethEndpoint: lzReceive()
-        ethEndpoint ->> ethAdapter: lzReceive()
-        ethAdapter ->> rlcLu: _credit(): corsschainMint()
+        ethEndpoint ->> ethBridge: lzReceive()
+        ethBridge ->> rlcLu: _credit(): corsschainMint()
         rlcLu ->> rlc: transfer()
     end
