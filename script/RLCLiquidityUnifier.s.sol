@@ -8,6 +8,7 @@ import {RLCLiquidityUnifier} from "../src/RLCLiquidityUnifier.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
+import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 /**
  * Deployment script for the RLCLiquidityUnifier contract.
  * It reads configuration from a JSON file and deploys the contract using CreateX.
