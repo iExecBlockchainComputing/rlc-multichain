@@ -230,7 +230,7 @@ contract IexecLayerZeroBridge is
                 from, address(BRIDGEABLE_TOKEN), amountSentLD
             );
         } else {
-            // Non-Ethereum chains: Burn tokens directly
+            // Non-Ethereum-Mainnet chains: Burn tokens directly using crosschainBurn
             BRIDGEABLE_TOKEN.crosschainBurn(from, amountSentLD);
         }
     }
