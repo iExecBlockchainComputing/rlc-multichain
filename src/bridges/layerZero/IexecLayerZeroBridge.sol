@@ -49,13 +49,43 @@ contract IexecLayerZeroBridge is
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
-     * @dev The RLC token contract that this bridge operates on
-     * Must implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) interface.
+     * @dev The ERC-7802 compliant token contract that this bridge operates on.
      *
+     * Architecture Overview:
+     * This bridge supports two distinct deployment scenarios:
+     *
+     * 1. Non-Mainnet Chains (L2s, sidechains, etc.):
+     *    - BRIDGEABLE_TOKEN: Points to RLCCrosschain contract (mintable/burnable tokens)
+     *    - APPROVAL_REQUIRED: false (bridge can mint/burn directly)
+     *    - Mechanism: Mint tokens on transfer-in, burn tokens on transfer-out
+     *
+     * 2. Ethereum Mainnet:
+     *    - BRIDGEABLE_TOKEN: Points to LiquidityUnifier contract (manages original RLC tokens)
+     *    - APPROVAL_REQUIRED: true (requires user approval for token transfers)
+     *    - Mechanism: Lock tokens on transfer-out, unlock tokens on transfer-in
+     *
+     * The LiquidityUnifier contract acts as an adapter, implementing ERC-7802 interface
+     * to provide consistent lock/unlock operations for the original RLC token contract
+     * that may not natively support the crosschain standard.
+     *
+     * @custom:security The immutable nature ensures the token contract cannot be changed post-deployment
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
     // slither-disable-next-line naming-convention
     IERC7802 public immutable BRIDGEABLE_TOKEN;
+
+    /**
+     * @dev Indicates the token transfer mechanism required for this deployment.
+     *
+     * - true: Mainnet deployment requiring user approval (lock/unlock mechanism)
+     * - false: Non-mainnet deployment with direct mint/burn capabilities
+     *
+     * This flag indicates on which chain the bridge is deployed.
+     *
+     * @custom:oz-upgrades-unsafe-allow state-variable-immutable
+     */
+    // slither-disable-next-line naming-convention
+    bool public immutable APPROVAL_REQUIRED;
 
     /**
      * @dev Constructor for the LayerZero bridge contract
@@ -64,11 +94,12 @@ contract IexecLayerZeroBridge is
      *
      * @custom:oz-upgrades-unsafe-allow constructor
      */
-    constructor(address bridgeableToken, address lzEndpoint)
+    constructor(bool approvalRequired_, address bridgeableToken, address lzEndpoint)
         OFTCoreUpgradeable(IERC20Metadata(bridgeableToken).decimals(), lzEndpoint)
     {
         _disableInitializers();
         BRIDGEABLE_TOKEN = IERC7802(bridgeableToken);
+        APPROVAL_REQUIRED = approvalRequired_;
     }
 
     // ============ INITIALIZATION ============
@@ -146,7 +177,7 @@ contract IexecLayerZeroBridge is
      * @return requiresApproval Returns true if deployed on Ethereum Mainnet, false otherwise
      */
     function approvalRequired() external view virtual returns (bool) {
-        return block.chainid == 1;
+        return APPROVAL_REQUIRED;
     }
 
     /**
@@ -154,7 +185,9 @@ contract IexecLayerZeroBridge is
      * @return The address of the RLC token contract
      */
     function token() external view returns (address) {
-        return address(BRIDGEABLE_TOKEN);
+        return APPROVAL_REQUIRED
+            ? address(BRIDGEABLE_TOKEN)
+            : address(IRLCLiquidityUnifier(address(BRIDGEABLE_TOKEN)).RLC_TOKEN());
     }
 
     // ============ ACCESS CONTROL OVERRIDES ============
@@ -222,7 +255,7 @@ contract IexecLayerZeroBridge is
         // Calculate the amounts using the parent's logic (handles slippage protection)
         (amountSentLD, amountReceivedLD) = _debitView(amountLD, minAmountLD, dstEid);
 
-        if (block.chainid == 1) {
+        if (APPROVAL_REQUIRED) {
             // Ethereum Mainnet: Transfer RLC tokens to LiquidityUnifier
             // Workaround for Stargate UI compatibility - UI approves this contract
             // instead of approving LiquidityUnifier directly
