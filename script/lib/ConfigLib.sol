@@ -174,7 +174,10 @@ library ConfigUtils {
         // Update the JSON file using vm.writeJson
         vm.writeJson(jsonValue, configPath, jsonPath);
         
-        console.log(" Updated config.json:");
+        // Ensure the file ends with a newline for proper EOF
+        _ensureFileEndsWithNewline(configPath);
+        
+        console.log("Updated config.json:");
         console.log("   Chain:", chain);
         console.log("   Field:", fieldName);
         console.log("   Address:", addressString);
@@ -191,5 +194,37 @@ library ConfigUtils {
             console.log("Invalid JSON in config file");
             revert("Invalid JSON format");
         }
+    }
+
+    /**
+     * @dev Ensures the config file ends with a newline for proper EOF
+     * @param configPath The path to the config file
+     */
+    function _ensureFileEndsWithNewline(string memory configPath) private {
+        // Read the current content
+        string memory content = vm.readFile(configPath);
+        
+        // Check if the content ends with a newline
+        if (!_endsWithNewline(content)) {
+            // Append a newline and write back
+            string memory contentWithNewline = string.concat(content, "\n");
+            vm.writeFile(configPath, contentWithNewline);
+            console.log("Added newline to EOF in config file");
+        }
+    }
+
+    /**
+     * @dev Checks if a string ends with a newline character
+     * @param str The string to check
+     * @return Whether the string ends with a newline
+     */
+    function _endsWithNewline(string memory str) private pure returns (bool) {
+        bytes memory strBytes = bytes(str);
+        
+        if (strBytes.length == 0) {
+            return false;
+        }
+        
+        return strBytes[strBytes.length - 1] == bytes1("\n");
     }
 }
