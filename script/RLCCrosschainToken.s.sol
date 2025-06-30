@@ -37,16 +37,6 @@ contract Deploy is Script {
         address implementationAddress = Upgrades.getImplementationAddress(rlcCrosschainTokenProxy);
         ConfigUtils.updateConfigAddress(chain, "rlcCrosschainTokenAddress", rlcCrosschainTokenProxy);
         ConfigUtils.updateConfigAddress(chain, "rlcCrosschainTokenImplementation", implementationAddress);
-//          Updating config.json: .chains.arbitrum_sepolia.rlcCrosschainTokenAddress
-//    Updated config.json:
-//      Chain: arbitrum_sepolia
-//      Field: rlcCrosschainTokenAddress
-//      Address: 0xA6b3Da1010f00c55cfd899BE23B8Ece1130DeF85
-//   Updating config.json: .chains.arbitrum_sepolia.rlcCrosschainTokenImplementation
-//    Updated config.json:
-//      Chain: arbitrum_sepolia
-//      Field: rlcCrosschainTokenImplementation
-//      Address: 0x63E0CE477361f0923E94B225975cC1DF8be33910
         return rlcCrosschainTokenProxy;
     }
 
