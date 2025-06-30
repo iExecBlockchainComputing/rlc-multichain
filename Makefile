@@ -148,10 +148,10 @@ configure-layerzero-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 #
 
 validate-layerzero-bridge: # CHAIN, RPC_URL
-    $(MAKE) validate-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
+	$(MAKE) validate-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
 
 upgrade-layerzero-bridge: # CHAIN, RPC_URL
-    $(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
+	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
 
 #
 # Bridge operations.
