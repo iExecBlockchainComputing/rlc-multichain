@@ -217,6 +217,9 @@ contract IexecLayerZeroBridge is
      * It overrides the `_debit` function
      * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L56-L69
      *
+     * This function behavior is chain specific and works differently
+     * depending on whether the bridge is deployed on Ethereum Mainnet or a non-mainnet chain.
+     * 
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token burned = 1 token minted)
      * - If BRIDGEABLE_TOKEN implements transfer fees, burn fees, or any other fee mechanism,
@@ -268,6 +271,7 @@ contract IexecLayerZeroBridge is
      * It overrides the `_credit` function
      * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L78-L88
      *
+     * This function behavior is chain agnostic and works for both mainnet and non-mainnet chains.
      *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token received = 1 token minted)
