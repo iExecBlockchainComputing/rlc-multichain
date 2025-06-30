@@ -12,7 +12,8 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {DualPausableUpgradeable} from "../utils/DualPausableUpgradeable.sol";
 import {IIexecLayerZeroBridge} from "../../interfaces/IIexecLayerZeroBridge.sol";
-import {IRLCLiquidityUnifier, IERC7802} from "../../interfaces/IRLCLiquidityUnifier.sol";
+import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
+import {IRLCLiquidityUnifier} from "../../interfaces/IRLCLiquidityUnifier.sol";
 
 /**
  * @title IexecLayerZeroBridge
@@ -219,7 +220,7 @@ contract IexecLayerZeroBridge is
      *
      * This function behavior is chain specific and works differently
      * depending on whether the bridge is deployed on Ethereum Mainnet or a non-mainnet chain.
-     * 
+     *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token burned = 1 token minted)
      * - If BRIDGEABLE_TOKEN implements transfer fees, burn fees, or any other fee mechanism,

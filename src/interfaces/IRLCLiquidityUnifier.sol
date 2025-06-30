@@ -3,12 +3,11 @@
 
 pragma solidity ^0.8.22;
 
-import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 /**
  * @title IRLCLiquidityUnifier
- * @dev Interface for the RLC Liquidity Unifier contract, extending the IERC7802 interface.
+ * @dev Interface for the RLC Liquidity Unifier contract.
  *
  * This interface defines the contract for managing RLC (iExec's native token) liquidity
  * across different chains or protocols. It extends ERC-7802, which is likely a standard
@@ -19,7 +18,7 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
  * - Handle liquidity management across different bridges
  * - Maintain compatibility with ERC-7802 standards
  */
-interface IRLCLiquidityUnifier is IERC7802 {
+interface IRLCLiquidityUnifier {
     /**
      * @dev Error indicating that the provided 'to' address is invalid for ERC-7802 operations.
      * @param addr The invalid address.
