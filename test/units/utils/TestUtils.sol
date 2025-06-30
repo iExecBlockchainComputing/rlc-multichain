@@ -58,7 +58,7 @@ library TestUtils {
         iexecLayerZeroBridgeChainA = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
-                abi.encode(rlcLiquidityUnifier, lzEndpointAdapter),
+                abi.encode(false, rlcLiquidityUnifier, lzEndpointAdapter),
                 abi.encodeWithSelector(
                     IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
                 ),
@@ -77,7 +77,7 @@ library TestUtils {
         iexecLayerZeroBridgeChainB = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
-                abi.encode(rlcCrosschainToken, lzEndpointBridge),
+                abi.encode(true, rlcCrosschainToken, lzEndpointBridge),
                 abi.encodeWithSelector(
                     IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
                 ),

@@ -42,7 +42,8 @@ contract Deploy is Script {
     ) public returns (address) {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
 
-        bytes memory constructorData = abi.encode(rlcCrosschain, lzEndpoint);
+        //TODO add a new constructor param `approvalRequired`depending on the chain target.
+        bytes memory constructorData = abi.encode(false, rlcCrosschain, lzEndpoint);
         bytes memory initializeData = abi.encodeWithSelector(
             IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
         );
