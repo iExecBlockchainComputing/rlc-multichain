@@ -1,4 +1,3 @@
-
 MAKEFLAGS += --no-print-directory
 
 include report.mk verification.mk
@@ -40,62 +39,83 @@ clean:
 	forge clean
 
 #
-# Deployment targets
+# High-level deployment targets
 #
 
 deploy-on-anvil:
-	$(MAKE) deploy-liquidity-unifier CHAIN=sepolia RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
-	$(MAKE) deploy-layerzero-bridge CHAIN=sepolia RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
-	$(MAKE) deploy-rlc-crosschain-token CHAIN=arbitrum_sepolia RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
-	$(MAKE) deploy-layerzero-bridge CHAIN=arbitrum_sepolia RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
-	$(MAKE) configure-layerzero-bridge SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
-	$(MAKE) configure-layerzero-bridge SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
-
-# TODO : RLCMultichain and RLCLiquidityUnifier upgrades
-upgrade-on-anvil:
-	$(MAKE) upgrade-layerzero-bridge CHAIN=sepolia RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
-	$(MAKE) upgrade-layerzero-bridge CHAIN=arbitrum_sepolia RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) deploy-all \
+		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
 deploy-on-testnets:
-	$(MAKE) deploy-liquidity-unifier CHAIN=sepolia RPC_URL=$(SEPOLIA_RPC_URL)
-	$(MAKE) deploy-layerzero-bridge CHAIN=sepolia RPC_URL=$(SEPOLIA_RPC_URL)
-	$(MAKE) deploy-rlc-crosschain-token CHAIN=arbitrum_sepolia RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
-	$(MAKE) deploy-layerzero-bridge CHAIN=arbitrum_sepolia RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
-	$(MAKE) configure-layerzero-bridge SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=$(SEPOLIA_RPC_URL)
-	$(MAKE) configure-layerzero-bridge SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) deploy-all \
+		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL)
+
+deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC
+	$(MAKE) deploy-contract CONTRACT=RLCLiquidityUnifier CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC)
+	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC)
+	$(MAKE) deploy-contract CONTRACT=RLCCrosschainToken CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC)
+	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC)
+	$(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
+	$(MAKE) configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
+
+#
+# High-level upgrade targets
+#
+
+upgrade-on-anvil:
+	$(MAKE) upgrade-all \
+		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
 # TODO : RLCMultichain and RLCLiquidityUnifier upgrades
 upgrade-on-testnets:
-	$(MAKE) upgrade-layerzero-bridge CHAIN=sepolia RPC_URL=$(SEPOLIA_RPC_URL)
-	$(MAKE) upgrade-layerzero-bridge CHAIN=arbitrum_sepolia RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) upgrade-all \
+		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL)
 
-# Generic deployment targets (works with any chain)
-deploy-liquidity-unifier:
-	@echo "Deploying RLCLiquidityUnifier (UUPS Proxy) on $(CHAIN): $(RPC_URL)"
-	CHAIN=$(CHAIN) forge script script/RLCLiquidityUnifier.s.sol:Deploy \
+upgrade-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC
+	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC)
+	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC)
+
+#
+# Generic deployment targets
+#
+
+deploy-contract: # CONTRACT, CHAIN, RPC_URL
+	@echo "Deploying $(CONTRACT) on $(CHAIN)"
+	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 
-deploy-rlc-crosschain-token:
-	@echo "Deploying RLC cross-chain token (UUPS Proxy) on $(CHAIN): $(RPC_URL)"
-	CHAIN=$(CHAIN) forge script script/RLCCrosschainToken.s.sol:Deploy \
+#
+# Generic upgrade targets
+#
+
+validate-contract: # CONTRACT, CHAIN, RPC_URL
+	@echo "Validating $(CONTRACT) upgrade on $(CHAIN)"
+	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:ValidateUpgrade \
+		--rpc-url $(RPC_URL) \
+		-vvv
+
+upgrade-contract: # CONTRACT, CHAIN, RPC_URL
+	@echo "Upgrading $(CONTRACT) on $(CHAIN)"
+	$(MAKE) validate-contract CONTRACT=$(CONTRACT) CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
+	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Upgrade \
 		--rpc-url $(RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 
-deploy-layerzero-bridge:
-	@echo "Deploying IexecLayerZeroBridge (UUPS Proxy) on $(CHAIN): $(RPC_URL)"
-	CHAIN=$(CHAIN) forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Deploy \
-		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
-		--broadcast \
-		-vvv
+#
+# Generic configuration targets
+#
 
-configure-layerzero-bridge:
-	@echo "Configuring IexecLayerZeroBridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN): $(RPC_URL)"
+configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
+	@echo "Configuring LayerZero Bridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN)"
 	SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) \
 	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Configure \
 		--rpc-url $(RPC_URL) \
@@ -104,23 +124,30 @@ configure-layerzero-bridge:
 		-vvv
 
 #
-# Upgrade targets
+# Individual deployment targets
 #
 
-validate-layerzero-bridge:
-	@echo "Validating IexecLayerZeroBridge upgrade on $(CHAIN): $(RPC_URL)"
-	CHAIN=$(CHAIN) forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:ValidateUpgrade \
-        --rpc-url $(RPC_URL) \
-        -vvv
+deploy-liquidity-unifier: # CHAIN, RPC_URL
+    $(MAKE) deploy-contract CONTRACT=RLCLiquidityUnifier CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
 
-upgrade-layerzero-bridge:
-	@echo "Upgrading IexecLayerZeroBridge on $(CHAIN): $(RPC_URL)"
-	$(MAKE) validate-layerzero-bridge
-	CHAIN=$(CHAIN) forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Upgrade \
-		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
-		--broadcast \
-		-vvv
+deploy-rlc-crosschain-token: # CHAIN, RPC_URL
+    $(MAKE) deploy-contract CONTRACT=RLCCrosschainToken CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
+
+deploy-layerzero-bridge: # CHAIN, RPC_URL
+    $(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
+
+configure-layerzero-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
+    $(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(RPC_URL)
+
+#
+# Individual upgrade targets 
+#
+
+validate-layerzero-bridge: # CHAIN, RPC_URL
+    $(MAKE) validate-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
+
+upgrade-layerzero-bridge: # CHAIN, RPC_URL
+    $(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
 
 #
 # Bridge operations.
