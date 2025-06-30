@@ -132,16 +132,16 @@ configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 #
 
 deploy-liquidity-unifier: # CHAIN, RPC_URL
-    $(MAKE) deploy-contract CONTRACT=RLCLiquidityUnifier CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
+	$(MAKE) deploy-contract CONTRACT=RLCLiquidityUnifier CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
 
 deploy-rlc-crosschain-token: # CHAIN, RPC_URL
-    $(MAKE) deploy-contract CONTRACT=RLCCrosschainToken CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
+	$(MAKE) deploy-contract CONTRACT=RLCCrosschainToken CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
 
 deploy-layerzero-bridge: # CHAIN, RPC_URL
-    $(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
+	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
 
 configure-layerzero-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
-    $(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(RPC_URL)
+	$(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(RPC_URL)
 
 #
 # Individual upgrade targets 
