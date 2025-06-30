@@ -86,7 +86,7 @@ contract Upgrade is Script {
         uint256 newStateVariable = 1000000 * 10 ** 9;
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: commonParams.bridgeAddress,
+            proxyAddress: commonParams.layerZeroBridge,
             constructorData: abi.encode(commonParams.bridgeableToken, commonParams.lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
             newStateVariable: newStateVariable,
