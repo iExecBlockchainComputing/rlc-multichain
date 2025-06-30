@@ -21,7 +21,7 @@ library BridgeConfigLib {
         address createxFactory;
         bytes32 createxSalt;
         address lzEndpoint;
-        uint32 layerZeroChainId;
+        uint32 lzChainId;
         address bridgeableToken;
         address bridgeAddress;
     }
@@ -66,6 +66,6 @@ library BridgeConfigLib {
         params.lzEndpoint = config.readAddress(string.concat(prefix, ".layerZeroEndpointAddress"));
         params.createxSalt = config.readBytes32(string.concat(prefix, ".iexecLayerZeroBridgeCreatexSalt"));
         params.bridgeAddress = config.readAddress(string.concat(prefix, ".iexecLayerZeroBridgeAddress"));
-        params.layerZeroChainId = uint32(config.readUint(string.concat(prefix, ".layerZeroChainId")));
+        params.lzChainId = uint32(config.readUint(string.concat(prefix, ".lzChainId")));
     }
 }

@@ -74,7 +74,7 @@ contract Configure is Script {
 
         // Configure one bridge to another
         IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.bridgeAddress);
-        sourceBridge.setPeer(targetParams.layerZeroChainId, bytes32(uint256(uint160(targetParams.bridgeAddress))));
+        sourceBridge.setPeer(targetParams.lzChainId, bytes32(uint256(uint160(targetParams.bridgeAddress))));
 
         vm.stopBroadcast();
     }
