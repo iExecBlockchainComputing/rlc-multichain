@@ -69,7 +69,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     // ============ BASIC BRIDGE FUNCTIONALITY TESTS ============
-
     function test_SendToken_WhenOperational() public {
         // Check initial balances
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);

@@ -32,6 +32,23 @@ import {IRLCLiquidityUnifier, IERC7802} from "../../interfaces/IRLCLiquidityUnif
  * Dual-Pause Emergency System:
  * 1. Complete Pause: Blocks all bridge operations (incoming and outgoing transfers)
  * 2. Send Pause: Blocks only outgoing transfers, allows users to receive/withdraw funds
+ *
+ * Architecture Overview:
+ * This bridge supports two distinct deployment scenarios:
+ *
+ * 1. Non-Mainnet Chains (L2s, sidechains, etc.):
+ *    - BRIDGEABLE_TOKEN: Points to RLCCrosschain contract (mintable/burnable tokens)
+ *    - APPROVAL_REQUIRED: false (bridge can mint/burn directly)
+ *    - Mechanism: Mint tokens on transfer-in, burn tokens on transfer-out
+ *
+ * 2. Ethereum Mainnet:
+ *    - BRIDGEABLE_TOKEN: Points to LiquidityUnifier contract (manages original RLC tokens)
+ *    - APPROVAL_REQUIRED: true (requires user approval for token transfers)
+ *    - Mechanism: Lock tokens on transfer-out, unlock tokens on transfer-in
+ *
+ * The LiquidityUnifier contract acts as an adapter, implementing ERC-7802 interface
+ * to provide consistent lock/unlock operations for the original RLC token contract
+ * that may not natively support the crosschain standard.
  */
 contract IexecLayerZeroBridge is
     UUPSUpgradeable,
@@ -49,25 +66,6 @@ contract IexecLayerZeroBridge is
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
-     * @dev The ERC-7802 compliant token contract that this bridge operates on.
-     *
-     * Architecture Overview:
-     * This bridge supports two distinct deployment scenarios:
-     *
-     * 1. Non-Mainnet Chains (L2s, sidechains, etc.):
-     *    - BRIDGEABLE_TOKEN: Points to RLCCrosschain contract (mintable/burnable tokens)
-     *    - APPROVAL_REQUIRED: false (bridge can mint/burn directly)
-     *    - Mechanism: Mint tokens on transfer-in, burn tokens on transfer-out
-     *
-     * 2. Ethereum Mainnet:
-     *    - BRIDGEABLE_TOKEN: Points to LiquidityUnifier contract (manages original RLC tokens)
-     *    - APPROVAL_REQUIRED: true (requires user approval for token transfers)
-     *    - Mechanism: Lock tokens on transfer-out, unlock tokens on transfer-in
-     *
-     * The LiquidityUnifier contract acts as an adapter, implementing ERC-7802 interface
-     * to provide consistent lock/unlock operations for the original RLC token contract
-     * that may not natively support the crosschain standard.
-     *
      * @custom:security The immutable nature ensures the token contract cannot be changed post-deployment
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
@@ -218,12 +216,6 @@ contract IexecLayerZeroBridge is
      * to another chain. It burns the specified amount from the sender's balance.
      * It overrides the `_debit` function
      * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L56-L69
-     *
-     * @notice CHAIN-SPECIFIC BEHAVIOR:
-     * - Ethereum Mainnet (chainId 1): Transfers RLC tokens to the LiquidityUnifier contract
-     *   for Stargate UI compatibility as UI can't approve directly LiquidityUnifier
-     *   (UI approves this contract, not LiquidityUnifier directly)
-     * - Other chains: Mint/Burn tokens directly via crosschainMint/crosschainBurn functions
      *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token burned = 1 token minted)
