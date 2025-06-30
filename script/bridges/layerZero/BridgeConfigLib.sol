@@ -22,24 +22,35 @@ library BridgeConfigLib {
         bytes32 createxSalt;
         address lzEndpoint;
         uint32 lzChainId;
-        address bridgeableToken;
+        address rlcLiquidityUnifierAddress;
+        address rlcCrossChainTokenAddress;
+        bool approvalRequired;
         address bridgeAddress;
     }
 
     /**
      * @dev Gets the appropriate bridgeable token address based on the chain
      * @param config The JSON configuration string
-     * @param chain The current chain identifier
      * @param prefix The JSON path prefix for the current chain
      * @return The address of the bridgeable token (RLCLiquidityUnifier on mainnet, RLC CrossChain on L2s)
      */
-    function getBridgeableTokenAddress(string memory config, string memory chain, string memory prefix)
-        internal
-        pure
-        returns (address)
-    {
-        if (keccak256(abi.encodePacked(chain)) == keccak256(abi.encodePacked("sepolia"))) {
+    function getLiquidityUnifierAddress(string memory config, string memory prefix) internal pure returns (address) {
+        if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
             return config.readAddress(string.concat(prefix, ".rlcLiquidityUnifierAddress"));
+        } else {
+            return address(0);
+        }
+    }
+    /**
+     * @dev Gets the RLC CrossChain token address based on the chain
+     * @param config The JSON configuration string
+     * @param prefix The JSON path prefix for the current chain
+     * @return The address of the RLC CrossChain token
+     */
+
+    function getRLCCrossChainTokenAddress(string memory config, string memory prefix) internal pure returns (address) {
+        if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
+            return address(0);
         } else {
             return config.readAddress(string.concat(prefix, ".rlcCrossChainTokenAddress"));
         }
@@ -62,10 +73,12 @@ library BridgeConfigLib {
         params.initialPauser = config.readAddress(".initialPauser");
         params.initialUpgrader = config.readAddress(".initialUpgrader");
         params.createxFactory = config.readAddress(".createxFactory");
-        params.bridgeableToken = getBridgeableTokenAddress(config, chain, prefix);
-        params.lzEndpoint = config.readAddress(string.concat(prefix, ".layerZeroEndpointAddress"));
+        params.rlcLiquidityUnifierAddress = getLiquidityUnifierAddress(config, prefix);
+        params.rlcCrossChainTokenAddress = getRLCCrossChainTokenAddress(config, prefix);
+        params.approvalRequired = config.readBool(string.concat(prefix, ".approvalRequired"));
         params.createxSalt = config.readBytes32(string.concat(prefix, ".iexecLayerZeroBridgeCreatexSalt"));
         params.bridgeAddress = config.readAddress(string.concat(prefix, ".iexecLayerZeroBridgeAddress"));
+        params.lzEndpoint = config.readAddress(string.concat(prefix, ".lzEndpointAddress"));
         params.lzChainId = uint32(config.readUint(string.concat(prefix, ".lzChainId")));
     }
 }
