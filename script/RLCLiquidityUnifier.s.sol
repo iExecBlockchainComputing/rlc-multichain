@@ -59,3 +59,38 @@ contract Deploy is Script {
         );
     }
 }
+
+contract Upgrade is Script {
+    function run() external {
+        vm.startBroadcast();
+
+        address proxyAddress = vm.envAddress("RLC_LIQUIDITY_UNIFIER_PROXY_ADDRESS");
+        address rlcToken = vm.envAddress("RLC_ADDRESS");
+
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: proxyAddress,
+            constructorData: abi.encode(rlcToken),
+            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2", // Would be production contract in real deployment
+            newStateVariable: 1000000 * 10 ** 9,
+            validateOnly: false
+        });
+
+        UpgradeUtils.executeUpgrade(params);
+        vm.stopBroadcast();
+    }
+}
+
+contract ValidateUpgrade is Script {
+    function run() external {
+        address rlcToken = vm.envAddress("RLC_ADDRESS");
+        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+            proxyAddress: address(0),
+            constructorData: abi.encode(rlcToken),
+            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
+            newStateVariable: 1000000 * 10 ** 9,
+            validateOnly: true
+        });
+
+        UpgradeUtils.validateUpgrade(params);
+    }
+}

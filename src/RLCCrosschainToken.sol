@@ -3,12 +3,14 @@
 
 pragma solidity ^0.8.22;
 
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ERC20PermitUpgradeable} from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
-import {IERC7802} from "./interfaces/IERC7802.sol";
+import {ERC20BridgeableUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20BridgeableUpgradeable.sol";
 import {ITokenSpender} from "./interfaces/ITokenSpender.sol";
 
 /**
@@ -20,14 +22,14 @@ import {ITokenSpender} from "./interfaces/ITokenSpender.sol";
  * a transaction to grant the role `TOKEN_BRIDGE_ROLE` to the bridge contract address
  * using `grantRole` function.
  *
- * The code is inspired by OpenZeppelin's community contract `ERC20Bridgeable`
- * https://github.com/OpenZeppelin/openzeppelin-community-contracts/blob/075587479556632d3dd9e9e3b37417cabf3e26a3/contracts/token/ERC20/extensions/ERC20Bridgeable.sol
+ * TODO upgrade openzeppelin packages when the audited version of ERC20BridgeableUpgradeable
+ * is released.
  */
 contract RLCCrosschainToken is
     UUPSUpgradeable,
     AccessControlDefaultAdminRulesUpgradeable,
     ERC20PermitUpgradeable,
-    IERC7802
+    ERC20BridgeableUpgradeable
 {
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant TOKEN_BRIDGE_ROLE = keccak256("TOKEN_BRIDGE_ROLE");
@@ -80,32 +82,15 @@ contract RLCCrosschainToken is
     }
 
     /**
-     * @dev See {IERC7802-crosschainMint}.
-     * Does not mint if `to` is the zero address.
-     * Reverts if the caller does not have the `TOKEN_BRIDGE_ROLE`.
-     * Emits a {CrosschainMint} event.
-     */
-    function crosschainMint(address to, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
-        _mint(to, value);
-        emit CrosschainMint(to, value, _msgSender());
-    }
-
-    /**
-     * @dev See {IERC7802-crosschainBurn}.
-     * Does not burn if `from` is the zero address.
-     * Reverts if the caller does not have the `TOKEN_BRIDGE_ROLE`.
-     * Emits a {CrosschainBurn} event.
-     */
-    function crosschainBurn(address from, uint256 value) external override onlyRole(TOKEN_BRIDGE_ROLE) {
-        _burn(from, value);
-        emit CrosschainBurn(from, value, _msgSender());
-    }
-
-    /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
-        return interfaceId == type(IERC7802).interfaceId || super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(AccessControlDefaultAdminRulesUpgradeable, ERC20BridgeableUpgradeable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 
     /**
@@ -120,4 +105,17 @@ contract RLCCrosschainToken is
      * an account with the UPGRADER_ROLE.
      */
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+    /**
+     * Checks if the caller is a trusted token bridge that is allowed by iExec to call
+     * `crosschainMint` or `crosschainBurn` functions.
+     * @dev This function is called by the modifier `onlyTokenBridge` in the
+     * `ERC20BridgeableUpgradeable` contract.
+     * @param caller The address of the caller that is trying to mint or burn tokens.
+     */
+    function _checkTokenBridge(address caller) internal view override {
+        if (!hasRole(TOKEN_BRIDGE_ROLE, caller)) {
+            revert IAccessControl.AccessControlUnauthorizedAccount(caller, TOKEN_BRIDGE_ROLE);
+        }
+    }
 }
