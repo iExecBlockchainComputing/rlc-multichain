@@ -42,7 +42,7 @@ contract Deploy is Script {
     ) public returns (address) {
         address createXFactory = vm.envAddress("CREATE_X_FACTORY_ADDRESS");
 
-        //TODO add a new constructor param `approvalRequired`depending on the chain target.
+        //TODO: adapt `approvalRequired`depending on the chain target.
         bytes memory constructorData = abi.encode(false, rlcCrosschain, lzEndpoint);
         bytes memory initializeData = abi.encodeWithSelector(
             IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
@@ -84,7 +84,8 @@ contract Upgrade is Script {
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
-            constructorData: abi.encode(rlcCrosschain, lzEndpoint),
+            //TODO: adapt `approvalRequired`depending on the chain target.
+            constructorData: abi.encode(false, rlcCrosschain, lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
             newStateVariable: newStateVariable,
             validateOnly: false

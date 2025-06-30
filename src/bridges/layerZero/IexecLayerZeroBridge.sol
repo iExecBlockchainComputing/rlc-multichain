@@ -184,7 +184,7 @@ contract IexecLayerZeroBridge is
      * @return The address of the RLC token contract
      */
     function token() external view returns (address) {
-        return APPROVAL_REQUIRED ? BRIDGEABLE_TOKEN : address(IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN());
+        return APPROVAL_REQUIRED ? address(IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN()) : BRIDGEABLE_TOKEN;
     }
 
     // ============ ACCESS CONTROL OVERRIDES ============

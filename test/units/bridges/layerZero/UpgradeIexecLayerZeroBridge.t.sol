@@ -36,7 +36,7 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         proxyAddress = address(iexecLayerZeroBridgeV1);
     }
 
-    function test_UpgradeCorrectly() public {
+    function testFuzz_UpgradeCorrectly() public {
         // 1. Verify V1 doesn't have V2 functions
         (bool success,) = proxyAddress.call(abi.encodeWithSignature("newStateVariable()"));
         assertFalse(success, "V1 should not have newStateVariable() function");
@@ -55,7 +55,7 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         vm.startPrank(upgrader);
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
-            constructorData: abi.encode(rlcCrosschainToken, mockEndpoint),
+            constructorData: abi.encode(false, rlcCrosschainToken, mockEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             newStateVariable: NEW_STATE_VARIABLE,
             validateOnly: false

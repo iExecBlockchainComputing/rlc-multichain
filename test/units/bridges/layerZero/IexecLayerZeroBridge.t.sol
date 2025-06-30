@@ -18,7 +18,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     using TestUtils for *;
 
     // ============ STATE VARIABLES ============
-    IexecLayerZeroBridge private iexecLayerZeroBridgeChainA;
+    IexecLayerZeroBridge private iexecLayerZeroBridgeEthereum;
     IexecLayerZeroBridge private iexecLayerZeroBridgeChainB;
     RLCCrosschainToken private rlcCrosschainToken;
 
@@ -45,15 +45,15 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address lzEndpointBridge = address(endpoints[SOURCE_EID]);
         address lzEndpointAdapter = address(endpoints[DEST_EID]);
 
-        //TODO: make tests with iexecLayerZeroBridgeChainA - when iexecLayerZeroBridge is connected to liquidity unifier
-        (iexecLayerZeroBridgeChainA, iexecLayerZeroBridgeChainB,, rlcCrosschainToken,) =
+        //TODO: make tests with iexecLayerZeroBridgeEthereum - when iexecLayerZeroBridge is connected to liquidity unifier
+        (iexecLayerZeroBridgeEthereum, iexecLayerZeroBridgeChainB,, rlcCrosschainToken,) =
             TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, admin, upgrader, pauser);
 
         address iexecLayerZeroBridgeChainBAddress = address(iexecLayerZeroBridgeChainB);
         // Wire the contracts
         address[] memory contracts = new address[](2);
         contracts[0] = iexecLayerZeroBridgeChainBAddress;
-        contracts[1] = address(iexecLayerZeroBridgeChainA);
+        contracts[1] = address(iexecLayerZeroBridgeEthereum);
         vm.startPrank(admin);
         wireOApps(contracts);
         vm.stopPrank();
@@ -201,7 +201,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function test_ShouldBeTrueOnMainnet() public {
         // Simulate Ethereum Mainnet chain ID
         vm.chainId(1);
-        bool requiresApproval = iexecLayerZeroBridgeChainB.approvalRequired();
+        bool requiresApproval = iexecLayerZeroBridgeEthereum.approvalRequired();
         assertTrue(requiresApproval, "approvalRequired() should return true on Ethereum Mainnet");
     }
 
