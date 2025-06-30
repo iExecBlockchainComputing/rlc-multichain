@@ -7,7 +7,6 @@ import {RLCLiquidityUnifierV2} from "../../../../src/mocks/RLCLiquidityUnifierV2
 import {RLCLiquidityUnifier} from "../../../../src/RLCLiquidityUnifier.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 import {UpgradeUtils} from "../../../../script/lib/UpgradeUtils.sol";
-import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 
 contract UpgradeRLCLiquidityUnifier is TestHelperOz5 {
