@@ -46,19 +46,19 @@ deploy-on-anvil:
 	$(MAKE) deploy-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
 		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL) \
-		ENABLE_VERIFICATION=false
+		OPTIONS=
 
 deploy-on-testnets:
 	$(MAKE) deploy-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
 		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
-		ENABLE_VERIFICATION=true
+		OPTIONS=--verify  
 
-deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, [ENABLE_VERIFICATION]
-	$(MAKE) deploy-contract CONTRACT=RLCLiquidityUnifier CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) $(if $(filter true,$(ENABLE_VERIFICATION)),ENABLE_VERIFICATION=true,)
-	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) $(if $(filter true,$(ENABLE_VERIFICATION)),ENABLE_VERIFICATION=true,)
-	$(MAKE) deploy-contract CONTRACT=RLCCrosschainToken CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) $(if $(filter true,$(ENABLE_VERIFICATION)),ENABLE_VERIFICATION=true,)
-	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) $(if $(filter true,$(ENABLE_VERIFICATION)),ENABLE_VERIFICATION=true,)
+deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
+	$(MAKE) deploy-contract CONTRACT=RLCLiquidityUnifier CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)  
+	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)  
+	$(MAKE) deploy-contract CONTRACT=RLCCrosschainToken CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)  
+	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)  
 	$(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
 	$(MAKE) configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
 
@@ -75,22 +75,22 @@ upgrade-on-testnets:
 	$(MAKE) upgrade-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
 		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
-		ENABLE_VERIFICATION=true
+		OPTIONS=--verify  
 
-upgrade-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, [ENABLE_VERIFICATION]
-	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) $(if $(filter true,$(ENABLE_VERIFICATION)),ENABLE_VERIFICATION=true,)
-	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) $(if $(filter true,$(ENABLE_VERIFICATION)),ENABLE_VERIFICATION=true,)
+upgrade-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
+	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)  
+	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)  
 
 #
 # Generic deployment targets
 #
 
-deploy-contract: # CONTRACT, CHAIN, RPC_URL, [ENABLE_VERIFICATION]
-	@echo "Deploying $(CONTRACT) on $(CHAIN)$(if $(filter true,$(ENABLE_VERIFICATION)), with verification,)"
+deploy-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
+	@echo "Deploying $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
 	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
 		--account $(ACCOUNT) \
-		$(if $(filter true,$(ENABLE_VERIFICATION)),--verify,) \
+		$(OPTIONS) \
 		--broadcast \
 		-vvv
 
@@ -104,14 +104,14 @@ validate-contract: # CONTRACT, CHAIN, RPC_URL
 		--rpc-url $(RPC_URL) \
 		-vvv
 
-upgrade-contract: # CONTRACT, CHAIN, RPC_URL, [ENABLE_VERIFICATION]
-	@echo "Upgrading $(CONTRACT) on $(CHAIN)$(if $(filter true,$(ENABLE_VERIFICATION)), with verification,)"
+upgrade-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
+	@echo "Upgrading $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
 	$(MAKE) validate-contract CONTRACT=$(CONTRACT) CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
 	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Upgrade \
 		--rpc-url $(RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
-		$(if $(filter true,$(ENABLE_VERIFICATION)),--verify,) \
+		$(OPTIONS) \
 		-vvv
 
 #
