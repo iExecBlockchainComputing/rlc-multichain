@@ -6,7 +6,6 @@ import "forge-std/Vm.sol";
 import "forge-std/console.sol";
 import "forge-std/StdJson.sol";
 
-
 /**
  * @title ConfigLib
  * @dev Library for handling configuration logic across all deployment and operational scripts
@@ -131,7 +130,7 @@ library ConfigLib {
  */
 library ConfigUtils {
     using stdJson for string;
-    
+
     Vm constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     /**
@@ -151,7 +150,9 @@ library ConfigUtils {
      * @param value The address value to set
      * @param configPath The path to the config file
      */
-    function updateConfigAddress(string memory chain, string memory fieldName, address value, string memory configPath) internal {
+    function updateConfigAddress(string memory chain, string memory fieldName, address value, string memory configPath)
+        internal
+    {
         // Check if file exists
         if (!vm.exists(configPath)) {
             console.log("Config file not found at:", configPath);
@@ -165,18 +166,18 @@ library ConfigUtils {
         // Convert address to string and create JSON value
         string memory addressString = vm.toString(value);
         string memory jsonValue = string.concat('"', addressString, '"');
-        
+
         // Create the JSON path: .chains.sepolia.iexecLayerZeroBridgeAddress
         string memory jsonPath = string.concat(".chains.", chain, ".", fieldName);
-        
+
         console.log("Updating config.json:", jsonPath);
-        
+
         // Update the JSON file using vm.writeJson
         vm.writeJson(jsonValue, configPath, jsonPath);
-        
+
         // Ensure the file ends with a newline for proper EOF
         _ensureFileEndsWithNewline(configPath);
-        
+
         console.log("Updated config.json:");
         console.log("   Chain:", chain);
         console.log("   Field:", fieldName);
@@ -203,7 +204,7 @@ library ConfigUtils {
     function _ensureFileEndsWithNewline(string memory configPath) private {
         // Read the current content
         string memory content = vm.readFile(configPath);
-        
+
         // Check if the content ends with a newline
         if (!_endsWithNewline(content)) {
             // Append a newline and write back
@@ -220,11 +221,11 @@ library ConfigUtils {
      */
     function _endsWithNewline(string memory str) private pure returns (bool) {
         bytes memory strBytes = bytes(str);
-        
+
         if (strBytes.length == 0) {
             return false;
         }
-        
+
         return strBytes[strBytes.length - 1] == bytes1("\n");
     }
 }
