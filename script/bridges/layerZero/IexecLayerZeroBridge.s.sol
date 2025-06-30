@@ -120,7 +120,7 @@ contract ValidateUpgrade is Script {
 
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: address(0),
-            constructorData: abi.encode(rlcCrosschain, lzEndpoint),
+            constructorData: abi.encode(commonParams.bridgeableToken, commonParams.lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             newStateVariable: 1000000 * 10 ** 9,
             validateOnly: true
