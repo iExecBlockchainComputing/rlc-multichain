@@ -12,8 +12,7 @@ library UpgradeUtils {
     struct UpgradeParams {
         address proxyAddress;
         string contractName;
-        address lzEndpoint;
-        address rlcToken;
+        bytes constructorData;
         uint256 newStateVariable; // For initialization
         bool validateOnly;
     }
@@ -67,7 +66,7 @@ library UpgradeUtils {
      * @return opts Configured Options struct
      */
     function _buildOptions(UpgradeParams memory params) private pure returns (Options memory opts) {
-        opts.constructorData = abi.encode(params.rlcToken, params.lzEndpoint);
+        opts.constructorData = params.constructorData;
         // Ignore check related to LayerZero contracts:
         // - OAppSenderUpgradeable
         // - OAppReceiverUpgradeable

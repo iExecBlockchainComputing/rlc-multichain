@@ -8,9 +8,9 @@ import {CreateX} from "@createx/contracts/CreateX.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosschainToken.s.sol";
-import {IERC7802} from "../../src/interfaces/IERC7802.sol";
 import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
 import {ITokenSpender} from "../../src/interfaces/ITokenSpender.sol";
 

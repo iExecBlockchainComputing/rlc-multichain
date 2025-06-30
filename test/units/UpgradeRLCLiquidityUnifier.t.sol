@@ -3,26 +3,27 @@
 pragma solidity ^0.8.22;
 
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {IexecLayerZeroBridgeV2} from "../../../../src/mocks/IexecLayerZeroBridgeV2Mock.sol";
-import {TestUtils} from "./../../utils/TestUtils.sol";
+import {RLCLiquidityUnifierV2} from "../../../../src/mocks/RLCLiquidityUnifierV2Mock.sol";
+import {RLCLiquidityUnifier} from "../../../../src/RLCLiquidityUnifier.sol";
+import {TestUtils} from "./utils/TestUtils.sol";
 import {UpgradeUtils} from "../../../../script/lib/UpgradeUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
+import {RLCMock} from "./mocks/RLCMock.sol";
 
-contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
+contract UpgradeRLCLiquidityUnifier is TestHelperOz5 {
     using TestUtils for *;
 
-    IexecLayerZeroBridge public iexecLayerZeroBridgeV1;
-    IexecLayerZeroBridgeV2 public iexecLayerZeroBridgeV2;
-    RLCCrosschainToken private rlcCrosschainToken;
+    RLCLiquidityUnifier private rlcLiquidityUnifierV1;
+    RLCLiquidityUnifierV2 private rlcLiquidityUnifierV2;
+    RLCMock private rlcToken;
 
     address public mockEndpoint;
     address public admin = makeAddr("admin");
-    address public upgrader = makeAddr("upgrader");
     address public pauser = makeAddr("pauser");
+    address private upgrader = makeAddr("upgrader");
 
     address public proxyAddress;
-    string public name = "iEx.ec Network Token";
+    string private name = "iEx.ec Network Token";
     string public symbol = "RLC";
     uint256 public constant NEW_STATE_VARIABLE = 2;
 
@@ -31,9 +32,9 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-        (, iexecLayerZeroBridgeV1,, rlcCrosschainToken,) =
+        (,, rlcToken,, rlcLiquidityUnifierV1) =
             TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, admin, upgrader, pauser);
-        proxyAddress = address(iexecLayerZeroBridgeV1);
+        proxyAddress = address(rlcLiquidityUnifierV1);
     }
 
     function test_UpgradeCorrectly() public {
@@ -45,18 +46,18 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         assertFalse(success2, "V1 should not have initializeV2() function");
 
         // 2. Store V1 state for comparison
-        address originalOwner = iexecLayerZeroBridgeV1.owner();
+        address originalOwner = rlcLiquidityUnifierV1.owner();
 
-        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.DEFAULT_ADMIN_ROLE(), admin));
-        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.UPGRADER_ROLE(), upgrader));
-        assertTrue(iexecLayerZeroBridgeV1.hasRole(iexecLayerZeroBridgeV1.PAUSER_ROLE(), pauser));
+        assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.DEFAULT_ADMIN_ROLE(), admin));
+        assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.UPGRADER_ROLE(), upgrader));
 
         // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(upgrader);
+
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
-            constructorData: abi.encode(rlcCrosschainToken, mockEndpoint),
-            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
+            constructorData: abi.encode(rlcToken),
+            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
             newStateVariable: NEW_STATE_VARIABLE,
             validateOnly: false
         });
@@ -65,26 +66,22 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
 
         vm.stopPrank();
 
-        iexecLayerZeroBridgeV2 = IexecLayerZeroBridgeV2(proxyAddress);
+        rlcLiquidityUnifierV2 = RLCLiquidityUnifierV2(proxyAddress);
 
         // 5. Verify state preservation
-        assertEq(iexecLayerZeroBridgeV2.owner(), originalOwner, "Owner should be preserved");
+        assertEq(rlcLiquidityUnifierV2.owner(), originalOwner, "Admin should be preserved");
         assertTrue(
-            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.DEFAULT_ADMIN_ROLE(), admin),
+            rlcLiquidityUnifierV2.hasRole(rlcLiquidityUnifierV2.DEFAULT_ADMIN_ROLE(), admin),
             "Default admin role should be preserved"
         );
         assertTrue(
-            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.UPGRADER_ROLE(), upgrader),
+            rlcLiquidityUnifierV2.hasRole(rlcLiquidityUnifierV2.UPGRADER_ROLE(), upgrader),
             "Upgrader role should be preserved"
-        );
-        assertTrue(
-            iexecLayerZeroBridgeV2.hasRole(iexecLayerZeroBridgeV2.PAUSER_ROLE(), pauser),
-            "Pauser role should be preserved"
         );
 
         // 6. Verify new V2 functionality
         assertEq(
-            iexecLayerZeroBridgeV2.newStateVariable(),
+            rlcLiquidityUnifierV2.newStateVariable(),
             NEW_STATE_VARIABLE,
             "New state variable should be initialized correctly"
         );
