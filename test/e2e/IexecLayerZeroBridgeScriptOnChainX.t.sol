@@ -36,8 +36,9 @@ contract IexecLayerZeroBridgeScriptOnChainXTest is Test {
     }
 
     function testFork_Deployment() public {
-        IexecLayerZeroBridge iexecLayerZeroBridge =
-            IexecLayerZeroBridge(deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, salt));
+        IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
+            deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt)
+        );
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
         assertEq(iexecLayerZeroBridge.token(), address(rlcAddress));
@@ -55,9 +56,9 @@ contract IexecLayerZeroBridgeScriptOnChainXTest is Test {
     }
 
     function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, salt);
+        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", CREATEX));
-        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, salt);
+        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
     }
 
     // TODO add tests for the configuration script.
