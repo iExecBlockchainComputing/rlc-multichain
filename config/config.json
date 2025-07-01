@@ -6,12 +6,22 @@
   "chains": {
     "sepolia": {
       "rlcAddress": "0x26A738b6D33EF4D94FF084D3552961b8f00639Cd",
-      "rlcLiquidityUnifierAddress": "",
-      "rlcLiquidityUnifierCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      "rlcLiquidityUnifierAddress": "0x0000000000000000000000000000000000000000",
+      "rlcLiquidityUnifierCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "approvalRequired": true,
+      "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
+      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
+      "lzChainId": 40161
     },
     "arbitrum_sepolia": {
-      "rlcCrossChainTokenAddress": "",
-      "rlcCrossChainTokenCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      "rlcCrossChainTokenAddress": "0x0000000000000000000000000000000000000000",
+      "rlcCrossChainTokenCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "approvalRequired": false,
+      "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
+      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f", 
+      "lzChainId": 40231
     }
   }
 }
