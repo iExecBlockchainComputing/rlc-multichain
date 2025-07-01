@@ -1,4 +1,3 @@
-
 MAKEFLAGS += --no-print-directory
 
 include report.mk
@@ -40,103 +39,93 @@ clean:
 	forge clean
 
 #
-# Deployment targets
+# High-level deployment targets
 #
 
 deploy-on-anvil:
-	$(MAKE) deploy-liquidity-unifier RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
-	$(MAKE) deploy-rlc-crosschain-token RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
-	$(MAKE) deploy-layerzero-bridge RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
-	$(MAKE) configure-adapter RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
-	$(MAKE) configure-layerzero-bridge RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
-
-upgrade-on-anvil:
-	$(MAKE) upgrade-liquidity-unifier RPC_URL=$(ANVIL_SEPOLIA_RPC_URL)
-	$(MAKE) upgrade-layerzero-bridge RPC_URL=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) deploy-all \
+		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL) \
+		OPTIONS=
 
 deploy-on-testnets:
-	$(MAKE) deploy-liquidity-unifier RPC_URL=$(SEPOLIA_RPC_URL)
-	$(MAKE) deploy-layerzero-bridge RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
-	$(MAKE) configure-adapter RPC_URL=$(SEPOLIA_RPC_URL)
-	$(MAKE) configure-layerzero-bridge RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) deploy-all \
+		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
+		OPTIONS=--verify  
+
+deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
+	$(MAKE) deploy-contract CONTRACT=RLCLiquidityUnifier CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)  
+	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)  
+	$(MAKE) deploy-contract CONTRACT=RLCCrosschainToken CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)  
+	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)  
+	$(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
+	$(MAKE) configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
+
+#
+# High-level upgrade targets
+#
+
+upgrade-on-anvil:
+	$(MAKE) upgrade-all \
+		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
 upgrade-on-testnets:
-	$(MAKE) upgrade-liquidity-unifier RPC_URL=$(SEPOLIA_RPC_URL)
-	$(MAKE) upgrade-layerzero-bridge RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
+	$(MAKE) upgrade-all \
+		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
+		OPTIONS=--verify  
 
-# deploy-rlc-crosschain-token RPC_URL=https://...
-deploy-rlc-crosschain-token:
-	@echo "Deploying RLC cross-chain token (UUPS Proxy) on : $(RPC_URL)"
-	CHAIN=arbitrum_sepolia forge script script/RLCCrosschainToken.s.sol:Deploy \
+upgrade-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
+	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)  
+	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)  
+
+#
+# Generic deployment targets
+#
+
+deploy-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
+	@echo "Deploying $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
+	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
 		--account $(ACCOUNT) \
+		$(OPTIONS) \
 		--broadcast \
 		-vvv
 
-deploy-liquidity-unifier:
-	@echo "Deploying RLCLiquidityUnifier (UUPS Proxy) on: $(RPC_URL)"
-	CHAIN=sepolia forge script script/RLCLiquidityUnifier.s.sol:Deploy \
+#
+# Generic upgrade targets
+#
+
+upgrade-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
+	@echo "Upgrading $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
+	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Upgrade \
 		--rpc-url $(RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
+		$(OPTIONS) \
 		-vvv
 
-deploy-layerzero-bridge:
-	@echo "Deploying IexecLayerZeroBridge (UUPS Proxy) on: $(RPC_URL)"
-	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Deploy \
-        --rpc-url $(RPC_URL) \
-        --account $(ACCOUNT) \
-        --broadcast \
-        -vvv
-configure-adapter:
-	@echo "Configuring RLCAdapter on: $(RPC_URL)..."
-	forge script script/bridges/layerZero/RLCAdapter.s.sol:Configure \
-        --rpc-url $(RPC_URL) \
-        --account $(ACCOUNT) \
-        --broadcast \
-        -vvv
+#
+# Generic configuration targets
+#
 
-configure-layerzero-bridge:
-	@echo "Configuring RLCOFT on: $(RPC_URL)"
+configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
+	@echo "Configuring LayerZero Bridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN)"
+	SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) \
 	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Configure \
-        --rpc-url $(RPC_URL) \
-        --account $(ACCOUNT) \
-        --broadcast \
-        -vvv
+		--rpc-url $(RPC_URL) \
+		--account $(ACCOUNT) \
+		--broadcast \
+		-vvv
 
 #
-# Upgrade targets
+# Individual upgrade targets 
 #
 
-validate-liquidity-unifier-upgrade:
-	@echo "Validating RLCLiquidityUnifier upgrade on: $(RPC_URL)"
-	forge script script/RLCLiquidityUnifier.s.sol:ValidateUpgrade \
-        --rpc-url $(RPC_URL) \
-        -vvv
-
-validate-layerZero-bridge-upgrade:
-	@echo "Validating RLC LayerZero upgrade on: $(RPC_URL)"
-	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:ValidateUpgrade \
-        --rpc-url $(RPC_URL) \
-        -vvv
-
-upgrade-liquidity-unifier:
-	@echo "Upgrading RLCLiquidityUnifier on: $(RPC_URL)"
-	$(MAKE) validate-liquidity-unifier-upgrade
-	forge script script/RLCLiquidityUnifier.s.sol:Upgrade \
-        --rpc-url $(RPC_URL) \
-        --account $(ACCOUNT) \
-        --broadcast \
-        -vvv
-
-upgrade-layerzero-bridge:
-	@echo "Upgrading RLC LayerZero Bridge on: $(RPC_URL)"
-	$(MAKE) validate-layerZero-bridge-upgrade
-	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Upgrade \
-        --rpc-url $(RPC_URL) \
-        --account $(ACCOUNT) \
-        --broadcast \
-        -vvv
+upgrade-layerzero-bridge: # CHAIN, RPC_URL
+	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
 
 #
 # Bridge operations.
@@ -157,57 +146,3 @@ send-tokens-to-sepolia:
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
-
-#
-# Verification targets
-#
-
-# Implementation verification
-verify-adapter-impl:
-	@echo "Verifying RLCAdapter Implementation on Sepolia Etherscan..."
-	forge verify-contract \
-        --chain-id 11155111 \
-        --watch \
-        --constructor-args $(shell cast abi-encode "constructor(address,address)" $(RLC_ADDRESS) $(LAYER_ZERO_SEPOLIA_ENDPOINT_ADDRESS)) \
-        --etherscan-api-key $(ETHERSCAN_API_KEY) \
-        $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) \
-        src/bridges/layerZero/RLCAdapter.sol:RLCAdapter
-
-verify-layerzero-bridge-impl:
-	@echo "Verifying RLCOFT Implementation on Arbitrum Sepolia Etherscan..."
-	forge verify-contract \
-        --chain-id 421614 \
-        --watch \
-        --constructor-args $(shell cast abi-encode "constructor(address)" $(LAYER_ZERO_ARBITRUM_SEPOLIA_ENDPOINT_ADDRESS)) \
-        --etherscan-api-key $(ARBISCAN_API_KEY) \
-        $(LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS) \
-        src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge
-
-# Proxy verification
-verify-adapter-proxy:
-	@echo "Verifying RLCAdapter Proxy on Sepolia Etherscan..."
-	forge verify-contract \
-        --chain-id 11155111 \
-        --watch \
-        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ADAPTER_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(ADMIN_ADDRESS) $(PAUSER_ADDRESS))) \
-        --etherscan-api-key $(ETHERSCAN_API_KEY) \
-        $(RLC_ADAPTER_PROXY_ADDRESS) \
-        lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
-
-verify-layerzero-bridge-proxy:
-	@echo "Verifying RLCOFT Proxy on Arbitrum Sepolia Etherscan..."
-	forge verify-contract \
-        --chain-id 421614 \
-        --watch \
-        --constructor-args $(shell cast abi-encode "constructor(address,bytes)" $(RLC_ARBITRUM_SEPOLIA_OFT_IMPLEMENTATION_ADDRESS) $(shell cast calldata "initialize(address,address)" $(ADMIN_ADDRESS) $(PAUSER_ADDRESS))) \
-        --etherscan-api-key $(ARBISCAN_API_KEY) \
-        $(LAYERZERO_BRIDGE_PROXY_ADDRESS) \
-        lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
-
-# Combined verification targets
-verify-adapter: verify-adapter-impl verify-adapter-proxy
-verify-layerzero-bridge: verify-layerzero-bridge-impl verify-layerzero-bridge-proxy
-
-verify-implementations: verify-adapter-impl verify-layerzero-bridge-impl
-verify-proxies: verify-adapter-proxy verify-layerzero-bridge-proxy
-verify-all: verify-implementations verify-proxies

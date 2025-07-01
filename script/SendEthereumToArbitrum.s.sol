@@ -8,6 +8,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 // import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import {ConfigLib} from "./lib/ConfigLib.sol";
 
 contract SendTokensToArbitrumSepolia is Script {
     /**
@@ -21,15 +22,21 @@ contract SendTokensToArbitrumSepolia is Script {
 
     function run() external {
         vm.startBroadcast();
+        string memory config = vm.readFile("config/config.json");
+        string memory sourceChain = vm.envString("SOURCE_CHAIN");
+        string memory targetChain = vm.envString("TARGET_CHAIN");
+
+        ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(config, sourceChain);
+        ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(config, targetChain);
 
         // Contract addresses
-        address iexecLayerZeroBridgeAddress = vm.envAddress("LAYERZERO_BRIDGE_ADAPTER_PROXY_ADDRESS"); // Your IexecLayerZeroBridge address
-        address liquidityUnifierAddress = vm.envAddress("RLC_LIQUIDITY_UNIFIER_PROXY_ADDRESS"); // Your RLCLiquidityUnifier address
-        address rlcTokenAddress = vm.envAddress("RLC_ADDRESS"); // RLC token address on sepolia testnet
+        address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
+        address liquidityUnifierAddress = sourceParams.rlcLiquidityUnifierAddress;
+        address rlcTokenAddress = sourceParams.rlcToken;
 
         // Transfer parameters
-        uint16 destinationChainId = uint16(vm.envUint("LAYER_ZERO_ARBITRUM_SEPOLIA_CHAIN_ID")); // LayerZero chain ID for Arbitrum Sepolia
-        address recipientAddress = vm.envAddress("ADMIN_ADDRESS"); // Recipient on Arbitrum (your address)
+        uint16 destinationChainId = uint16(targetParams.lzChainId);
+        address recipientAddress = targetParams.initialAdmin; // TODO read recipient address from env variables.
         uint256 amount = 5 * 10 ** 9; //  RLC tokens (adjust the amount as needed)
 
         // First, approve the adapter to spend your tokens
