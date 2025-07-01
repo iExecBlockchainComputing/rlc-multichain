@@ -2,25 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import "forge-std/StdJson.sol";
 import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {BridgeConfigLib} from "./BridgeConfigLib.sol";
+import {ConfigLib} from "./../../lib/ConfigLib.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "../../lib/UpdateEnvUtils.sol";
 import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
-    using stdJson for string;
-
+    /**
+     * Reads configuration from config file and deploys IexecLayerZeroBridge contract.
+     * @return address of the deployed IexecLayerZeroBridge proxy contract.
+     */
     function run() external returns (address) {
         vm.startBroadcast();
 
         string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
 
-        BridgeConfigLib.CommonConfigParams memory params = BridgeConfigLib.readCommonConfig(config, chain);
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
 
         address iexecLayerZeroBridgeProxy = deploy(
             params.approvalRequired,
@@ -30,7 +31,7 @@ contract Deploy is Script {
             params.initialUpgrader,
             params.initialPauser,
             params.createxFactory,
-            params.createxSalt
+            params.iexecLayerZeroBridgeCreatexSalt
         );
 
         vm.stopBroadcast();
@@ -62,36 +63,32 @@ contract Deploy is Script {
 }
 
 contract Configure is Script {
-    using stdJson for string;
-
     function run() external {
         string memory config = vm.readFile("config/config.json");
         string memory sourceChain = vm.envString("SOURCE_CHAIN");
         string memory targetChain = vm.envString("TARGET_CHAIN");
 
+        ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(config, sourceChain);
+        ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(config, targetChain);
         vm.startBroadcast();
 
-        BridgeConfigLib.CommonConfigParams memory sourceParams = BridgeConfigLib.readCommonConfig(config, sourceChain);
-        BridgeConfigLib.CommonConfigParams memory targetParams = BridgeConfigLib.readCommonConfig(config, targetChain);
-
-        // Peer one bridge to another
-        IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.bridgeAddress);
-        sourceBridge.setPeer(targetParams.lzChainId, bytes32(uint256(uint160(targetParams.bridgeAddress))));
+        IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.iexecLayerZeroBridgeAddress);
+        sourceBridge.setPeer(
+            targetParams.lzChainId, bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)))
+        );
 
         vm.stopBroadcast();
     }
 }
 
 contract Upgrade is Script {
-    using stdJson for string;
-
     function run() external {
         vm.startBroadcast();
 
         string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
 
-        BridgeConfigLib.CommonConfigParams memory commonParams = BridgeConfigLib.readCommonConfig(config, chain);
+        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(config, chain);
         // For testing purpose
         uint256 newStateVariable = 1000000 * 10 ** 9;
 
@@ -99,11 +96,10 @@ contract Upgrade is Script {
             ? commonParams.rlcLiquidityUnifierAddress
             : commonParams.rlcCrossChainTokenAddress;
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: commonParams.bridgeAddress,
+            proxyAddress: commonParams.iexecLayerZeroBridgeAddress,
             constructorData: abi.encode(commonParams.approvalRequired, bridgeableToken, commonParams.lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
-            newStateVariable: newStateVariable,
-            validateOnly: false
+            newStateVariable: newStateVariable
         });
 
         address newImplementationAddress = UpgradeUtils.executeUpgrade(params);
@@ -111,28 +107,5 @@ contract Upgrade is Script {
         vm.stopBroadcast();
 
         EnvUtils.updateEnvVariable("LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS", newImplementationAddress);
-    }
-}
-
-contract ValidateUpgrade is Script {
-    using stdJson for string;
-
-    function run() external {
-        string memory config = vm.readFile("config/config.json");
-        string memory chain = vm.envString("CHAIN");
-
-        BridgeConfigLib.CommonConfigParams memory commonParams = BridgeConfigLib.readCommonConfig(config, chain);
-        address bridgeableToken = commonParams.approvalRequired
-            ? commonParams.rlcLiquidityUnifierAddress
-            : commonParams.rlcCrossChainTokenAddress;
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: address(0),
-            constructorData: abi.encode(bridgeableToken, commonParams.lzEndpoint),
-            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
-            newStateVariable: 1000000 * 10 ** 9,
-            validateOnly: true
-        });
-
-        UpgradeUtils.validateUpgrade(params);
     }
 }

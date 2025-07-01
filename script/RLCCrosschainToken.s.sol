@@ -3,36 +3,35 @@
 
 pragma solidity ^0.8.22;
 
-import "forge-std/StdJson.sol";
 import {Script} from "forge-std/Script.sol";
 import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
+import {ConfigLib} from "./lib/ConfigLib.sol";
 
 /**
  * Deployment script for the RLCCrosschainToken contract.
  * It reads configuration from a JSON file and deploys the contract using CreateX.
  */
 contract Deploy is Script {
-    using stdJson for string;
-
     /**
-     * Reads configuration from a JSON file and deploys RLCCrosschainToken contract.
-     *
+     * Reads configuration from config file and deploys RLCCrosschainToken contract.
      * @return address of the deployed RLCCrosschainToken proxy contract.
      */
     function run() external returns (address) {
-        // TODO put inside a shared utility function.
         string memory config = vm.readFile("config/config.json");
-        address initialAdmin = config.readAddress(".initialAdmin");
-        address initialUpgrader = config.readAddress(".initialUpgrader");
-        address createxFactory = config.readAddress(".createxFactory");
-        string memory chain = vm.envString("CHAIN"); // the same name as the config file.
-        string memory prefix = string.concat(".chains.", chain);
-        bytes32 createxSalt = config.readBytes32(string.concat(prefix, ".rlcCrossChainTokenCreatexSalt"));
+        string memory chain = vm.envString("CHAIN");
+
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
         vm.startBroadcast();
-        address rlcCrosschainTokenProxy =
-            deploy("iEx.ec Network Token", "RLC", initialAdmin, initialUpgrader, createxFactory, createxSalt);
+        address rlcCrosschainTokenProxy = deploy(
+            "iEx.ec Network Token",
+            "RLC",
+            params.initialAdmin,
+            params.initialUpgrader,
+            params.createxFactory,
+            params.rlcCrossChainTokenCreatexSalt
+        );
         vm.stopBroadcast();
 
         //TODO: use config file to store addresses.

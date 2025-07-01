@@ -57,8 +57,7 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
             proxyAddress: proxyAddress,
             constructorData: abi.encode(false, rlcCrosschainToken, mockEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
-            newStateVariable: NEW_STATE_VARIABLE,
-            validateOnly: false
+            newStateVariable: NEW_STATE_VARIABLE
         });
 
         UpgradeUtils.executeUpgrade(params);
