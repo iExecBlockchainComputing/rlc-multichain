@@ -15,7 +15,7 @@ import {ConfigLib} from "./lib/ConfigLib.sol";
  */
 contract Deploy is Script {
     /**
-     * Reads configuration from a JSON file and deploys RLCCrosschainToken contract.
+     * Reads configuration from config file and deploys RLCCrosschainToken contract.
      * @return address of the deployed RLCCrosschainToken proxy contract.
      */
     function run() external returns (address) {

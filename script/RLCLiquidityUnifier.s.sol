@@ -16,6 +16,7 @@ import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
     /**
+     * Reads configuration from config file and deploys RLCLiquidityUnifier contract.
      * @return address of the deployed RLCLiquidityUnifier proxy contract.
      */
     function run() external returns (address) {

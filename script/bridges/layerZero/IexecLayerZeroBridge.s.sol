@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import "forge-std/StdJson.sol";
 import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {ConfigLib} from "./../../lib/ConfigLib.sol";
@@ -12,7 +11,10 @@ import {EnvUtils} from "../../lib/UpdateEnvUtils.sol";
 import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
-    using stdJson for string;
+    /**
+     * Reads configuration from config file and deploys IexecLayerZeroBridge contract.
+     * @return address of the deployed IexecLayerZeroBridge proxy contract.
+     */
 
     function run() external returns (address) {
         vm.startBroadcast();
@@ -60,8 +62,6 @@ contract Deploy is Script {
 }
 
 contract Configure is Script {
-    using stdJson for string;
-
     function run() external {
         string memory config = vm.readFile("config/config.json");
         string memory sourceChain = vm.envString("SOURCE_CHAIN");
@@ -79,8 +79,6 @@ contract Configure is Script {
 }
 
 contract Upgrade is Script {
-    using stdJson for string;
-
     function run() external {
         vm.startBroadcast();
 
@@ -110,8 +108,6 @@ contract Upgrade is Script {
 }
 
 contract ValidateUpgrade is Script {
-    using stdJson for string;
-
     function run() external {
         string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
