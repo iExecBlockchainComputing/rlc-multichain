@@ -83,7 +83,7 @@ contract IexecLayerZeroBridge is
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
     // slither-disable-next-line naming-convention
-    bool public immutable APPROVAL_REQUIRED;
+    bool private immutable APPROVAL_REQUIRED;
 
     /**
      * @dev Constructor for the LayerZero bridge contract
