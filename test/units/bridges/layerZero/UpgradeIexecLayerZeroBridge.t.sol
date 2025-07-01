@@ -36,7 +36,7 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         proxyAddress = address(iexecLayerZeroBridgeV1);
     }
 
-    function testFuzz_UpgradeCorrectly() public {
+    function test_UpgradeCorrectly() public {
         // 1. Verify V1 doesn't have V2 functions
         (bool success,) = proxyAddress.call(abi.encodeWithSignature("newStateVariable()"));
         assertFalse(success, "V1 should not have newStateVariable() function");
