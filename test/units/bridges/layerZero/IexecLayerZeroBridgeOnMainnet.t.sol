@@ -18,7 +18,7 @@ import {RLCMock} from "../../mocks/RLCMock.sol";
 /**
  * Test Script for the IexecLayerZeroBridge on Ethereum Mainnet.
  * In this case, IexecLayerZeroBridge should be connected to
- * RLC LiquidityUnifier contract deployed on the same chain.
+ * RLCLiquidityUnifier contract deployed on the same chain.
  */
 contract IexecLayerZeroBridgeOnMainnetTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
