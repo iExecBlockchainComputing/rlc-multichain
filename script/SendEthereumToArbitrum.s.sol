@@ -30,8 +30,8 @@ contract SendTokensToArbitrumSepolia is Script {
         ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(config, targetChain);
 
         // Contract addresses
-        address iexecLayerZeroBridgeAddress = sourceParams.layerZeroBridge;
-        address liquidityUnifierAddress = sourceParams.rlcLiquidityUnifier;
+        address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
+        address liquidityUnifierAddress = sourceParams.rlcLiquidityUnifierAddress;
         address rlcTokenAddress = sourceParams.rlcToken;
 
         // Transfer parameters

@@ -30,7 +30,7 @@ contract SendTokensToSepolia is Script {
         ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(config, targetChain);
 
         // Contract addresses
-        address iexecLayerZeroBridgeAddress = sourceParams.layerZeroBridge;
+        address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
 
         // Transfer parameters
         uint16 destinationChainId = uint16(targetParams.lzChainId); // LayerZero chain ID for Ethereum Sepolia

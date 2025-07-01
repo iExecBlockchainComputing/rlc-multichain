@@ -27,7 +27,11 @@ contract Deploy is Script {
 
         vm.startBroadcast();
         address liquidityUnifierProxy = deploy(
-            params.rlcToken, params.initialAdmin, params.initialUpgrader, params.createxFactory, params.createxLUSalt
+            params.rlcToken,
+            params.initialAdmin,
+            params.initialUpgrader,
+            params.createxFactory,
+            params.rlcLiquidityUnifierCreatexSalt
         );
         vm.stopBroadcast();
 

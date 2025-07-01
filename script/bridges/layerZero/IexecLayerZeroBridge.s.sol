@@ -15,7 +15,6 @@ contract Deploy is Script {
      * Reads configuration from config file and deploys IexecLayerZeroBridge contract.
      * @return address of the deployed IexecLayerZeroBridge proxy contract.
      */
-
     function run() external returns (address) {
         vm.startBroadcast();
 
@@ -25,13 +24,13 @@ contract Deploy is Script {
         ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
 
         address iexecLayerZeroBridgeProxy = deploy(
-            params.approvalRequired ? params.rlcLiquidityUnifier : params.rlcCrossChainToken,
+            params.approvalRequired ? params.rlcLiquidityUnifierAddress : params.rlcCrossChainTokenAddress,
             params.lzEndpoint,
             params.initialAdmin,
             params.initialUpgrader,
             params.initialPauser,
             params.createxFactory,
-            params.createxBridgeSalt
+            params.iexecLayerZeroBridgeCreatexSalt
         );
 
         vm.stopBroadcast();
@@ -71,8 +70,10 @@ contract Configure is Script {
         ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(config, targetChain);
         vm.startBroadcast();
 
-        IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.layerZeroBridge);
-        sourceBridge.setPeer(targetParams.lzChainId, bytes32(uint256(uint160(targetParams.layerZeroBridge))));
+        IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.iexecLayerZeroBridgeAddress);
+        sourceBridge.setPeer(
+            targetParams.lzChainId, bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)))
+        );
 
         vm.stopBroadcast();
     }
@@ -89,10 +90,11 @@ contract Upgrade is Script {
         // For testing purpose
         uint256 newStateVariable = 1000000 * 10 ** 9;
 
-        address bridgeableToken =
-            commonParams.approvalRequired ? commonParams.rlcLiquidityUnifier : commonParams.rlcCrossChainToken;
+        address bridgeableToken = commonParams.approvalRequired
+            ? commonParams.rlcLiquidityUnifierAddress
+            : commonParams.rlcCrossChainTokenAddress;
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: commonParams.layerZeroBridge,
+            proxyAddress: commonParams.iexecLayerZeroBridgeAddress,
             constructorData: abi.encode(bridgeableToken, commonParams.lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
             newStateVariable: newStateVariable,
@@ -113,8 +115,9 @@ contract ValidateUpgrade is Script {
         string memory chain = vm.envString("CHAIN");
 
         ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(config, chain);
-        address bridgeableToken =
-            commonParams.approvalRequired ? commonParams.rlcLiquidityUnifier : commonParams.rlcCrossChainToken;
+        address bridgeableToken = commonParams.approvalRequired
+            ? commonParams.rlcLiquidityUnifierAddress
+            : commonParams.rlcCrossChainTokenAddress;
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: address(0),
             constructorData: abi.encode(bridgeableToken, commonParams.lzEndpoint),

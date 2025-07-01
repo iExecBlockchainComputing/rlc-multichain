@@ -22,13 +22,13 @@ library ConfigLib {
         address lzEndpoint;
         uint32 lzChainId;
         address rlcToken; // RLC token address (already deployed on L1)
-        bytes32 createxLUSalt; // Salt for CreateX deployment of the RLC Liquidity Unifier
-        address rlcLiquidityUnifier; // RLC Liquidity Unifier address (only on L1)
-        bytes32 createxCCTSalt; // Salt for CreateX deployment of the RLC CrossChain Token
-        address rlcCrossChainToken; // RLC CrossChain token address (only on L2)
+        bytes32 rlcLiquidityUnifierCreatexSalt; // Salt for CreateX deployment of the RLC Liquidity Unifier
+        address rlcLiquidityUnifierAddress; // RLC Liquidity Unifier address (only on L1)
+        bytes32 rlcCrossChainTokenCreatexSalt; // Salt for CreateX deployment of the RLC CrossChain Token
+        address rlcCrossChainTokenAddress; // RLC CrossChain token address (only on L2)
         bool approvalRequired; // Whether approval is required for the bridgeable token (yes on L1, no on L2)
-        bytes32 createxBridgeSalt; // Salt for CreateX deployment of the LayerZero bridge
-        address layerZeroBridge;
+        bytes32 iexecLayerZeroBridgeCreatexSalt; // Salt for CreateX deployment of the LayerZero bridge
+        address iexecLayerZeroBridgeAddress;
     }
 
     /**
@@ -83,6 +83,29 @@ library ConfigLib {
         return config.readAddress(string.concat(prefix, ".iexecLayerZeroBridgeAddress"));
     }
 
+    function getAllCreatexParams(string memory config, string memory prefix)
+        internal
+        pure
+        returns (
+            bytes32 rlcCrossChainTokenCreatexSalt,
+            bytes32 rlcLiquidityUnifierCreatexSalt,
+            bytes32 iexecLayerZeroBridgeCreatexSalt
+        )
+    {
+        if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
+            rlcCrossChainTokenCreatexSalt = bytes32(0); // RLC CrossChain token is not deployed on L1
+            iexecLayerZeroBridgeCreatexSalt =
+                config.readBytes32(string.concat(prefix, ".iexecLayerZeroBridgeCreatexSalt"));
+            rlcLiquidityUnifierCreatexSalt =
+                config.readBytes32(string.concat(prefix, ".rlcLiquidityUnifierCreatexSalt"));
+        } else {
+            rlcCrossChainTokenCreatexSalt = config.readBytes32(string.concat(prefix, ".rlcCrossChainTokenCreatexSalt"));
+            rlcLiquidityUnifierCreatexSalt = bytes32(0); // RLC Liquidity Unifier is not deployed on L2s
+            iexecLayerZeroBridgeCreatexSalt =
+                config.readBytes32(string.concat(prefix, ".iexecLayerZeroBridgeCreatexSalt"));
+        }
+    }
+
     /**
      * @dev Reads common configuration parameters from config.json
      * @param config The JSON configuration string
@@ -100,13 +123,15 @@ library ConfigLib {
         params.initialUpgrader = config.readAddress(".initialUpgrader");
         params.createxFactory = config.readAddress(".createxFactory");
         params.rlcToken = getRLCTokenAddress(config, prefix);
-        params.createxCCTSalt = config.readBytes32(string.concat(prefix, ".rlcCrossChainTokenCreatexSalt"));
-        params.rlcCrossChainToken = getRLCCrossChainTokenAddress(config, prefix);
-        params.createxLUSalt = config.readBytes32(string.concat(prefix, ".rlcLiquidityUnifierCreatexSalt"));
-        params.rlcLiquidityUnifier = getLiquidityUnifierAddress(config, prefix);
+        (
+            params.rlcCrossChainTokenCreatexSalt,
+            params.rlcLiquidityUnifierCreatexSalt,
+            params.iexecLayerZeroBridgeCreatexSalt
+        ) = getAllCreatexParams(config, prefix);
+        params.rlcCrossChainTokenAddress = getRLCCrossChainTokenAddress(config, prefix);
+        params.rlcLiquidityUnifierAddress = getLiquidityUnifierAddress(config, prefix);
         params.approvalRequired = config.readBool(string.concat(prefix, ".approvalRequired"));
-        params.createxBridgeSalt = config.readBytes32(string.concat(prefix, ".iexecLayerZeroBridgeCreatexSalt"));
-        params.layerZeroBridge = config.readAddress(string.concat(prefix, ".iexecLayerZeroBridgeAddress"));
+        params.iexecLayerZeroBridgeAddress = config.readAddress(string.concat(prefix, ".iexecLayerZeroBridgeAddress"));
         params.lzEndpoint = config.readAddress(string.concat(prefix, ".lzEndpointAddress"));
         params.lzChainId = uint32(config.readUint(string.concat(prefix, ".lzChainId")));
     }
