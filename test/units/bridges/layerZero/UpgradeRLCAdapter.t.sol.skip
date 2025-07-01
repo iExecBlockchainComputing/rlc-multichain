@@ -58,7 +58,6 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
             lzEndpoint: mockEndpoint,
             rlcToken: address(rlcToken),
             newStateVariable: NEW_STATE_VARIABLE,
-            validateOnly: false
         });
 
         UpgradeUtils.executeUpgrade(params);
@@ -91,7 +90,6 @@ contract UpgradeRLCAdapterTest is TestHelperOz5 {
             lzEndpoint: mockEndpoint,
             rlcToken: address(rlcToken),
             newStateVariable: NEW_STATE_VARIABLE,
-            validateOnly: false
         });
 
         UpgradeUtils.executeUpgrade(params);

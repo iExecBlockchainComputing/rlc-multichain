@@ -77,26 +77,10 @@ contract Upgrade is Script {
             proxyAddress: proxyAddress,
             constructorData: abi.encode(rlcToken),
             contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2", // Would be production contract in real deployment
-            newStateVariable: 1000000 * 10 ** 9,
-            validateOnly: false
+            newStateVariable: 1000000 * 10 ** 9
         });
 
         UpgradeUtils.executeUpgrade(params);
         vm.stopBroadcast();
-    }
-}
-
-contract ValidateUpgrade is Script {
-    function run() external {
-        address rlcToken = vm.envAddress("RLC_ADDRESS");
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: address(0),
-            constructorData: abi.encode(rlcToken),
-            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
-            newStateVariable: 1000000 * 10 ** 9,
-            validateOnly: true
-        });
-
-        UpgradeUtils.validateUpgrade(params);
     }
 }

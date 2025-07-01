@@ -97,8 +97,7 @@ contract Upgrade is Script {
             proxyAddress: commonParams.iexecLayerZeroBridgeAddress,
             constructorData: abi.encode(bridgeableToken, commonParams.lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
-            newStateVariable: newStateVariable,
-            validateOnly: false
+            newStateVariable: newStateVariable
         });
 
         address newImplementationAddress = UpgradeUtils.executeUpgrade(params);
@@ -106,26 +105,5 @@ contract Upgrade is Script {
         vm.stopBroadcast();
 
         EnvUtils.updateEnvVariable("LAYERZERO_BRIDGE_IMPLEMENTATION_ADDRESS", newImplementationAddress);
-    }
-}
-
-contract ValidateUpgrade is Script {
-    function run() external {
-        string memory config = vm.readFile("config/config.json");
-        string memory chain = vm.envString("CHAIN");
-
-        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(config, chain);
-        address bridgeableToken = commonParams.approvalRequired
-            ? commonParams.rlcLiquidityUnifierAddress
-            : commonParams.rlcCrossChainTokenAddress;
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: address(0),
-            constructorData: abi.encode(bridgeableToken, commonParams.lzEndpoint),
-            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
-            newStateVariable: 1000000 * 10 ** 9,
-            validateOnly: true
-        });
-
-        UpgradeUtils.validateUpgrade(params);
     }
 }
