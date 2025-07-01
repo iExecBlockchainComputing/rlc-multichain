@@ -9,7 +9,12 @@ import {Deploy as IexecLayerZeroBridgeDeploy} from "../../script/bridges/layerZe
 import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosschainToken.s.sol";
 
-contract IexecLayerZeroBridgeScriptTest is Test {
+/**
+ * Test Script for the IexecLayerZeroBridge on any chain expect Ethereum Mainnet.
+ * In this case, IexecLayerZeroBridge should be connected to
+ * RLCCrosschainToken deployed on the same chain.
+ */
+contract IexecLayerZeroBridgeScriptOnChainXTest is Test {
     // TODO read value from config.json file.
     address LAYERZERO_ENDPOINT = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
     address CREATEX = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
