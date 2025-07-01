@@ -73,16 +73,6 @@ library ConfigLib {
         }
     }
 
-    /**
-     * @dev Gets the LayerZero bridge address for the specified chain
-     * @param config The JSON configuration string
-     * @param prefix The JSON path prefix for the current chain
-     * @return The address of the LayerZero bridge contract
-     */
-    function getLayerZeroBridgeAddress(string memory config, string memory prefix) internal pure returns (address) {
-        return config.readAddress(string.concat(prefix, ".iexecLayerZeroBridgeAddress"));
-    }
-
     function getAllCreatexParams(string memory config, string memory prefix)
         internal
         pure
