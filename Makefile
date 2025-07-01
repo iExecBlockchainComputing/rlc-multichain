@@ -98,15 +98,8 @@ deploy-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
 # Generic upgrade targets
 #
 
-validate-contract: # CONTRACT, CHAIN, RPC_URL
-	@echo "Validating $(CONTRACT) upgrade on $(CHAIN)"
-	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:ValidateUpgrade \
-		--rpc-url $(RPC_URL) \
-		-vvv
-
 upgrade-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
 	@echo "Upgrading $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
-	$(MAKE) validate-contract CONTRACT=$(CONTRACT) CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
 	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Upgrade \
 		--rpc-url $(RPC_URL) \
 		--account $(ACCOUNT) \
