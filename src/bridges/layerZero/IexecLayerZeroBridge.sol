@@ -67,7 +67,6 @@ contract IexecLayerZeroBridge is
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
-     * @custom:security The immutable nature ensures the token contract cannot be changed post-deployment
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
     // slither-disable-next-line naming-convention
@@ -76,15 +75,15 @@ contract IexecLayerZeroBridge is
     /**
      * @dev Indicates the token transfer mechanism required for this deployment.
      *
-     * - true: Mainnet deployment requiring user approval (lock/unlock mechanism)
-     * - false: Non-mainnet deployment with direct mint/burn capabilities
+     * - true: Ethereum Mainnet deployment requiring user approval (lock/unlock mechanism)
+     * - false: Non Ethereum Mainnet deployment with direct mint/burn capabilities
      *
      * This flag indicates on which chain the bridge is deployed.
      *
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
     // slither-disable-next-line naming-convention
-    bool public immutable APPROVAL_REQUIRED;
+    bool private immutable APPROVAL_REQUIRED;
 
     /**
      * @dev Constructor for the LayerZero bridge contract
