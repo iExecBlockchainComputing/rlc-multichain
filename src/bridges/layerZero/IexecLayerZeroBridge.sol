@@ -67,7 +67,6 @@ contract IexecLayerZeroBridge is
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
-     * @custom:security The immutable nature ensures the token contract cannot be changed post-deployment
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
     // slither-disable-next-line naming-convention
