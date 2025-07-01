@@ -26,7 +26,7 @@ contract Deploy is Script {
             params.initialUpgrader,
             params.initialPauser,
             params.createxFactory,
-            params.createxSalt
+            params.createxBridgeSalt
         );
 
         vm.stopBroadcast();
@@ -84,9 +84,8 @@ contract Upgrade is Script {
         // For testing purpose
         uint256 newStateVariable = 1000000 * 10 ** 9;
 
-        address bridgeableToken = commonParams.approvalRequired
-            ? commonParams.rlcLiquidityUnifier
-            : commonParams.rlcCrossChainToken;
+        address bridgeableToken =
+            commonParams.approvalRequired ? commonParams.rlcLiquidityUnifier : commonParams.rlcCrossChainToken;
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: commonParams.layerZeroBridge,
             constructorData: abi.encode(bridgeableToken, commonParams.lzEndpoint),
@@ -109,9 +108,8 @@ contract ValidateUpgrade is Script {
         string memory chain = vm.envString("CHAIN");
 
         ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(config, chain);
-        address bridgeableToken = commonParams.approvalRequired
-            ? commonParams.rlcLiquidityUnifier
-            : commonParams.rlcCrossChainToken;
+        address bridgeableToken =
+            commonParams.approvalRequired ? commonParams.rlcLiquidityUnifier : commonParams.rlcCrossChainToken;
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: address(0),
             constructorData: abi.encode(bridgeableToken, commonParams.lzEndpoint),

@@ -30,7 +30,7 @@ contract Deploy is Script {
             params.initialAdmin,
             params.initialUpgrader,
             params.createxFactory,
-            params.createxSalt
+            params.createxCCTSalt
         );
         vm.stopBroadcast();
 
