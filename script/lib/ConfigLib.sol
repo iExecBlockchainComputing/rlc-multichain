@@ -21,67 +21,57 @@ library ConfigLib {
         address createxFactory;
         bytes32 createxSalt;
         address lzEndpoint;
-        uint32 layerZeroChainId;
-        address rlcToken;
-        address bridgeableToken;
-        address rlcLiquidityUnifier;
+        uint32 lzChainId;
+        address rlcToken; // RLC token address (already deployed on L1)
+        address rlcLiquidityUnifier; // RLC Liquidity Unifier address (only on L1)
+        address rlcCrossChainToken; // RLC CrossChain token address (only on L2)
+        bool approvalRequired; // Whether approval is required for the bridgeable token (yes on L1, no on L2)
         address layerZeroBridge;
     }
 
-    /**
-     * @dev Gets the appropriate token address for bridging based on the chain
+        /**
+     * @dev Gets the appropriate bridgeable token address based on the chain
      * @param config The JSON configuration string
-     * @param chain The current chain identifier
      * @param prefix The JSON path prefix for the current chain
      * @return The address of the bridgeable token (RLCLiquidityUnifier on mainnet, RLC CrossChain on L2s)
      */
-    function getBridgeableTokenAddress(string memory config, string memory chain, string memory prefix)
-        internal
-        pure
-        returns (address)
-    {
-        if (keccak256(abi.encodePacked(chain)) == keccak256(abi.encodePacked("sepolia"))) {
+    function getLiquidityUnifierAddress(string memory config, string memory prefix) internal pure returns (address) {
+        if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
             return config.readAddress(string.concat(prefix, ".rlcLiquidityUnifierAddress"));
+        } else {
+            return address(0);
+        }
+    }
+    /**
+     * @dev Gets the RLC CrossChain token address based on the chain
+     * @param config The JSON configuration string
+     * @param prefix The JSON path prefix for the current chain
+     * @return The address of the RLC CrossChain token
+     */
+
+    function getRLCCrossChainTokenAddress(string memory config, string memory prefix) internal pure returns (address) {
+        if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
+            return address(0);
         } else {
             return config.readAddress(string.concat(prefix, ".rlcCrossChainTokenAddress"));
         }
     }
 
     /**
-     * @dev Gets the liquidity unifier address (only applicable for L1 chains)
+     * @dev Gets the bridgeable token address based on the chains
      * @param config The JSON configuration string
-     * @param chain The current chain identifier
-     * @param prefix The JSON path prefix for the current chain
-     * @return The address of the liquidity unifier (zero address for L2s)
-     */
-    function getLiquidityUnifierAddress(string memory config, string memory chain, string memory prefix)
-        internal
-        pure
-        returns (address)
-    {
-        if (keccak256(abi.encodePacked(chain)) == keccak256(abi.encodePacked("sepolia"))) {
-            return config.readAddress(string.concat(prefix, ".rlcLiquidityUnifierAddress"));
-        } else {
-            return address(0); // Not applicable for L2s
-        }
-    }
-
-    /**
-     * @dev Gets the appropriate RLC token address based on the chain
-     * @param config The JSON configuration string
-     * @param chain The current chain identifier
      * @param prefix The JSON path prefix for the current chain
      * @return The address of the RLC token (native RLC on L1, crosschain token on L2s)
      */
-    function getRLCTokenAddress(string memory config, string memory chain, string memory prefix)
+    function getRLCTokenAddress(string memory config, string memory prefix)
         internal
         pure
         returns (address)
     {
-        if (keccak256(abi.encodePacked(chain)) == keccak256(abi.encodePacked("sepolia"))) {
+        if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
             return config.readAddress(string.concat(prefix, ".rlcAddress"));
         } else {
-            return config.readAddress(string.concat(prefix, ".rlcCrossChainTokenAddress"));
+            return address(0);
         }
     }
 
@@ -107,17 +97,17 @@ library ConfigLib {
         returns (CommonConfigParams memory params)
     {
         string memory prefix = string.concat(".chains.", chain);
-
         params.initialAdmin = config.readAddress(".initialAdmin");
         params.initialPauser = config.readAddress(".initialPauser");
         params.initialUpgrader = config.readAddress(".initialUpgrader");
         params.createxFactory = config.readAddress(".createxFactory");
-        params.bridgeableToken = getBridgeableTokenAddress(config, chain, prefix);
-        params.rlcLiquidityUnifier = getLiquidityUnifierAddress(config, chain, prefix);
-        params.rlcToken = getRLCTokenAddress(config, chain, prefix);
-        params.lzEndpoint = config.readAddress(string.concat(prefix, ".layerZeroEndpointAddress"));
+        params.rlcToken = getRLCTokenAddress(config, prefix);
+        params.rlcLiquidityUnifier = getLiquidityUnifierAddress(config, prefix);
+        params.rlcCrossChainToken = getRLCCrossChainTokenAddress(config, prefix);
+        params.approvalRequired = config.readBool(string.concat(prefix, ".approvalRequired"));
         params.createxSalt = config.readBytes32(string.concat(prefix, ".iexecLayerZeroBridgeCreatexSalt"));
         params.layerZeroBridge = config.readAddress(string.concat(prefix, ".iexecLayerZeroBridgeAddress"));
-        params.layerZeroChainId = uint32(config.readUint(string.concat(prefix, ".layerZeroChainId")));
+        params.lzEndpoint = config.readAddress(string.concat(prefix, ".lzEndpointAddress"));
+        params.lzChainId = uint32(config.readUint(string.concat(prefix, ".lzChainId")));
     }
 }

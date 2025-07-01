@@ -20,7 +20,7 @@ contract Deploy is Script {
         ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
 
         address iexecLayerZeroBridgeProxy = deploy(
-            params.bridgeableToken,
+            params.approvalRequired ? params.rlcLiquidityUnifier : params.rlcCrossChainToken,
             params.lzEndpoint,
             params.initialAdmin,
             params.initialUpgrader,
@@ -66,9 +66,8 @@ contract Configure is Script {
         ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(config, targetChain);
         vm.startBroadcast();
 
-        // Configure one bridge to another
         IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.layerZeroBridge);
-        sourceBridge.setPeer(targetParams.layerZeroChainId, bytes32(uint256(uint160(targetParams.layerZeroBridge))));
+        sourceBridge.setPeer(targetParams.lzChainId, bytes32(uint256(uint160(targetParams.layerZeroBridge))));
 
         vm.stopBroadcast();
     }
@@ -85,9 +84,12 @@ contract Upgrade is Script {
         // For testing purpose
         uint256 newStateVariable = 1000000 * 10 ** 9;
 
+        address bridgeableToken = commonParams.approvalRequired
+            ? commonParams.rlcLiquidityUnifier
+            : commonParams.rlcCrossChainToken;
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: commonParams.layerZeroBridge,
-            constructorData: abi.encode(commonParams.bridgeableToken, commonParams.lzEndpoint),
+            constructorData: abi.encode(bridgeableToken, commonParams.lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
             newStateVariable: newStateVariable,
             validateOnly: false
@@ -107,10 +109,12 @@ contract ValidateUpgrade is Script {
         string memory chain = vm.envString("CHAIN");
 
         ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(config, chain);
-
+        address bridgeableToken = commonParams.approvalRequired
+            ? commonParams.rlcLiquidityUnifier
+            : commonParams.rlcCrossChainToken;
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: address(0),
-            constructorData: abi.encode(commonParams.bridgeableToken, commonParams.lzEndpoint),
+            constructorData: abi.encode(bridgeableToken, commonParams.lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             newStateVariable: 1000000 * 10 ** 9,
             validateOnly: true

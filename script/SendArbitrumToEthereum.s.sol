@@ -33,7 +33,7 @@ contract SendTokensToSepolia is Script {
         address iexecLayerZeroBridgeAddress = sourceParams.layerZeroBridge;
 
         // Transfer parameters
-        uint16 destinationChainId = uint16(targetParams.layerZeroChainId); // LayerZero chain ID for Ethereum Sepolia
+        uint16 destinationChainId = uint16(targetParams.lzChainId); // LayerZero chain ID for Ethereum Sepolia
         address recipientAddress = sourceParams.initialAdmin; // Replace with the actual recipient address
         console.log("Recipient: %s", recipientAddress);
 
