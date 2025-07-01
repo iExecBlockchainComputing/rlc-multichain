@@ -20,8 +20,8 @@ library TestUtils {
     function setupDeployment(
         string memory name,
         string memory symbol,
-        address lzEndpointAdapter,
-        address lzEndpointBridge,
+        address lzEndpointSource,
+        address lzEndpointDestination,
         address initialAdmin,
         address initialUpgrader,
         address initialPauser
@@ -58,7 +58,7 @@ library TestUtils {
         iexecLayerZeroBridgeChainA = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
-                abi.encode(true, rlcLiquidityUnifier, lzEndpointAdapter),
+                abi.encode(true, rlcLiquidityUnifier, lzEndpointSource),
                 abi.encodeWithSelector(
                     IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
                 ),
@@ -77,7 +77,7 @@ library TestUtils {
         iexecLayerZeroBridgeChainB = IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUUPSProxyWithCreateX(
                 "IexecLayerZeroBridge",
-                abi.encode(false, rlcCrosschainToken, lzEndpointBridge),
+                abi.encode(false, rlcCrosschainToken, lzEndpointDestination),
                 abi.encodeWithSelector(
                     IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
                 ),

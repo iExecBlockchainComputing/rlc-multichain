@@ -12,15 +12,18 @@ import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayer
 import {DualPausableUpgradeable} from "../../../../src/bridges/utils/DualPausableUpgradeable.sol";
 import {TestUtils} from "../../utils/TestUtils.sol";
 import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
+import {RLCLiquidityUnifier} from "../../../../src/RLCLiquidityUnifier.sol";
+import {RLCMock} from "../../mocks/RLCMock.sol";
 
-contract IexecLayerZeroBridgeTest is TestHelperOz5 {
+contract IexecLayerZeroBridgeOnMainnetTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;
 
     // ============ STATE VARIABLES ============
     IexecLayerZeroBridge private iexecLayerZeroBridgeEthereum;
-    IexecLayerZeroBridge private iexecLayerZeroBridgeChainB;
-    RLCCrosschainToken private rlcCrosschainToken;
+    IexecLayerZeroBridge private iexecLayerZeroBridgeChainX;
+    RLCMock private rlcToken;
+    RLCLiquidityUnifier private rlcLiquidityUnifier;
 
     uint32 private constant SOURCE_EID = 1;
     uint32 private constant DEST_EID = 2;
@@ -42,48 +45,49 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
 
         // Set up endpoints for the deployment
-        address lzEndpointBridge = address(endpoints[SOURCE_EID]);
-        address lzEndpointAdapter = address(endpoints[DEST_EID]);
+        address lzEndpointSource = address(endpoints[SOURCE_EID]);
+        address lzEndpointDestination = address(endpoints[DEST_EID]);
 
-        //TODO: make tests with iexecLayerZeroBridgeEthereum - when iexecLayerZeroBridge is connected to liquidity unifier
-        (iexecLayerZeroBridgeEthereum, iexecLayerZeroBridgeChainB,, rlcCrosschainToken,) =
-            TestUtils.setupDeployment(name, symbol, lzEndpointAdapter, lzEndpointBridge, admin, upgrader, pauser);
+        (iexecLayerZeroBridgeEthereum, iexecLayerZeroBridgeChainX, rlcToken,, rlcLiquidityUnifier) =
+            TestUtils.setupDeployment(name, symbol, lzEndpointSource, lzEndpointDestination, admin, upgrader, pauser);
 
-        address iexecLayerZeroBridgeChainBAddress = address(iexecLayerZeroBridgeChainB);
+        address iexecLayerZeroBridgeEthereumAddress = address(iexecLayerZeroBridgeEthereum);
+        address iexecLayerZeroBridgeChainXAddress = address(iexecLayerZeroBridgeChainX);
         // Wire the contracts
         address[] memory contracts = new address[](2);
-        contracts[0] = iexecLayerZeroBridgeChainBAddress;
-        contracts[1] = address(iexecLayerZeroBridgeEthereum);
+        contracts[0] = iexecLayerZeroBridgeEthereumAddress;
+        contracts[1] = iexecLayerZeroBridgeChainXAddress;
         vm.startPrank(admin);
         wireOApps(contracts);
         vm.stopPrank();
 
         // Authorize the bridge to mint/burn tokens.
         vm.startPrank(admin);
-        rlcCrosschainToken.grantRole(rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), iexecLayerZeroBridgeChainBAddress);
+        rlcLiquidityUnifier.grantRole(rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), iexecLayerZeroBridgeEthereumAddress);
         vm.stopPrank();
 
-        // Mint RLC tokens to user1
-        vm.prank(iexecLayerZeroBridgeChainBAddress);
-        rlcCrosschainToken.crosschainMint(user1, INITIAL_BALANCE);
+        // Transfer initial RLC balance to user1
+        rlcToken.transfer(user1, INITIAL_BALANCE);
     }
 
     // ============ BASIC BRIDGE FUNCTIONALITY TESTS ============
     function test_SendToken_WhenOperational() public {
         // Check initial balances
-        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE);
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(iexecLayerZeroBridgeChainB, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(iexecLayerZeroBridgeEthereum, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
-        vm.prank(user1);
-        iexecLayerZeroBridgeChainB.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        vm.startPrank(user1);
+        rlcToken.approve(address(iexecLayerZeroBridgeEthereum), TRANSFER_AMOUNT); // For Stargate compatibility, user should approve iexecLayerZeroBridge
+        iexecLayerZeroBridgeEthereum.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        vm.stopPrank();
 
         // Verify source state - tokens should be burned
-        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
+        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
     //TODO: Add more tests for send functionality, in both directions
@@ -92,34 +96,34 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function test_Pause_OnlyPauserRole() public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
-        iexecLayerZeroBridgeChainB.pause();
+        iexecLayerZeroBridgeEthereum.pause();
     }
 
     function test_Pause_BlocksOutgoingTransfers() public {
         // Pause the bridge
         vm.prank(pauser);
-        iexecLayerZeroBridgeChainB.pause();
+        iexecLayerZeroBridgeEthereum.pause();
 
         // Prepare send parameters
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(iexecLayerZeroBridgeChainB, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(iexecLayerZeroBridgeEthereum, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Attempt to send tokens - should revert
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
         vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-        iexecLayerZeroBridgeChainB.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        iexecLayerZeroBridgeEthereum.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify no tokens were burned
-        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
     function test_Unpause_RestoresFullFunctionality() public {
         // Pause then unpause the bridge
         vm.startPrank(pauser);
-        iexecLayerZeroBridgeChainB.pause();
+        iexecLayerZeroBridgeEthereum.pause();
 
-        iexecLayerZeroBridgeChainB.unpause();
+        iexecLayerZeroBridgeEthereum.unpause();
         vm.stopPrank();
 
         // Should now work normally
@@ -129,21 +133,23 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function test_sendRLCWhenSourceLayerZeroBridgeUnpaused() public {
         // Pause then unpause the bridge
         vm.startPrank(pauser);
-        iexecLayerZeroBridgeChainB.pause();
-        iexecLayerZeroBridgeChainB.unpause();
+        iexecLayerZeroBridgeEthereum.pause();
+        iexecLayerZeroBridgeEthereum.unpause();
         vm.stopPrank();
 
         // Prepare send parameters using utility
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(iexecLayerZeroBridgeChainB, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(iexecLayerZeroBridgeEthereum, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
-        vm.prank(user1);
-        iexecLayerZeroBridgeChainB.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        vm.startPrank(user1);
+        rlcToken.approve(address(iexecLayerZeroBridgeEthereum), TRANSFER_AMOUNT); // For Stargate compatibility, user should approve iexecLayerZeroBridge
+        iexecLayerZeroBridgeEthereum.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        vm.stopPrank();
 
         // Verify source state - tokens should be burned
-        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
+        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
     // ============ LEVEL 2 PAUSE TESTS (Send Pause) ============
@@ -151,65 +157,61 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function test_PauseSend_OnlyPauserRole() public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
-        iexecLayerZeroBridgeChainB.pauseSend();
+        iexecLayerZeroBridgeEthereum.pauseSend();
     }
 
     function test_PauseSend_BlocksOutgoingOnly() public {
         // Pause send
         vm.prank(pauser);
-        iexecLayerZeroBridgeChainB.pauseSend();
+        iexecLayerZeroBridgeEthereum.pauseSend();
 
         // Verify state
-        assertFalse(iexecLayerZeroBridgeChainB.paused());
-        assertTrue(iexecLayerZeroBridgeChainB.sendPaused());
+        assertFalse(iexecLayerZeroBridgeEthereum.paused());
+        assertTrue(iexecLayerZeroBridgeEthereum.sendPaused());
 
         // Prepare send parameters
         (SendParam memory sendParam, MessagingFee memory fee) =
-            TestUtils.prepareSend(iexecLayerZeroBridgeChainB, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
+            TestUtils.prepareSend(iexecLayerZeroBridgeEthereum, addressToBytes32(user2), TRANSFER_AMOUNT, DEST_EID);
 
         // Attempt to send tokens - should revert with EnforcedSendPause
         vm.deal(user1, fee.nativeFee);
-        vm.prank(user1);
+        vm.startPrank(user1);
+        rlcToken.approve(address(iexecLayerZeroBridgeEthereum), TRANSFER_AMOUNT); // For Stargate compatibility, user should approve iexecLayerZeroBridge
         vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
-        iexecLayerZeroBridgeChainB.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        iexecLayerZeroBridgeEthereum.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        vm.stopPrank();
 
         // Verify no tokens were burned
-        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
+        assertEq(rlcToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
     function test_UnpauseSend_RestoresOutgoingTransfers() public {
         // Pause then unpause send
         vm.startPrank(pauser);
-        iexecLayerZeroBridgeChainB.pauseSend();
+        iexecLayerZeroBridgeEthereum.pauseSend();
 
-        iexecLayerZeroBridgeChainB.unpauseSend();
+        iexecLayerZeroBridgeEthereum.unpauseSend();
         vm.stopPrank();
 
         // Should now work normally
-        assertFalse(iexecLayerZeroBridgeChainB.paused());
-        assertFalse(iexecLayerZeroBridgeChainB.sendPaused());
+        assertFalse(iexecLayerZeroBridgeEthereum.paused());
+        assertFalse(iexecLayerZeroBridgeEthereum.sendPaused());
 
         test_SendToken_WhenOperational();
     }
 
     // ============ token and approvalRequired ============
     function test_ReturnsBridgeableTokenAddress() public view {
-        address bridgeTokenAddress = iexecLayerZeroBridgeChainB.token();
-        assertEq(bridgeTokenAddress, address(rlcCrosschainToken), "token() should return the RLC token address");
+        // On Ethereum Mainnet
+        address bridgeableToken = iexecLayerZeroBridgeEthereum.token();
+        assertEq(bridgeableToken, address(rlcToken), "token() should return the RLC token address");
     }
 
-    function test_ShouldBeTrueOnMainnet() public {
+    function test_ReturnsApprovalRequired() public {
         // Simulate Ethereum Mainnet chain ID
         vm.chainId(1);
         bool requiresApproval = iexecLayerZeroBridgeEthereum.approvalRequired();
         assertTrue(requiresApproval, "approvalRequired() should return true on Ethereum Mainnet");
-    }
-
-    function test_ShouldBeFalseOffMainnet() public {
-        // Simulate non-mainnet chain ID
-        vm.chainId(31337);
-        bool requiresApproval = iexecLayerZeroBridgeChainB.approvalRequired();
-        assertFalse(requiresApproval, "approvalRequired() should return false on non-mainnet chains");
     }
 
     //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues

@@ -6,8 +6,9 @@ pragma solidity ^0.8.22;
 import {Test} from "forge-std/Test.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Deploy as IexecLayerZeroBridgeDeploy} from "../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
+import {Deploy as RLCLiquidityUnifierDeployScript} from "../../script/RLCLiquidityUnifier.s.sol";
 import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosschainToken.s.sol";
+import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 
 /**
  * Test Script for the IexecLayerZeroBridge on Ethereum Mainnet.
@@ -18,25 +19,29 @@ contract IexecLayerZeroBridgeScriptOnMainnetTest is Test {
     // TODO read value from config.json file.
     address LAYERZERO_ENDPOINT = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
     address CREATEX = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
+    address rlcAddress = 0x26A738b6D33EF4D94FF084D3552961b8f00639Cd;
 
     address admin = makeAddr("admin");
     address upgrader = makeAddr("upgrader");
     address pauser = makeAddr("pauser");
-    address rlcAddress; // This will be set to a mock token address for testing
     bytes32 salt = keccak256("salt");
 
     IexecLayerZeroBridgeDeploy public deployer;
+    RLCLiquidityUnifier private liquidityUnifier;
 
     function setUp() public {
         vm.createSelectFork(vm.envString("SEPOLIA_RPC_URL"));
         deployer = new IexecLayerZeroBridgeDeploy();
-        rlcAddress =
-            new RLCCrosschainTokenDeployScript().deploy("iEx.ec Network Token", "RLC", admin, admin, CREATEX, salt);
+        liquidityUnifier = RLCLiquidityUnifier(
+            new RLCLiquidityUnifierDeployScript().deploy(
+                address(rlcAddress), admin, upgrader, CREATEX, keccak256("salt")
+            )
+        );
     }
 
     function testFork_Deployment() public {
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
-            deployer.deploy(true, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt)
+            deployer.deploy(true, address(liquidityUnifier), LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt)
         );
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
@@ -55,9 +60,9 @@ contract IexecLayerZeroBridgeScriptOnMainnetTest is Test {
     }
 
     function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        deployer.deploy(true,rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
+        deployer.deploy(true, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", CREATEX));
-        deployer.deploy(true,rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
+        deployer.deploy(true, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
     }
 
     // TODO add tests for the configuration script.
