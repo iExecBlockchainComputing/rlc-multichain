@@ -32,12 +32,12 @@ contract IexecLayerZeroBridgeScriptOnMainnetTest is Test {
         deployer = new IexecLayerZeroBridgeDeploy();
         rlcAddress =
             new RLCCrosschainTokenDeployScript().deploy("iEx.ec Network Token", "RLC", admin, admin, CREATEX, salt);
-        vm.setEnv("CREATE_X_FACTORY", vm.toString(CREATEX));
     }
 
     function testFork_Deployment() public {
-        IexecLayerZeroBridge iexecLayerZeroBridge =
-            IexecLayerZeroBridge(deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, salt));
+        IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
+            deployer.deploy(true, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt)
+        );
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
         assertEq(iexecLayerZeroBridge.token(), address(rlcAddress));
@@ -55,9 +55,9 @@ contract IexecLayerZeroBridgeScriptOnMainnetTest is Test {
     }
 
     function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, salt);
+        deployer.deploy(true,rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", CREATEX));
-        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, salt);
+        deployer.deploy(true,rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
     }
 
     // TODO add tests for the configuration script.
