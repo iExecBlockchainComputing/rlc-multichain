@@ -42,6 +42,8 @@ contract IexecLayerZeroBridgeScriptOnChainXTest is Test {
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
         assertEq(iexecLayerZeroBridge.token(), address(rlcAddress));
+        // Check ApprovalRequired value
+        assertEq(iexecLayerZeroBridge.approvalRequired(), requireApproval, "ApprovalRequired should be false");
         // Check all roles.
         assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.DEFAULT_ADMIN_ROLE(), admin));
         assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.UPGRADER_ROLE(), upgrader));
