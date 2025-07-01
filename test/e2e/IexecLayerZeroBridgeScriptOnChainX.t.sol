@@ -10,7 +10,7 @@ import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBr
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosschainToken.s.sol";
 
 /**
- * Test Script for the IexecLayerZeroBridge on any chain expect Ethereum Mainnet.
+ * Test Script for the IexecLayerZeroBridge on any chain except Ethereum Mainnet.
  * In this case, IexecLayerZeroBridge should be connected to
  * RLCCrosschainToken deployed on the same chain.
  */

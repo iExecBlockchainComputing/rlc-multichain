@@ -13,6 +13,11 @@ import {DualPausableUpgradeable} from "../../../../src/bridges/utils/DualPausabl
 import {TestUtils} from "../../utils/TestUtils.sol";
 import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
 
+/**
+ * Test Script for the IexecLayerZeroBridge on any chain except Ethereum Mainnet.
+ * In this case, IexecLayerZeroBridge should be connected to
+ * RLCCrosschainToken deployed on the same chain.
+ */
 contract IexecLayerZeroBridgeOnChainXTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
     using TestUtils for *;

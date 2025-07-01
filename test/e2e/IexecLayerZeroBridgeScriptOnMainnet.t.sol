@@ -13,7 +13,7 @@ import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 /**
  * Test Script for the IexecLayerZeroBridge on Ethereum Mainnet.
  * In this case, IexecLayerZeroBridge should be connected to
- * original RLC token deployed on the same chain.
+ * RLC LiquidityUnifier contract deployed on the same chain.
  */
 contract IexecLayerZeroBridgeScriptOnMainnetTest is Test {
     // TODO read value from config.json file.
