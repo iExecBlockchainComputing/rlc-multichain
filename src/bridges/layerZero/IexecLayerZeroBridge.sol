@@ -75,8 +75,8 @@ contract IexecLayerZeroBridge is
     /**
      * @dev Indicates the token transfer mechanism required for this deployment.
      *
-     * - true: Mainnet deployment requiring user approval (lock/unlock mechanism)
-     * - false: Non-mainnet deployment with direct mint/burn capabilities
+     * - true: Ethereum Mainnet deployment requiring user approval (lock/unlock mechanism)
+     * - false: Non Ethereum Mainnet deployment with direct mint/burn capabilities
      *
      * This flag indicates on which chain the bridge is deployed.
      *
