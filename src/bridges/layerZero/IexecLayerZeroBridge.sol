@@ -47,7 +47,7 @@ import {IRLCLiquidityUnifier} from "../../interfaces/IRLCLiquidityUnifier.sol";
  *    - APPROVAL_REQUIRED: true (requires user approval for token transfers)
  *    - Mechanism: Lock tokens on transfer-out, unlock tokens on transfer-in
  *
- * The LiquidityUnifier contract acts as an adapter, implementing ERC-7802 interface
+ * The LiquidityUnifier contract acts as a relayer, implementing ERC-7802 interface
  * to provide consistent lock/unlock operations for the original RLC token contract
  * that may not natively support the crosschain standard.
  */

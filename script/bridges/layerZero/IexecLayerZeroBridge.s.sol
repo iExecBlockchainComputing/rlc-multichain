@@ -51,7 +51,6 @@ contract Deploy is Script {
         address createxFactory,
         bytes32 createxSalt
     ) public returns (address) {
-        //TODO: adapt `approvalRequired`depending on the chain target.
         bytes memory constructorData = abi.encode(approvalRequired, bridgeableToken, lzEndpoint);
         bytes memory initializeData = abi.encodeWithSelector(
             IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
