@@ -24,6 +24,7 @@ contract IexecLayerZeroBridgeScriptOnChainXTest is Test {
     address pauser = makeAddr("pauser");
     address rlcAddress; // This will be set to a mock token address for testing
     bytes32 salt = keccak256("salt");
+    bool requireApproval = false;
 
     IexecLayerZeroBridgeDeploy public deployer;
 
@@ -36,7 +37,7 @@ contract IexecLayerZeroBridgeScriptOnChainXTest is Test {
 
     function testFork_Deployment() public {
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
-            deployer.deploy(false, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt)
+            deployer.deploy(requireApproval, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt)
         );
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
@@ -55,9 +56,9 @@ contract IexecLayerZeroBridgeScriptOnChainXTest is Test {
     }
 
     function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        deployer.deploy(false, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
+        deployer.deploy(requireApproval, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", CREATEX));
-        deployer.deploy(false, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
+        deployer.deploy(requireApproval, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
     }
 
     // TODO add tests for the configuration script.

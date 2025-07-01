@@ -25,6 +25,7 @@ contract IexecLayerZeroBridgeScriptOnMainnetTest is Test {
     address upgrader = makeAddr("upgrader");
     address pauser = makeAddr("pauser");
     bytes32 salt = keccak256("salt");
+    bool requireApproval = false;
 
     IexecLayerZeroBridgeDeploy public deployer;
     RLCLiquidityUnifier private liquidityUnifier;
@@ -41,7 +42,9 @@ contract IexecLayerZeroBridgeScriptOnMainnetTest is Test {
 
     function testFork_Deployment() public {
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
-            deployer.deploy(true, address(liquidityUnifier), LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt)
+            deployer.deploy(
+                requireApproval, address(liquidityUnifier), LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt
+            )
         );
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
@@ -60,9 +63,9 @@ contract IexecLayerZeroBridgeScriptOnMainnetTest is Test {
     }
 
     function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        deployer.deploy(true, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
+        deployer.deploy(requireApproval, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", CREATEX));
-        deployer.deploy(true, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
+        deployer.deploy(requireApproval, rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
     }
 
     // TODO add tests for the configuration script.
