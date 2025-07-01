@@ -34,7 +34,7 @@ contract SendTokensToSepolia is Script {
 
         // Transfer parameters
         uint16 destinationChainId = uint16(targetParams.lzChainId); // LayerZero chain ID for Ethereum Sepolia
-        address recipientAddress = sourceParams.initialAdmin; // Replace with the actual recipient address
+        address recipientAddress = sourceParams.initialAdmin; // TODO read recipient address from env variables.
         console.log("Recipient: %s", recipientAddress);
 
         uint256 amount = 5 * 10 ** 18; // RLC tokens (adjust the amount as needed)

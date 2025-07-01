@@ -36,7 +36,7 @@ contract SendTokensToArbitrumSepolia is Script {
 
         // Transfer parameters
         uint16 destinationChainId = uint16(targetParams.lzChainId);
-        address recipientAddress = targetParams.initialAdmin; // Replace with the actual recipient address
+        address recipientAddress = targetParams.initialAdmin; // TODO read recipient address from env variables.
         uint256 amount = 5 * 10 ** 9; //  RLC tokens (adjust the amount as needed)
 
         // First, approve the adapter to spend your tokens
