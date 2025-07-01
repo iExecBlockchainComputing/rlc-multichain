@@ -38,11 +38,9 @@ library ConfigLib {
      * @return The address of the bridgeable token (RLCLiquidityUnifier on mainnet, RLC CrossChain on L2s)
      */
     function getLiquidityUnifierAddress(string memory config, string memory prefix) internal pure returns (address) {
-        if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
-            return config.readAddress(string.concat(prefix, ".rlcLiquidityUnifierAddress"));
-        } else {
-            return address(0);
-        }
+        return config.readBool(string.concat(prefix, ".approvalRequired"))
+            ? config.readAddress(string.concat(prefix, ".rlcLiquidityUnifierAddress"))
+            : address(0);
     }
     /**
      * @dev Gets the RLC CrossChain token address based on the chain
@@ -52,11 +50,9 @@ library ConfigLib {
      */
 
     function getRLCCrossChainTokenAddress(string memory config, string memory prefix) internal pure returns (address) {
-        if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
-            return address(0);
-        } else {
-            return config.readAddress(string.concat(prefix, ".rlcCrossChainTokenAddress"));
-        }
+        return config.readBool(string.concat(prefix, ".approvalRequired"))
+            ? address(0)
+            : config.readAddress(string.concat(prefix, ".rlcCrossChainTokenAddress"));
     }
 
     /**
@@ -66,11 +62,9 @@ library ConfigLib {
      * @return The address of the RLC token (native RLC on L1, crosschain token on L2s)
      */
     function getRLCTokenAddress(string memory config, string memory prefix) internal pure returns (address) {
-        if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
-            return config.readAddress(string.concat(prefix, ".rlcAddress"));
-        } else {
-            return address(0);
-        }
+        return config.readBool(string.concat(prefix, ".approvalRequired"))
+            ? config.readAddress(string.concat(prefix, ".rlcLiquidityUnifierAddress"))
+            : address(0);
     }
 
     function getAllCreatexParams(string memory config, string memory prefix)
@@ -82,17 +76,17 @@ library ConfigLib {
             bytes32 iexecLayerZeroBridgeCreatexSalt
         )
     {
+        rlcCrossChainTokenCreatexSalt = bytes32(0);
+        rlcLiquidityUnifierCreatexSalt = bytes32(0);
+        iexecLayerZeroBridgeCreatexSalt = config.readBytes32(string.concat(prefix, ".iexecLayerZeroBridgeCreatexSalt"));
+
         if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
-            rlcCrossChainTokenCreatexSalt = bytes32(0); // RLC CrossChain token is not deployed on L1
-            iexecLayerZeroBridgeCreatexSalt =
-                config.readBytes32(string.concat(prefix, ".iexecLayerZeroBridgeCreatexSalt"));
+            // RLCLiquidityUnifier is deployed.
             rlcLiquidityUnifierCreatexSalt =
                 config.readBytes32(string.concat(prefix, ".rlcLiquidityUnifierCreatexSalt"));
         } else {
+            // RLCCrossChainToken is deployed.
             rlcCrossChainTokenCreatexSalt = config.readBytes32(string.concat(prefix, ".rlcCrossChainTokenCreatexSalt"));
-            rlcLiquidityUnifierCreatexSalt = bytes32(0); // RLC Liquidity Unifier is not deployed on L2s
-            iexecLayerZeroBridgeCreatexSalt =
-                config.readBytes32(string.concat(prefix, ".iexecLayerZeroBridgeCreatexSalt"));
         }
     }
 
