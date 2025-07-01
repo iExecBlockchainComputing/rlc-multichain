@@ -37,9 +37,8 @@ library BridgeConfigLib {
     function getLiquidityUnifierAddress(string memory config, string memory prefix) internal pure returns (address) {
         if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
             return config.readAddress(string.concat(prefix, ".rlcLiquidityUnifierAddress"));
-        } else {
-            return address(0);
         }
+        return address(0);
     }
     /**
      * @dev Gets the RLC CrossChain token address based on the chain
@@ -49,11 +48,10 @@ library BridgeConfigLib {
      */
 
     function getRLCCrossChainTokenAddress(string memory config, string memory prefix) internal pure returns (address) {
-        if (config.readBool(string.concat(prefix, ".approvalRequired"))) {
-            return address(0);
-        } else {
+        if (!config.readBool(string.concat(prefix, ".approvalRequired"))) {
             return config.readAddress(string.concat(prefix, ".rlcCrossChainTokenAddress"));
         }
+        return address(0);
     }
 
     /**
