@@ -33,8 +33,7 @@ library UUPSProxyDeployer {
         bytes32 salt
     ) internal returns (address) {
         ICreateX createX = ICreateX(createXFactory);
-        address implementation = deployImplementationWithCreateX(contractName, constructorData, createX, salt);
-        // Deploy the proxy contract using CreateX Factory
+        address implementation = deployImplementation(contractName, constructorData, createX);
         address proxy = createX.deployCreate2AndInit(
             salt,
             abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(implementation, "")), // initCode
@@ -45,27 +44,21 @@ library UUPSProxyDeployer {
         return proxy;
     }
 
-    // TODO remove and deploy implementation without create2.
-
     /**
-     * Deploys the implementation contract using the CreateX Factory
+     * Deploys the implementation contract using tradition `create`.
      * @param contractName The name of the contract to deploy (used to fetch creation code)
      * @param constructorData The constructor arguments for the implementation contract
-     * @param createXFactory The address of the CreateX factory
-     * @param salt The salt for deterministic deployment
+     * @param createxFactory The address of the CreateX factory
      * @return The address of the deployed implementation contract
      */
-    function deployImplementationWithCreateX(
+    function deployImplementation(
         string memory contractName,
         bytes memory constructorData,
-        ICreateX createXFactory,
-        bytes32 salt
+        ICreateX createxFactory
     ) internal returns (address) {
-        // Deploy the implementation contract using CreateX Factory
         bytes memory creationCode = vm.getCode(contractName);
-        address implementation = createXFactory.deployCreate2(salt, abi.encodePacked(creationCode, constructorData));
+        address implementation = createxFactory.deployCreate(abi.encodePacked(creationCode, constructorData));
         console.log("Implementation deployed at:", implementation);
-
         return implementation;
     }
 }
