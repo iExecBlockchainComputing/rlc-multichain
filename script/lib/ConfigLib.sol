@@ -8,10 +8,13 @@ import "forge-std/StdJson.sol";
 
 /**
  * @title ConfigLib
- * @dev Library for handling configuration logic across all deployment and operational scripts
+ * @dev Library for handling configuration logic across all deployment and operational scripts,
+ *      including configuration reading and JSON file updating functionality
  */
 library ConfigLib {
     using stdJson for string;
+
+    Vm constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     /**
      * @dev Common configuration parameters structure
@@ -121,16 +124,6 @@ library ConfigLib {
         params.lzEndpoint = config.readAddress(string.concat(prefix, ".lzEndpointAddress"));
         params.lzChainId = uint32(config.readUint(string.concat(prefix, ".lzChainId")));
     }
-}
-
-/**
- * @title ConfigUtils
- * @dev Library for updating configuration files with deployed addresses using proper JSON serialization
- */
-library ConfigUtils {
-    using stdJson for string;
-
-    Vm constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     /**
      * @dev Updates the config.json file with a new address for a specific chain

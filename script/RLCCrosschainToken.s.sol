@@ -7,7 +7,7 @@ import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
-import {ConfigLib, ConfigUtils} from "./lib/ConfigLib.sol";
+import {ConfigLib} from "./lib/ConfigLib.sol";
 
 /**
  * Deployment script for the RLCCrosschainToken contract.
@@ -35,8 +35,8 @@ contract Deploy is Script {
         vm.stopBroadcast();
 
         address implementationAddress = Upgrades.getImplementationAddress(rlcCrosschainTokenProxy);
-        ConfigUtils.updateConfigAddress(chain, "rlcCrosschainTokenAddress", rlcCrosschainTokenProxy);
-        ConfigUtils.updateConfigAddress(chain, "rlcCrosschainTokenImplementation", implementationAddress);
+        ConfigLib.updateConfigAddress(chain, "rlcCrosschainTokenAddress", rlcCrosschainTokenProxy);
+        ConfigLib.updateConfigAddress(chain, "rlcCrosschainTokenImplementation", implementationAddress);
         return rlcCrosschainTokenProxy;
     }
 

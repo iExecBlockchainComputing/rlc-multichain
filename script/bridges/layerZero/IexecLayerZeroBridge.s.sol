@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {ConfigUtils, ConfigLib} from "./../../lib/ConfigLib.sol";
+import {ConfigLib} from "./../../lib/ConfigLib.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
 import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
@@ -35,8 +35,8 @@ contract Deploy is Script {
         vm.stopBroadcast();
 
         address implementationAddress = Upgrades.getImplementationAddress(iexecLayerZeroBridgeProxy);
-        ConfigUtils.updateConfigAddress(chain, "iexecLayerZeroBridgeAddress", iexecLayerZeroBridgeProxy);
-        ConfigUtils.updateConfigAddress(chain, "iexecLayerZeroBridgeImplementation", implementationAddress);
+        ConfigLib.updateConfigAddress(chain, "iexecLayerZeroBridgeAddress", iexecLayerZeroBridgeProxy);
+        ConfigLib.updateConfigAddress(chain, "iexecLayerZeroBridgeImplementation", implementationAddress);
 
         return iexecLayerZeroBridgeProxy;
     }
@@ -103,6 +103,6 @@ contract Upgrade is Script {
         address newImplementationAddress = UpgradeUtils.executeUpgrade(params);
 
         vm.stopBroadcast();
-        ConfigUtils.updateConfigAddress(chain, "layerZeroBridgeImplementation", newImplementationAddress);
+        ConfigLib.updateConfigAddress(chain, "layerZeroBridgeImplementation", newImplementationAddress);
     }
 }

@@ -7,7 +7,7 @@ import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCLiquidityUnifier} from "../src/RLCLiquidityUnifier.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
-import {ConfigLib, ConfigUtils} from "./lib/ConfigLib.sol";
+import {ConfigLib} from "./lib/ConfigLib.sol";
 import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 /**
  * Deployment script for the RLCLiquidityUnifier contract.
@@ -36,8 +36,8 @@ contract Deploy is Script {
         vm.stopBroadcast();
 
         address implementationAddress = Upgrades.getImplementationAddress(liquidityUnifierProxy);
-        ConfigUtils.updateConfigAddress(chain, "rlcLiquidityUnifierAddress", liquidityUnifierProxy);
-        ConfigUtils.updateConfigAddress(chain, "rlcLiquidityUnifierImplementation", implementationAddress);
+        ConfigLib.updateConfigAddress(chain, "rlcLiquidityUnifierAddress", liquidityUnifierProxy);
+        ConfigLib.updateConfigAddress(chain, "rlcLiquidityUnifierImplementation", implementationAddress);
         return liquidityUnifierProxy;
     }
 
@@ -84,7 +84,7 @@ contract Upgrade is Script {
 
         UpgradeUtils.executeUpgrade(params);
         address implementationAddress = Upgrades.getImplementationAddress(params.proxyAddress);
-        ConfigUtils.updateConfigAddress(chain, "rlcLiquidityUnifierImplementation", implementationAddress);
+        ConfigLib.updateConfigAddress(chain, "rlcLiquidityUnifierImplementation", implementationAddress);
         vm.stopBroadcast();
     }
 }
