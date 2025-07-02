@@ -169,11 +169,6 @@ library ConfigLib {
 
         // Ensure the file ends with a newline for proper EOF
         _ensureFileEndsWithNewline(configPath);
-
-        console.log("Updated config.json:");
-        console.log("   Chain:", chain);
-        console.log("   Field:", fieldName);
-        console.log("   Address:", addressString);
     }
 
     /**
