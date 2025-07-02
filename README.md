@@ -1,15 +1,90 @@
-# RLC Layer Zero Bridge
+# RLC Multichain Bridge
 
-This project implements a cross-chain token bridge for the RLC token between Ethereum and Arbitrum using LayerZero's OFT (Omnichain Fungible Token) protocol. It enables seamless token transfers between Ethereum Sepolia and Arbitrum Sepolia testnets.
+This project implements a cross-chain token bridge system for the RLC token using LayerZero's OFT (Omnichain Fungible Token) protocol. It enables seamless token transfers between multiple blockchains, initially supporting Ethereum Sepolia and Arbitrum Sepolia testnets.
 
 ## Architecture
 
-The system consists of two main components:
+The system consists of three main components that work together to enable cross-chain RLC transfers:
 
-1. **RLCAdapter (on Ethereum Sepolia)**: Wraps the existing RLC ERC-20 token to make it compatible with LayerZero's cross-chain messaging.
-2. **RLCOFT (on Arbitrum Sepolia)**: A new token that's minted when RLC tokens are locked in the adapter on Ethereum, and burned when tokens are sent back.
+### Core Components
 
-[![Architecture Diagram](https://mermaid.ink/img/pako:eNqNVNtO4zAQ_RXLvAY2F3JpQEhpLrsPRUhQXqBoZRKXRjh2ZCdouf372nHSEhrYddV2MjnHZ-ZM4leYswLDED5wVG_AMllRIJdo73ViBdNmgzluK3CFa0ZKtIIaotblIr6VX7Bkj5ju0qflWXoZ2-bpj_LsbpeOClQ3mCtGH44oF9myT3_iLW5-p8tftwv0jPkN5gyktKhZSZseg2mhg73aI35fNny6dimnKpF_E-XL7H4R0eX8v4u4Fph3VasAMAoGG-_A4eHZmwWiuubsCQvQKHHxBkaWDPQObIMYESKAkBqfcP1FB3PAguWPuw1lc_ugY2kFLQSosBDoAb_15mqgjjucC2LOhDjMN6ikI7R0YYuWcYf2QIJJ-YT5h42lhRqnHFYgH5xLu3b1dT0qTweLhmnd7Rk56EQjJ_YU5mDecrpT2APEE91P9ZN82f2UV-lE919OKQPXlPx7Tj_BkiMq1mrTkWHbAvRvTpAQCV4DPLym65KQ8CD24izzDdFwSQ4PnMQ1576RM8J4eE9Q_njyiY-GV0Xz51bqZNmWb0eBnQXf8Vs1RM3NssSOzC03y4LANL_jkpeembjqs6u6WxPMD3xlnzE4N5jwUaAb_tDd6Mbgp7F9xlQTI4iestE_GuTlBBqwwrxCZSHPzFcFXUEpWuEVDGVY4DVqSaPOmXcJRW3Drp5pDkMpjg3Y1gVqcFIieUBVMFwjImS2RvSGsWoAyUsYvsI_MAysI8_yfNuZeY7tuUFgwGcYWjP3yLdN1_Jl5PiBab8b8KXbwDyaufbMOnYs27OsIPA8A3LWPmy2WrgoG8bP9ZnfHf2GPPpVN1qcy_cD85i1tJFKlj3UnHY8jXr_C5RA8AI)](https://mermaid.live/edit#pako:eNqNVNtO4zAQ_RXLvAY2F3JpQEhpLrsPRUhQXqBoZRKXRjh2ZCdouf372nHSEhrYddV2MjnHZ-ZM4leYswLDED5wVG_AMllRIJdo73ViBdNmgzluK3CFa0ZKtIIaotblIr6VX7Bkj5ju0qflWXoZ2-bpj_LsbpeOClQ3mCtGH44oF9myT3_iLW5-p8tftwv0jPkN5gyktKhZSZseg2mhg73aI35fNny6dimnKpF_E-XL7H4R0eX8v4u4Fph3VasAMAoGG-_A4eHZmwWiuubsCQvQKHHxBkaWDPQObIMYESKAkBqfcP1FB3PAguWPuw1lc_ugY2kFLQSosBDoAb_15mqgjjucC2LOhDjMN6ikI7R0YYuWcYf2QIJJ-YT5h42lhRqnHFYgH5xLu3b1dT0qTweLhmnd7Rk56EQjJ_YU5mDecrpT2APEE91P9ZN82f2UV-lE919OKQPXlPx7Tj_BkiMq1mrTkWHbAvRvTpAQCV4DPLym65KQ8CD24iyyDdFwSQ4PnMQ1576RM8J4eE9Q_njyiY-GV0Xz51bqZNmWb0eBnQXf8Vs1RM3NssSOzC03y4LANL_jkpeembjqs6u6WxPMD3xlnzE4N5jwUaAb_tDd6Mbgp7F9xlQTI4iestE_GuTlBBqwwrxCZSHPzFcFXUEpWuEVDGVY4DVqSaPOmXcJRW3Drp5pDkMpjg3Y1gVqcFIieUBVMFwjImS2RvSGsWoAyUsYvsI_MAysI8_yfNuZeY7tuUFgwGcYWjP3yLdN1_Jl5PiBab8b8KXbwDyaufbMOnYs27OsIPA8A3LWPmy2WrgoG8bP9ZnfHf2GPPpVN1qcy_cD85i1tJFKlj3UnHY8jXr_C5RA8AI)
+1. **RLCCrosschainToken**: An upgradeable ERC20 token that implements the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) bridgeable token standard. This token can be minted and burned by authorized bridge contracts.
+
+2. **RLCLiquidityUnifier** (Ethereum only): A liquidity management contract that locks/unlocks the original RLC tokens on Ethereum. It implements the ERC-7802 interface to work seamlessly with bridge contracts while managing liquidity from the existing RLC token.
+
+3. **IexecLayerZeroBridge**: A LayerZero OFT bridge contract that handles cross-chain messaging and token transfers. It uses the ERC-7802 interface to mint/burn tokens or lock/unlock liquidity as needed.
+
+### Network-Specific Deployment
+
+- **Ethereum Sepolia**: 
+  - `RLCLiquidityUnifier` (manages original RLC token liquidity)
+  - `IexecLayerZeroBridge` (LayerZero bridge)
+
+- **Arbitrum Sepolia (and other chains)**:
+  - `RLCCrosschainToken` (bridgeable RLC token)
+  - `IexecLayerZeroBridge` (LayerZero bridge)
+
+### Key Features
+
+- **ERC-7802 Compatibility**: All tokens implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) bridgeable token standard
+- **Upgradeable Contracts**: UUPS proxy pattern for safe upgrades
+- **Dual-Pause Emergency System**: Granular control over bridge operations
+- **Multi-Chain Support**: Designed to extend beyond Ethereum and Arbitrum
+- **Original Token Preservation**: Maintains the original RLC token on Ethereum
+
+### Architecture Flow
+
+```mermaid
+graph TB
+    subgraph "Ethereum Sepolia"
+        RLC[Original RLC Token]
+        LU[RLCLiquidityUnifier]
+        LZB1[IexecLayerZeroBridge]
+        
+        RLC --> LU
+        LU --> LZB1
+    end
+    
+    subgraph "Arbitrum Sepolia"
+        CCT[RLCCrosschainToken]
+        LZB2[IexecLayerZeroBridge]
+        
+        CCT --> LZB2
+    end
+    
+    subgraph "LayerZero Network"
+        LZ[LayerZero Protocol]
+    end
+    
+    LZB1 <--> LZ
+    LZB2 <--> LZ
+    
+    classDef ethereum fill:#627eea
+    classDef arbitrum fill:#28a0f0
+    classDef layerzero fill:#ff6b6b
+    
+    class RLC,LU,LZB1 ethereum
+    class CCT,LZB2 arbitrum
+    class LZ layerzero
+```
+
+[![Architecture Diagram](https://mermaid.ink/img/pako:eNqNVNtO4zAQ_RXLvAY2F3JpQEhpLrsPRUhQXqBoZRKXRjh2ZCdouf372nHSEhrYddV2MjnHZ-ZM4leYswLDED5wVG_AMllRIJdo73ViBdNmgzluK3CFa0ZKtIIaotblIr6VX7Bkj5ju0qflWXoZ2-bpj_LsbpeOClQ3mCtGH44oF9myT3_iLW5-p8tftwv0jPkN5gyktKhZSZseg2mhg73aI35fNny6dimnKpF_E-XL7H4R0eX8v4u4Fph3VasAMAoGG-_A4eHZmwWiuubsCQvQKHHxBkaWDPQObIMYESKAkBqfcP1FB3PAguWPuw1lc_ugY2kFLQSosBDoAb_15mqgjjucC2LOhDjMN6ikI7R0YYuWcYf2QIJJ-YT5h42lhRqnHFYgH5xLu3b1dT0qTweLhmnd7Rk56EQjJ_YU5mDecrpT2APEE91P9ZN82f2UV-lE919OKQPXlPx7Tj_BkiMq1mrTkWHbAvRvTpAQCV4DPLym65KQ8CD24izzDdFwSQ4PnMQ1576RM8J4eE9Q_njyiY-GV0Xz51bqZNmWb0eBnQXf8Vs1RM3NssSOzC03y4LANL_jkpeembjqs6u6WxPMD3xlnzE4N5jwUaAb_tDd6Mbgp7F9xlQTI4iestE_GuTlBBqwwrxCZSHPzFcFXUEpWuEVDGVY4DVqSaPOmXcJRW3Drp5pDkMpjg3Y1gVqcFIieUBVMFwjImS2RvSGsWoAyUsYvsI_MAysI8_yfNuZeY7tuUFgwGcYWjP3yLdN1_Jl5PiBab8b8KXbwDyaufbMOnYs27OsIPA8A3LWPmy2WrgoG8bP9ZnfHf2GPPpVN1qcy_cD85i1tJFKlj3UnHY8jXr_C5RA8AI)](https://mermaid.live/edit#pako:eNqNVNtO4zAQ_RXLvAY2F3JpQEhpLrsPRUhQXqBoZRKXRjh2ZCdouf372nHSEhrYddV2MjnHZ-ZM4leYswLDED5wVG_AMllRIJdo73ViBdNmgzluK3CFa0ZKtIIaotblIr6VX7Bkj5ju0qflWXoZ2-bpj_LsbpeOClQ3mCtGH44oF9myT3_iLW5-p8tftwv0jPkN5gyktKhZSZseg2mhg73aI35fNny6dimnKpF_E-XL7H4R0eX8v4u4Fph3VasAMAoGG-_A4eHZmwWiuubsCQvQKHHxBkaWDPQObIMYESKAkBqfcP1FB3PAguWPuw1lc_ugY2kFLQSosBDoAb_15mqgjjucC2LOhDjMN6ikI7R0YYuWcYf2QIJJ-YT5h42lhRqnHFYgH5xLu3b1dT0qTweLhmnd7Rk56EQjJ_YU5mDecrpT2APEE91P9ZN82f2UV-lE919OKQPXlPx7Tj_BkiMq1mrTkWHbAvRvTpAQCV4DPLym65KQ8CD24izzDdFwSQ4PnMQ1576RM8J4eE9Q_njyiY-GV0Xz51bqZNmWb0eBnQXf8Vs1RM3NssSOzC03y4LANL_jkpeembjqs6u6WxPMD3xlnzE4N5jwUaAb_tDd6Mbgp7F9xlQTI4iestE_GuTlBBqwwrxCZSHPzFcFXUEpWuEVDGVY4DVqSaPOmXcJRW3Drp5pDkMpjg3Y1gVqcFIieUBVMFwjImS2RvSGsWoAyUsYvsI_MAysI8_yfNuZeY7tuUFgwGcYWjP3yLdN1_Jl5PiBab8b8KXbwDyaufbMOnYs27OsIPA8A3LWPmy2WrgoG8bP9ZnfHf2GPPpVN1qcy_cD85i1tJFKlj3UnHY8jXr_C5RA8AI)
+
+### Token Standards & Bridge Architecture
+
+The bridge system leverages modern token standards to enable secure cross-chain transfers:
+
+- **ERC-7802 Bridgeable Token Standard**: A new standard that defines interfaces for tokens that can be minted and burned by authorized bridge contracts
+- **LayerZero OFT V2**: Omnichain Fungible Token protocol for cross-chain messaging and token transfers
+- **OpenZeppelin UUPS Proxy**: Upgradeable proxy pattern for contract evolution while maintaining state
+
+### Supported Networks
+
+Currently deployed on:
+- **Ethereum Sepolia** (testnet)
+- **Arbitrum Sepolia** (testnet)
+
+The architecture is designed to support additional networks in the future with minimal changes.
 
 ## Prerequisites
 
@@ -49,10 +124,11 @@ Alternatively, you can use a mnemonic by specifying the `--mnemonic-path` option
 
 ## Contract Overview
 
-Instead of duplicating code that may become outdated, here are links to the key contracts in the repository:
+The core contracts of the multichain bridge system:
 
-- [RLCAdapter.sol](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/main/src/RLCAdapter.sol) - Ethereum-side adapter that wraps the existing RLC token
-- [RLCOFT.sol](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/main/src/RLCOFT.sol) - Arbitrum-side token that implements the OFT standard
+- [RLCCrosschainToken.sol](src/RLCCrosschainToken.sol) - Bridgeable ERC20 token implementing ERC-7802 standard
+- [RLCLiquidityUnifier.sol](src/RLCLiquidityUnifier.sol) - Liquidity management for original RLC tokens on Ethereum
+- [IexecLayerZeroBridge.sol](src/bridges/layerZero/IexecLayerZeroBridge.sol) - LayerZero OFT bridge for cross-chain transfers
 
 ## 📊 Code Coverage Analysis
 
@@ -94,7 +170,7 @@ make generate-coverage
 
 ## Upgrades
 
-Both RLCAdapter and RLCOFT contracts are implemented using the UUPS pattern, allowing for seamless contract upgrades while maintaining the same proxy address.
+All core contracts (RLCCrosschainToken, RLCLiquidityUnifier, and IexecLayerZeroBridge) are implemented using the UUPS pattern, allowing for seamless contract upgrades while maintaining the same proxy address.
 
 ### Upgrade Architecture
 
@@ -114,19 +190,7 @@ Test upgrades locally before deploying to live networks:
 make upgrade-on-anvil
 ```
 
-#### 2. Validation (Testnets)
-
-Always validate upgrades before execution:
-
-```bash
-# Validate RLCAdapter upgrade
-make validate-adapter-upgrade RPC_URL=$(SEPOLIA_RPC_URL)
-
-# Validate RLCOFT upgrade
-make validate-layerzero-bridge-upgrade RPC_URL=$(ARBITRUM_SEPOLIA_RPC_URL)
-```
-
-#### 3. Live Network Upgrades
+#### 2. Live Network Upgrades
 
 Execute upgrades on testnets:
 
@@ -136,10 +200,9 @@ make upgrade-on-testnets
 
 ### Upgrade Safety Features
 
-- **Automatic Validation**: All upgrade commands automatically validate compatibility first
-- **OpenZeppelin Checks**: Uses OpenZeppelin's upgrade safety validations
 - **Storage Layout Protection**: Prevents storage slot conflicts between versions
 - **Constructor Validation**: Ensures new implementations have compatible constructors
+- **Manual Testing**: Always test upgrades thoroughly on testnets before deploying to mainnet
 
 ## Usage
 
@@ -153,9 +216,9 @@ make send-tokens-to-arbitrum-sepolia
 
 This will:
 
-1. Approve the RLCAdapter to spend your RLC tokens
-2. Initiate the cross-chain transfer through LayerZero
-3. Lock tokens in the adapter and mint equivalent tokens on Arbitrum
+1. Approve the RLCLiquidityUnifier to spend your RLC tokens
+2. Initiate the cross-chain transfer through the IexecLayerZeroBridge
+3. Lock original RLC tokens in the RLCLiquidityUnifier and mint equivalent RLCCrosschainToken on Arbitrum
 
 B. To send RLC tokens from Arbitrum Sepolia back to Ethereum Sepolia:
 
@@ -165,38 +228,34 @@ make send-tokens-to-sepolia
 
 This will:
 
-1. Burn RLCOFT tokens on Arbitrum
-2. Send a cross-chain message to the adapter
-3. Release the original RLC tokens on Ethereum
+1. Burn RLCCrosschainToken tokens on Arbitrum
+2. Send a cross-chain message via LayerZero to Ethereum
+3. Release the original RLC tokens from the RLCLiquidityUnifier on Ethereum
 
 ## How It Works
 
-1. **Ethereum → Arbitrum:**
-   - User approves RLCAdapter to spend RLC tokens
-   - RLCAdapter locks the RLC tokens
-   - LayerZero delivers a message to RLCOFT
-   - RLCOFT mints equivalent tokens to the recipient on Arbitrum
+### Cross-Chain Transfer Mechanism
 
-2. **Arbitrum → Ethereum:**
-   - User initiates transfer from RLCOFT
-   - RLCOFT burns the tokens
-   - LayerZero delivers a message to RLCAdapter
-   - RLCAdapter unlocks the original RLC tokens to the recipient on Ethereum
+The bridge operates using different mechanisms depending on the source chain:
 
-## Verification
+**Ethereum → Other Chains:**
+1. User approves RLCLiquidityUnifier to spend original RLC tokens
+2. RLCLiquidityUnifier locks the original RLC tokens  
+3. IexecLayerZeroBridge sends a LayerZero message to the destination chain
+4. Destination chain's IexecLayerZeroBridge receives the message and mints RLCCrosschainToken
 
-Verify your deployed contracts on block explorers:
+**Other Chains → Ethereum:**
+1. User initiates transfer from RLCCrosschainToken
+2. Source chain's IexecLayerZeroBridge burns the RLCCrosschainToken
+3. LayerZero delivers a message to Ethereum's IexecLayerZeroBridge
+4. Ethereum's RLCLiquidityUnifier releases the original RLC tokens to the recipient
 
-```bash
-# Verify all contracts (implementations and proxies)
-make verify-all
+**Chain-to-Chain (Non-Ethereum):**
+1. Source chain burns RLCCrosschainToken
+2. LayerZero message triggers minting of RLCCrosschainToken on destination chain
 
-# Verify specific components
-make verify-adapter        # Both implementation and proxy
-make verify-layerzero-bridge           # Both implementation and proxy
-make verify-implementations # Only implementations
-make verify-proxies       # Only proxies
-```
+This design ensures the total supply across all chains remains constant while preserving the original RLC token on Ethereum.
+
 
 ## Security Considerations
 
@@ -209,7 +268,7 @@ make verify-proxies       # Only proxies
 
 ## Emergency Controls: Dual-Pause System
 
-Both the RLCAdapter and IexecLayerZeroBridge implement a sophisticated **dual-pause emergency system** designed to handle different types of security incidents while minimizing user impact.
+The IexecLayerZeroBridge implements a sophisticated **dual-pause emergency system** designed to handle different types of security incidents while minimizing user impact.
 
 ### 🚨 Pause Levels
 
@@ -219,11 +278,11 @@ Both the RLCAdapter and IexecLayerZeroBridge implement a sophisticated **dual-pa
 - **Allows**: ✅ Admin functions, view functions
 - **Emergency**: Maximum protection - complete bridge shutdown
 
-#### Level 2: Entrance Pause (`pauseEntrances()`)
+#### Level 2: Send Pause (`pauseSend()`)
 **Use Case**: Destination chain issues, or controlled maintenance
-- **Blocks**: ❌ Triggering transfers only (users can't submit send requests)
-- **Allows**: ✅ Already submitted transfers (users can still receive their tokens if the send operation was submitted before level 2 pause).
-- **Benefit**: Bridge requests that are on-going do not get blocked.
+- **Blocks**: ❌ Outgoing transfers only (users can't initiate send requests)
+- **Allows**: ✅ Incoming transfers (users can still receive tokens from other chains)
+- **Benefit**: Allows completion of in-flight transfers while preventing new ones
 
 ## Gas Costs and Fees
 
