@@ -53,7 +53,6 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
 
         // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(upgrader);
-        bool requireApproval = false;
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
             constructorData: abi.encode(false, rlcCrosschainToken, mockEndpoint),

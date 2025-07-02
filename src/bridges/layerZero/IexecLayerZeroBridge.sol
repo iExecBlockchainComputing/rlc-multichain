@@ -265,7 +265,7 @@ contract IexecLayerZeroBridge is
      * It overrides the `_credit` function
      * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L78-L88
      *
-     * This function behavior is chain agnostic and works the same for both chains that doers or doesn't require approval.
+     * This function behavior is chain agnostic and works the same for both chains that does or doesn't require approval.
      *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token received = 1 token minted)

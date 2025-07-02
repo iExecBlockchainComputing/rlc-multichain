@@ -216,7 +216,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
         // Verify source state - tokens should be burned/locked
         assertEq(token.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT, "Tokens should be deducted from sender");
-``` ? 
     }
 
     function _test_Pause_OnlyPauserRole(IexecLayerZeroBridge iexecLayerZeroBridge) internal {
