@@ -18,6 +18,7 @@ contract SendTokensToArbitrumSepolia is Script {
      * @param _addr The address to convert.
      * @return The bytes32 representation of the address.
      */
+
     function addressToBytes32(address _addr) internal pure returns (bytes32) {
         return bytes32(uint256(uint160(_addr)));
     }
@@ -55,7 +56,7 @@ contract SendTokensToArbitrumSepolia is Script {
 
         bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(65000, 0); // 65000 gas limit for the receiving executor and 0 for the executor's value
         SendParam memory sendParam = SendParam(
-            destinationChainId,// Destination endpoint ID.
+            destinationChainId, // Destination endpoint ID.
             addressToBytes32(recipientAddress), // Recipient address.
             amount, // Amount to send in local decimals.
             amount * 9 / 10, // Minimum amount to send in local decimals (allowing 10% slippage).
