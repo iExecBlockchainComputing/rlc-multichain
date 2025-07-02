@@ -54,7 +54,7 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     // Without ApprovalRequired
     // ###############################################
 
-    function testFork_DeploymentOnChain_WithoutApproval() public {
+    function testFork_Deployment_WithoutApproval() public {
         vm.selectFork(arbitrumSepoliaFork);
         _test_Deployment(false, rlcCrosschainToken);
     }
@@ -68,7 +68,7 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     // With ApprovalRequired
     // ###############################################
 
-    function testFork_DeploymentOnChain_WithApproval() public {
+    function testFork_Deployment_WithApproval() public {
         vm.selectFork(sepoliaFork);
         _test_Deployment(true, liquidityUnifier);
     }
