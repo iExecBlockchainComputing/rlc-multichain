@@ -11,6 +11,7 @@ import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosscha
 import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
+import {ConfigLib} from "../../script/lib/ConfigLib.sol";
 
 /**
  * Test Script for the IexecLayerZeroBridge on Ethereum Mainnet.
@@ -18,10 +19,9 @@ import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
  * RLCLiquidityUnifier contract deployed on the same chain.
  */
 contract IexecLayerZeroBridgeScriptTest is Test {
-    // TODO read value from config.json file.
-    address LAYERZERO_ENDPOINT = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
-    address CREATEX = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
-    address rlcAddress = 0x26A738b6D33EF4D94FF084D3552961b8f00639Cd;
+    string config = vm.readFile("config/config.json");
+    // We doesn't matter the chain here are LAYERZERO_ENDPOINT address is the same for both network (Ethereum Mainnet & Arbitrum)
+    ConfigLib.CommonConfigParams params = ConfigLib.readCommonConfig(config, "sepolia");
 
     address admin = makeAddr("admin");
     address upgrader = makeAddr("upgrader");
@@ -46,13 +46,14 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         // Setup Ethereum Mainnet fork
         vm.selectFork(ethereumMainnetFork);
         liquidityUnifier = new RLCLiquidityUnifierDeployScript().deploy(
-            address(rlcAddress), admin, upgrader, CREATEX, keccak256("salt")
+            params.rlcToken, admin, upgrader, params.createxFactory, keccak256("salt")
         );
 
         // Setup Arbitrum Sepolia fork
         vm.selectFork(arbitrumFork);
-        rlcCrosschain =
-            new RLCCrosschainTokenDeployScript().deploy("iEx.ec Network Token", "RLC", admin, admin, CREATEX, salt);
+        rlcCrosschain = new RLCCrosschainTokenDeployScript().deploy(
+            "iEx.ec Network Token", "RLC", admin, admin, params.createxFactory, salt
+        );
     }
 
     // ###############################################
@@ -90,12 +91,19 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     function _testDeployment(bool _requireApproval, address bridgeableToken) internal {
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
             deployer.deploy(
-                _requireApproval, bridgeableToken, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt
+                _requireApproval,
+                bridgeableToken,
+                params.lzEndpoint,
+                admin,
+                upgrader,
+                pauser,
+                params.createxFactory,
+                salt
             )
         );
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
-        assertEq(iexecLayerZeroBridge.token(), _requireApproval ? rlcAddress : bridgeableToken);
+        assertEq(iexecLayerZeroBridge.token(), _requireApproval ? params.rlcToken : bridgeableToken);
         // Check ApprovalRequired value
         assertEq(iexecLayerZeroBridge.approvalRequired(), _requireApproval, "Incorrect ApprovalRequired value");
         // Check all roles.
@@ -112,9 +120,13 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     }
 
     function _testTwoDeploymentsWithTheSameSalt(bool _requireApproval, address bridgeableToken) internal {
-        deployer.deploy(_requireApproval, bridgeableToken, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
-        vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", CREATEX));
-        deployer.deploy(_requireApproval, bridgeableToken, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
+        deployer.deploy(
+            _requireApproval, bridgeableToken, params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
+        );
+        vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", params.createxFactory));
+        deployer.deploy(
+            _requireApproval, bridgeableToken, params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
+        );
     }
 
     // TODO add tests for the configuration script.
