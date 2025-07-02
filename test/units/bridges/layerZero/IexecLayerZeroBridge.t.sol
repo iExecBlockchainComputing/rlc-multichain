@@ -59,7 +59,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         contracts[0] = iexecLayerZeroBridgeEthereumAddress; // Index 0 → EID 1
         contracts[1] = iexecLayerZeroBridgeChainXAddress; // Index 1 → EID 2
         vm.startPrank(admin);
-        wireOApps(contracts); // ✨ Configuration automatique bidirectionnelle
+        wireOApps(contracts);
         vm.stopPrank();
 
         // ### Setup for chainX ###
@@ -186,7 +186,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     // Common functions
     // ###############################################
 
-    // ============ BASIC BRIDGE FUNCTIONALITY TESTS ============
     function _test_SendToken_WhenOperational(
         IexecLayerZeroBridge iexecLayerZeroBridge,
         address tokenAddress,
@@ -219,7 +218,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(token.balanceOf(user1), initialBalance - TRANSFER_AMOUNT, "Tokens should be deducted from sender");
     }
 
-    // ============ LEVEL 1 PAUSE TESTS (Complete Pause) ============
     function _test_Pause_OnlyPauserRole(IexecLayerZeroBridge iexecLayerZeroBridge) internal {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
@@ -301,7 +299,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(token.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
-    // ============ LEVEL 2 PAUSE TESTS (Send Pause) ============
     function _test_PauseSend_OnlyPauserRole(IexecLayerZeroBridge iexecLayerZeroBridge) public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
@@ -358,7 +355,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         _test_SendToken_WhenOperational(iexecLayerZeroBridge, tokenAddress, approvalRequired);
     }
 
-    // ============ token and approvalRequired ============
     function _testReturnsApprovalRequired(IexecLayerZeroBridge iexecLayerZeroBridge, bool requireApproval) internal {
         requireApproval ? vm.chainId(1) : vm.chainId(42161);
         assertEq(
