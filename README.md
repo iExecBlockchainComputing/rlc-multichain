@@ -8,63 +8,79 @@ The system consists of three main components that work together to enable cross-
 
 ### Core Components
 
-1. **RLCCrosschainToken**: An upgradeable ERC20 token that implements the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) bridgeable token standard. This token can be minted and burned by authorized bridge contracts.
+1. **RLCCrosschainToken**: An upgradeable ERC20 token that implements the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) bridgeable token standard. This token can be minted and burned by authorized bridge contracts and is deployed on non-Ethereum chains.
 
-2. **RLCLiquidityUnifier** (Ethereum only): A liquidity management contract that locks/unlocks the original RLC tokens on Ethereum. It implements the ERC-7802 interface to work seamlessly with bridge contracts while managing liquidity from the existing RLC token.
+2. **RLCLiquidityUnifier** (Ethereum Mainnet only): A liquidity management contract that locks/unlocks the original RLC tokens on Ethereum. It implements the ERC-7802 interface to work seamlessly with bridge contracts while managing liquidity from the existing RLC token contract.
 
-3. **IexecLayerZeroBridge**: A LayerZero OFT bridge contract that handles cross-chain messaging and token transfers. It uses the ERC-7802 interface to mint/burn tokens or lock/unlock liquidity as needed.
+3. **IexecLayerZeroBridge**: A LayerZero OFT bridge contract that handles cross-chain messaging and token transfers. This contract has **dual deployment modes** based on the chain:
+   - **Ethereum Mode** (`APPROVAL_REQUIRED = true`): Interfaces with RLCLiquidityUnifier to lock/unlock original RLC tokens
+   - **Non-Ethereum Mode** (`APPROVAL_REQUIRED = false`): Directly mints/burns RLCCrosschainToken
 
-### Network-Specific Deployment
+### Deployment Architecture
 
-- **Ethereum Sepolia**: 
-  - `RLCLiquidityUnifier` (manages original RLC token liquidity)
-  - `IexecLayerZeroBridge` (LayerZero bridge)
+The bridge system uses a **dual-mode architecture** where the same `IexecLayerZeroBridge` contract behaves differently based on deployment configuration:
 
-- **Arbitrum Sepolia (and other chains)**:
-  - `RLCCrosschainToken` (bridgeable RLC token)
-  - `IexecLayerZeroBridge` (LayerZero bridge)
+#### **Ethereum Mainnet Deployment**
+- **Configuration**: `APPROVAL_REQUIRED = true`
+- **BRIDGEABLE_TOKEN**: Points to `RLCLiquidityUnifier` contract
+- **Mechanism**: Lock/unlock original RLC tokens
+- **Components**:
+  - Original RLC Token (existing ERC-20)
+  - `RLCLiquidityUnifier` (ERC-7802 wrapper/adapter)
+  - `IexecLayerZeroBridge` (LayerZero bridge in Ethereum mode)
+
+#### **Non-Ethereum Chain Deployment (L2s, Sidechains)**
+- **Configuration**: `APPROVAL_REQUIRED = false`
+- **BRIDGEABLE_TOKEN**: Points to `RLCCrosschainToken` contract
+- **Mechanism**: Mint/burn bridgeable tokens
+- **Components**:
+  - `RLCCrosschainToken` (ERC-7802 bridgeable token)
+  - `IexecLayerZeroBridge` (LayerZero bridge in non-Ethereum mode)
 
 ### Key Features
 
-- **ERC-7802 Compatibility**: All tokens implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) bridgeable token standard
-- **Upgradeable Contracts**: UUPS proxy pattern for safe upgrades
-- **Dual-Pause Emergency System**: Granular control over bridge operations
-- **Multi-Chain Support**: Designed to extend beyond Ethereum and Arbitrum
-- **Original Token Preservation**: Maintains the original RLC token on Ethereum
+- **ERC-7802 Compatibility**: All bridgeable tokens implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) standard
+- **Dual-Mode Bridge**: Single bridge contract with different behaviors for Ethereum vs. non-Ethereum chains
+- **Upgradeable Contracts**: UUPS proxy pattern for safe upgrades across all components
+- **Dual-Pause Emergency System**: Granular control over bridge operations with complete and send-only pause modes
+- **Multi-Chain Support**: Designed to extend to any LayerZero-supported chain
+- **Original Token Preservation**: Maintains the original RLC token on Ethereum through liquidity management
+- **Approval Optimization**: Smart approval handling for UI compatibility (e.g., Stargate)
 
 ### Architecture Flow
 
 ```mermaid
 graph TB
-    subgraph "Ethereum Sepolia"
-        RLC[Original RLC Token]
-        LU[RLCLiquidityUnifier]
-        LZB1[IexecLayerZeroBridge]
+    subgraph "Ethereum Mainnet"
+        RLC[Original RLC Token<br/>ERC-20]
+        LU[RLCLiquidityUnifier<br/>ERC-7802 Adapter]
+        LZB1[IexecLayerZeroBridge<br/>APPROVAL_REQUIRED=true]
         
         RLC --> LU
         LU --> LZB1
     end
     
-    subgraph "Arbitrum Sepolia"
-        CCT[RLCCrosschainToken]
-        LZB2[IexecLayerZeroBridge]
+    subgraph "Non-Ethereum Chains<br/>(L2s, Sidechains)"
+        CCT[RLCCrosschainToken<br/>ERC-7802]
+        LZB2[IexecLayerZeroBridge<br/>APPROVAL_REQUIRED=false]
         
         CCT --> LZB2
     end
     
     subgraph "LayerZero Network"
-        LZ[LayerZero Protocol]
+        LZ[LayerZero OFT Protocol]
     end
     
-    LZB1 <--> LZ
-    LZB2 <--> LZ
+    LZB1 <-->|Lock/Unlock| LZ
+    LZB2 <-->|Mint/Burn| LZ
     
-    classDef ethereum fill:#627eea
-    classDef arbitrum fill:#28a0f0
-    classDef layerzero fill:#ff6b6b
+    classDef ethereum fill:#627eea,color:#fff
+    classDef nonEthereum fill:#28a0f0,color:#fff
+    classDef layerzero fill:#ff6b6b,color:#fff
+    classDef token fill:#90EE90,color:#000
     
     class RLC,LU,LZB1 ethereum
-    class CCT,LZB2 arbitrum
+    class CCT,LZB2 nonEthereum
     class LZ layerzero
 ```
 
@@ -284,6 +300,22 @@ The IexecLayerZeroBridge implements a sophisticated **dual-pause emergency syste
 - **Allows**: ✅ Incoming transfers (users can still receive tokens from other chains)
 - **Benefit**: Allows completion of in-flight transfers while preventing new ones
 
+## Contract Verification
+
+### Automatic Verification
+
+Contracts are automatically verified on block explorers during deployment when using testnets:
+
+```bash
+# Deploys and verifies contracts on testnets
+make deploy-on-testnets
+
+# Upgrades and verifies contracts on testnets  
+make upgrade-on-testnets
+```
+
+The verification is handled by Foundry's built-in `--verify` flag, which submits the source code and constructor arguments to the respective block explorers (Etherscan, Arbiscan, etc.).
+
 ## Gas Costs and Fees
 
 LayerZero transactions require fees to cover:
@@ -298,12 +330,14 @@ The scripts automatically calculate these fees and include them in the transacti
 
 ## References
 
+- [ERC-7802: Crosschain Token Interface](https://eips.ethereum.org/EIPS/eip-7802) - The crosschain token standard used by bridgeable tokens
 - [LayerZero Documentation](https://layerzero.gitbook.io/docs/)
-- [OFT Contracts](https://github.com/LayerZero-Labs/solidity-examples/tree/main/contracts/token/oft)
+- [LayerZero OFT V2 Protocol](https://docs.layerzero.network/v2/developers/evm/oft/quickstart)
 - [OpenZeppelin UUPS Proxy Pattern](https://docs.openzeppelin.com/contracts/5.x/api/proxy#UUPSUpgradeable)
 - [OpenZeppelin Upgrade Safety](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable)
-- [iExec Platform Documentation](https://docs.iex.ec/)
+- [Foundry Documentation](https://book.getfoundry.sh/)
 - [Forge Coverage](https://book.getfoundry.sh/reference/forge/forge-coverage)
+- [iExec Platform Documentation](https://docs.iex.ec/)
 
 ## TODO
 
