@@ -4,9 +4,9 @@
 pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
+import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCLiquidityUnifier} from "../src/RLCLiquidityUnifier.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
-import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
 import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 /**
@@ -20,10 +20,8 @@ contract Deploy is Script {
      * @return address of the deployed RLCLiquidityUnifier proxy contract.
      */
     function run() external returns (address) {
-        string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
-
-        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
 
         vm.startBroadcast();
         address liquidityUnifierProxy = deploy(
@@ -35,8 +33,7 @@ contract Deploy is Script {
         );
         vm.stopBroadcast();
 
-        //TODO: use config file to store addresses.
-        EnvUtils.updateEnvVariable("RLC_LIQUIDITY_UNIFIER_PROXY_ADDRESS", liquidityUnifierProxy);
+        ConfigLib.updateConfigAddress(chain, "rlcLiquidityUnifierAddress", liquidityUnifierProxy);
         return liquidityUnifierProxy;
     }
 
@@ -68,18 +65,16 @@ contract Deploy is Script {
 
 contract Upgrade is Script {
     function run() external {
+        string memory chain = vm.envString("CHAIN");
+        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(chain);
+
         vm.startBroadcast();
-
-        address proxyAddress = vm.envAddress("RLC_LIQUIDITY_UNIFIER_PROXY_ADDRESS");
-        address rlcToken = vm.envAddress("RLC_ADDRESS");
-
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: proxyAddress,
-            constructorData: abi.encode(rlcToken),
+            proxyAddress: commonParams.rlcLiquidityUnifierAddress,
+            constructorData: abi.encode(commonParams.rlcToken),
             contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2", // Would be production contract in real deployment
             newStateVariable: 1000000 * 10 ** 9
         });
-
         UpgradeUtils.executeUpgrade(params);
         vm.stopBroadcast();
     }
