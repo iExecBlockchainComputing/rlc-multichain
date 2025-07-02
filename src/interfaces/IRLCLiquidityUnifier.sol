@@ -9,14 +9,8 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
  * @title IRLCLiquidityUnifier
  * @dev Interface for the RLC Liquidity Unifier contract.
  *
- * This interface defines the contract for managing RLC (iExec's native token) liquidity
- * across different chains or protocols. It extends ERC-7802, which is likely a standard
- * for cross-chain token management.
- *
- * The RLC Liquidity Unifier appears to be designed to:
- * - Provide a unified interface for RLC token operations
- * - Handle liquidity management across different bridges
- * - Maintain compatibility with ERC-7802 standards
+ * This interface defines the contract that is used to centralize the RLC liquidity
+ * across different bridges.
  */
 interface IRLCLiquidityUnifier {
     /**
@@ -30,11 +24,11 @@ interface IRLCLiquidityUnifier {
      * @param addr The invalid address.
      */
     error ERC7802InvalidFromAddress(address addr);
+
     /**
      * @dev Returns the address of the RLC token contract
      * @return The contract address of the RLC token
      */
-
     function RLC_TOKEN() external view returns (IERC20Metadata);
 
     /**
