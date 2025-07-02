@@ -13,14 +13,9 @@ import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
 import {ConfigLib} from "../../script/lib/ConfigLib.sol";
 
-/**
- * Test Script for the IexecLayerZeroBridge on Ethereum Mainnet.
- * In this case, IexecLayerZeroBridge should be connected to
- * RLCLiquidityUnifier contract deployed on the same chain.
- */
 contract IexecLayerZeroBridgeScriptTest is Test {
     string config = vm.readFile("config/config.json");
-    // We doesn't matter the chain here are LAYERZERO_ENDPOINT address is the same for both network (Ethereum Mainnet & Arbitrum)
+    // The chain does not matter here as the LAYERZERO_ENDPOINT address is the same for both networks (Ethereum Mainnet & Arbitrum)
     ConfigLib.CommonConfigParams params = ConfigLib.readCommonConfig(config, "sepolia");
 
     address admin = makeAddr("admin");
@@ -30,7 +25,7 @@ contract IexecLayerZeroBridgeScriptTest is Test {
 
     IexecLayerZeroBridgeDeploy public deployer;
     address private liquidityUnifier;
-    address private rlcCrosschain;
+    address private rlcCrosschainToken;
 
     // Forks ID
     uint256 private ethereumMainnetFork;
@@ -51,7 +46,7 @@ contract IexecLayerZeroBridgeScriptTest is Test {
 
         // Setup Arbitrum Sepolia fork
         vm.selectFork(arbitrumFork);
-        rlcCrosschain = new RLCCrosschainTokenDeployScript().deploy(
+        rlcCrosschainToken = new RLCCrosschainTokenDeployScript().deploy(
             "iEx.ec Network Token", "RLC", admin, admin, params.createxFactory, salt
         );
     }
@@ -60,38 +55,38 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     // Without ApprovalRequired
     // ###############################################
 
-    function testFork_DeploymentOnChainWithoutApproval() public {
+    function testFork_DeploymentOnChain_WithoutApproval() public {
         vm.selectFork(arbitrumFork);
-        _testDeployment(false, rlcCrosschain);
+        _test_Deployment(false, rlcCrosschainToken);
     }
 
-    function testFork_RevertWhen_TwoDeploymentsWithTheSameSaltWithoutApproval() public {
+    function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt_WithoutApproval() public {
         vm.selectFork(arbitrumFork);
-        _testTwoDeploymentsWithTheSameSalt(false, rlcCrosschain);
+        _test_TwoDeploymentsWithTheSameSalt(false, rlcCrosschainToken);
     }
 
     // ###############################################
     // With ApprovalRequired
     // ###############################################
 
-    function testFork_DeploymentOnChainWithApproval() public {
+    function testFork_DeploymentOnChain_WithApproval() public {
         vm.selectFork(ethereumMainnetFork);
-        _testDeployment(true, liquidityUnifier);
+        _test_Deployment(true, liquidityUnifier);
     }
 
-    function testFork_RevertWhen_TwoDeploymentsWithTheSameSaltWithApproval() public {
+    function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt_WithApproval() public {
         vm.selectFork(ethereumMainnetFork);
-        _testTwoDeploymentsWithTheSameSalt(true, liquidityUnifier);
+        _test_TwoDeploymentsWithTheSameSalt(true, liquidityUnifier);
     }
 
     // ###############################################
     // Common functions
     // ###############################################
 
-    function _testDeployment(bool _requireApproval, address bridgeableToken) internal {
+    function _test_Deployment(bool requireApproval, address bridgeableToken) internal {
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
             deployer.deploy(
-                _requireApproval,
+                requireApproval,
                 bridgeableToken,
                 params.lzEndpoint,
                 admin,
@@ -103,9 +98,9 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         );
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
-        assertEq(iexecLayerZeroBridge.token(), _requireApproval ? params.rlcToken : bridgeableToken);
+        assertEq(iexecLayerZeroBridge.token(), requireApproval ? params.rlcToken : bridgeableToken);
         // Check ApprovalRequired value
-        assertEq(iexecLayerZeroBridge.approvalRequired(), _requireApproval, "Incorrect ApprovalRequired value");
+        assertEq(iexecLayerZeroBridge.approvalRequired(), requireApproval, "Incorrect ApprovalRequired value");
         // Check all roles.
         assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.DEFAULT_ADMIN_ROLE(), admin));
         assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.UPGRADER_ROLE(), upgrader));
@@ -119,13 +114,13 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         // TODO check that the proxy address is saved.
     }
 
-    function _testTwoDeploymentsWithTheSameSalt(bool _requireApproval, address bridgeableToken) internal {
+    function _test_TwoDeploymentsWithTheSameSalt(bool requireApproval, address bridgeableToken) internal {
         deployer.deploy(
-            _requireApproval, bridgeableToken, params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
+            requireApproval, bridgeableToken, params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
         );
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", params.createxFactory));
         deployer.deploy(
-            _requireApproval, bridgeableToken, params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
+            requireApproval, bridgeableToken, params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
         );
     }
 
