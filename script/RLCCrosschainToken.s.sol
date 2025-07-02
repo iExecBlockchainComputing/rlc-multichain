@@ -4,9 +4,9 @@
 pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
+import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
-import {EnvUtils} from "./lib/UpdateEnvUtils.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
 
 /**
@@ -19,10 +19,9 @@ contract Deploy is Script {
      * @return address of the deployed RLCCrosschainToken proxy contract.
      */
     function run() external returns (address) {
-        string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
 
-        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
         vm.startBroadcast();
         address rlcCrosschainTokenProxy = deploy(
             "iEx.ec Network Token",
@@ -30,12 +29,11 @@ contract Deploy is Script {
             params.initialAdmin,
             params.initialUpgrader,
             params.createxFactory,
-            params.rlcCrossChainTokenCreatexSalt
+            params.rlcCrosschainTokenCreatexSalt
         );
         vm.stopBroadcast();
 
-        //TODO: use config file to store addresses.
-        EnvUtils.updateEnvVariable("RLC_CROSSCHAIN_ADDRESS", rlcCrosschainTokenProxy);
+        ConfigLib.updateConfigAddress(chain, "rlcCrosschainTokenAddress", rlcCrosschainTokenProxy);
         return rlcCrosschainTokenProxy;
     }
 

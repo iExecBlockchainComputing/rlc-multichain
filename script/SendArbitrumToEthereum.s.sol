@@ -20,14 +20,11 @@ contract SendTokensToSepolia is Script {
     }
 
     function run() external {
-        vm.startBroadcast();
-
-        string memory config = vm.readFile("config/config.json");
         string memory sourceChain = vm.envString("SOURCE_CHAIN");
         string memory targetChain = vm.envString("TARGET_CHAIN");
 
-        ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(config, sourceChain);
-        ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(config, targetChain);
+        ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(sourceChain);
+        ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(targetChain);
 
         // Contract addresses
         address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
@@ -48,6 +45,7 @@ contract SendTokensToSepolia is Script {
         bytes memory _extraOptions =
             abi.encodePacked(uint16(3), uint8(1), uint16(33), uint8(1), uint128(65000), uint128(0));
 
+        vm.startBroadcast();
         SendParam memory sendParam = SendParam(
             destinationChainId,
             addressToBytes32(recipientAddress),
