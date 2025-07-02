@@ -216,7 +216,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         vm.stopPrank();
 
         // Verify source state - tokens should be burned/locked
-        assertEq(token.balanceOf(user1), initialBalance - TRANSFER_AMOUNT, "Tokens should be deducted from sender");
+        assertEq(token.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT, "Tokens should be deducted from sender");
+``` ? 
     }
 
     // ============ LEVEL 1 PAUSE TESTS (Complete Pause) ============
