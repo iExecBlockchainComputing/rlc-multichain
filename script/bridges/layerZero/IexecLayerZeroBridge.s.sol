@@ -33,11 +33,7 @@ contract Deploy is Script {
         );
 
         vm.stopBroadcast();
-
-        address implementationAddress = Upgrades.getImplementationAddress(iexecLayerZeroBridgeProxy);
         ConfigLib.updateConfigAddress(chain, "iexecLayerZeroBridgeAddress", iexecLayerZeroBridgeProxy);
-        ConfigLib.updateConfigAddress(chain, "iexecLayerZeroBridgeImplementation", implementationAddress);
-
         return iexecLayerZeroBridgeProxy;
     }
 
@@ -99,10 +95,7 @@ contract Upgrade is Script {
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
             newStateVariable: newStateVariable
         });
-
-        address newImplementationAddress = UpgradeUtils.executeUpgrade(params);
-
+        UpgradeUtils.executeUpgrade(params);
         vm.stopBroadcast();
-        ConfigLib.updateConfigAddress(chain, "layerZeroBridgeImplementation", newImplementationAddress);
     }
 }

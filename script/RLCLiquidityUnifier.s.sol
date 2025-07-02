@@ -35,9 +35,7 @@ contract Deploy is Script {
         );
         vm.stopBroadcast();
 
-        address implementationAddress = Upgrades.getImplementationAddress(liquidityUnifierProxy);
         ConfigLib.updateConfigAddress(chain, "rlcLiquidityUnifierAddress", liquidityUnifierProxy);
-        ConfigLib.updateConfigAddress(chain, "rlcLiquidityUnifierImplementation", implementationAddress);
         return liquidityUnifierProxy;
     }
 
@@ -83,8 +81,6 @@ contract Upgrade is Script {
         });
 
         UpgradeUtils.executeUpgrade(params);
-        address implementationAddress = Upgrades.getImplementationAddress(params.proxyAddress);
-        ConfigLib.updateConfigAddress(chain, "rlcLiquidityUnifierImplementation", implementationAddress);
         vm.stopBroadcast();
     }
 }

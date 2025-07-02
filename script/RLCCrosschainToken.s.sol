@@ -34,9 +34,7 @@ contract Deploy is Script {
         );
         vm.stopBroadcast();
 
-        address implementationAddress = Upgrades.getImplementationAddress(rlcCrosschainTokenProxy);
         ConfigLib.updateConfigAddress(chain, "rlcCrosschainTokenAddress", rlcCrosschainTokenProxy);
-        ConfigLib.updateConfigAddress(chain, "rlcCrosschainTokenImplementation", implementationAddress);
         return rlcCrosschainTokenProxy;
     }
 
