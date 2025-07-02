@@ -248,12 +248,11 @@ contract IexecLayerZeroBridge is
         (amountSentLD, amountReceivedLD) = _debitView(amountLD, minAmountLD, dstEid);
 
         if (APPROVAL_REQUIRED) {
-            // Ethereum Mainnet: Transfer RLC tokens to LiquidityUnifier
-            // Workaround for Stargate UI compatibility - UI approves this contract
-            // instead of approving LiquidityUnifier directly
+            // Transfer RLC tokens from the user's account to the LiquidityUnifier contract.
+            //  The normal workflow would be to call `LiquidityUnifier#crosschainBurn()` but this workflow is not compatible with Stargate UI.
+            // Stargate UI does not support approving a contract other than the bridge itself, so here the LiquidityUnifier will not be able to send the `transferFrom` transaction.
             IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN().safeTransferFrom(from, BRIDGEABLE_TOKEN, amountSentLD);
         } else {
-            // Non-Ethereum-Mainnet chains: Burn tokens directly using crosschainBurn
             IERC7802(BRIDGEABLE_TOKEN).crosschainBurn(from, amountSentLD);
         }
     }
@@ -266,7 +265,7 @@ contract IexecLayerZeroBridge is
      * It overrides the `_credit` function
      * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L78-L88
      *
-     * This function behavior is chain agnostic and works for both mainnet and non-mainnet chains.
+     * This function behavior is chain agnostic and works the same for both chains that doers or doesn't require approval.
      *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token received = 1 token minted)

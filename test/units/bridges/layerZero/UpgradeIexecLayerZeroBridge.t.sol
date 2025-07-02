@@ -56,7 +56,7 @@ contract UpgradeLayerZeroBridgeTest is TestHelperOz5 {
         bool requireApproval = false;
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
-            constructorData: abi.encode(requireApproval, rlcCrosschainToken, mockEndpoint),
+            constructorData: abi.encode(false, rlcCrosschainToken, mockEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             newStateVariable: NEW_STATE_VARIABLE
         });
