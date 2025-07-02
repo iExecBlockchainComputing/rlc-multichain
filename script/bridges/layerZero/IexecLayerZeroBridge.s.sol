@@ -20,7 +20,7 @@ contract Deploy is Script {
 
         vm.startBroadcast();
         address iexecLayerZeroBridgeProxy = deploy(
-            params.approvalRequired ? params.rlcLiquidityUnifierAddress : params.rlcCrossChainTokenAddress,
+            params.approvalRequired ? params.rlcLiquidityUnifierAddress : params.rlcCrosschainTokenAddress,
             params.lzEndpoint,
             params.initialAdmin,
             params.initialUpgrader,
@@ -78,7 +78,7 @@ contract Upgrade is Script {
         uint256 newStateVariable = 1000000 * 10 ** 9;
         address bridgeableToken = commonParams.approvalRequired
             ? commonParams.rlcLiquidityUnifierAddress
-            : commonParams.rlcCrossChainTokenAddress;
+            : commonParams.rlcCrosschainTokenAddress;
         vm.startBroadcast();
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: commonParams.iexecLayerZeroBridgeAddress,
