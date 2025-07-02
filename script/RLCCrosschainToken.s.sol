@@ -7,7 +7,7 @@ import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
-import {ConfigLib, ConfigUtils} from "./lib/ConfigLib.sol";
+import {ConfigLib} from "./lib/ConfigLib.sol";
 
 /**
  * Deployment script for the RLCCrosschainToken contract.
@@ -15,14 +15,13 @@ import {ConfigLib, ConfigUtils} from "./lib/ConfigLib.sol";
  */
 contract Deploy is Script {
     /**
-     * Reads configuration from a JSON file and deploys RLCCrosschainToken contract.
+     * Reads configuration from config file and deploys RLCCrosschainToken contract.
      * @return address of the deployed RLCCrosschainToken proxy contract.
      */
     function run() external returns (address) {
-        string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
 
-        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
         vm.startBroadcast();
         address rlcCrosschainTokenProxy = deploy(
             "iEx.ec Network Token",
@@ -30,13 +29,11 @@ contract Deploy is Script {
             params.initialAdmin,
             params.initialUpgrader,
             params.createxFactory,
-            params.createxSalt
+            params.rlcCrossChainTokenCreatexSalt
         );
         vm.stopBroadcast();
 
-        address implementationAddress = Upgrades.getImplementationAddress(rlcCrosschainTokenProxy);
-        ConfigUtils.updateConfigAddress(chain, "rlcCrosschainTokenAddress", rlcCrosschainTokenProxy);
-        ConfigUtils.updateConfigAddress(chain, "rlcCrosschainTokenImplementation", implementationAddress);
+        ConfigLib.updateConfigAddress(chain, "rlcCrosschainTokenAddress", rlcCrosschainTokenProxy);
         return rlcCrosschainTokenProxy;
     }
 

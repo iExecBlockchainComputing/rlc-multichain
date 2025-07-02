@@ -23,21 +23,18 @@ contract SendTokensToSepolia is Script {
     }
 
     function run() external {
-        vm.startBroadcast();
-
-        string memory config = vm.readFile("config/config.json");
         string memory sourceChain = vm.envString("SOURCE_CHAIN");
         string memory targetChain = vm.envString("TARGET_CHAIN");
 
-        ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(config, sourceChain);
-        ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(config, targetChain);
+        ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(sourceChain);
+        ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(targetChain);
 
         // Contract addresses
-        address iexecLayerZeroBridgeAddress = sourceParams.layerZeroBridge;
-        address rlcArbitrumTokenAddress = sourceParams.rlcToken;
+        address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
+        address rlcArbitrumTokenAddress = sourceParams.rlcCrossChainTokenAddress; // RLC
 
         // Transfer parameters
-        uint16 destinationChainId = uint16(targetParams.layerZeroChainId); // LayerZero chain ID for Ethereum Sepolia
+        uint16 destinationChainId = uint16(targetParams.lzChainId); // LayerZero chain ID for Ethereum Sepolia
         address recipientAddress = vm.envAddress("RECIPIENT_ADDRESS");
         console.log("Recipient: %s", recipientAddress);
 
@@ -54,6 +51,7 @@ contract SendTokensToSepolia is Script {
         // Estimate gas for the OFT endpoint
         bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(65000, 0); // 65000 gas limit for the receiving executor and 0 for the executor's value
 
+        vm.startBroadcast();
         SendParam memory sendParam = SendParam(
             destinationChainId, // Destination endpoint ID.
             addressToBytes32(recipientAddress), // Recipient address.

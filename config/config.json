@@ -8,18 +8,20 @@
       "rlcAddress": "0x26A738b6D33EF4D94FF084D3552961b8f00639Cd",
       "rlcLiquidityUnifierAddress": "0x0000000000000000000000000000000000000000",
       "rlcLiquidityUnifierCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "approvalRequired": true,
       "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
-      "layerZeroEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-      "layerZeroChainId": 40161
+      "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
+      "lzChainId": 40161
     },
     "arbitrum_sepolia": {
       "rlcCrossChainTokenAddress": "0x0000000000000000000000000000000000000000",
       "rlcCrossChainTokenCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
       "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
-      "layerZeroEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f", 
-      "layerZeroChainId": 40231
+      "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
+      "approvalRequired": false,
+      "lzChainId": 40231
     }
   }
 }

@@ -7,7 +7,7 @@ import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCLiquidityUnifier} from "../src/RLCLiquidityUnifier.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
-import {ConfigLib, ConfigUtils} from "./lib/ConfigLib.sol";
+import {ConfigLib} from "./lib/ConfigLib.sol";
 import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 /**
  * Deployment script for the RLCLiquidityUnifier contract.
@@ -16,23 +16,24 @@ import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 
 contract Deploy is Script {
     /**
+     * Reads configuration from config file and deploys RLCLiquidityUnifier contract.
      * @return address of the deployed RLCLiquidityUnifier proxy contract.
      */
     function run() external returns (address) {
-        string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
-
-        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
 
         vm.startBroadcast();
         address liquidityUnifierProxy = deploy(
-            params.rlcToken, params.initialAdmin, params.initialUpgrader, params.createxFactory, params.createxSalt
+            params.rlcToken,
+            params.initialAdmin,
+            params.initialUpgrader,
+            params.createxFactory,
+            params.rlcLiquidityUnifierCreatexSalt
         );
         vm.stopBroadcast();
 
-        address implementationAddress = Upgrades.getImplementationAddress(liquidityUnifierProxy);
-        ConfigUtils.updateConfigAddress(chain, "rlcLiquidityUnifierAddress", liquidityUnifierProxy);
-        ConfigUtils.updateConfigAddress(chain, "rlcLiquidityUnifierImplementation", implementationAddress);
+        ConfigLib.updateConfigAddress(chain, "rlcLiquidityUnifierAddress", liquidityUnifierProxy);
         return liquidityUnifierProxy;
     }
 
@@ -64,41 +65,17 @@ contract Deploy is Script {
 
 contract Upgrade is Script {
     function run() external {
-        vm.startBroadcast();
-
-        string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
-        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(config, chain);
+        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(chain);
 
+        vm.startBroadcast();
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: commonParams.rlcLiquidityUnifier,
+            proxyAddress: commonParams.rlcLiquidityUnifierAddress,
             constructorData: abi.encode(commonParams.rlcToken),
             contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2", // Would be production contract in real deployment
-            newStateVariable: 1000000 * 10 ** 9,
-            validateOnly: false
+            newStateVariable: 1000000 * 10 ** 9
         });
-
         UpgradeUtils.executeUpgrade(params);
-        address implementationAddress = Upgrades.getImplementationAddress(params.proxyAddress);
-        ConfigUtils.updateConfigAddress(chain, "rlcLiquidityUnifierImplementation", implementationAddress);
         vm.stopBroadcast();
-    }
-}
-
-contract ValidateUpgrade is Script {
-    function run() external {
-        string memory config = vm.readFile("config/config.json");
-        string memory chain = vm.envString("CHAIN");
-        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(config, chain);
-
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: address(0),
-            constructorData: abi.encode(commonParams.rlcToken),
-            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
-            newStateVariable: 1000000 * 10 ** 9,
-            validateOnly: true
-        });
-
-        UpgradeUtils.validateUpgrade(params);
     }
 }

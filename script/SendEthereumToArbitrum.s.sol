@@ -23,24 +23,23 @@ contract SendTokensToArbitrumSepolia is Script {
     }
 
     function run() external {
-        vm.startBroadcast();
-        string memory config = vm.readFile("config/config.json");
         string memory sourceChain = vm.envString("SOURCE_CHAIN");
         string memory targetChain = vm.envString("TARGET_CHAIN");
 
-        ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(config, sourceChain);
-        ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(config, targetChain);
+        ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(sourceChain);
+        ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(targetChain);
 
         // Contract addresses
-        address iexecLayerZeroBridgeAddress = sourceParams.layerZeroBridge;
-        // address liquidityUnifierAddress = sourceParams.rlcLiquidityUnifier;
+        address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
+        // address liquidityUnifierAddress = sourceParams.rlcLiquidityUnifierAddress;
         address rlcMainnetTokenAddress = sourceParams.rlcToken;
 
         // Transfer parameters
-        uint16 destinationChainId = uint16(targetParams.layerZeroChainId);
+        uint16 destinationChainId = uint16(targetParams.lzChainId);
         address recipientAddress = vm.envAddress("RECIPIENT_ADDRESS");
         uint256 amount = 5 * 10 ** 9; //  RLC tokens (adjust the amount as needed)
 
+        vm.startBroadcast();
         // First, approve the adapter to spend your tokens
         IERC20 rlcToken = IERC20(rlcMainnetTokenAddress);
         console.log("Approving RLCLiquidityUnifier contract to spend %s RLC", amount / 10 ** 9);
