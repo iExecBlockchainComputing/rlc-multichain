@@ -19,10 +19,9 @@ contract Deploy is Script {
      * @return address of the deployed RLCCrosschainToken proxy contract.
      */
     function run() external returns (address) {
-        string memory config = vm.readFile("config/config.json");
         string memory chain = vm.envString("CHAIN");
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
 
-        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(config, chain);
         vm.startBroadcast();
         address rlcCrosschainTokenProxy = deploy(
             "iEx.ec Network Token",

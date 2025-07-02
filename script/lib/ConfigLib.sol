@@ -97,15 +97,11 @@ library ConfigLib {
 
     /**
      * @dev Reads common configuration parameters from config.json
-     * @param config The JSON configuration string
      * @param chain The current chain identifier
      * @return params Common configuration parameters
      */
-    function readCommonConfig(string memory config, string memory chain)
-        internal
-        pure
-        returns (CommonConfigParams memory params)
-    {
+    function readCommonConfig(string memory chain) internal view returns (CommonConfigParams memory params) {
+        string memory config = vm.readFile("config/config.json");
         string memory prefix = string.concat(".chains.", chain);
         params.initialAdmin = config.readAddress(".initialAdmin");
         params.initialPauser = config.readAddress(".initialPauser");
@@ -126,25 +122,13 @@ library ConfigLib {
     }
 
     /**
-     * @dev Updates the config.json file with a new address for a specific chain
+     * @dev Updates the config file with a new address for a specific chain
      * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia")
      * @param fieldName The field name to update (e.g., "iexecLayerZeroBridgeAddress")
      * @param value The address value to set
      */
     function updateConfigAddress(string memory chain, string memory fieldName, address value) internal {
-        updateConfigAddress(chain, fieldName, value, "config/config.json");
-    }
-
-    /**
-     * @dev Updates the config file with a new address for a specific chain
-     * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia")
-     * @param fieldName The field name to update (e.g., "iexecLayerZeroBridgeAddress")
-     * @param value The address value to set
-     * @param configPath The path to the config file
-     */
-    function updateConfigAddress(string memory chain, string memory fieldName, address value, string memory configPath)
-        internal
-    {
+        string memory configPath = "config/config.json";
         // Check if file exists
         if (!vm.exists(configPath)) {
             console.log("Config file not found at:", configPath);
@@ -197,7 +181,6 @@ library ConfigLib {
             // Append a newline and write back
             string memory contentWithNewline = string.concat(content, "\n");
             vm.writeFile(configPath, contentWithNewline);
-            console.log("Added newline to EOF in config file");
         }
     }
 
