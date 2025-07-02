@@ -48,44 +48,7 @@ The bridge system uses a **dual-mode architecture** where the same `IexecLayerZe
 - **Approval Optimization**: Smart approval handling for UI compatibility (e.g., Stargate)
 
 ### Architecture Flow
-
-```mermaid
-graph TB
-    subgraph "Ethereum Mainnet"
-        RLC[Original RLC Token<br/>ERC-20]
-        LU[RLCLiquidityUnifier<br/>ERC-7802 Adapter]
-        LZB1[IexecLayerZeroBridge<br/>APPROVAL_REQUIRED=true]
-        
-        RLC --> LU
-        LU --> LZB1
-    end
-    
-    subgraph "Non-Ethereum Chains<br/>(L2s, Sidechains)"
-        CCT[RLCCrosschainToken<br/>ERC-7802]
-        LZB2[IexecLayerZeroBridge<br/>APPROVAL_REQUIRED=false]
-        
-        CCT --> LZB2
-    end
-    
-    subgraph "LayerZero Network"
-        LZ[LayerZero OFT Protocol]
-    end
-    
-    LZB1 <-->|Lock/Unlock| LZ
-    LZB2 <-->|Mint/Burn| LZ
-    
-    classDef ethereum fill:#627eea,color:#fff
-    classDef nonEthereum fill:#28a0f0,color:#fff
-    classDef layerzero fill:#ff6b6b,color:#fff
-    classDef token fill:#90EE90,color:#000
-    
-    class RLC,LU,LZB1 ethereum
-    class CCT,LZB2 nonEthereum
-    class LZ layerzero
-```
-
-[![Architecture Diagram](https://mermaid.ink/img/pako:eNqNVNtO4zAQ_RXLvAY2F3JpQEhpLrsPRUhQXqBoZRKXRjh2ZCdouf372nHSEhrYddV2MjnHZ-ZM4leYswLDED5wVG_AMllRIJdo73ViBdNmgzluK3CFa0ZKtIIaotblIr6VX7Bkj5ju0qflWXoZ2-bpj_LsbpeOClQ3mCtGH44oF9myT3_iLW5-p8tftwv0jPkN5gyktKhZSZseg2mhg73aI35fNny6dimnKpF_E-XL7H4R0eX8v4u4Fph3VasAMAoGG-_A4eHZmwWiuubsCQvQKHHxBkaWDPQObIMYESKAkBqfcP1FB3PAguWPuw1lc_ugY2kFLQSosBDoAb_15mqgjjucC2LOhDjMN6ikI7R0YYuWcYf2QIJJ-YT5h42lhRqnHFYgH5xLu3b1dT0qTweLhmnd7Rk56EQjJ_YU5mDecrpT2APEE91P9ZN82f2UV-lE919OKQPXlPx7Tj_BkiMq1mrTkWHbAvRvTpAQCV4DPLym65KQ8CD24izzDdFwSQ4PnMQ1576RM8J4eE9Q_njyiY-GV0Xz51bqZNmWb0eBnQXf8Vs1RM3NssSOzC03y4LANL_jkpeembjqs6u6WxPMD3xlnzE4N5jwUaAb_tDd6Mbgp7F9xlQTI4iestE_GuTlBBqwwrxCZSHPzFcFXUEpWuEVDGVY4DVqSaPOmXcJRW3Drp5pDkMpjg3Y1gVqcFIieUBVMFwjImS2RvSGsWoAyUsYvsI_MAysI8_yfNuZeY7tuUFgwGcYWjP3yLdN1_Jl5PiBab8b8KXbwDyaufbMOnYs27OsIPA8A3LWPmy2WrgoG8bP9ZnfHf2GPPpVN1qcy_cD85i1tJFKlj3UnHY8jXr_C5RA8AI)](https://mermaid.live/edit#pako:eNqNVNtO4zAQ_RXLvAY2F3JpQEhpLrsPRUhQXqBoZRKXRjh2ZCdouf372nHSEhrYddV2MjnHZ-ZM4leYswLDED5wVG_AMllRIJdo73ViBdNmgzluK3CFa0ZKtIIaotblIr6VX7Bkj5ju0qflWXoZ2-bpj_LsbpeOClQ3mCtGH44oF9myT3_iLW5-p8tftwv0jPkN5gyktKhZSZseg2mhg73aI35fNny6dimnKpF_E-XL7H4R0eX8v4u4Fph3VasAMAoGG-_A4eHZmwWiuubsCQvQKHHxBkaWDPQObIMYESKAkBqfcP1FB3PAguWPuw1lc_ugY2kFLQSosBDoAb_15mqgjjucC2LOhDjMN6ikI7R0YYuWcYf2QIJJ-YT5h42lhRqnHFYgH5xLu3b1dT0qTweLhmnd7Rk56EQjJ_YU5mDecrpT2APEE91P9ZN82f2UV-lE919OKQPXlPx7Tj_BkiMq1mrTkWHbAvRvTpAQCV4DPLym65KQ8CD24izzDdFwSQ4PnMQ1576RM8J4eE9Q_njyiY-GV0Xz51bqZNmWb0eBnQXf8Vs1RM3NssSOzC03y4LANL_jkpeembjqs6u6WxPMD3xlnzE4N5jwUaAb_tDd6Mbgp7F9xlQTI4iestE_GuTlBBqwwrxCZSHPzFcFXUEpWuEVDGVY4DVqSaPOmXcJRW3Drp5pDkMpjg3Y1gVqcFIieUBVMFwjImS2RvSGsWoAyUsYvsI_MAysI8_yfNuZeY7tuUFgwGcYWjP3yLdN1_Jl5PiBab8b8KXbwDyaufbMOnYs27OsIPA8A3LWPmy2WrgoG8bP9ZnfHf2GPPpVN1qcy_cD85i1tJFKlj3UnHY8jXr_C5RA8AI)
-
+[![Architecture Diagram](https://mermaid.ink/img/pako:eNqVVmtv4jgU_SuWR7Of0gykEELUrZTnTiWqmWVgP7RUI5MYsBrsrJ3MTlv639d2iBseU-0GgUxyjn3vOdfXeYEZyzH04ZqjcgNm8YICeYl62dxYwKTaYI7rLfiGS1YQtIANRF3TSXQvv2DGHjG9WvJP11fkOplGF07v6hO5fnhDTuYKOCF_1yQn1dOckhXBvEsZeT0HBDkqK3n_iHwX9u9v8E-cTdAT5neYs5CTfI1bfvD16_TLX8Hk-zT5c34zTeLfK17jk1m-J7PP92YKkNC8ZIRWewymeTM4kSDgSyInPCtBFM1UZhFnQmQbROiJFiqx04Sc_5nQChXiTEbBNPzPGX38CIyZFQMmq7Rg_zSIucBci6QGgFGDfwAXF9e7PgjKkrMfWEi-zFLspK-HTI1zQISKQgAhA9hp9xqQGmnAJZhxRMUKcwF-AwXLHk9nnMw1dAAm-jHjZE0oKlTN7dTP0ZRDaQ7NBfiSzsAWC4HWeLe3vEWa-Fyg7brQfh2gpZwGLccaPQIxLsgPFWsHGjomAEfDPHArlRcgM5VgUpI10oDlQGPHMgAs98Fb1lo_ZWarfOvOw5GDxjXpoHHzyME28sA-NuI46NAGYc2pOA3VQCL7F8qe0yq2fyntOSMS-7y2x_WStom8iavEPimWP2wwp8V79aK6lUJ-tjsleGCCidNIHrFtySimFeC4QBVhVGxIKToT2nLGBTTdDdwiKlPZSsoCHgbZIE2_u6Gy261QhjXOJK7rpIHGhOOs0kDZjtTie6jTjTIrkBAxXgHclsSKFIX_IXKjNB1ZouIyRf_DZTzshSMrYwXj_rJA2eMRHbXV1dDDfnKZpobuBJ6Teu_Qa1W8DTVNYyfoGWqael6v9w61eN4T46H6vIWsr3eIS9049-TES4eJZ8iDKEiHZ1btTKEMtKQzrXDdR8qGVpHu_bZOLLPbVOJdRFPj1n5nFM-Hz8K-pbdXEzq04BbzLSK5PIZfFHIBZTBbWRO-HOZ4heqiUmfOq4SiumLfnmgGfXXEWbAuc1ThmCBZHVvo62PCgiWid4xtW5D8C_0X-BP6jmtf9p3BeDwYjkd917XgE_T7nmuPveHYHYxHrjdynVcLPmt6z_ZGEjwee05P-dB3LMhZvd6YlVQbY_y2eYnQ7xKWfJdQuTRLc9k7MI9YTSu5es9pI040r0G9_gslqqfC)][https://mermaid.live/edit#pako:eNqVVmtv4jgU_SuWR7Of0gykEELUrZTnTiWqmWVgP7RUI5MYsBrsrJ3MTlv639d2iBseU-0GgUxyjn3vOdfXeYEZyzH04ZqjcgNm8YICeYl62dxYwKTaYI7rLfiGS1YQtIANRF3TSXQvv2DGHjG9WvJP11fkOplGF07v6hO5fnhDTuYKOCF_1yQn1dOckhXBvEsZeT0HBDkqK3n_iHwX9u9v8E-cTdAT5neYs5CTfI1bfvD16_TLX8Hk-zT5c34zTeLfK17jk1m-J7PP92YKkNC8ZIRWewymeTM4kSDgSyInPCtBFM1UZhFnQmQbROiJFiqx04Sc_5nQChXiTEbBNPzPGX38CIyZFQMmq7Rg_zSIucBci6QGgFGDfwAXF9e7PgjKkrMfWEi-zFLspK-HTI1zQISKQgAhA9hp9xqQGmnAJZhxRMUKcwF-AwXLHk9nnMw1dAAm-jHjZE0oKlTN7dTP0ZRDaQ7NBfiSzsAWC4HWeLe3vEWa-Fyg7brQfh2gpZwGLccaPQIxLsgPFWsHGjomAEfDPHArlRcgM5VgUpI10oDlQGPHMgAs98Fb1lo_ZWarfOvOw5GDxjXpoHHzyME28sA-NuI46NAGYc2pOA3VQCL7F8qe0yq2fyntOSMS-7y2x_WStom8iavEPimWP2wwp8V79aK6lUJ-tjsleGCCidNIHrFtySimFeC4QBVhVGxIKToT2nLGBTTdDdwiKlPZSsoCHgbZIE2_u6Gy261QhjXOJK7rpIHGhOOs0kDZjtTie6jTjTIrkBAxXgHclsSKFIX_IXKjNB1ZouIyRf_DZTzshSMrYwXj_rJA2eMRHbXV1dDDfnKZpobuBJ6Teu_Qa1W8DTVNYyfoGWqael6v9w61eN4T46H6vIWsr3eIS9049-TES4eJZ8iDKEiHZ1btTKEMtKQzrXDdR8qGVpHu_bZOLLPbVOJdRFPj1n5nFM-Hz8K-pbdXEzq04BbzLSK5PIZfFHIBZTBbWRO-HOZ4heqiUmfOq4SiumLfnmgGfXXEWbAuc1ThmCBZHVvo62PCgiWid4xtW5D8C_0X-BP6jmtf9p3BeDwYjkd917XgE_T7nmuPveHYHYxHrjdynVcLPmt6z_ZGEjwee05P-dB3LMhZvd6YlVQbY_y2eYnQ7xKWfJdQuTRLc9k7MI9YTSu5es9pI040r0G9_gslqqfC]
 ### Token Standards & Bridge Architecture
 
 The bridge system leverages modern token standards to enable secure cross-chain transfers:
