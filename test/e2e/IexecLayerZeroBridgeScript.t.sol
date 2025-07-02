@@ -28,24 +28,24 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     address private rlcCrosschainToken;
 
     // Forks ID
-    uint256 private ethereumMainnetFork;
-    uint256 private arbitrumFork;
+    uint256 private sepoliaFork;
+    uint256 private arbitrumSepoliaFork;
 
     function setUp() public {
         deployer = new IexecLayerZeroBridgeDeploy();
 
         // Create a forks
-        ethereumMainnetFork = vm.createFork(vm.envString("SEPOLIA_RPC_URL"));
-        arbitrumFork = vm.createFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
+        sepoliaFork = vm.createFork(vm.envString("SEPOLIA_RPC_URL"));
+        arbitrumSepoliaFork = vm.createFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
 
         // Setup Ethereum Mainnet fork
-        vm.selectFork(ethereumMainnetFork);
+        vm.selectFork(sepoliaFork);
         liquidityUnifier = new RLCLiquidityUnifierDeployScript().deploy(
             params.rlcToken, admin, upgrader, params.createxFactory, keccak256("salt")
         );
 
         // Setup Arbitrum Sepolia fork
-        vm.selectFork(arbitrumFork);
+        vm.selectFork(arbitrumSepoliaFork);
         rlcCrosschainToken = new RLCCrosschainTokenDeployScript().deploy(
             "iEx.ec Network Token", "RLC", admin, admin, params.createxFactory, salt
         );
@@ -56,12 +56,12 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     // ###############################################
 
     function testFork_DeploymentOnChain_WithoutApproval() public {
-        vm.selectFork(arbitrumFork);
+        vm.selectFork(arbitrumSepoliaFork);
         _test_Deployment(false, rlcCrosschainToken);
     }
 
     function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt_WithoutApproval() public {
-        vm.selectFork(arbitrumFork);
+        vm.selectFork(arbitrumSepoliaFork);
         _test_TwoDeploymentsWithTheSameSalt(false, rlcCrosschainToken);
     }
 
@@ -70,12 +70,12 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     // ###############################################
 
     function testFork_DeploymentOnChain_WithApproval() public {
-        vm.selectFork(ethereumMainnetFork);
+        vm.selectFork(sepoliaFork);
         _test_Deployment(true, liquidityUnifier);
     }
 
     function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt_WithApproval() public {
-        vm.selectFork(ethereumMainnetFork);
+        vm.selectFork(sepoliaFork);
         _test_TwoDeploymentsWithTheSameSalt(true, liquidityUnifier);
     }
 
