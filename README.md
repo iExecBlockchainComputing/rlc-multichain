@@ -1,6 +1,6 @@
 # RLC Multichain Bridge
 
-This project implements a cross-chain token bridge system for the RLC token using LayerZero's OFT (Omnichain Fungible Token) protocol. It enables seamless token transfers between multiple blockchains, initially supporting Ethereum Sepolia and Arbitrum Sepolia testnets.
+This project implements a cross-chain token bridge system for the RLC token using LayerZero's OFT (Omnichain Fungible Token) protocol. It enables seamless token transfers between multiple blockchains, initially supporting Ethereum and Arbitrum mainnets.
 
 ## Architecture
 
@@ -8,12 +8,12 @@ The system consists of three main components that work together to enable cross-
 
 ### Core Components
 
-1. **RLCCrosschainToken**: An upgradeable ERC20 token that implements the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) bridgeable token standard. This token can be minted and burned by authorized bridge contracts and is deployed on non-Ethereum chains.
+1. **RLCCrosschainToken**: An upgradeable ERC20 token that implements the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) bridgeable token standard. This token can be minted and burned by authorized bridge contracts and is deployed on Non-Mainnet chains.
 
-2. **RLCLiquidityUnifier** (Ethereum Mainnet only): A liquidity management contract that locks/unlocks the original RLC tokens on Ethereum. It implements the ERC-7802 interface to work seamlessly with bridge contracts while managing liquidity from the existing RLC token contract.
+2. **RLCLiquidityUnifier** (Ethereum Mainnet only): A liquidity management contract that acts as an intermediary between the original RLC token and supported bridges. It enables the locking and unlocking of RLC tokens on Ethereum, and implements the ERC-7802 interface to ensure seamless integration with various bridge contracts, while centralizing liquidity on their behalf.
 
 3. **IexecLayerZeroBridge**: A LayerZero OFT bridge contract that handles cross-chain messaging and token transfers. This contract has **dual deployment modes** based on the chain:
-   - **Ethereum Mode** (`APPROVAL_REQUIRED = true`): Interfaces with RLCLiquidityUnifier to lock/unlock original RLC tokens
+   - **Ethereum Mainnet Mode** (`APPROVAL_REQUIRED = true`): Interfaces with RLCLiquidityUnifier to lock/unlock original RLC tokens
    - **Non-Ethereum Mode** (`APPROVAL_REQUIRED = false`): Directly mints/burns RLCCrosschainToken
 
 ### Deployment Architecture
@@ -39,8 +39,8 @@ The bridge system uses a **dual-mode architecture** where the same `IexecLayerZe
 
 ### Key Features
 
-- **ERC-7802 Compatibility**: All bridgeable tokens implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) standard
-- **Dual-Mode Bridge**: Single bridge contract with different behaviors for Ethereum vs. non-Ethereum chains
+- **ERC-7802 Compatibility**:  Implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) standard as a future-proof architecture for bridge compatibility
+- **Dual-Mode Bridge**: Single bridge contract with different behaviors for Ethereum Mainnet vs. non-Mainnet chains
 - **Upgradeable Contracts**: UUPS proxy pattern for safe upgrades across all components
 - **Dual-Pause Emergency System**: Granular control over bridge operations with complete and send-only pause modes
 - **Multi-Chain Support**: Designed to extend to any LayerZero-supported chain
@@ -106,7 +106,7 @@ Alternatively, you can use a mnemonic by specifying the `--mnemonic-path` option
 The core contracts of the multichain bridge system:
 
 - [RLCCrosschainToken.sol](src/RLCCrosschainToken.sol) - Bridgeable ERC20 token implementing ERC-7802 standard
-- [RLCLiquidityUnifier.sol](src/RLCLiquidityUnifier.sol) - Liquidity management for original RLC tokens on Ethereum
+- [RLCLiquidityUnifier.sol](src/RLCLiquidityUnifier.sol) - Liquidity management for original RLC tokens on Ethereum (implements ERC-7802 standard as well).
 - [IexecLayerZeroBridge.sol](src/bridges/layerZero/IexecLayerZeroBridge.sol) - LayerZero OFT bridge for cross-chain transfers
 
 ## 📊 Code Coverage Analysis
@@ -195,7 +195,7 @@ make send-tokens-to-arbitrum-sepolia
 
 This will:
 
-1. Approve the RLCLiquidityUnifier to spend your RLC tokens
+1. Approve the bridge contract (or the RLCLiquidityUnifier, according to the chosen workflow) to spend your RLC tokens
 2. Initiate the cross-chain transfer through the IexecLayerZeroBridge
 3. Lock original RLC tokens in the RLCLiquidityUnifier and mint equivalent RLCCrosschainToken on Arbitrum
 
