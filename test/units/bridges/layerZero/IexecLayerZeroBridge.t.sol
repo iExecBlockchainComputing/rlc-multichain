@@ -40,8 +40,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     uint256 private constant INITIAL_BALANCE = 100 * 10 ** 9; // 100 RLC tokens with 9 decimals
     uint256 private constant TRANSFER_AMOUNT = 1 * 10 ** 9; // 1 RLC token with 9 decimals
-    string private name = "iEx.ec Network Token";
-    string private symbol = "RLC";
 
     function setUp() public virtual override {
         super.setUp();
@@ -51,8 +49,22 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address lzEndpointSource = address(endpoints[SOURCE_EID]); // Source endpoint for Sepolia - Destination endpoint for Arbitrum Sepolia
         address lzEndpointDestination = address(endpoints[DEST_EID]); // Source endpoint for Arbitrum Sepolia - Destination endpoint for Sepolia
 
-        (iexecLayerZeroBridgeEthereum, iexecLayerZeroBridgeChainX, rlcToken, rlcCrosschainToken, rlcLiquidityUnifier) =
-            TestUtils.setupDeployment(name, symbol, lzEndpointSource, lzEndpointDestination, admin, upgrader, pauser);
+        TestUtils.DeploymentResult memory deploymentResult2 = TestUtils.setupDeployment(
+            TestUtils.DeploymentParams({
+                iexecLayerZeroBridgeContractName: "IexecLayerZeroBridge",
+                lzEndpointSource: lzEndpointSource,
+                lzEndpointDestination: lzEndpointDestination,
+                initialAdmin: admin,
+                initialUpgrader: upgrader,
+                initialPauser: pauser
+            })
+        );
+
+        iexecLayerZeroBridgeEthereum = deploymentResult2.iexecLayerZeroBridgeChainA;
+        iexecLayerZeroBridgeChainX = deploymentResult2.iexecLayerZeroBridgeChainB;
+        rlcToken = deploymentResult2.rlcToken;
+        rlcCrosschainToken = deploymentResult2.rlcCrosschainToken;
+        rlcLiquidityUnifier = deploymentResult2.rlcLiquidityUnifier;
 
         address iexecLayerZeroBridgeEthereumAddress = address(iexecLayerZeroBridgeEthereum);
         address iexecLayerZeroBridgeChainXAddress = address(iexecLayerZeroBridgeChainX);

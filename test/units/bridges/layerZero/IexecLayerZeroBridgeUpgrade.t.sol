@@ -22,8 +22,6 @@ contract IexecLayerZeroBridgeUpgradeTest is TestHelperOz5 {
     address public pauser = makeAddr("pauser");
 
     address public proxyAddress;
-    string public name = "iEx.ec Network Token";
-    string public symbol = "RLC";
     uint256 public constant NEW_STATE_VARIABLE = 2;
 
     function setUp() public virtual override {
@@ -31,8 +29,20 @@ contract IexecLayerZeroBridgeUpgradeTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-        (, iexecLayerZeroBridgeV1,, rlcCrosschainToken,) =
-            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, admin, upgrader, pauser);
+        TestUtils.DeploymentResult memory deploymentResult1 = TestUtils.setupDeployment(
+            TestUtils.DeploymentParams({
+                iexecLayerZeroBridgeContractName: "IexecLayerZeroBridge",
+                lzEndpointSource: mockEndpoint,
+                lzEndpointDestination: mockEndpoint,
+                initialAdmin: admin,
+                initialUpgrader: upgrader,
+                initialPauser: pauser
+            })
+        );
+
+        iexecLayerZeroBridgeV1 = deploymentResult1.iexecLayerZeroBridgeChainA;
+        rlcCrosschainToken = deploymentResult1.rlcCrosschainToken;
+
         proxyAddress = address(iexecLayerZeroBridgeV1);
     }
 
