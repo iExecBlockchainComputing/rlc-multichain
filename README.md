@@ -8,13 +8,13 @@ The system consists of three main components that work together to enable cross-
 
 ### Core Components
 
-1. **RLCCrosschainToken**: An upgradeable ERC20 token that implements the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) bridgeable token standard. This token can be minted and burned by authorized bridge contracts and is deployed on Non-Mainnet chains.
+1. **RLCLiquidityUnifier** (Ethereum Mainnet only): A liquidity management contract that acts as an intermediary between the original RLC token and supported bridges. It enables the locking and unlocking of RLC tokens on Ethereum, and implements the ERC-7802 interface to ensure seamless integration with various bridge contracts, while centralizing liquidity on their behalf.
 
-2. **RLCLiquidityUnifier** (Ethereum Mainnet only): A liquidity management contract that acts as an intermediary between the original RLC token and supported bridges. It enables the locking and unlocking of RLC tokens on Ethereum, and implements the ERC-7802 interface to ensure seamless integration with various bridge contracts, while centralizing liquidity on their behalf.
-
-3. **IexecLayerZeroBridge**: A LayerZero OFT bridge contract that handles cross-chain messaging and token transfers. This contract has **dual deployment modes** based on the chain:
+2. **IexecLayerZeroBridge**: A LayerZero OFT bridge contract that handles cross-chain messaging and token transfers. This contract has **dual deployment modes** based on the chain:
    - **Ethereum Mainnet Mode** (`APPROVAL_REQUIRED = true`): Interfaces with RLCLiquidityUnifier to lock/unlock original RLC tokens
    - **Non-Ethereum Mode** (`APPROVAL_REQUIRED = false`): Directly mints/burns RLCCrosschainToken
+
+3. **RLCCrosschainToken**: An upgradeable ERC20 token that implements the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) bridgeable token standard. This token can be minted and burned by authorized bridge contracts and is deployed on Non-Mainnet chains.
 
 ### Deployment Architecture
 
