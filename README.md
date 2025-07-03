@@ -430,6 +430,6 @@ The scripts automatically calculate these fees and include them in the transacti
 
 ## TODO
 
-- Use an entreprise RPC URL for `secrets.SEPOLIA_RPC_URL` in Github environment `ci`.
+- Use an enterprise RPC URL for `secrets.SEPOLIA_RPC_URL` in Github environment `ci`.
 - Add git pre-commit hook to format code locally.
 - Testing Documentation 
