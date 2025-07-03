@@ -245,6 +245,109 @@ This design ensures the total supply across all chains remains constant while pr
 - Always test upgrades thoroughly on testnets before deploying to mainnet
 - Upgrade safety is enforced through OpenZeppelin's upgrade validation
 
+## Access Control: Role-Based Security
+
+The RLC multichain bridge system implements a comprehensive **role-based access control system** using OpenZeppelin's `AccessControlDefaultAdminRulesUpgradeable`. This ensures that critical operations are restricted to authorized accounts only.
+
+### 🔐 System Roles
+
+#### **DEFAULT_ADMIN_ROLE**
+**Purpose**: Supreme administrator with ultimate control over all contracts
+- **Scope**: All contracts (inherited from OpenZeppelin)
+- **Permissions**:
+  - Grant and revoke any role to any address
+  - Manage role administrators
+  - Ultimate fallback authority for contract governance
+- **Security**: 🔴 **CRITICAL** - This role has unlimited power
+- **Best Practice**: Use a multisig wallet or governance contract
+
+#### **UPGRADER_ROLE**
+**Purpose**: Authorized to upgrade contract implementations
+- **Scope**: All contracts (`IexecLayerZeroBridge`, `RLCLiquidityUnifier`, `RLCCrosschainToken`)
+- **Permissions**:
+  - `_authorizeUpgrade()` - Approve new implementation contracts
+  - Deploy new versions via UUPS proxy pattern
+- **Security**: 🔴 **CRITICAL** - Can change contract logic
+- **Best Practice**: Use a separate secure wallet, test all upgrades on testnets first
+
+#### **PAUSER_ROLE**
+**Purpose**: Emergency response for bridge operations
+- **Scope**: `IexecLayerZeroBridge` only
+- **Permissions**:
+  - `pause()` - Complete bridge shutdown (Level 1 emergency)
+  - `unpause()` - Resume all bridge operations
+  - `pauseSend()` - Block outgoing transfers only (Level 2 emergency)
+  - `unpauseSend()` - Resume outgoing transfers
+- **Security**: 🟡 **HIGH** - Can halt bridge operations
+- **Best Practice**: Use a monitoring system or incident response team wallet
+
+#### **TOKEN_BRIDGE_ROLE**
+**Purpose**: Authorized bridge contracts for cross-chain operations
+- **Scope**: `RLCLiquidityUnifier` and `RLCCrosschainToken`
+- **Permissions**:
+  - `crosschainMint()` - Mint tokens on destination chain
+  - `crosschainBurn()` - Burn tokens on source chain
+  - ERC-7802 standard compliance operations
+- **Security**: 🟡 **HIGH** - Can mint/burn tokens
+- **Best Practice**: Only grant to audited and trusted bridge contracts
+
+### 🛡️ Role Assignment Strategy
+
+#### **Initial Setup**
+```solidity
+// Typically assigned during contract initialization
+DEFAULT_ADMIN_ROLE → Multisig/Governance Contract
+UPGRADER_ROLE      → Secure Upgrade Wallet  
+PAUSER_ROLE        → Monitoring/Emergency Response
+TOKEN_BRIDGE_ROLE  → IexecLayerZeroBridge Contract
+```
+
+#### **Role Relationships**
+- **DEFAULT_ADMIN_ROLE** can grant/revoke all other roles
+- **UPGRADER_ROLE** is independent - cannot grant roles to others
+- **PAUSER_ROLE** is independent - focused solely on emergency controls
+- **TOKEN_BRIDGE_ROLE** is functional - enables cross-chain operations
+
+### 🔒 Security Best Practices
+
+#### **Multi-Signature Requirements**
+- **DEFAULT_ADMIN_ROLE**: Use 3-of-5 or 4-of-7 multisig
+- **UPGRADER_ROLE**: Use 2-of-3 multisig minimum
+- **PAUSER_ROLE**: Can use 1-of-3 for emergency response speed
+
+#### **Role Separation**
+- Never assign multiple critical roles to the same address
+- Use different secure wallets for different roles
+- Consider time-locked upgrades for additional security
+
+#### **Monitoring & Alerting**
+- Monitor all role-restricted function calls
+- Set up alerts for unexpected role assignments
+- Regular audits of role holders
+
+#### **Emergency Procedures**
+- **PAUSER_ROLE** should have 24/7 monitoring capabilities
+- **DEFAULT_ADMIN_ROLE** can revoke compromised accounts
+- Test emergency procedures regularly on testnets
+
+### 🔍 Role Verification
+
+To verify current role assignments:
+
+```bash
+# Check if address has DEFAULT_ADMIN_ROLE
+cast call $CONTRACT_ADDRESS "hasRole(bytes32,address)" "0x0000000000000000000000000000000000000000000000000000000000000000" $ADDRESS
+
+# Check if address has UPGRADER_ROLE  
+cast call $CONTRACT_ADDRESS "hasRole(bytes32,address)" "0x189ab7a9244df0848122154315af71fe140f3db0fe014031783b0946b8c9d2e3" $ADDRESS
+
+# Check if address has PAUSER_ROLE
+cast call $CONTRACT_ADDRESS "hasRole(bytes32,address)" "0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a" $ADDRESS
+
+# Check if address has TOKEN_BRIDGE_ROLE
+cast call $CONTRACT_ADDRESS "hasRole(bytes32,address)" "0xd7c4527c99f13bf6a80d3bc15ebce76f7f8256ab4fbf63363b10858db314c978" $ADDRESS
+```
+
 ## Emergency Controls: Dual-Pause System
 
 The IexecLayerZeroBridge implements a sophisticated **dual-pause emergency system** designed to handle different types of security incidents while minimizing user impact.
