@@ -1,0 +1,48 @@
+%% https://www.mermaidchart.com/play
+
+sequenceDiagram
+    actor ethUser as User on Ethereum
+    box
+        participant rlc as RLC
+        participant rlcLu as RLC Liquidity Unifier (LU)
+        participant ethBridge as LZ Bridge
+        participant ethEndpoint as LZ Ethereum Endpoint
+    end
+    box LayerZero off-chain services
+        participant dvn as DVNs
+        participant executors as Executors
+    end
+    box Arbitrum
+        participant arbEndpoint as LZ Arbitrum Endpoint
+        participant arbBridge as LZ Bridge
+        participant arbitrumRlc as RLC Crosschain Token
+    end
+    actor aUser as User on Arbitrum
+
+    rect rgb(204, 235, 255)
+        ethUser ->> rlc: approve(lzBridge, amount)
+        ethUser ->> ethBridge: send(sendParam, fee, refundAddress)
+        ethBridge ->> rlc: _debit(): transferFrom(user, LU, amount)
+        ethBridge ->> ethEndpoint: send(messagingParams, refundAddress)
+        ethEndpoint ->> ethEndpoint: emit PacketSent event
+        ethEndpoint -->> ethUser: Request submitted
+        dvn ->> ethEndpoint: detect event
+        dvn ->> arbEndpoint: verify()
+        executors ->> arbEndpoint: lzReceive()
+        arbEndpoint ->> arbBridge: lzReceive()
+        arbBridge ->> arbitrumRlc: _credit(): corsschainMint()
+        arbitrumRlc ->> arbitrumRlc: _mint()
+    end
+    rect rgb(255, 255, 204)
+        aUser ->> arbBridge: send()
+        arbBridge ->> arbitrumRlc: _debit(): crosschainBurn()
+        arbitrumRlc ->> arbitrumRlc: _burn()
+        arbBridge ->> arbEndpoint: send(messagingParams, refundAddress)
+        arbEndpoint ->> arbEndpoint: emit PacketSent event
+        dvn ->> arbEndpoint: detect event
+        dvn ->> ethEndpoint: verify()
+        executors ->> ethEndpoint: lzReceive()
+        ethEndpoint ->> ethBridge: lzReceive()
+        ethBridge ->> rlcLu: _credit(): corsschainMint()
+        rlcLu ->> rlc: transfer()
+    end

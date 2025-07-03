@@ -10,10 +10,6 @@ out/
 broadcast/*/*/run-*.json
 !broadcast/*/*/run-latest.json
 
-
-# Docs
-docs/
-
 # Dotenv file
 .env
 .last_deploy.json
@@ -21,5 +17,5 @@ docs/
 .idea
 .DS_Store
 /coverage
-lcov.info 
+lcov.info
 lcov.src.info

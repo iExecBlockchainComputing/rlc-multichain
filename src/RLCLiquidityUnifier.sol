@@ -9,8 +9,9 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
 import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
+import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
+import {IRLCLiquidityUnifier} from "./interfaces/IRLCLiquidityUnifier.sol";
 
 /**
  * @dev This contract facilitates cross-chain liquidity unification by allowing
@@ -21,11 +22,13 @@ import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
  * without being an ERC20 token itself. Functions are overridden to lock/unlock
  * tokens on an external ERC20 contract.
  */
-contract RLCLiquidityUnifier is UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, IERC7802 {
+contract RLCLiquidityUnifier is
+    UUPSUpgradeable,
+    AccessControlDefaultAdminRulesUpgradeable,
+    IRLCLiquidityUnifier,
+    IERC7802
+{
     using SafeERC20 for IERC20Metadata;
-
-    error ERC7802InvalidToAddress(address addr);
-    error ERC7802InvalidFromAddress(address addr);
 
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant TOKEN_BRIDGE_ROLE = keccak256("TOKEN_BRIDGE_ROLE");

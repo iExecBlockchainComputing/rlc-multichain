@@ -16,7 +16,9 @@ contract IexecLayerZeroBridgeV2 is IexecLayerZeroBridge {
     uint256 public newStateVariable;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(address _token, address _lzEndpoint) IexecLayerZeroBridge(_token, _lzEndpoint) {}
+    constructor(bool approvalRequired, address token, address lzEndpoint)
+        IexecLayerZeroBridge(approvalRequired, token, lzEndpoint)
+    {}
 
     /**
      * @notice Initializes V2 features (called after upgrade)
