@@ -218,10 +218,11 @@ This will:
 The bridge operates using different mechanisms depending on the source chain:
 
 **Ethereum → Other Chains:**
-1. User approves RLCLiquidityUnifier to spend original RLC tokens
-2. RLCLiquidityUnifier locks the original RLC tokens  
-3. IexecLayerZeroBridge sends a LayerZero message to the destination chain
-4. Destination chain's IexecLayerZeroBridge receives the message and mints RLCCrosschainToken
+1. User approves IexecLayerZeroBridge to spend original RLC tokens
+2. IexecLayerZeroBridge transfers RLC tokens directly to RLCLiquidityUnifier (bypassing crosschainBurn for UI compatibility)
+3. RLCLiquidityUnifier receives and locks the original RLC tokens  
+4. IexecLayerZeroBridge sends a LayerZero message to the destination chain
+5. Destination chain's IexecLayerZeroBridge receives the message and mints RLCCrosschainToken
 
 **Other Chains → Ethereum:**
 1. User initiates transfer from RLCCrosschainToken
