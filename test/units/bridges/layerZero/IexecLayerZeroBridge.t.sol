@@ -48,8 +48,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
 
         // Set up endpoints for the deployment
-        address lzEndpointSource = address(endpoints[SOURCE_EID]); // Source endpoint for Ethereum Mainnet - Destination endpoint for Arbitrum
-        address lzEndpointDestination = address(endpoints[DEST_EID]); // Source endpoint for Arbitrum - Destination endpoint for Ethereum Mainnet
+        address lzEndpointSource = address(endpoints[SOURCE_EID]); // Source endpoint for Sepolia - Destination endpoint for Arbitrum Sepolia
+        address lzEndpointDestination = address(endpoints[DEST_EID]); // Source endpoint for Arbitrum Sepolia - Destination endpoint for Sepolia
 
         (iexecLayerZeroBridgeEthereum, iexecLayerZeroBridgeChainX, rlcToken, rlcCrosschainToken, rlcLiquidityUnifier) =
             TestUtils.setupDeployment(name, symbol, lzEndpointSource, lzEndpointDestination, admin, upgrader, pauser);
