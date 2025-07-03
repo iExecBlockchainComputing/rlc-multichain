@@ -51,11 +51,10 @@ library UUPSProxyDeployer {
      * @param createxFactory The address of the CreateX factory
      * @return The address of the deployed implementation contract
      */
-    function deployImplementation(
-        string memory contractName,
-        bytes memory constructorData,
-        ICreateX createxFactory
-    ) internal returns (address) {
+    function deployImplementation(string memory contractName, bytes memory constructorData, ICreateX createxFactory)
+        internal
+        returns (address)
+    {
         bytes memory creationCode = vm.getCode(contractName);
         address implementation = createxFactory.deployCreate(abi.encodePacked(creationCode, constructorData));
         console.log("Implementation deployed at:", implementation);
