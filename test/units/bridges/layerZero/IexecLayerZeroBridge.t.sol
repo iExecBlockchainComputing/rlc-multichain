@@ -228,34 +228,28 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     // ============ token and approvalRequired ============
     function test_ReturnsApprovalRequired_WithApproval() public {
-        _testReturnsApprovalRequired(iexecLayerZeroBridgeEthereum, true);
+        vm.chainId(1);
+        assertEq(iexecLayerZeroBridgeEthereum.approvalRequired(), true, "approvalRequired() should return true");
     }
 
     function test_ReturnsApprovalRequired_WithoutApproval() public {
-        _testReturnsApprovalRequired(iexecLayerZeroBridgeChainX, false);
-    }
-
-    function _testReturnsApprovalRequired(IexecLayerZeroBridge iexecLayerZeroBridge, bool requireApproval) internal {
-        requireApproval ? vm.chainId(1) : vm.chainId(42161);
-        assertEq(
-            iexecLayerZeroBridge.approvalRequired(),
-            requireApproval,
-            "approvalRequired() should return the correct value depending on the chain"
-        );
+        vm.chainId(42161);
+        assertEq(iexecLayerZeroBridgeChainX.approvalRequired(), false, "approvalRequired() should return false");
     }
 
     function test_ReturnsBridgeableTokenAddress_WithApproval() public view {
-        _testBridgeableTokenAddress(iexecLayerZeroBridgeEthereum, address(rlcToken));
+        assertEq(
+            iexecLayerZeroBridgeEthereum.token(),
+            address(rlcToken),
+            "token() should return the correct token contract address"
+        );
     }
 
     function test_ReturnsBridgeableTokenAddress_WithoutApproval() public view {
-        _testBridgeableTokenAddress(iexecLayerZeroBridgeChainX, address(rlcCrosschainToken));
-    }
-
-    function _testBridgeableTokenAddress(IexecLayerZeroBridge iexecLayerZeroBridge, address tokenAddress)
-        internal
-        view
-    {
-        assertEq(iexecLayerZeroBridge.token(), tokenAddress, "token() should return the correct token contract address");
+        assertEq(
+            iexecLayerZeroBridgeChainX.token(),
+            address(rlcCrosschainToken),
+            "token() should return the correct token contract address"
+        );
     }
 }
