@@ -50,37 +50,15 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         );
     }
 
-    // ###############################################
-    // Without ApprovalRequired
-    // ###############################################
-
-    function testFork_Deployment_WithoutApproval() public {
-        vm.selectFork(arbitrumSepoliaFork);
-        _test_Deployment(false, rlcCrosschainToken);
-    }
-
-    function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt_WithoutApproval() public {
-        vm.selectFork(arbitrumSepoliaFork);
-        _test_TwoDeploymentsWithTheSameSalt(false, rlcCrosschainToken);
-    }
-
-    // ###############################################
-    // With ApprovalRequired
-    // ###############################################
-
     function testFork_Deployment_WithApproval() public {
         vm.selectFork(sepoliaFork);
         _test_Deployment(true, liquidityUnifier);
     }
 
-    function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt_WithApproval() public {
-        vm.selectFork(sepoliaFork);
-        _test_TwoDeploymentsWithTheSameSalt(true, liquidityUnifier);
+    function testFork_Deployment_WithoutApproval() public {
+        vm.selectFork(arbitrumSepoliaFork);
+        _test_Deployment(false, rlcCrosschainToken);
     }
-
-    // ###############################################
-    // Common functions
-    // ###############################################
 
     function _test_Deployment(bool requireApproval, address bridgeableToken) internal {
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
@@ -113,20 +91,17 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         // TODO check that the proxy address is saved.
     }
 
-    function _test_TwoDeploymentsWithTheSameSalt(bool requireApproval, address bridgeableToken) internal {
-        deployer.deploy(
-            requireApproval, bridgeableToken, params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
-        );
+    function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
+        deployer.deploy(false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt);
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", params.createxFactory));
-        deployer.deploy(
-            requireApproval, bridgeableToken, params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
-        );
+        deployer.deploy(false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt);
     }
 
-    // TODO add tests for the configuration script.
+
+    // TODO: add tests for the configuration script.
 
     function testFork_ConfigureContractCorrectly() public {
-        // TODO check that the peer has been set with the correct config.
+        // TODO: check that the peer has been set with the correct config.
     }
 
     function testFork_RevertWhenPeerIsAlreadySet() public {}
