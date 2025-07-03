@@ -256,13 +256,11 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     // ============ token and approvalRequired ============
-    function test_ReturnsApprovalRequired_WithApproval() public {
-        vm.chainId(1);
+    function test_ReturnsApprovalRequired_WithApproval() public view {
         assertEq(iexecLayerZeroBridgeEthereum.approvalRequired(), true, "approvalRequired() should return true");
     }
 
-    function test_ReturnsApprovalRequired_WithoutApproval() public {
-        vm.chainId(42161);
+    function test_ReturnsApprovalRequired_WithoutApproval() public view {
         assertEq(iexecLayerZeroBridgeChainX.approvalRequired(), false, "approvalRequired() should return false");
     }
 
