@@ -230,14 +230,15 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         test_SendToken_WhenOperational_WithoutApproval();
     }
 
-
     // ============ token and approvalRequired ============
     function test_ReturnsApprovalRequired_WithApproval() public {
         _testReturnsApprovalRequired(iexecLayerZeroBridgeEthereum, true);
     }
+
     function test_ReturnsApprovalRequired_WithoutApproval() public {
         _testReturnsApprovalRequired(iexecLayerZeroBridgeChainX, false);
     }
+
     function _testReturnsApprovalRequired(IexecLayerZeroBridge iexecLayerZeroBridge, bool requireApproval) internal {
         requireApproval ? vm.chainId(1) : vm.chainId(42161);
         assertEq(

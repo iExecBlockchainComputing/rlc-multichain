@@ -92,11 +92,14 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     }
 
     function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        deployer.deploy(false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt);
+        deployer.deploy(
+            false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
+        );
         vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", params.createxFactory));
-        deployer.deploy(false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt);
+        deployer.deploy(
+            false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
+        );
     }
-
 
     // TODO: add tests for the configuration script.
 
