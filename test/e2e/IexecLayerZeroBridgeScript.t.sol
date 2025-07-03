@@ -97,7 +97,7 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         );
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
-        assertEq(iexecLayerZeroBridge.token(), requireApproval ? params.rlcToken : bridgeableToken);
+        assertEq(iexecLayerZeroBridge.token(), requireApproval ? params.rlcToken : rlcCrosschainToken);
         // Check ApprovalRequired value
         assertEq(iexecLayerZeroBridge.approvalRequired(), requireApproval, "Incorrect ApprovalRequired value");
         // Check all roles.
