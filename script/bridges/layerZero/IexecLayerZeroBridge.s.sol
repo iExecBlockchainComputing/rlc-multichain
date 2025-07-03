@@ -20,6 +20,7 @@ contract Deploy is Script {
 
         vm.startBroadcast();
         address iexecLayerZeroBridgeProxy = deploy(
+            params.approvalRequired,
             params.approvalRequired ? params.rlcLiquidityUnifierAddress : params.rlcCrosschainTokenAddress,
             params.lzEndpoint,
             params.initialAdmin,
@@ -35,6 +36,7 @@ contract Deploy is Script {
     }
 
     function deploy(
+        bool approvalRequired,
         address bridgeableToken,
         address lzEndpoint,
         address initialAdmin,
@@ -43,7 +45,7 @@ contract Deploy is Script {
         address createxFactory,
         bytes32 createxSalt
     ) public returns (address) {
-        bytes memory constructorData = abi.encode(bridgeableToken, lzEndpoint);
+        bytes memory constructorData = abi.encode(approvalRequired, bridgeableToken, lzEndpoint);
         bytes memory initializeData = abi.encodeWithSelector(
             IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
         );
@@ -82,7 +84,7 @@ contract Upgrade is Script {
         vm.startBroadcast();
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: commonParams.iexecLayerZeroBridgeAddress,
-            constructorData: abi.encode(bridgeableToken, commonParams.lzEndpoint),
+            constructorData: abi.encode(commonParams.approvalRequired, bridgeableToken, commonParams.lzEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
             newStateVariable: newStateVariable
         });

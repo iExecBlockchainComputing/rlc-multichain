@@ -6,37 +6,78 @@ pragma solidity ^0.8.22;
 import {Test} from "forge-std/Test.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Deploy as IexecLayerZeroBridgeDeploy} from "../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
-import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {Deploy as RLCLiquidityUnifierDeployScript} from "../../script/RLCLiquidityUnifier.s.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosschainToken.s.sol";
+import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
+import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
+import {ConfigLib} from "../../script/lib/ConfigLib.sol";
 
 contract IexecLayerZeroBridgeScriptTest is Test {
-    // TODO read value from config.json file.
-    address LAYERZERO_ENDPOINT = 0x6EDCE65403992e310A62460808c4b910D972f10f; // LayerZero Arbitrum Sepolia endpoint
-    address CREATEX = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
+    // The chain does not matter here as the LAYERZERO_ENDPOINT address is the same for both networks (Sepolia & Arbitrum Sepolia)
+    ConfigLib.CommonConfigParams params = ConfigLib.readCommonConfig("sepolia");
 
     address admin = makeAddr("admin");
     address upgrader = makeAddr("upgrader");
     address pauser = makeAddr("pauser");
-    address rlcAddress; // This will be set to a mock token address for testing
     bytes32 salt = keccak256("salt");
 
     IexecLayerZeroBridgeDeploy public deployer;
+    address private liquidityUnifier;
+    address private rlcCrosschainToken;
+
+    // Forks ID
+    uint256 private sepoliaFork;
+    uint256 private arbitrumSepoliaFork;
 
     function setUp() public {
-        vm.createSelectFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
         deployer = new IexecLayerZeroBridgeDeploy();
-        rlcAddress =
-            new RLCCrosschainTokenDeployScript().deploy("iEx.ec Network Token", "RLC", admin, admin, CREATEX, salt);
-        vm.setEnv("CREATE_X_FACTORY", vm.toString(CREATEX));
+
+        // Create a forks
+        sepoliaFork = vm.createFork(vm.envString("SEPOLIA_RPC_URL"));
+        arbitrumSepoliaFork = vm.createFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
+
+        // Setup Ethereum Mainnet fork
+        vm.selectFork(sepoliaFork);
+        liquidityUnifier = new RLCLiquidityUnifierDeployScript().deploy(
+            params.rlcToken, admin, upgrader, params.createxFactory, keccak256("salt")
+        );
+
+        // Setup Arbitrum Sepolia fork
+        vm.selectFork(arbitrumSepoliaFork);
+        rlcCrosschainToken = new RLCCrosschainTokenDeployScript().deploy(
+            "iEx.ec Network Token", "RLC", admin, admin, params.createxFactory, salt
+        );
     }
 
-    function testFork_Deployment() public {
+    function testFork_Deployment_WithApproval() public {
+        vm.selectFork(sepoliaFork);
+        _test_Deployment(true, liquidityUnifier);
+    }
+
+    function testFork_Deployment_WithoutApproval() public {
+        vm.selectFork(arbitrumSepoliaFork);
+        _test_Deployment(false, rlcCrosschainToken);
+    }
+
+    function _test_Deployment(bool requireApproval, address bridgeableToken) internal {
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
-            deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt)
+            deployer.deploy(
+                requireApproval,
+                bridgeableToken,
+                params.lzEndpoint,
+                admin,
+                upgrader,
+                pauser,
+                params.createxFactory,
+                salt
+            )
         );
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
-        assertEq(iexecLayerZeroBridge.token(), address(rlcAddress));
+        assertEq(iexecLayerZeroBridge.token(), requireApproval ? params.rlcToken : rlcCrosschainToken);
+        // Check ApprovalRequired value
+        assertEq(iexecLayerZeroBridge.approvalRequired(), requireApproval, "Incorrect ApprovalRequired value");
         // Check all roles.
         assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.DEFAULT_ADMIN_ROLE(), admin));
         assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.UPGRADER_ROLE(), upgrader));
@@ -51,15 +92,19 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     }
 
     function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
-        vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", CREATEX));
-        deployer.deploy(rlcAddress, LAYERZERO_ENDPOINT, admin, upgrader, pauser, CREATEX, salt);
+        deployer.deploy(
+            false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
+        );
+        vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", params.createxFactory));
+        deployer.deploy(
+            false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
+        );
     }
 
-    // TODO add tests for the configuration script.
+    // TODO: add tests for the configuration script.
 
     function testFork_ConfigureContractCorrectly() public {
-        // TODO check that the peer has been set with the correct config.
+        // TODO: check that the peer has been set with the correct config.
     }
 
     function testFork_RevertWhenPeerIsAlreadySet() public {}

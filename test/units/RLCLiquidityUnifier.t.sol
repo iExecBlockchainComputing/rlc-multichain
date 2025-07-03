@@ -11,6 +11,7 @@ import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Deploy as RLCLiquidityUnifierDeployScript} from "../../script/RLCLiquidityUnifier.s.sol";
+import {IRLCLiquidityUnifier} from "../../src/interfaces/IRLCLiquidityUnifier.sol";
 import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 
@@ -209,7 +210,7 @@ contract LiquidityUnifierTest is Test {
 
         // Attempt to mint tokens the zero address.
         rlcToken.transfer(liquidityUnifierAddress, amount);
-        vm.expectRevert(abi.encodeWithSelector(RLCLiquidityUnifier.ERC7802InvalidToAddress.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(IRLCLiquidityUnifier.ERC7802InvalidToAddress.selector, address(0)));
         vm.prank(bridge);
         liquidityUnifier.crosschainMint(address(0), amount);
         // Check that no tokens were minted.
@@ -448,7 +449,7 @@ contract LiquidityUnifierTest is Test {
     function test_RevertWhen_BurnFromZeroAddress() public {
         _authorizeBridge(bridge);
         // Attempt to burn tokens from the zero address.
-        vm.expectRevert(abi.encodeWithSelector(RLCLiquidityUnifier.ERC7802InvalidFromAddress.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(IRLCLiquidityUnifier.ERC7802InvalidFromAddress.selector, address(0)));
         vm.prank(bridge);
         liquidityUnifier.crosschainBurn(address(0), amount);
     }
