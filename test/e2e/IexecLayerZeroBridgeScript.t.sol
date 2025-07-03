@@ -14,7 +14,7 @@ import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
 import {ConfigLib} from "../../script/lib/ConfigLib.sol";
 
 contract IexecLayerZeroBridgeScriptTest is Test {
-    // The chain does not matter here as the LAYERZERO_ENDPOINT address is the same for both networks (Ethereum Mainnet & Arbitrum)
+    // The chain does not matter here as the LAYERZERO_ENDPOINT address is the same for both networks (Sepolia & Arbitrum Sepolia)
     ConfigLib.CommonConfigParams params = ConfigLib.readCommonConfig("sepolia");
 
     address admin = makeAddr("admin");
