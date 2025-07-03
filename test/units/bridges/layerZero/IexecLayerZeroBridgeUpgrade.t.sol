@@ -55,7 +55,7 @@ contract IexecLayerZeroBridgeUpgradeTest is TestHelperOz5 {
         vm.startPrank(upgrader);
         UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
             proxyAddress: proxyAddress,
-            constructorData: abi.encode(rlcCrosschainToken, mockEndpoint),
+            constructorData: abi.encode(false, rlcCrosschainToken, mockEndpoint),
             contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             newStateVariable: NEW_STATE_VARIABLE
         });
