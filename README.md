@@ -195,9 +195,11 @@ make send-tokens-to-arbitrum-sepolia
 
 This will:
 
-1. Approve the bridge contract (or the RLCLiquidityUnifier, according to the chosen workflow) to spend your RLC tokens
-2. Initiate the cross-chain transfer through the IexecLayerZeroBridge
-3. Lock original RLC tokens in the RLCLiquidityUnifier and mint equivalent RLCCrosschainToken on Arbitrum
+1. Approve IexecLayerZeroBridge to spend your original RLC tokens
+2. IexecLayerZeroBridge transfers RLC tokens directly to RLCLiquidityUnifier (bypassing crosschainBurn for UI compatibility)
+3. RLCLiquidityUnifier receives and locks the original RLC tokens
+4. IexecLayerZeroBridge sends a LayerZero message to the destination chain
+5. Destination chain's IexecLayerZeroBridge receives the message and mints RLCCrosschainToken
 
 B. To send RLC tokens from Arbitrum Sepolia back to Ethereum Sepolia:
 
