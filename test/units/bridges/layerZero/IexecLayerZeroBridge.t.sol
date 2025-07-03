@@ -20,7 +20,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     using TestUtils for *;
 
     // ============ STATE VARIABLES ============
-    IexecLayerZeroBridge private iexecLayerZeroBridgeEthereum;
+    IexecLayerZeroBridge private iexecLayerZeroBridgeEthereum; // A chain with approval required.
     IexecLayerZeroBridge private iexecLayerZeroBridgeChainX;
     RLCCrosschainToken private rlcCrosschainToken;
     RLCLiquidityUnifier private rlcLiquidityUnifier;
