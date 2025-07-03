@@ -34,7 +34,7 @@ contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
         (,, rlcToken,, rlcLiquidityUnifierV1) =
             TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, admin, upgrader, pauser);
         proxyAddress = address(rlcLiquidityUnifierV1);
-        
+
         //Add label to make logs more readable
         vm.label(address(rlcToken), "rlcToken");
         vm.label(proxyAddress, "rlcLiquidityUnifierV1");

@@ -35,7 +35,7 @@ contract RLCCrosschainTokenTest is Test {
 
         //Add label to make logs more readable
         vm.label(address(rlcCrosschainToken), "rlcCrosschainToken");
-        
+
         // TODO check that the proxy address is saved.
     }
 
