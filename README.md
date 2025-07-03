@@ -294,13 +294,36 @@ The RLC multichain bridge system implements a comprehensive **role-based access 
 ### 🛡️ Role Assignment Strategy
 
 #### **Initial Setup**
-```solidity
-// Typically assigned during contract initialization
-DEFAULT_ADMIN_ROLE → Multisig/Governance Contract
-UPGRADER_ROLE      → Secure Upgrade Wallet  
-PAUSER_ROLE        → Monitoring/Emergency Response
-TOKEN_BRIDGE_ROLE  → IexecLayerZeroBridge Contract
+
+The initial role assignments are configured in the `config/config.json` file and automatically applied during contract deployment:
+
+```json
+{
+  "initialAdmin": "0xa000000000000000000000000000000000000000",
+  "initialUpgrader": "0xb000000000000000000000000000000000000000", 
+  "initialPauser": "0xc000000000000000000000000000000000000000"
+}
 ```
+
+**Role Assignment During Deployment:**
+```solidity
+// Applied automatically via deployment scripts
+DEFAULT_ADMIN_ROLE → config.initialAdmin (Multisig/Governance Contract)
+UPGRADER_ROLE      → config.initialUpgrader (Secure Upgrade Wallet)  
+PAUSER_ROLE        → config.initialPauser (Monitoring/Emergency Response)
+TOKEN_BRIDGE_ROLE  → IexecLayerZeroBridge Contract (Post-deployment)
+```
+
+**Configuration Steps:**
+1. **Update config.json**: Replace placeholder addresses with actual wallet/multisig addresses
+2. **Deploy Contracts**: Run deployment scripts which read from config.json
+3. **Grant Bridge Role**: After deployment, grant `TOKEN_BRIDGE_ROLE` to the deployed bridge contracts
+4. **Verify Roles**: Use the verification commands below to confirm correct role assignments
+
+**Important Notes:**
+- 🚨 **Never deploy with placeholder addresses** (`0xa000...`, `0xb000...`, `0xc000...`)
+- ✅ **Use actual multisig addresses** for production deployments
+- 🔄 **TOKEN_BRIDGE_ROLE** is granted post-deployment to the bridge contract addresses
 
 #### **Role Relationships**
 - **DEFAULT_ADMIN_ROLE** can grant/revoke all other roles
