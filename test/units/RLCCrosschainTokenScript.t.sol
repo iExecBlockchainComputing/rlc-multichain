@@ -22,16 +22,20 @@ contract RLCCrosschainTokenTest is Test {
 
     function test_Deploy() public {
         address crosschainTokenAddress = deployer.deploy(name, symbol, admin, upgrader, createx, salt);
-        RLCCrosschainToken crossChainToken = RLCCrosschainToken(crosschainTokenAddress);
-        assertEq(crossChainToken.name(), name);
-        assertEq(crossChainToken.symbol(), symbol);
-        assertEq(crossChainToken.owner(), admin);
-        assertEq(crossChainToken.hasRole(crossChainToken.DEFAULT_ADMIN_ROLE(), admin), true);
-        assertEq(crossChainToken.hasRole(crossChainToken.UPGRADER_ROLE(), upgrader), true);
+        RLCCrosschainToken rlcCrosschainToken = RLCCrosschainToken(crosschainTokenAddress);
+        assertEq(rlcCrosschainToken.name(), name);
+        assertEq(rlcCrosschainToken.symbol(), symbol);
+        assertEq(rlcCrosschainToken.owner(), admin);
+        assertEq(rlcCrosschainToken.hasRole(rlcCrosschainToken.DEFAULT_ADMIN_ROLE(), admin), true);
+        assertEq(rlcCrosschainToken.hasRole(rlcCrosschainToken.UPGRADER_ROLE(), upgrader), true);
 
         // Make sure the contract has been initialized.
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
-        crossChainToken.initialize(name, symbol, admin, upgrader);
+        rlcCrosschainToken.initialize(name, symbol, admin, upgrader);
+
+        //Add label to make logs more readable
+        vm.label(address(rlcCrosschainToken), "rlcCrosschainToken");
+        
         // TODO check that the proxy address is saved.
     }
 
