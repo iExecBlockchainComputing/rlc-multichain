@@ -87,6 +87,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     // ============ BASIC BRIDGE FUNCTIONALITY TESTS ============
     function test_SendToken_WhenOperational_WithApproval() public {
+        vm.startPrank(user1);
+        rlcToken.approve(address(iexecLayerZeroBridgeEthereum), TRANSFER_AMOUNT);
         _test_SendToken_WhenOperational(iexecLayerZeroBridgeEthereum, address(rlcToken), true);
     }
 
@@ -110,12 +112,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         (SendParam memory sendParam, MessagingFee memory fee) = TestUtils.prepareSend(
             iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, approvalRequired ? DEST_EID : SOURCE_EID
         );
-
-        // Handle approval if required
-        vm.startPrank(user1);
-        if (approvalRequired) {
-            token.approve(address(iexecLayerZeroBridge), TRANSFER_AMOUNT);
-        }
 
         // Send tokens
         vm.deal(user1, fee.nativeFee);
