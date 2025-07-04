@@ -70,16 +70,12 @@ contract Configure is Script {
             targetParams.lzChainId, bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)))
         );
         if (sourceParams.approvalRequired) {
-            RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(
-                sourceParams.rlcLiquidityUnifierAddress
-            );
+            RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(sourceParams.rlcLiquidityUnifierAddress);
 
             bytes32 bridgeTokenRoleId = liquidityUnifier.TOKEN_BRIDGE_ROLE();
             sourceBridge.grantRole(bridgeTokenRoleId, sourceParams.rlcLiquidityUnifierAddress);
         } else {
-            RLCCrosschainToken sourceBridgeToken = RLCCrosschainToken(
-                sourceParams.rlcCrosschainTokenAddress
-            );
+            RLCCrosschainToken sourceBridgeToken = RLCCrosschainToken(sourceParams.rlcCrosschainTokenAddress);
             bytes32 bridgeTokenRoleId = sourceBridgeToken.TOKEN_BRIDGE_ROLE();
             address crosschainToken = sourceParams.rlcCrosschainTokenAddress;
             sourceBridge.grantRole(bridgeTokenRoleId, crosschainToken);
