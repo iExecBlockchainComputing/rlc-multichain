@@ -109,6 +109,36 @@ The core contracts of the multichain bridge system:
 - [RLCLiquidityUnifier.sol](src/RLCLiquidityUnifier.sol) - Liquidity management for original RLC tokens on Ethereum (implements ERC-7802 standard as well).
 - [IexecLayerZeroBridge.sol](src/bridges/layerZero/IexecLayerZeroBridge.sol) - LayerZero OFT bridge for cross-chain transfers
 
+## Usage
+
+### Bridge RLC
+
+A. To send RLC tokens from Ethereum Sepolia to Arbitrum Sepolia:
+
+```bash
+make send-tokens-to-arbitrum-sepolia
+```
+
+This will:
+
+1. Approve IexecLayerZeroBridge to spend your original RLC tokens
+2. IexecLayerZeroBridge transfers RLC tokens directly to RLCLiquidityUnifier (bypassing crosschainBurn for UI compatibility)
+3. RLCLiquidityUnifier receives and locks the original RLC tokens
+4. IexecLayerZeroBridge sends a LayerZero message to the destination chain
+5. Destination chain's IexecLayerZeroBridge receives the message and mints RLCCrosschainToken
+
+B. To send RLC tokens from Arbitrum Sepolia back to Ethereum Sepolia:
+
+```bash
+make send-tokens-to-sepolia
+```
+
+This will:
+
+1. Burn RLCCrosschainToken tokens on Arbitrum
+2. Send a cross-chain message via LayerZero to Ethereum
+3. Release the original RLC tokens from the RLCLiquidityUnifier on Ethereum
+
 ## 📊 Code Coverage Analysis
 
 ### Generating Coverage Reports
@@ -183,35 +213,6 @@ make upgrade-on-mainnets
 - **Constructor Validation**: Ensures new implementations have compatible constructors
 - **Manual Testing**: Always test upgrades thoroughly on staging environments before deploying to mainnet
 
-## Usage
-
-### Bridge RLC
-
-A. To send RLC tokens from Ethereum Sepolia to Arbitrum Sepolia:
-
-```bash
-make send-tokens-to-arbitrum-sepolia
-```
-
-This will:
-
-1. Approve IexecLayerZeroBridge to spend your original RLC tokens
-2. IexecLayerZeroBridge transfers RLC tokens directly to RLCLiquidityUnifier (bypassing crosschainBurn for UI compatibility)
-3. RLCLiquidityUnifier receives and locks the original RLC tokens
-4. IexecLayerZeroBridge sends a LayerZero message to the destination chain
-5. Destination chain's IexecLayerZeroBridge receives the message and mints RLCCrosschainToken
-
-B. To send RLC tokens from Arbitrum Sepolia back to Ethereum Sepolia:
-
-```bash
-make send-tokens-to-sepolia
-```
-
-This will:
-
-1. Burn RLCCrosschainToken tokens on Arbitrum
-2. Send a cross-chain message via LayerZero to Ethereum
-3. Release the original RLC tokens from the RLCLiquidityUnifier on Ethereum
 
 ## How It Works
 
