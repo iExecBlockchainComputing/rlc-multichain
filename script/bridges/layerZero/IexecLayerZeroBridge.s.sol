@@ -6,6 +6,8 @@ import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {ConfigLib} from "./../../lib/ConfigLib.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
+import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
 import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
 
@@ -65,6 +67,21 @@ contract Configure is Script {
         sourceBridge.setPeer(
             targetParams.lzChainId, bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)))
         );
+        if (sourceParams.approvalRequired) {
+            RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(
+                sourceParams.rlcLiquidityUnifierAddress
+            );
+
+            bytes32 bridgeTokenRoleId = liquidityUnifier.TOKEN_BRIDGE_ROLE();
+            sourceBridge.grantRole(bridgeTokenRoleId, sourceParams.rlcLiquidityUnifierAddress);
+        } else {
+            RLCCrosschainToken sourceBridgeToken = RLCCrosschainToken(
+                sourceParams.rlcCrosschainTokenAddress
+            );
+            bytes32 bridgeTokenRoleId = sourceBridgeToken.TOKEN_BRIDGE_ROLE();
+            address crosschainToken = sourceParams.rlcCrosschainTokenAddress;
+            sourceBridge.grantRole(bridgeTokenRoleId, crosschainToken);
+        }
         vm.stopBroadcast();
     }
 }
