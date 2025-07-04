@@ -52,7 +52,7 @@ contract SendTokensToArbitrumSepolia is Script {
         console.log("Sending %s RLC to Arbitrum Sepolia", amount / 10 ** 9);
         console.log("Recipient: %s", recipientAddress);
 
-        bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(65000, 0); // 65000 gas limit for the receiving executor and 0 for the executor's value
+        bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(70_000, 0); // 70_000 gas limit for the receiving executor and 0 for the executor's value
         SendParam memory sendParam = SendParam(
             destinationChainId, // Destination endpoint ID.
             addressToBytes32(recipientAddress), // Recipient address.

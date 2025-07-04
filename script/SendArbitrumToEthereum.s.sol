@@ -31,7 +31,7 @@ contract SendTokensToSepolia is Script {
 
         // Contract addresses
         address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
-        address rlcArbitrumTokenAddress = sourceParams.rlcCrossChainTokenAddress; // RLC
+        address rlcArbitrumTokenAddress = sourceParams.rlcCrosschainTokenAddress; // RLC
 
         // Transfer parameters
         uint16 destinationChainId = uint16(targetParams.lzChainId); // LayerZero chain ID for Ethereum Sepolia
@@ -49,7 +49,7 @@ contract SendTokensToSepolia is Script {
         console.log("Sending %s RLC to Ethereum Sepolia", amount / 10 ** 9);
 
         // Estimate gas for the OFT endpoint
-        bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(65000, 0); // 65000 gas limit for the receiving executor and 0 for the executor's value
+        bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(70_000, 0); // 70_000 gas limit for the receiving executor and 0 for the executor's value
 
         vm.startBroadcast();
         SendParam memory sendParam = SendParam(
