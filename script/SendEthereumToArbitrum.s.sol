@@ -9,10 +9,8 @@ import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 // import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
-import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 
 contract SendTokensToArbitrumSepolia is Script {
-    using OptionsBuilder for bytes;
     /**
      * @dev Converts an address to bytes32.
      * @param _addr The address to convert.
@@ -52,13 +50,12 @@ contract SendTokensToArbitrumSepolia is Script {
         console.log("Sending %s RLC to Arbitrum Sepolia", amount / 10 ** 9);
         console.log("Recipient: %s", recipientAddress);
 
-        bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(70_000, 0); // 70_000 gas limit for the receiving executor and 0 for the executor's value
         SendParam memory sendParam = SendParam(
             destinationChainId, // Destination endpoint ID.
             addressToBytes32(recipientAddress), // Recipient address.
             amount, // Amount to send in local decimals.
             amount * 9 / 10, // Minimum amount to send in local decimals (allowing 10% slippage).
-            _extraOptions, // Additional options supplied by the caller to be used in the LayerZero message.
+            "", // Extra options, not used in this case used setEnforcedOptions.
             "", // Composed message for the send() operation, unused in this context.
             "" // OFT command to be executed, unused in default OFT implementations.
         );

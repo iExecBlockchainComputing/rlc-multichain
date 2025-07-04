@@ -8,11 +8,8 @@ import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
-import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 
 contract SendTokensToSepolia is Script {
-    using OptionsBuilder for bytes;
-
     /**
      * @dev Converts an address to bytes32.
      * @param _addr The address to convert.
@@ -48,16 +45,12 @@ contract SendTokensToSepolia is Script {
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
         console.log("Sending %s RLC to Ethereum Sepolia", amount / 10 ** 9);
 
-        // Estimate gas for the OFT endpoint
-        bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(70_000, 0); // 70_000 gas limit for the receiving executor and 0 for the executor's value
-
-        vm.startBroadcast();
         SendParam memory sendParam = SendParam(
             destinationChainId, // Destination endpoint ID.
             addressToBytes32(recipientAddress), // Recipient address.
             amount, // amount (in local decimals, e.g., 5 RLC = 5 * 10 ** 9)
             amount * 9 / 10, // minAmount (allowing 10% slippage)
-            _extraOptions, // Extra options for the LayerZero message
+            "", // Extra options, not used in this case used setEnforcedOptions 
             "", // Composed message, not used in this case
             "" // OFT command to be executed, unused in default OFT implementations.
         );
