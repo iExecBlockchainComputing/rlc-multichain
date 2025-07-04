@@ -12,7 +12,7 @@ import {IexecLayerZeroBridge} from "../bridges/layerZero/IexecLayerZeroBridge.so
  * @custom:oz-upgrades-from src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge
  */
 contract IexecLayerZeroBridgeV2 is IexecLayerZeroBridge {
-    /// NEW STATE VARIABLES FOR V2
+    // New state variable for v2.
     uint256 public newStateVariable;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
