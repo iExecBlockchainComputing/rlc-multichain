@@ -8,6 +8,12 @@ include report.mk
 # Test and utility targets
 #
 
+fork-ethereum:
+	anvil --fork-url $(ETHEREUM_RPC_URL) --port 8545
+
+fork-arbitrum:
+	anvil --fork-url $(ARBITRUM_RPC_URL) --port 8546
+
 fork-sepolia:
 	anvil --fork-url $(SEPOLIA_RPC_URL) --port 8545
 
@@ -48,6 +54,12 @@ deploy-on-anvil:
 		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL) \
 		OPTIONS=
 
+deploy-on-mainnets:
+	$(MAKE) deploy-all \
+		SOURCE_CHAIN=ethereum SOURCE_RPC=$(ETHEREUM_RPC_URL) \
+		TARGET_CHAIN=arbitrum TARGET_RPC=$(ARBITRUM_RPC_URL) \
+		OPTIONS=--verify
+
 deploy-on-testnets:
 	$(MAKE) deploy-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
@@ -70,6 +82,12 @@ upgrade-on-anvil:
 	$(MAKE) upgrade-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
 		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+
+upgrade-on-mainnets:
+	$(MAKE) upgrade-all \
+		SOURCE_CHAIN=ethereum SOURCE_RPC=$(ETHEREUM_RPC_URL) \
+		TARGET_CHAIN=arbitrum TARGET_RPC=$(ARBITRUM_RPC_URL) \
+		OPTIONS=--verify
 
 # TODO : RLCMultichain and RLCLiquidityUnifier upgrades
 upgrade-on-testnets:

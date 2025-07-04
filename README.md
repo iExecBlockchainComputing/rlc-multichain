@@ -60,16 +60,16 @@ The bridge system leverages modern token standards to enable secure cross-chain 
 ### Supported Networks
 
 Currently deployed on:
-- **Ethereum Sepolia** (testnet)
-- **Arbitrum Sepolia** (testnet)
+- **Ethereum Mainnet**
+- **Arbitrum**
 
 The architecture is designed to support additional networks in the future with minimal changes.
 
 ## Prerequisites
 
 - [Foundry](https://book.getfoundry.sh/getting-started/installation.html) for contract compilation and deployment
-- Ethereum wallet with Sepolia ETH and Arbitrum Sepolia ETH for gas
-- RLC tokens on Sepolia testnet for bridge testing
+- Ethereum wallet with ETH and Arbitrum ETH for gas
+- RLC tokens for bridge testing
 - [LCOV](https://wiki.documentfoundation.org/Development/Lcov) for coverage report generation (install via `brew install lcov` on macOS)
 
 ## Installation
@@ -123,16 +123,16 @@ make generate-coverage
 
 ### Local deployment
 
-1. Start a local Anvil fork of Sepolia:
+1. Start a local Anvil fork of Ethereum:
 
    ```bash
-   make fork-sepolia
+   make fork-ethereum
    ```
 
-2. Start a local fork of Arbitrum Sepolia:
+2. Start a local fork of Arbitrum:
 
    ```bash
-   make fork-arbitrum-sepolia
+   make fork-arbitrum
    ```
 
 3. Deploy all contracts:
@@ -144,7 +144,7 @@ make generate-coverage
 ### Live network deployment
 
    ```bash
-   make deploy-on-testnets
+   make deploy-on-mainnets
    ```
 
 ## Upgrades
@@ -171,17 +171,17 @@ make upgrade-on-anvil
 
 #### 2. Live Network Upgrades
 
-Execute upgrades on testnets:
+Execute upgrades on live networks:
 
 ```bash
-make upgrade-on-testnets
+make upgrade-on-mainnets
 ```
 
 ### Upgrade Safety Features
 
 - **Storage Layout Protection**: Prevents storage slot conflicts between versions
 - **Constructor Validation**: Ensures new implementations have compatible constructors
-- **Manual Testing**: Always test upgrades thoroughly on testnets before deploying to mainnet
+- **Manual Testing**: Always test upgrades thoroughly on staging environments before deploying to mainnet
 
 ## Usage
 
@@ -396,14 +396,14 @@ The IexecLayerZeroBridge implements a sophisticated **dual-pause emergency syste
 
 ### Automatic Verification
 
-Contracts are automatically verified on block explorers during deployment when using testnets:
+Contracts are automatically verified on block explorers during deployment:
 
 ```bash
-# Deploys and verifies contracts on testnets
-make deploy-on-testnets
+# Deploys and verifies contracts on mainnet
+make deploy-on-mainnets
 
-# Upgrades and verifies contracts on testnets  
-make upgrade-on-testnets
+# Upgrades and verifies contracts on mainnet  
+make upgrade-on-mainnets
 ```
 
 The verification is handled by Foundry's built-in `--verify` flag, which submits the source code and constructor arguments to the respective block explorers (Etherscan, Arbiscan, etc.).
