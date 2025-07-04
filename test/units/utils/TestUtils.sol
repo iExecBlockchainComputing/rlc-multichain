@@ -28,8 +28,8 @@ library TestUtils {
 
     // Struct to hold deployment results
     struct DeploymentResult {
-        IexecLayerZeroBridge iexecLayerZeroBridgeChainA;
-        IexecLayerZeroBridge iexecLayerZeroBridgeChainB;
+        IexecLayerZeroBridge iexecLayerZeroBridgeChainWithApproval;
+        IexecLayerZeroBridge iexecLayerZeroBridgeChainWithoutApproval;
         RLCMock rlcToken;
         RLCCrosschainToken rlcCrosschainToken;
         RLCLiquidityUnifier rlcLiquidityUnifier;
@@ -48,15 +48,15 @@ library TestUtils {
         result.rlcLiquidityUnifier =
             _deployLiquidityUnifier(result.rlcToken, params.initialAdmin, params.initialUpgrader, createXFactory, salt);
 
-        // Deploy IexecLayerZeroBridge for Chain A
-        result.iexecLayerZeroBridgeChainA =
+        // Deploy IexecLayerZeroBridge for Sepolia
+        result.iexecLayerZeroBridgeChainWithApproval =
             _deployBridge(params, true, address(result.rlcLiquidityUnifier), createXFactory, salt);
 
-        // Deploy RLC Crosschain token and Bridge for Chain B
+        // Deploy RLC Crosschain token and Bridge for ChainX
         result.rlcCrosschainToken =
             _deployCrosschainToken(name, symbol, params.initialAdmin, params.initialUpgrader, createXFactory, salt);
 
-        result.iexecLayerZeroBridgeChainB =
+        result.iexecLayerZeroBridgeChainWithoutApproval =
             _deployBridge(params, false, address(result.rlcCrosschainToken), createXFactory, salt);
     }
 

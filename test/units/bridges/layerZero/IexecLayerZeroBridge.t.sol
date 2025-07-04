@@ -46,7 +46,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address lzEndpointSource = address(endpoints[SOURCE_EID]); // Source endpoint for Sepolia - Destination endpoint for Arbitrum Sepolia
         address lzEndpointDestination = address(endpoints[DEST_EID]); // Source endpoint for Arbitrum Sepolia - Destination endpoint for Sepolia
 
-        TestUtils.DeploymentResult memory deploymentResult2 = TestUtils.setupDeployment(
+        TestUtils.DeploymentResult memory deploymentResult = TestUtils.setupDeployment(
             TestUtils.DeploymentParams({
                 iexecLayerZeroBridgeContractName: "IexecLayerZeroBridge",
                 lzEndpointSource: lzEndpointSource,
@@ -57,11 +57,11 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
             })
         );
 
-        iexecLayerZeroBridgeEthereum = deploymentResult2.iexecLayerZeroBridgeChainA;
-        iexecLayerZeroBridgeChainX = deploymentResult2.iexecLayerZeroBridgeChainB;
-        rlcToken = deploymentResult2.rlcToken;
-        rlcCrosschainToken = deploymentResult2.rlcCrosschainToken;
-        rlcLiquidityUnifier = deploymentResult2.rlcLiquidityUnifier;
+        iexecLayerZeroBridgeEthereum = deploymentResult.iexecLayerZeroBridgeChainWithApproval;
+        iexecLayerZeroBridgeChainX = deploymentResult.iexecLayerZeroBridgeChainWithoutApproval;
+        rlcToken = deploymentResult.rlcToken;
+        rlcCrosschainToken = deploymentResult.rlcCrosschainToken;
+        rlcLiquidityUnifier = deploymentResult.rlcLiquidityUnifier;
 
         address iexecLayerZeroBridgeEthereumAddress = address(iexecLayerZeroBridgeEthereum);
         address iexecLayerZeroBridgeChainXAddress = address(iexecLayerZeroBridgeChainX);

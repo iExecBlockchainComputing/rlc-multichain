@@ -17,11 +17,11 @@ extra_output = ["storageLayout"]
 
 [profile.test]
 optimizer = false
+fuzz = true
+runs = 1000
 
 # TODO configure this profile and use it in CI.
 # [profile.ci]
-# fuzz = true
-# fuzz.runs = 1000
 
 # TODO use vm.rpcUrl("arbitrumSepolia") instead of env variable.
 # https://getfoundry.sh/config/reference/testing#rpc_endpoints
