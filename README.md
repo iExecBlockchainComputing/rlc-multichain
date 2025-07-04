@@ -61,7 +61,7 @@ The bridge system leverages modern token standards to enable secure cross-chain 
 
 Currently deployed on:
 - **Ethereum Mainnet**
-- **Arbitrum**
+- **Arbitrum One**
 
 The architecture is designed to support additional networks in the future with minimal changes.
 
@@ -172,8 +172,8 @@ make generate-coverage
    ```
 
 ### Live network deployment
-
    ```bash
+  # deploy-on-testnets is also available.
    make deploy-on-mainnets
    ```
 
@@ -238,16 +238,6 @@ The bridge operates using different mechanisms depending on the source chain:
 2. LayerZero message triggers minting of RLCCrosschainToken on destination chain
 
 This design ensures the total supply across all chains remains constant while preserving the original RLC token on Ethereum.
-
-
-## Security Considerations
-
-- The bridge security relies on LayerZero's security model
-- Administrative functions are protected by the Ownable pattern
-- UUPS upgrade authorization is restricted to contract owners only
-- Use caution when setting trusted remotes to prevent unauthorized cross-chain interactions
-- Always test upgrades thoroughly on testnets before deploying to mainnet
-- Upgrade safety is enforced through OpenZeppelin's upgrade validation
 
 ## Access Control: Role-Based Security
 
