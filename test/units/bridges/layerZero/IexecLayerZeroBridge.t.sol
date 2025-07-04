@@ -294,8 +294,11 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         // Test successful minting to a regular user address
         uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
 
+        // Expect the Transfer & CrosschainMint event
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
+        vm.expectEmit(true, true, true, true);
+        emit IERC7802.CrosschainMint(user2, TRANSFER_AMOUNT, address(iexecLayerZeroBridgeChainX));
 
         uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
 
@@ -312,11 +315,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         // Handle zero address redirection
         address actualRecipient = (to == address(0)) ? address(0xdead) : to;
         uint256 initialBalance = rlcCrosschainToken.balanceOf(actualRecipient);
-
-        // Expect the Transfer event to the actual recipient (0xdead if input was address(0))
-        vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(address(0), actualRecipient, TRANSFER_AMOUNT);
-
         uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(to, TRANSFER_AMOUNT, SOURCE_EID);
 
         assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
@@ -364,6 +362,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
+        vm.expectEmit(true, true, true, true);
+        emit IERC7802.CrosschainMint(user2, TRANSFER_AMOUNT, address(iexecLayerZeroBridgeChainX));
 
         uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
 
@@ -390,6 +390,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         // Now it should work
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
+        vm.expectEmit(true, true, true, true);
+        emit IERC7802.CrosschainMint(user2, TRANSFER_AMOUNT, address(iexecLayerZeroBridgeChainX));
 
         uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
 
