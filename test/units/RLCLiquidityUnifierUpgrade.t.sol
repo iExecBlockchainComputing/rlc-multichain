@@ -44,6 +44,11 @@ contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
         rlcLiquidityUnifierV1 = deploymentResult.rlcLiquidityUnifier;
 
         proxyAddress = address(rlcLiquidityUnifierV1);
+
+        //Add label to make logs more readable
+        vm.label(address(rlcToken), "rlcToken");
+        vm.label(proxyAddress, "rlcLiquidityUnifierV1");
+        vm.label(address(rlcLiquidityUnifierV2), "rlcLiquidityUnifierV2");
     }
 
     function test_UpgradeCorrectly() public {

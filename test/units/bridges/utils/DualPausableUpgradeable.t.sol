@@ -23,6 +23,8 @@ contract DualPausableUpgradeableTest is Test {
         dualPausable = new DualPausableUpgradeableImpl();
         vm.prank(OWNER);
         dualPausable.initialize();
+
+        vm.label(address(dualPausable), "dualPausable");
     }
 
     // ============ initialize ============
