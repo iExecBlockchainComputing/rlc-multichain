@@ -3,13 +3,11 @@
 
 pragma solidity ^0.8.22;
 
-import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {MessagingFee, SendParam, IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {CreateX} from "@createx/contracts/CreateX.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {DualPausableUpgradeable} from "../../../../src/bridges/utils/DualPausableUpgradeable.sol";
 import {TestUtils} from "../../utils/TestUtils.sol";
@@ -18,7 +16,6 @@ import {RLCLiquidityUnifier} from "../../../../src/RLCLiquidityUnifier.sol";
 import {RLCMock} from "../../mocks/RLCMock.sol";
 
 contract IexecLayerZeroBridgeTest is TestHelperOz5 {
-    using OptionsBuilder for bytes;
     using TestUtils for *;
 
     // ============ STATE VARIABLES ============
