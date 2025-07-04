@@ -34,8 +34,8 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         deployer = new IexecLayerZeroBridgeDeploy();
 
         // Create a forks
-        sepoliaFork = vm.createFork(vm.envString("SEPOLIA_RPC_URL"));
-        arbitrumSepoliaFork = vm.createFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
+        sepoliaFork = vm.createFork(vm.rpcUrl("sepolia"));
+        arbitrumSepoliaFork = vm.createFork(vm.rpcUrl("arbitrum_sepolia"));
 
         // Setup Ethereum Mainnet fork
         vm.selectFork(sepoliaFork);
