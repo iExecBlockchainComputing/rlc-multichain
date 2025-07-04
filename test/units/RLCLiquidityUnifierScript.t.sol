@@ -20,15 +20,15 @@ contract LiquidityUnifierTest is Test {
     function setUp() public {}
 
     function test_Deploy() public {
-        address liquidityUnifierAddress = deployer.deploy(rlcToken, admin, upgrader, createx, salt);
-        RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(liquidityUnifierAddress);
-        assertEq(liquidityUnifier.owner(), admin);
-        assertEq(address(liquidityUnifier.RLC_TOKEN()), rlcToken);
-        assertEq(liquidityUnifier.hasRole(liquidityUnifier.DEFAULT_ADMIN_ROLE(), admin), true);
-        assertEq(liquidityUnifier.hasRole(liquidityUnifier.UPGRADER_ROLE(), upgrader), true);
+        address rlcLiquidityUnifierAddress = deployer.deploy(rlcToken, admin, upgrader, createx, salt);
+        RLCLiquidityUnifier rlcLiquidityUnifier = RLCLiquidityUnifier(rlcLiquidityUnifierAddress);
+        assertEq(rlcLiquidityUnifier.owner(), admin);
+        assertEq(address(rlcLiquidityUnifier.RLC_TOKEN()), rlcToken);
+        assertEq(rlcLiquidityUnifier.hasRole(rlcLiquidityUnifier.DEFAULT_ADMIN_ROLE(), admin), true);
+        assertEq(rlcLiquidityUnifier.hasRole(rlcLiquidityUnifier.UPGRADER_ROLE(), upgrader), true);
         // Make sure the contract has been initialized.
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
-        liquidityUnifier.initialize(admin, upgrader);
+        rlcLiquidityUnifier.initialize(admin, upgrader);
         // TODO check that the proxy address is saved.
     }
 

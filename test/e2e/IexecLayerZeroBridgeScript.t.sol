@@ -23,7 +23,7 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     bytes32 salt = keccak256("salt");
 
     IexecLayerZeroBridgeDeploy public deployer;
-    address private liquidityUnifier;
+    address private rlcLiquidityUnifier;
     address private rlcCrosschainToken;
 
     // Forks ID
@@ -39,7 +39,7 @@ contract IexecLayerZeroBridgeScriptTest is Test {
 
         // Setup Ethereum Mainnet fork
         vm.selectFork(sepoliaFork);
-        liquidityUnifier = new RLCLiquidityUnifierDeployScript().deploy(
+        rlcLiquidityUnifier = new RLCLiquidityUnifierDeployScript().deploy(
             params.rlcToken, admin, upgrader, params.createxFactory, keccak256("salt")
         );
 
@@ -48,11 +48,15 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         rlcCrosschainToken = new RLCCrosschainTokenDeployScript().deploy(
             "iEx.ec Network Token", "RLC", admin, admin, params.createxFactory, salt
         );
+
+        //Add label to make logs more readable
+        vm.label(address(rlcCrosschainToken), "rlcCrosschainToken");
+        vm.label(address(rlcLiquidityUnifier), "rlcLiquidityUnifier");
     }
 
     function testFork_Deployment_WithApproval() public {
         vm.selectFork(sepoliaFork);
-        _test_Deployment(true, liquidityUnifier);
+        _test_Deployment(true, rlcLiquidityUnifier);
     }
 
     function testFork_Deployment_WithoutApproval() public {
@@ -73,6 +77,7 @@ contract IexecLayerZeroBridgeScriptTest is Test {
                 salt
             )
         );
+        vm.label(address(iexecLayerZeroBridge), "iexecLayerZeroBridge");
 
         assertEq(iexecLayerZeroBridge.owner(), admin);
         assertEq(iexecLayerZeroBridge.token(), requireApproval ? params.rlcToken : rlcCrosschainToken);
