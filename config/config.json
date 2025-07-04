@@ -1,26 +1,26 @@
 {
   "createxFactory": "0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed",
-  "initialAdmin": "0xa000000000000000000000000000000000000000",
-  "initialUpgrader": "0xb000000000000000000000000000000000000000",
-  "initialPauser": "0xc000000000000000000000000000000000000000",
+  "initialAdmin": "0x29d9Fb59587Af02AE3Bee909BabdD0aC75580009",
+  "initialUpgrader": "0x29d9Fb59587Af02AE3Bee909BabdD0aC75580009",
+  "initialPauser": "0x29d9Fb59587Af02AE3Bee909BabdD0aC75580009",
   "chains": {
     "sepolia": {
-      "rlcAddress": "0x26A738b6D33EF4D94FF084D3552961b8f00639Cd",
-      "rlcLiquidityUnifierAddress": "0x0000000000000000000000000000000000000000",
-      "rlcLiquidityUnifierCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
       "approvalRequired": true,
-      "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
-      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "rlcAddress": "0x26A738b6D33EF4D94FF084D3552961b8f00639Cd",
+      "rlcLiquidityUnifierAddress": "0x6B4147eb1f2b30eF13758cB803A706286443d959",
+      "rlcLiquidityUnifierCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
+      "iexecLayerZeroBridgeAddress": "0x68cc55914CBC2630C2C60F49531E4b70b33399fF",
+      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "lzChainId": 40161
     },
     "arbitrum_sepolia": {
-      "rlcCrosschainTokenAddress": "0x0000000000000000000000000000000000000000",
-      "rlcCrosschainTokenCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
-      "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
-      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
-      "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "approvalRequired": false,
+      "rlcCrosschainTokenAddress": "0xE377Ac9b7075421997ebaf0267813090b0277B39",
+      "rlcCrosschainTokenCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
+      "iexecLayerZeroBridgeAddress": "0x62Fa14C85638Eb81Ef38121591DCB8E4E12ce9Fc",
+      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
+      "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "lzChainId": 40231
     }
   }

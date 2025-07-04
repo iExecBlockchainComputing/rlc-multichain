@@ -32,7 +32,6 @@ contract SendTokensToArbitrumSepolia is Script {
 
         // Contract addresses
         address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
-        // address liquidityUnifierAddress = sourceParams.rlcLiquidityUnifierAddress;
         address rlcMainnetTokenAddress = sourceParams.rlcToken;
 
         // Transfer parameters
@@ -47,7 +46,6 @@ contract SendTokensToArbitrumSepolia is Script {
 
         //TODO: when new workflow is deployed, use the new liquidity unifier address
         rlcToken.approve(iexecLayerZeroBridgeAddress, amount);
-        // rlcToken.approve(liquidityUnifierAddress, amount);
 
         // Then, send tokens cross-chain
         IexecLayerZeroBridge adapter = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
