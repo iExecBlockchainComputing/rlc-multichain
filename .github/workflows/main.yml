@@ -1,0 +1,58 @@
+name: Default
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.ref }}-ci
+  cancel-in-progress: true
+
+env:
+  FOUNDRY_PROFILE: ci
+  SEPOLIA_RPC_URL: secrets.SEPOLIA_RPC_URL
+  ARBITRUM_SEPOLIA_RPC_URL: secrets.ARBITRUM_SEPOLIA_RPC_URL
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Show Forge version
+        run: forge --version
+
+      - name: Run Forge fmt
+        run: forge fmt --check
+
+      - name: Run Forge build
+        run: forge build --sizes && cp .env.template .env
+
+      - name: Run Foundry coverage
+        run: make generate-coverage
+        env:
+          CI: true
+        
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: iExecBlockchainComputing/rlc-multichain
+          exclude: lib
+
+      - name: Run static analysis with slither
+        uses: crytic/slither-action@v0.4.1
+        with:
+          slither-args: --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+          fail-on: none
+          sarif: results.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
