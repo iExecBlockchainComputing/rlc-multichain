@@ -5,13 +5,15 @@ pragma solidity ^0.8.22;
 
 import {OFTCoreUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTCoreUpgradeable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlDefaultAdminRulesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {DualPausableUpgradeable} from "../utils/DualPausableUpgradeable.sol";
 import {IIexecLayerZeroBridge} from "../../interfaces/IIexecLayerZeroBridge.sol";
+import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
+import {IRLCLiquidityUnifier} from "../../interfaces/IRLCLiquidityUnifier.sol";
 
 /**
  * @title IexecLayerZeroBridge
@@ -31,6 +33,22 @@ import {IIexecLayerZeroBridge} from "../../interfaces/IIexecLayerZeroBridge.sol"
  * Dual-Pause Emergency System:
  * 1. Complete Pause: Blocks all bridge operations (incoming and outgoing transfers)
  * 2. Send Pause: Blocks only outgoing transfers, allows users to receive/withdraw funds
+ *
+ * Architecture Overview:
+ * This bridge supports two distinct deployment scenarios:
+ *
+ * 1. Non-Mainnet Chains (L2s, sidechains, etc.):
+ *    - BRIDGEABLE_TOKEN: Points to RLCCrosschain contract (mintable/burnable tokens)
+ *    - APPROVAL_REQUIRED: false (bridge can mint/burn directly)
+ *    - Mechanism: Mint tokens on transfer-in, burn tokens on transfer-out
+ *
+ * 2. Ethereum Mainnet:
+ *    - BRIDGEABLE_TOKEN: Points to LiquidityUnifier contract (manages original RLC tokens)
+ *    - APPROVAL_REQUIRED: true (requires user approval for token transfers)
+ *    - Mechanism: Lock tokens on transfer-out, unlock tokens on transfer-in
+ *      The LiquidityUnifier contract acts as a relayer, implementing ERC-7802 interface
+ *      to provide consistent lock/unlock operations for the original RLC token contract
+ *      that may not natively support the crosschain standard.
  */
 contract IexecLayerZeroBridge is
     UUPSUpgradeable,
@@ -39,6 +57,8 @@ contract IexecLayerZeroBridge is
     DualPausableUpgradeable,
     IIexecLayerZeroBridge
 {
+    using SafeERC20 for IERC20Metadata;
+
     /// @dev Role identifier for accounts authorized to upgrade the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
@@ -46,13 +66,23 @@ contract IexecLayerZeroBridge is
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
-     * @dev The RLC token contract that this bridge operates on
-     * Must implement the [ERC-7802](https://eips.ethereum.org/EIPS/eip-7802) interface.
+     * @custom:oz-upgrades-unsafe-allow state-variable-immutable
+     */
+    // slither-disable-next-line naming-convention
+    address public immutable BRIDGEABLE_TOKEN;
+
+    /**
+     * @dev Indicates the token transfer mechanism required for this deployment.
+     *
+     * - true: Ethereum Mainnet deployment requiring user approval (lock/unlock mechanism)
+     * - false: Non Ethereum Mainnet deployment with direct mint/burn capabilities
+     *
+     * This flag indicates on which chain the bridge is deployed.
      *
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
      */
     // slither-disable-next-line naming-convention
-    IERC7802 public immutable BRIDGEABLE_TOKEN;
+    bool private immutable APPROVAL_REQUIRED;
 
     /**
      * @dev Constructor for the LayerZero bridge contract
@@ -61,11 +91,12 @@ contract IexecLayerZeroBridge is
      *
      * @custom:oz-upgrades-unsafe-allow constructor
      */
-    constructor(address bridgeableToken, address lzEndpoint)
+    constructor(bool approvalRequired_, address bridgeableToken, address lzEndpoint)
         OFTCoreUpgradeable(IERC20Metadata(bridgeableToken).decimals(), lzEndpoint)
     {
         _disableInitializers();
-        BRIDGEABLE_TOKEN = IERC7802(bridgeableToken);
+        BRIDGEABLE_TOKEN = bridgeableToken;
+        APPROVAL_REQUIRED = approvalRequired_;
     }
 
     // ============ INITIALIZATION ============
@@ -143,7 +174,7 @@ contract IexecLayerZeroBridge is
      * @return requiresApproval Returns true if deployed on Ethereum Mainnet, false otherwise
      */
     function approvalRequired() external view virtual returns (bool) {
-        return block.chainid == 1;
+        return APPROVAL_REQUIRED;
     }
 
     /**
@@ -151,7 +182,7 @@ contract IexecLayerZeroBridge is
      * @return The address of the RLC token contract
      */
     function token() external view returns (address) {
-        return address(BRIDGEABLE_TOKEN);
+        return APPROVAL_REQUIRED ? address(IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN()) : BRIDGEABLE_TOKEN;
     }
 
     // ============ ACCESS CONTROL OVERRIDES ============
@@ -183,6 +214,9 @@ contract IexecLayerZeroBridge is
      * It overrides the `_debit` function
      * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L56-L69
      *
+     * This function behavior is chain specific and works differently
+     * depending on whether the bridge is deployed on Ethereum Mainnet or a non-mainnet chain.
+     *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token burned = 1 token minted)
      * - If BRIDGEABLE_TOKEN implements transfer fees, burn fees, or any other fee mechanism,
@@ -213,8 +247,14 @@ contract IexecLayerZeroBridge is
         // Calculate the amounts using the parent's logic (handles slippage protection)
         (amountSentLD, amountReceivedLD) = _debitView(amountLD, minAmountLD, dstEid);
 
-        // Burn the tokens from the sender's balance
-        BRIDGEABLE_TOKEN.crosschainBurn(from, amountSentLD);
+        if (APPROVAL_REQUIRED) {
+            // Transfer RLC tokens from the user's account to the LiquidityUnifier contract.
+            //  The normal workflow would be to call `LiquidityUnifier#crosschainBurn()` but this workflow is not compatible with Stargate UI.
+            // Stargate UI does not support approving a contract other than the bridge itself, so here the LiquidityUnifier will not be able to send the `transferFrom` transaction.
+            IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN().safeTransferFrom(from, BRIDGEABLE_TOKEN, amountSentLD);
+        } else {
+            IERC7802(BRIDGEABLE_TOKEN).crosschainBurn(from, amountSentLD);
+        }
     }
 
     /**
@@ -225,6 +265,7 @@ contract IexecLayerZeroBridge is
      * It overrides the `_credit` function
      * https://github.com/LayerZero-Labs/devtools/blob/a2e444f4c3a6cb7ae88166d785bd7cf2d9609c7f/packages/oft-evm/contracts/OFT.sol#L78-L88
      *
+     * This function behavior is chain agnostic and works the same for both chains that does or doesn't require approval.
      *
      * IMPORTANT ASSUMPTIONS:
      * - This implementation assumes LOSSLESS transfers (1 token received = 1 token minted)
@@ -257,7 +298,7 @@ contract IexecLayerZeroBridge is
 
         // Mint the tokens to the recipient
         // This assumes crosschainMint doesn't apply any fees
-        BRIDGEABLE_TOKEN.crosschainMint(to, amountLD);
+        IERC7802(BRIDGEABLE_TOKEN).crosschainMint(to, amountLD);
 
         // Return the amount minted (assuming no fees)
         return amountLD;
