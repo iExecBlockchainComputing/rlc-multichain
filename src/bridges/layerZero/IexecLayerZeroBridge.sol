@@ -31,7 +31,7 @@ import {IRLCLiquidityUnifier} from "../../interfaces/IRLCLiquidityUnifier.sol";
  * chain are minted on another, maintaining a 1:1 peg across the entire ecosystem.
  *
  * Dual-Pause Emergency System:
- * 1. Complete pause: Blocks all bridge operations (incoming and outbound transfers)
+ * 1. Complete pause: Blocks all bridge operations (inbound and outbound transfers)
  * 2. Outbout transfers only pause: Blocks only outbound transfers, allows users to receive/withdraw funds
  *
  * Architecture Overview:
@@ -125,7 +125,7 @@ contract IexecLayerZeroBridge is
      *
      * When fully paused:
      * - All _debit operations (outbound transfers) are blocked
-     * - All _credit operations (incoming transfers) are blocked
+     * - All _credit operations (inbound transfers) are blocked
      * - Use this for critical security incidents (e.g., LayerZero exploit)
      *
      * @custom:security Critical emergency function for complete bridge shutdown
@@ -148,7 +148,7 @@ contract IexecLayerZeroBridge is
      *
      * When outbount transfers are paused:
      * - All _debit operations (outbound transfers) are blocked
-     * - All _credit operations (incoming transfers) still work
+     * - All _credit operations (inbound transfers) still work
      * - Users can still receive funds and "exit" their positions
      * - Use this for less critical issues or when you want to allow withdrawals
      *
@@ -274,7 +274,7 @@ contract IexecLayerZeroBridge is
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
      *
-     * @dev This function is called for INCOMING transfers (when receiving from another chain)
+     * @dev This function is called for inbound transfers (when receiving from another chain)
      * Pause Behavior:
      * - Blocked ONLY when contract is fully paused (Level 1 pause)
      * - NOT blocked when outbound transfers are paused (Level 2) - users can still receive/exit
