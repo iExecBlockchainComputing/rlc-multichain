@@ -16,7 +16,6 @@ contract SendTokensToArbitrumSepolia is Script {
      * @param _addr The address to convert.
      * @return The bytes32 representation of the address.
      */
-
     function addressToBytes32(address _addr) internal pure returns (bytes32) {
         return bytes32(uint256(uint160(_addr)));
     }

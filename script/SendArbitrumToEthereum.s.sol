@@ -50,7 +50,7 @@ contract SendTokensToSepolia is Script {
             addressToBytes32(recipientAddress), // Recipient address.
             amount, // amount (in local decimals, e.g., 5 RLC = 5 * 10 ** 9)
             amount * 9 / 10, // minAmount (allowing 10% slippage)
-            "", // Extra options, not used in this case used setEnforcedOptions 
+            "", // Extra options, not used in this case used setEnforcedOptions
             "", // Composed message, not used in this case
             "" // OFT command to be executed, unused in default OFT implementations.
         );
