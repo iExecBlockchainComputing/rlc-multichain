@@ -8,6 +8,12 @@ include report.mk
 # Test and utility targets
 #
 
+fork-ethereum:
+	anvil --fork-url $(ETHEREUM_RPC_URL) --port 8545
+
+fork-arbitrum:
+	anvil --fork-url $(ARBITRUM_RPC_URL) --port 8546
+
 fork-sepolia:
 	anvil --fork-url $(SEPOLIA_RPC_URL) --port 8545
 
@@ -48,19 +54,28 @@ deploy-on-anvil:
 		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL) \
 		OPTIONS=
 
+deploy-on-mainnets:
+	$(MAKE) deploy-all \
+		SOURCE_CHAIN=ethereum SOURCE_RPC=$(ETHEREUM_RPC_URL) \
+		TARGET_CHAIN=arbitrum TARGET_RPC=$(ARBITRUM_RPC_URL) \
+		OPTIONS=--verify
+
 deploy-on-testnets:
 	$(MAKE) deploy-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
 		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
-		OPTIONS=--verify
+		OPTIONS="--verify --verifier etherscan --verifier-api-key $(ETHERSCAN_API_KEY) --verifier-url $(ETHERSCAN_API_URL)"
 
 deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
-	$(MAKE) deploy-contract CONTRACT=RLCLiquidityUnifier CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)
-	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)
-	$(MAKE) deploy-contract CONTRACT=RLCCrosschainToken CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)
-	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)
+	$(MAKE) deploy-contract CONTRACT=RLCLiquidityUnifier CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS) || true
+	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS) || true
+	$(MAKE) deploy-contract CONTRACT=RLCCrosschainToken CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS) || true
+	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS) || true
 	$(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
 	$(MAKE) configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
+	@echo "Deployment completed."
+	@echo "⚠️ Please authorize bridges on RLCLiquidityUnifier and RLCCrosschainToken contracts."
+	# TODO verify contracts after deployment.
 
 #
 # High-level upgrade targets
@@ -70,6 +85,12 @@ upgrade-on-anvil:
 	$(MAKE) upgrade-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
 		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+
+upgrade-on-mainnets:
+	$(MAKE) upgrade-all \
+		SOURCE_CHAIN=ethereum SOURCE_RPC=$(ETHEREUM_RPC_URL) \
+		TARGET_CHAIN=arbitrum TARGET_RPC=$(ARBITRUM_RPC_URL) \
+		OPTIONS=--verify
 
 # TODO : RLCMultichain and RLCLiquidityUnifier upgrades
 upgrade-on-testnets:
