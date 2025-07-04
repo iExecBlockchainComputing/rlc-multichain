@@ -31,26 +31,30 @@ contract LiquidityUnifierTest is Test {
 
     bytes32 private bridgeTokenRoleId;
 
-    RLCLiquidityUnifier private liquidityUnifier;
-    address private liquidityUnifierAddress;
+    RLCLiquidityUnifier private rlcLiquidityUnifier;
+    address private rlcLiquidityUnifierAddress;
     RLCMock private rlcToken;
 
     function setUp() public {
         rlcToken = new RLCMock();
-        liquidityUnifier = RLCLiquidityUnifier(
+        rlcLiquidityUnifier = RLCLiquidityUnifier(
             new RLCLiquidityUnifierDeployScript().deploy(
                 address(rlcToken), admin, upgrader, address(new CreateX()), keccak256("salt")
             )
         );
-        liquidityUnifierAddress = address(liquidityUnifier);
-        bridgeTokenRoleId = liquidityUnifier.TOKEN_BRIDGE_ROLE();
+        rlcLiquidityUnifierAddress = address(rlcLiquidityUnifier);
+        bridgeTokenRoleId = rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE();
+
+        //Add label to make logs more readable
+        vm.label(address(rlcToken), "rlcToken");
+        vm.label(rlcLiquidityUnifierAddress, "rlcLiquidityUnifier");
     }
 
     // ============ initialize ============
 
     function test_RevertWhen_InitializedMoreThanOnce() public {
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
-        liquidityUnifier.initialize(admin, upgrader);
+        rlcLiquidityUnifier.initialize(admin, upgrader);
     }
 
     // ============ crosschainMint ============
@@ -58,22 +62,22 @@ contract LiquidityUnifierTest is Test {
     function test_CrosschainMintForOneUserFromOneBridge() public {
         _authorizeBridge(bridge);
 
-        rlcToken.transfer(liquidityUnifierAddress, amount);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount);
 
         // Expect the correct transfer and crosschainMint events
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(liquidityUnifierAddress, user, amount);
+        emit IERC20.Transfer(rlcLiquidityUnifierAddress, user, amount);
 
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge);
 
         // Act
         vm.prank(bridge);
-        liquidityUnifier.crosschainMint(user, amount);
+        rlcLiquidityUnifier.crosschainMint(user, amount);
 
         // Assert
         assertEq(rlcToken.balanceOf(user), amount);
-        assertEq(rlcToken.balanceOf(liquidityUnifierAddress), 0);
+        assertEq(rlcToken.balanceOf(rlcLiquidityUnifierAddress), 0);
         assertEq(rlcToken.balanceOf(bridge), 0);
     }
 
@@ -82,10 +86,10 @@ contract LiquidityUnifierTest is Test {
         // Check the initial state.
 
         // Mint 1
-        rlcToken.transfer(liquidityUnifierAddress, amount);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount);
         _mintForUser(user, amount);
         // Mint 2
-        rlcToken.transfer(liquidityUnifierAddress, amount);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount);
         _mintForUser(user, amount);
         // Check that tokens are minted.
         assertEq(rlcToken.balanceOf(user), 2 * amount);
@@ -97,17 +101,17 @@ contract LiquidityUnifierTest is Test {
         _authorizeBridge(bridge2);
 
         // Bridge 1
-        rlcToken.transfer(liquidityUnifierAddress, amount);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(liquidityUnifierAddress, user, amount);
+        emit IERC20.Transfer(rlcLiquidityUnifierAddress, user, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge);
         // Send mint request from the bridge.
         _mintForUser(user, amount);
         // Bridge 2
-        rlcToken.transfer(liquidityUnifierAddress, amount);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(liquidityUnifierAddress, user, amount);
+        emit IERC20.Transfer(rlcLiquidityUnifierAddress, user, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge2);
         // Send mint request from the bridge.
@@ -122,23 +126,23 @@ contract LiquidityUnifierTest is Test {
         _authorizeBridge(bridge);
 
         // User 1
-        rlcToken.transfer(liquidityUnifierAddress, amount);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(liquidityUnifierAddress, user, amount);
+        emit IERC20.Transfer(rlcLiquidityUnifierAddress, user, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge);
         _mintForUser(user, amount);
         // User 2
-        rlcToken.transfer(liquidityUnifierAddress, amount2);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount2);
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(liquidityUnifierAddress, user2, amount2);
+        emit IERC20.Transfer(rlcLiquidityUnifierAddress, user2, amount2);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user2, amount2, bridge);
         _mintForUser(user2, amount2);
         // User 3
-        rlcToken.transfer(liquidityUnifierAddress, amount3);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount3);
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(liquidityUnifierAddress, user3, amount3);
+        emit IERC20.Transfer(rlcLiquidityUnifierAddress, user3, amount3);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user3, amount3, bridge);
         _mintForUser(user3, amount3);
@@ -155,30 +159,30 @@ contract LiquidityUnifierTest is Test {
         _authorizeBridge(bridge2);
 
         // Bridge 1, user 1
-        rlcToken.transfer(liquidityUnifierAddress, amount);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(liquidityUnifierAddress, user, amount);
+        emit IERC20.Transfer(rlcLiquidityUnifierAddress, user, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge);
         _mintForUser(user, amount);
         // Bridge 2, user 2
-        rlcToken.transfer(liquidityUnifierAddress, amount2);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount2);
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(liquidityUnifierAddress, user2, amount2);
+        emit IERC20.Transfer(rlcLiquidityUnifierAddress, user2, amount2);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user2, amount2, bridge2);
         _mintForUser(bridge2, user2, amount2);
         // Bridge 2, user 1
-        rlcToken.transfer(liquidityUnifierAddress, amount);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(liquidityUnifierAddress, user, amount);
+        emit IERC20.Transfer(rlcLiquidityUnifierAddress, user, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge2);
         _mintForUser(bridge2, user, amount);
         // Bridge 2, user 3
-        rlcToken.transfer(liquidityUnifierAddress, amount3);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount3);
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(liquidityUnifierAddress, user3, amount3);
+        emit IERC20.Transfer(rlcLiquidityUnifierAddress, user3, amount3);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user3, amount3, bridge2);
         _mintForUser(bridge2, user3, amount3);
@@ -199,7 +203,7 @@ contract LiquidityUnifierTest is Test {
             abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, anyone, bridgeTokenRoleId)
         );
         vm.prank(anyone);
-        liquidityUnifier.crosschainMint(user, amount);
+        rlcLiquidityUnifier.crosschainMint(user, amount);
         // Check that no tokens were minted.
         assertEq(rlcToken.balanceOf(user), 0);
     }
@@ -209,10 +213,10 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(address(0)), 0);
 
         // Attempt to mint tokens the zero address.
-        rlcToken.transfer(liquidityUnifierAddress, amount);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount);
         vm.expectRevert(abi.encodeWithSelector(IRLCLiquidityUnifier.ERC7802InvalidToAddress.selector, address(0)));
         vm.prank(bridge);
-        liquidityUnifier.crosschainMint(address(0), amount);
+        rlcLiquidityUnifier.crosschainMint(address(0), amount);
         // Check that no tokens were minted.
         assertEq(rlcToken.balanceOf(address(0)), 0);
     }
@@ -228,16 +232,16 @@ contract LiquidityUnifierTest is Test {
         _approveLiquidityUnifier(user, amount);
         // Expect events to be emitted.
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user, liquidityUnifierAddress, amount);
+        emit IERC20.Transfer(user, rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge);
         // Send burn request from the bridge.
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(user, amount);
+        rlcLiquidityUnifier.crosschainBurn(user, amount);
         // Check that tokens are burned.
 
         assertEq(rlcToken.balanceOf(user), 0);
-        assertEq(rlcToken.balanceOf(liquidityUnifierAddress), amount);
+        assertEq(rlcToken.balanceOf(rlcLiquidityUnifierAddress), amount);
     }
 
     function test_CrosschainBurnForOneUserFromOneBridgeMultipleTimes() public {
@@ -247,29 +251,29 @@ contract LiquidityUnifierTest is Test {
         // Check the initial state.
         assertEq(rlcToken.balanceOf(user), 2 * amount);
 
-        // Approve the liquidityUnifier to spend tokens
+        // Approve the rlcLiquidityUnifier to spend tokens
         _approveLiquidityUnifier(user, 2 * amount);
 
         // Burn 1
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user, liquidityUnifierAddress, amount);
+        emit IERC20.Transfer(user, rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge);
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(user, amount);
+        rlcLiquidityUnifier.crosschainBurn(user, amount);
         assertEq(rlcToken.balanceOf(user), amount);
 
         // Burn 2
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user, liquidityUnifierAddress, amount);
+        emit IERC20.Transfer(user, rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge);
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(user, amount);
+        rlcLiquidityUnifier.crosschainBurn(user, amount);
         // Check that tokens are burned.
 
         assertEq(rlcToken.balanceOf(user), 0);
-        assertEq(rlcToken.balanceOf(liquidityUnifierAddress), 2 * amount);
+        assertEq(rlcToken.balanceOf(rlcLiquidityUnifierAddress), 2 * amount);
     }
 
     function test_CrosschainBurnForOneUserFromMultipleBridges() public {
@@ -278,29 +282,29 @@ contract LiquidityUnifierTest is Test {
         rlcToken.transfer(user, 2 * amount);
         assertEq(rlcToken.balanceOf(user), 2 * amount);
 
-        // Approve the liquidityUnifier to spend tokens
+        // Approve the rlcLiquidityUnifier to spend tokens
         _approveLiquidityUnifier(user, 2 * amount);
 
         // Bridge 1
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user, liquidityUnifierAddress, amount);
+        emit IERC20.Transfer(user, rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge);
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(user, amount);
+        rlcLiquidityUnifier.crosschainBurn(user, amount);
         assertEq(rlcToken.balanceOf(user), amount);
 
         // Bridge 2
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user, liquidityUnifierAddress, amount);
+        emit IERC20.Transfer(user, rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge2);
         vm.prank(bridge2);
-        liquidityUnifier.crosschainBurn(user, amount);
+        rlcLiquidityUnifier.crosschainBurn(user, amount);
         // Check that tokens are burned.
 
         assertEq(rlcToken.balanceOf(user), 0);
-        assertEq(rlcToken.balanceOf(liquidityUnifierAddress), 2 * amount);
+        assertEq(rlcToken.balanceOf(rlcLiquidityUnifierAddress), 2 * amount);
     }
 
     function test_CrosschainBurnForMultipleUsersFromOneBridge() public {
@@ -309,41 +313,41 @@ contract LiquidityUnifierTest is Test {
         rlcToken.transfer(user2, amount2);
         rlcToken.transfer(user3, amount3);
 
-        // Approve the liquidityUnifier to spend tokens for each user
+        // Approve the rlcLiquidityUnifier to spend tokens for each user
         _approveLiquidityUnifier(user, amount);
         _approveLiquidityUnifier(user2, amount2);
         _approveLiquidityUnifier(user3, amount3);
 
         // User 1
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user, liquidityUnifierAddress, amount);
+        emit IERC20.Transfer(user, rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge);
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(user, amount);
+        rlcLiquidityUnifier.crosschainBurn(user, amount);
 
         // User 2
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user2, liquidityUnifierAddress, amount2);
+        emit IERC20.Transfer(user2, rlcLiquidityUnifierAddress, amount2);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user2, amount2, bridge);
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(user2, amount2);
+        rlcLiquidityUnifier.crosschainBurn(user2, amount2);
 
         // User 3
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user3, liquidityUnifierAddress, amount3);
+        emit IERC20.Transfer(user3, rlcLiquidityUnifierAddress, amount3);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user3, amount3, bridge);
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(user3, amount3);
+        rlcLiquidityUnifier.crosschainBurn(user3, amount3);
 
         // Check that tokens are burned.
 
         assertEq(rlcToken.balanceOf(user), 0);
         assertEq(rlcToken.balanceOf(user2), 0);
         assertEq(rlcToken.balanceOf(user3), 0);
-        assertEq(rlcToken.balanceOf(liquidityUnifierAddress), amount + amount2 + amount3);
+        assertEq(rlcToken.balanceOf(rlcLiquidityUnifierAddress), amount + amount2 + amount3);
     }
 
     function test_CrosschainBurnForMultipleUsersFromMultipleBridges() public {
@@ -356,49 +360,49 @@ contract LiquidityUnifierTest is Test {
         assertEq(rlcToken.balanceOf(user2), amount2);
         assertEq(rlcToken.balanceOf(user3), amount3);
 
-        // Approve the liquidityUnifier to spend tokens for each user
+        // Approve the rlcLiquidityUnifier to spend tokens for each user
         _approveLiquidityUnifier(user, 2 * amount);
         _approveLiquidityUnifier(user2, amount2);
         _approveLiquidityUnifier(user3, amount3);
 
         // Bridge 1, user 1
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user, liquidityUnifierAddress, amount);
+        emit IERC20.Transfer(user, rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge);
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(user, amount);
+        rlcLiquidityUnifier.crosschainBurn(user, amount);
 
         // Bridge 2, user 2
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user2, liquidityUnifierAddress, amount2);
+        emit IERC20.Transfer(user2, rlcLiquidityUnifierAddress, amount2);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user2, amount2, bridge2);
         vm.prank(bridge2);
-        liquidityUnifier.crosschainBurn(user2, amount2);
+        rlcLiquidityUnifier.crosschainBurn(user2, amount2);
 
         // Bridge 2, user 1
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user, liquidityUnifierAddress, amount);
+        emit IERC20.Transfer(user, rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge2);
         vm.prank(bridge2);
-        liquidityUnifier.crosschainBurn(user, amount);
+        rlcLiquidityUnifier.crosschainBurn(user, amount);
 
         // Bridge 2, user 3
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user3, liquidityUnifierAddress, amount3);
+        emit IERC20.Transfer(user3, rlcLiquidityUnifierAddress, amount3);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user3, amount3, bridge2);
         vm.prank(bridge2);
-        liquidityUnifier.crosschainBurn(user3, amount3);
+        rlcLiquidityUnifier.crosschainBurn(user3, amount3);
 
         // Check that tokens are burned.
 
         assertEq(rlcToken.balanceOf(user), 0);
         assertEq(rlcToken.balanceOf(user2), 0);
         assertEq(rlcToken.balanceOf(user3), 0);
-        assertEq(rlcToken.balanceOf(liquidityUnifierAddress), 2 * amount + amount2 + amount3);
+        assertEq(rlcToken.balanceOf(rlcLiquidityUnifierAddress), 2 * amount + amount2 + amount3);
     }
 
     function test_CrosschainBurnForUserEvenWhenMintIsDoneByDifferentBridge() public {
@@ -406,24 +410,24 @@ contract LiquidityUnifierTest is Test {
         _authorizeBridge(bridge2);
 
         // Bridge 1 mints
-        rlcToken.transfer(liquidityUnifierAddress, amount);
+        rlcToken.transfer(rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(liquidityUnifierAddress, user, amount);
+        emit IERC20.Transfer(rlcLiquidityUnifierAddress, user, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge);
         _mintForUser(user, amount);
         assertEq(rlcToken.balanceOf(user), amount);
 
-        // User approves liquidityUnifier to spend tokens
+        // User approves rlcLiquidityUnifier to spend tokens
         _approveLiquidityUnifier(user, amount);
 
         // Bridge 2 burns
         vm.expectEmit(true, true, true, true);
-        emit IERC20.Transfer(user, liquidityUnifierAddress, amount);
+        emit IERC20.Transfer(user, rlcLiquidityUnifierAddress, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge2);
         vm.prank(bridge2);
-        liquidityUnifier.crosschainBurn(user, amount);
+        rlcLiquidityUnifier.crosschainBurn(user, amount);
 
         // Check that tokens are burned.
 
@@ -440,7 +444,7 @@ contract LiquidityUnifierTest is Test {
             abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, anyone, bridgeTokenRoleId)
         );
         vm.prank(anyone);
-        liquidityUnifier.crosschainBurn(user, amount);
+        rlcLiquidityUnifier.crosschainBurn(user, amount);
 
         // Check that tokens were not burned.
         assertEq(rlcToken.balanceOf(user), amount);
@@ -451,7 +455,7 @@ contract LiquidityUnifierTest is Test {
         // Attempt to burn tokens from the zero address.
         vm.expectRevert(abi.encodeWithSelector(IRLCLiquidityUnifier.ERC7802InvalidFromAddress.selector, address(0)));
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(address(0), amount);
+        rlcLiquidityUnifier.crosschainBurn(address(0), amount);
     }
 
     function test_RevertWhen_BurnMoreThanBalance() public {
@@ -464,7 +468,7 @@ contract LiquidityUnifierTest is Test {
         // Attempt to burn more than balance
         vm.expectRevert(stdError.arithmeticError);
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(user, amount + 1);
+        rlcLiquidityUnifier.crosschainBurn(user, amount + 1);
         assertEq(rlcToken.balanceOf(user), amount);
     }
 
@@ -478,7 +482,7 @@ contract LiquidityUnifierTest is Test {
         // Attempt to burn more than allowance
         vm.expectRevert(stdError.arithmeticError);
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(user, amount + 1);
+        rlcLiquidityUnifier.crosschainBurn(user, amount + 1);
         assertEq(rlcToken.balanceOf(user), amount + 1);
     }
 
@@ -489,7 +493,7 @@ contract LiquidityUnifierTest is Test {
         // Attempt to burn without user approval
         vm.expectRevert(stdError.arithmeticError);
         vm.prank(bridge);
-        liquidityUnifier.crosschainBurn(user, amount);
+        rlcLiquidityUnifier.crosschainBurn(user, amount);
         assertEq(rlcToken.balanceOf(user), amount);
     }
 
@@ -497,7 +501,7 @@ contract LiquidityUnifierTest is Test {
 
     function test_DecimalsShouldBeTheSameAsTheRlcToken() public view {
         uint8 expectedDecimals = rlcToken.decimals();
-        uint8 actualDecimals = liquidityUnifier.decimals();
+        uint8 actualDecimals = rlcLiquidityUnifier.decimals();
         assertEq(actualDecimals, expectedDecimals, "decimals() should return the same value as RLC_TOKEN.decimals()");
         assertEq(actualDecimals, 9, "Decimals should equal 9");
     }
@@ -506,7 +510,7 @@ contract LiquidityUnifierTest is Test {
 
     function test_SupportErc7802Interface() public view {
         assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
-        assertTrue(liquidityUnifier.supportsInterface(type(IERC7802).interfaceId));
+        assertTrue(rlcLiquidityUnifier.supportsInterface(type(IERC7802).interfaceId));
     }
 
     // ============ upgradeToAndCall ============
@@ -517,11 +521,11 @@ contract LiquidityUnifierTest is Test {
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 unauthorizedUpgrader,
-                liquidityUnifier.UPGRADER_ROLE()
+                rlcLiquidityUnifier.UPGRADER_ROLE()
             )
         );
         vm.prank(unauthorizedUpgrader);
-        liquidityUnifier.upgradeToAndCall(makeAddr("newImpl"), "");
+        rlcLiquidityUnifier.upgradeToAndCall(makeAddr("newImpl"), "");
     }
 
     // ============ helper functions ============
@@ -533,7 +537,7 @@ contract LiquidityUnifierTest is Test {
      */
     function _authorizeBridge(address bridgeAddress) internal {
         vm.prank(admin);
-        liquidityUnifier.grantRole(bridgeTokenRoleId, bridgeAddress);
+        rlcLiquidityUnifier.grantRole(bridgeTokenRoleId, bridgeAddress);
     }
 
     /**
@@ -553,7 +557,7 @@ contract LiquidityUnifierTest is Test {
      */
     function _mintForUser(address bridgeAddress, address userAddress, uint256 mintAmount) internal {
         vm.prank(bridgeAddress);
-        liquidityUnifier.crosschainMint(userAddress, mintAmount);
+        rlcLiquidityUnifier.crosschainMint(userAddress, mintAmount);
     }
 
     /**
@@ -563,6 +567,6 @@ contract LiquidityUnifierTest is Test {
      */
     function _approveLiquidityUnifier(address sender, uint256 approveAmount) internal {
         vm.prank(sender);
-        rlcToken.approve(liquidityUnifierAddress, approveAmount);
+        rlcToken.approve(rlcLiquidityUnifierAddress, approveAmount);
     }
 }
