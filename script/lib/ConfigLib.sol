@@ -68,7 +68,7 @@ library ConfigLib {
      */
     function getRLCTokenAddress(string memory config, string memory prefix) internal pure returns (address) {
         return config.readBool(string.concat(prefix, ".approvalRequired"))
-            ? config.readAddress(string.concat(prefix, ".rlcLiquidityUnifierAddress"))
+            ? config.readAddress(string.concat(prefix, ".rlcAddress"))
             : address(0);
     }
 
