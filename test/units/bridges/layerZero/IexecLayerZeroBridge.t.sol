@@ -3,12 +3,13 @@
 
 pragma solidity ^0.8.22;
 
+import {Script, console} from "forge-std/Script.sol";
 import {MessagingFee, SendParam, IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {IexecLayerZeroBridgeHarness} from "../../../../src/mocks/IexecLayerZeroBridgeHarness.sol";
 import {DualPausableUpgradeable} from "../../../../src/bridges/utils/DualPausableUpgradeable.sol";
 import {TestUtils} from "../../utils/TestUtils.sol";
 import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
@@ -19,8 +20,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     using TestUtils for *;
 
     // ============ STATE VARIABLES ============
-    IexecLayerZeroBridge private iexecLayerZeroBridgeEthereum; // A chain with approval required.
-    IexecLayerZeroBridge private iexecLayerZeroBridgeChainX;
+    IexecLayerZeroBridgeHarness private iexecLayerZeroBridgeEthereum; // A chain with approval required.
+    IexecLayerZeroBridgeHarness private iexecLayerZeroBridgeChainX;
     RLCCrosschainToken private rlcCrosschainToken;
     RLCLiquidityUnifier private rlcLiquidityUnifier;
     RLCMock private rlcToken;
@@ -48,7 +49,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
         TestUtils.DeploymentResult memory deploymentResult = TestUtils.setupDeployment(
             TestUtils.DeploymentParams({
-                iexecLayerZeroBridgeContractName: "IexecLayerZeroBridge",
+                iexecLayerZeroBridgeContractName: "IexecLayerZeroBridgeHarness",
                 lzEndpointSource: lzEndpointSource,
                 lzEndpointDestination: lzEndpointDestination,
                 initialAdmin: admin,
@@ -57,14 +58,15 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
             })
         );
 
-        iexecLayerZeroBridgeEthereum = deploymentResult.iexecLayerZeroBridgeChainWithApproval;
-        iexecLayerZeroBridgeChainX = deploymentResult.iexecLayerZeroBridgeChainWithoutApproval;
+        address iexecLayerZeroBridgeEthereumAddress = address(deploymentResult.iexecLayerZeroBridgeChainWithApproval);
+        address iexecLayerZeroBridgeChainXAddress = address(deploymentResult.iexecLayerZeroBridgeChainWithoutApproval);
+
+        iexecLayerZeroBridgeEthereum = IexecLayerZeroBridgeHarness(iexecLayerZeroBridgeEthereumAddress);
+        iexecLayerZeroBridgeChainX = IexecLayerZeroBridgeHarness(iexecLayerZeroBridgeChainXAddress);
         rlcToken = deploymentResult.rlcToken;
         rlcCrosschainToken = deploymentResult.rlcCrosschainToken;
         rlcLiquidityUnifier = deploymentResult.rlcLiquidityUnifier;
 
-        address iexecLayerZeroBridgeEthereumAddress = address(iexecLayerZeroBridgeEthereum);
-        address iexecLayerZeroBridgeChainXAddress = address(iexecLayerZeroBridgeChainX);
         // Wire the contracts
         address[] memory contracts = new address[](2);
         contracts[0] = iexecLayerZeroBridgeEthereumAddress; // Index 0 → EID 1
@@ -88,7 +90,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         vm.startPrank(admin);
         rlcLiquidityUnifier.grantRole(rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), iexecLayerZeroBridgeEthereumAddress);
         vm.stopPrank();
-
         // Transfer initial RLC balance to user1
         rlcToken.transfer(user1, INITIAL_BALANCE);
 
@@ -115,7 +116,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     function _test_SendToken_WhenOperational(
-        IexecLayerZeroBridge iexecLayerZeroBridge,
+        IexecLayerZeroBridgeHarness iexecLayerZeroBridge,
         address tokenAddress,
         bool approvalRequired
     ) internal {
@@ -287,5 +288,113 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
             address(rlcCrosschainToken),
             "token() should return the correct token contract address"
         );
+    }
+
+    // ============ _credit ============
+    function test_credit_SuccessfulMintToUser() public {
+        // Test successful minting to a regular user address
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
+
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
+
+        uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
+
+        assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
+        assertEq(
+            rlcCrosschainToken.balanceOf(user2),
+            initialBalance + TRANSFER_AMOUNT,
+            "User balance should increase by mint amount"
+        );
+    }
+
+    function testFuzz_credit_Address(address to) public {
+        // Fuzz test with different addresses including zero address
+        // Handle zero address redirection
+        address actualRecipient = (to == address(0)) ? address(0xdead) : to;
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(actualRecipient);
+
+        // Expect the Transfer event to the actual recipient (0xdead if input was address(0))
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Transfer(address(0), actualRecipient, TRANSFER_AMOUNT);
+
+        uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(to, TRANSFER_AMOUNT, SOURCE_EID);
+
+        assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
+        assertEq(
+            rlcCrosschainToken.balanceOf(actualRecipient),
+            initialBalance + TRANSFER_AMOUNT,
+            "Actual recipient balance should increase"
+        );
+
+        // Additional check for zero address case
+        if (to == address(0)) {
+            assertEq(rlcCrosschainToken.balanceOf(address(0)), 0, "Zero address balance should remain zero");
+        }
+    }
+
+    function testFuzz_credit_Amount(uint256 amount) public {
+        // Fuzz test with different amounts for testing edge case (0 & max RLC supply)
+        vm.assume(amount <= INITIAL_BALANCE);
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
+        uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, amount, SOURCE_EID);
+
+        assertEq(amountReceived, amount, "Amount received should equal mint amount");
+        assertEq(
+            rlcCrosschainToken.balanceOf(user2), initialBalance + amount, "User balance should increase by mint amount"
+        );
+    }
+
+    function test_credit_RevertsWhenFullyPaused() public {
+        // Test that _credit reverts when contract is fully paused
+        // Pause the contract
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.pause();
+
+        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
+        iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
+    }
+
+    function test_credit_WorksWhenOnlySendPaused() public {
+        // Test that _credit still works when only sends are paused (Level 2 pause)
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
+
+        // Pause only sends
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.pauseSend();
+
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
+
+        uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
+
+        assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
+        assertEq(rlcCrosschainToken.balanceOf(user2), initialBalance + TRANSFER_AMOUNT, "User balance should increase");
+    }
+
+    function test_credit_WorksAfterUnpause() public {
+        // Test that _credit works after unpausing
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
+
+        // Pause the contract
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.pause();
+
+        // Verify it's paused
+        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
+        iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
+
+        // Unpause the contract
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.unpause();
+
+        // Now it should work
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
+
+        uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
+
+        assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
+        assertEq(rlcCrosschainToken.balanceOf(user2), initialBalance + TRANSFER_AMOUNT, "User balance should increase");
     }
 }
