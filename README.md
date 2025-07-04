@@ -213,15 +213,15 @@ Both the RLCAdapter and IexecLayerZeroBridge implement a sophisticated **dual-pa
 
 ### 🚨 Pause Levels
 
-#### Level 1: Complete Pause (`pause()`)
+#### Level 1: Complete pause (`pause()`)
 **Use Case**: Critical security incidents requiring immediate complete shutdown
-- **Blocks**: ❌ All bridge operations (incoming and outgoing transfers)
+- **Blocks**: ❌ All bridge operations (inbound and outbound transfers)
 - **Allows**: ✅ Admin functions, view functions
 - **Emergency**: Maximum protection - complete bridge shutdown
 
-#### Level 2: Entrance Pause (`pauseEntrances()`)
+#### Level 2: Outbound transfers onlypPause (`pauseOutboundTransfers()`)
 **Use Case**: Destination chain issues, or controlled maintenance
-- **Blocks**: ❌ Triggering transfers only (users can't submit send requests)
+- **Blocks**: ❌ Triggering outbound transfers only (users can't submit send requests)
 - **Allows**: ✅ Already submitted transfers (users can still receive their tokens if the send operation was submitted before level 2 pause).
 - **Benefit**: Bridge requests that are on-going do not get blocked.
 
