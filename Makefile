@@ -155,6 +155,7 @@ upgrade-layerzero-bridge: # CHAIN, RPC_URL
 
 send-tokens-to-arbitrum-sepolia:
 	@echo "Sending tokens cross-chain... from SEPOLIA to Arbitrum SEPOLIA"
+	SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia \
 	forge script script/SendEthereumToArbitrum.s.sol:SendTokensToArbitrumSepolia \
 		--rpc-url $(SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
@@ -163,6 +164,7 @@ send-tokens-to-arbitrum-sepolia:
 
 send-tokens-to-sepolia:
 	@echo "Sending tokens cross-chain... from Arbitrum SEPOLIA to SEPOLIA"
+	SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia \
 	forge script script/SendArbitrumToEthereum.s.sol:SendTokensToSepolia \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \

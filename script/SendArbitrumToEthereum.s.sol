@@ -6,7 +6,7 @@ import {Script, console} from "forge-std/Script.sol";
 import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
 
 contract SendTokensToSepolia is Script {
@@ -28,32 +28,31 @@ contract SendTokensToSepolia is Script {
 
         // Contract addresses
         address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
+        address rlcArbitrumTokenAddress = sourceParams.rlcCrosschainTokenAddress; // RLC
 
         // Transfer parameters
         uint16 destinationChainId = uint16(targetParams.lzChainId); // LayerZero chain ID for Ethereum Sepolia
-        address recipientAddress = sourceParams.initialAdmin; // TODO read recipient address from env variables.
+        address recipientAddress = vm.envAddress("RECIPIENT_ADDRESS");
         console.log("Recipient: %s", recipientAddress);
 
-        uint256 amount = 5 * 10 ** 18; // RLC tokens (adjust the amount as needed)
+        uint256 amount = 5 * 10 ** 9; // RLC tokens (adjust the amount as needed)
+
+        IERC20 rlcToken = IERC20(rlcArbitrumTokenAddress);
+        console.log("Approving RLC token transfer of %s", amount / 10 ** 9);
+        rlcToken.approve(iexecLayerZeroBridgeAddress, amount);
 
         // Send tokens cross-chain
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
         console.log("Sending %s RLC to Ethereum Sepolia", amount / 10 ** 9);
 
-        // Estimate gas for the OFT endpoint
-        // TODO extract in function and document
-        bytes memory _extraOptions =
-            abi.encodePacked(uint16(3), uint8(1), uint16(33), uint8(1), uint128(65000), uint128(0));
-
-        vm.startBroadcast();
         SendParam memory sendParam = SendParam(
-            destinationChainId,
-            addressToBytes32(recipientAddress),
-            amount,
+            destinationChainId, // Destination endpoint ID.
+            addressToBytes32(recipientAddress), // Recipient address.
+            amount, // amount (in local decimals, e.g., 5 RLC = 5 * 10 ** 9)
             amount * 9 / 10, // minAmount (allowing 10% slippage)
-            _extraOptions,
-            "",
-            ""
+            "", // Extra options, not used in this case used setEnforcedOptions
+            "", // Composed message, not used in this case
+            "" // OFT command to be executed, unused in default OFT implementations.
         );
 
         // Get the fee for the transfer
