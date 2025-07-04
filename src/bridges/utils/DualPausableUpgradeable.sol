@@ -10,11 +10,12 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
  * @dev Abstract contract providing independent pause controls for different operation types.
  *
  * Implements two independent pause mechanisms:
- * 1. Complete Pause (inherited from PausableUpgradeable): Blocks ALL operations
- * 2. Send Pause (new functionality): Blocks only "send" operations while allowing "receive"
+ * 1. Complete pause (inherited from PausableUpgradeable): Blocks ALL operations
+ * 2. Outbound transfer pause (new functionality): Blocks only "send" operations while allowing "receive"
  * Emergency Response Scenarios:
  * - Complete pause: Critical security incidents requiring full shutdown
- * - Send pause: Allows ongoing transfers to complete while preventing new outgoing transfers
+ * - Outbound transfer only pause: Allows inbound requests of already ongoing transfers to complete while
+ * preventing new outbound transfers.
  *
  * @custom:storage-location erc7201:iexec.storage.DualPausable
  */
@@ -24,7 +25,7 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
     /// @custom:storage-location erc7201:iexec.storage.DualPausable
     struct DualPausableStorage {
         /// @dev True when send operations are paused, but receive operations are allowed.
-        bool _sendPaused;
+        bool _outboundTransfersPaused;
     }
 
     /// keccak256(abi.encode(uint256(keccak256("iexec.storage.DualPausable")) - 1)) & ~bytes32(uint256(0xff))
@@ -41,44 +42,44 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
     // ============ EVENTS ============
 
     /**
-     * @dev Emitted when send pause is triggered by `account`
+     * @dev Emitted when outbount transfer pause is triggered by `account`
      */
-    event SendPaused(address account);
+    event OutboundTransfersPaused(address account);
 
     /**
-     * @dev Emitted when send pause is lifted by `account`
+     * @dev Emitted when outbount transfer pause is lifted by `account`
      */
-    event SendUnpaused(address account);
+    event OutboundTransfersUnpaused(address account);
 
     // ============ ERRORS ============
 
     /**
      * @dev The operation failed because send operations are paused
      */
-    error EnforcedSendPause();
+    error EnforcedOutboundTransfersPause();
 
     /**
      * @dev The operation failed because send operations are not paused
      */
-    error ExpectedSendPause();
+    error ExpectedOutboundTransfersPause();
 
     // ============ MODIFIERS ============
 
     /**
-     * @dev Modifier for send operations - blocks when send is paused
-     * @notice Use this modifier for functions that should be blocked during send pause
+     * @dev Modifier for send operations - blocks when outbount transfer is paused
+     * @notice Use this modifier for functions that should be blocked during outbount transfer pause
      */
-    modifier whenSendNotPaused() {
-        _requireSendNotPaused();
+    modifier whenOutboundTransfersNotPaused() {
+        _requireOutbountTransfersNotPaused();
         _;
     }
 
     /**
      * @dev Modifier to make a function callable only when send operations are paused
-     * @notice Use this modifier for administrative functions that should only work during send pause
+     * @notice Use this modifier for administrative functions that should only work during outbount transfer pause
      */
-    modifier whenSendPaused() {
-        _requireSendPaused();
+    modifier whenOutbountTransfersPaused() {
+        _requireOutbountTransfersPaused();
         _;
     }
 
@@ -100,19 +101,19 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
     /**
      * @dev Returns true if send operations are paused, false otherwise
      */
-    function sendPaused() public view virtual returns (bool) {
+    function outbountTransfersPaused() public view virtual returns (bool) {
         DualPausableStorage storage $ = _getDualPausableStorage();
-        return $._sendPaused;
+        return $._outboundTransfersPaused;
     }
 
     /**
      * @dev Returns the overall operational state of the contract
      * @return fullyPaused True if complete pause is active (blocks all operations)
-     * @return sendPausedOnly True if send pause is active (blocks only send operations)
+     * @return onlyOutboundTransfersPaused True if outbount transfer pause is active (blocks only send operations)
      */
-    function pauseStatus() public view virtual returns (bool fullyPaused, bool sendPausedOnly) {
+    function pauseStatus() public view virtual returns (bool fullyPaused, bool onlyOutboundTransfersPaused) {
         fullyPaused = paused();
-        sendPausedOnly = sendPaused();
+        onlyOutboundTransfersPaused = outbountTransfersPaused();
     }
 
     // ============ INTERNAL FUNCTIONS ============
@@ -120,40 +121,40 @@ abstract contract DualPausableUpgradeable is PausableUpgradeable {
     /**
      * @dev Throws if send operations are paused
      */
-    function _requireSendNotPaused() internal view virtual {
-        if (sendPaused()) {
-            revert EnforcedSendPause();
+    function _requireOutbountTransfersNotPaused() internal view virtual {
+        if (outbountTransfersPaused()) {
+            revert EnforcedOutboundTransfersPause();
         }
     }
 
     /**
      * @dev Throws if send operations are not paused
      */
-    function _requireSendPaused() internal view virtual {
-        if (!sendPaused()) {
-            revert ExpectedSendPause();
+    function _requireOutbountTransfersPaused() internal view virtual {
+        if (!outbountTransfersPaused()) {
+            revert ExpectedOutboundTransfersPause();
         }
     }
 
     /**
-     * @dev Triggers send paused state
+     * @dev Triggers outbount transfers pause.
      * Requirements:
      * - Send operations must not already be paused
      */
-    function _pauseSend() internal virtual whenSendNotPaused {
+    function _pauseOutboundTransfers() internal virtual whenOutboundTransfersNotPaused {
         DualPausableStorage storage $ = _getDualPausableStorage();
-        $._sendPaused = true;
-        emit SendPaused(_msgSender());
+        $._outboundTransfersPaused = true;
+        emit OutboundTransfersPaused(_msgSender());
     }
 
     /**
-     * @dev Returns send operations to normal state
+     * @dev Unpauses outbount transfers.
      * Requirements:
-     * - Send operations must currently be paused
+     * - Send operations must already be paused
      */
-    function _unpauseSend() internal virtual whenSendPaused {
+    function _unpauseOutboundTransfers() internal virtual whenOutbountTransfersPaused {
         DualPausableStorage storage $ = _getDualPausableStorage();
-        $._sendPaused = false;
-        emit SendUnpaused(_msgSender());
+        $._outboundTransfersPaused = false;
+        emit OutboundTransfersUnpaused(_msgSender());
     }
 }

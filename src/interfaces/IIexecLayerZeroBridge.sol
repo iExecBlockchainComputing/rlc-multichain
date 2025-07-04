@@ -18,11 +18,11 @@ interface IIexecLayerZeroBridge {
      * @notice Pauses only the `_debit` function, allowing `_credit` to still work.
      * @dev Should only be callable by authorized accounts: PAUSER_ROLE.
      */
-    function pauseSend() external;
+    function pauseOutboundTransfers() external;
 
     /**
-     * @notice Unpauses the `_debit` function, allowing outgoing transfers again.
+     * @notice Unpauses the `_debit` function, allowing outbound transfers again.
      * @dev Should only be callable by authorized accounts: PAUSER_ROLE.
      */
-    function unpauseSend() external;
+    function unpauseOutboundTransfers() external;
 }
