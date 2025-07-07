@@ -10,7 +10,7 @@ import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
 
-contract SendTokensToArbitrumSepolia is Script {
+contract SendTokensFromEthereumToArbitrum is Script {
     /**
      * @dev Converts an address to bytes32.
      * @param _addr The address to convert.
@@ -29,36 +29,32 @@ contract SendTokensToArbitrumSepolia is Script {
 
         // Contract addresses
         address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
-        address liquidityUnifierAddress = sourceParams.rlcLiquidityUnifierAddress;
-        address rlcTokenAddress = sourceParams.rlcToken;
+        address rlcMainnetTokenAddress = sourceParams.rlcToken;
 
         // Transfer parameters
         uint16 destinationChainId = uint16(targetParams.lzChainId);
-        address recipientAddress = targetParams.initialAdmin; // TODO read recipient address from env variables.
+        address recipientAddress = vm.envAddress("RECIPIENT_ADDRESS");
         uint256 amount = 5 * 10 ** 9; //  RLC tokens (adjust the amount as needed)
 
         vm.startBroadcast();
         // First, approve the adapter to spend your tokens
-        IERC20 rlcToken = IERC20(rlcTokenAddress);
-        console.log("Approving RLCLiquidityUnifier contract to spend %s RLC", amount / 10 ** 9);
-        rlcToken.approve(liquidityUnifierAddress, amount);
+        IERC20 rlcToken = IERC20(rlcMainnetTokenAddress);
+        console.log("Approving IexecLayerZeroBridge contract to spend %s RLC", amount / 10 ** 9);
+        rlcToken.approve(iexecLayerZeroBridgeAddress, amount);
 
         // Then, send tokens cross-chain
         IexecLayerZeroBridge adapter = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
         console.log("Sending %s RLC to Arbitrum Sepolia", amount / 10 ** 9);
         console.log("Recipient: %s", recipientAddress);
 
-        // bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(65000, 0);
-        bytes memory _extraOptions =
-            abi.encodePacked(uint16(3), uint8(1), uint16(33), uint8(1), uint128(65000), uint128(0));
         SendParam memory sendParam = SendParam(
-            destinationChainId, // You can also make this dynamic if needed
-            addressToBytes32(recipientAddress),
-            amount,
-            amount * 9 / 10,
-            _extraOptions,
-            "",
-            ""
+            destinationChainId, // Destination endpoint ID.
+            addressToBytes32(recipientAddress), // Recipient address.
+            amount, // Amount to send in local decimals.
+            amount * 99 / 100, // Minimum amount to send in local decimals (allowing 1% slippage).
+            "", // Extra options, not used in this case, already setup using `setEnforcedOptions`
+            "", // Composed message for the send() operation, unused in this context.
+            "" // OFT command to be executed, unused in default OFT implementations.
         );
 
         MessagingFee memory fee = adapter.quoteSend(sendParam, false);

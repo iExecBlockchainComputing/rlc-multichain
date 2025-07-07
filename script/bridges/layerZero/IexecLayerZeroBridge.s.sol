@@ -4,8 +4,12 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
+import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {ConfigLib} from "./../../lib/ConfigLib.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
+import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
 import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
 
@@ -56,6 +60,8 @@ contract Deploy is Script {
 }
 
 contract Configure is Script {
+    using OptionsBuilder for bytes;
+
     function run() external {
         string memory sourceChain = vm.envString("SOURCE_CHAIN");
         string memory targetChain = vm.envString("TARGET_CHAIN");
@@ -66,6 +72,21 @@ contract Configure is Script {
         sourceBridge.setPeer(
             targetParams.lzChainId, bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)))
         );
+        EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](1);
+        bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(70_000, 0); // 70_000 gas limit for the receiving executor and 0 for the executor's value
+        enforcedOptions[0] = EnforcedOptionParam(targetParams.lzChainId, 2, _extraOptions);
+        sourceBridge.setEnforcedOptions(enforcedOptions);
+        // Authorize bridge in the relevant contract.
+        if (sourceParams.approvalRequired) {
+            RLCLiquidityUnifier rlcLiquidityUnifier = RLCLiquidityUnifier(sourceParams.rlcLiquidityUnifierAddress);
+            bytes32 bridgeTokenRoleId = rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE();
+            rlcLiquidityUnifier.grantRole(bridgeTokenRoleId, address(sourceBridge));
+        } else {
+            RLCCrosschainToken rlcCrosschainToken = RLCCrosschainToken(sourceParams.rlcCrosschainTokenAddress);
+            bytes32 bridgeTokenRoleId = rlcCrosschainToken.TOKEN_BRIDGE_ROLE();
+            rlcCrosschainToken.grantRole(bridgeTokenRoleId, address(sourceBridge));
+        }
+
         vm.stopBroadcast();
     }
 }
