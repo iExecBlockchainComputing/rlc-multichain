@@ -61,3 +61,5 @@ contract Deploy is Script {
         return UUPSProxyDeployer.deployUsingCreateX("RLCCrosschainToken", "", initData, createxFactory, createxSalt);
     }
 }
+
+// TODO add upgrade script.
