@@ -223,7 +223,7 @@ The bridge operates using different mechanisms depending on the source chain:
 **Ethereum → Other Chains:**
 1. User approves IexecLayerZeroBridge to spend original RLC tokens
 2. IexecLayerZeroBridge transfers RLC tokens directly to RLCLiquidityUnifier (bypassing crosschainBurn for UI compatibility)
-3. RLCLiquidityUnifier receives and locks the original RLC tokens  
+3. RLCLiquidityUnifier receives and locks the original RLC tokens
 4. IexecLayerZeroBridge sends a LayerZero message to the destination chain
 5. Destination chain's IexecLayerZeroBridge receives the message and mints RLCCrosschainToken
 
@@ -254,17 +254,17 @@ The IexecLayerZeroBridge implements a sophisticated **dual-pause emergency syste
 
 ### 🚨 Pause Levels
 
-#### Level 1: Complete Pause (`pause()`)
+#### Level 1: Complete pause (`pause()`)
 **Use Case**: Critical security incidents requiring immediate complete shutdown
-- **Blocks**: ❌ All bridge operations (incoming and outgoing transfers)
+- **Blocks**: ❌ All bridge operations (inbound and outbound transfers)
 - **Allows**: ✅ Admin functions, view functions
 - **Emergency**: Maximum protection - complete bridge shutdown
 
-#### Level 2: Send Pause (`pauseSend()`)
+#### Level 2: Outbound transfers onlypPause (`pauseOutboundTransfers()`)
 **Use Case**: Destination chain issues, or controlled maintenance
-- **Blocks**: ❌ Outgoing transfers only (users can't initiate send requests)
-- **Allows**: ✅ Incoming transfers (users can still receive tokens from other chains)
-- **Benefit**: Allows completion of in-flight transfers while preventing new ones
+- **Blocks**: ❌ Outbound transfers only (users can't initiate send requests)
+- **Allows**: ✅ Inbound transfers (users can still receive tokens when the request is initiated before the pause)
+- **Benefit**: Allows completion of already triggered transfers while preventing new ones
 
 ## Contract Verification
 
@@ -276,7 +276,7 @@ Contracts are automatically verified on block explorers during deployment:
 # Deploys and verifies contracts on mainnet
 make deploy-on-mainnets
 
-# Upgrades and verifies contracts on mainnet  
+# Upgrades and verifies contracts on mainnet
 make upgrade-on-mainnets
 ```
 
@@ -308,4 +308,4 @@ The scripts automatically calculate these fees and include them in the transacti
 
 - Use an enterprise RPC URL for `secrets.SEPOLIA_RPC_URL` in Github environment `ci`.
 - Add git pre-commit hook to format code locally.
-- Testing Documentation 
+- Testing Documentation
