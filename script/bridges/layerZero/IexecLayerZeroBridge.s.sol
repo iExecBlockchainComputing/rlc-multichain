@@ -67,9 +67,8 @@ contract Configure is Script {
         string memory targetChain = vm.envString("TARGET_CHAIN");
         ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(sourceChain);
         ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(targetChain);
-
-        vm.startBroadcast();
         IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.iexecLayerZeroBridgeAddress);
+        vm.startBroadcast();
         sourceBridge.setPeer(
             targetParams.lzChainId, bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)))
         );
