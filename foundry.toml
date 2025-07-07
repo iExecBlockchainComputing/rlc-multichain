@@ -26,7 +26,7 @@ optimizer = false
 [doc]
 out = "docs/soldoc"
 title = "RLC Multichain Bridge"
-ignore = ["src/mocks/**/*",]
+ignore = ["src/mocks/**/*"]
 
 # TODO use vm.rpcUrl("arbitrumSepolia") instead of env variable.
 # https://getfoundry.sh/config/reference/testing#rpc_endpoints
