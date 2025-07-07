@@ -39,9 +39,7 @@ contract SendTokensFromEthereumToArbitrum is Script {
         vm.startBroadcast();
         // First, approve the adapter to spend your tokens
         IERC20 rlcToken = IERC20(rlcMainnetTokenAddress);
-        console.log("Approving RLCLiquidityUnifier contract to spend %s RLC", amount / 10 ** 9);
-
-        //TODO: when new workflow is deployed, use the new liquidity unifier address
+        console.log("Approving IexecLayerZeroBridge contract to spend %s RLC", amount / 10 ** 9);
         rlcToken.approve(iexecLayerZeroBridgeAddress, amount);
 
         // Then, send tokens cross-chain

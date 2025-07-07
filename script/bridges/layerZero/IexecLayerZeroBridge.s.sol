@@ -72,6 +72,11 @@ contract Configure is Script {
         sourceBridge.setPeer(
             targetParams.lzChainId, bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)))
         );
+        EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](1);
+        bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(70_000, 0); // 70_000 gas limit for the receiving executor and 0 for the executor's value
+        enforcedOptions[0] = EnforcedOptionParam(targetParams.lzChainId, 2, _extraOptions);
+        sourceBridge.setEnforcedOptions(enforcedOptions);
+        // Authorize bridge in the relevant contract.
         if (sourceParams.approvalRequired) {
             RLCLiquidityUnifier rlcLiquidityUnifier = RLCLiquidityUnifier(sourceParams.rlcLiquidityUnifierAddress);
             bytes32 bridgeTokenRoleId = rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE();
@@ -82,10 +87,7 @@ contract Configure is Script {
             rlcCrosschainToken.grantRole(bridgeTokenRoleId, address(sourceBridge));
         }
 
-        EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](1);
-        bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(70_000, 0); // 70_000 gas limit for the receiving executor and 0 for the executor's value
-        enforcedOptions[0] = EnforcedOptionParam(targetParams.lzChainId, 2, _extraOptions);
-        sourceBridge.setEnforcedOptions(enforcedOptions);
+
         vm.stopBroadcast();
     }
 }
