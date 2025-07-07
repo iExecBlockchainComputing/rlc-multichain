@@ -30,11 +30,11 @@ contract DualPausableUpgradeableTest is Test {
     // ============ initialize ============
 
     function test_initialize_SetsCorrectInitialStates() public view {
-        assertFalse(dualPausable.outbountTransfersPaused(), "Send should not be paused initially");
+        assertFalse(dualPausable.outbountTransfersPaused(), "Outbound transfers should not be paused initially");
 
         (bool fullyPaused, bool onlyOutboundTransfersPaused) = dualPausable.pauseStatus();
         assertFalse(fullyPaused, "Contract should not be fully paused initially");
-        assertFalse(onlyOutboundTransfersPaused, "Send should not be paused initially");
+        assertFalse(onlyOutboundTransfersPaused, "Outbound transfers should not be paused initially");
     }
 
     // ============ pauseOutboundTransfers ============
@@ -50,7 +50,7 @@ contract DualPausableUpgradeableTest is Test {
         vm.prank(OWNER);
         dualPausable.pauseOutboundTransfers();
 
-        assertTrue(dualPausable.outbountTransfersPaused(), "Send should be paused after pauseOutboundTransfers");
+        assertTrue(dualPausable.outbountTransfersPaused(), "Outbound transfers should be paused after pauseOutboundTransfers");
 
         vm.expectRevert(DualPausableUpgradeable.EnforcedOutboundTransfersPause.selector);
         dualPausable.mockOperation();
@@ -80,12 +80,12 @@ contract DualPausableUpgradeableTest is Test {
     function test_unpauseOutboundTransfers_RestoresOperations() public {
         vm.startPrank(OWNER);
         dualPausable.pauseOutboundTransfers();
-        assertTrue(dualPausable.outbountTransfersPaused(), "Send should be paused before unpause");
+        assertTrue(dualPausable.outbountTransfersPaused(), "Outbound transfers should be paused before unpause");
 
         dualPausable.unpauseOutboundTransfers();
         vm.stopPrank();
 
-        assertFalse(dualPausable.outbountTransfersPaused(), "Send should not be paused after unpause");
+        assertFalse(dualPausable.outbountTransfersPaused(), "Outbound transfers should not be paused after unpause");
 
         // Operation should work normally
         assertTrue(dualPausable.mockOperation(), "Mock operation should succeed after unpause");
@@ -121,7 +121,7 @@ contract DualPausableUpgradeableTest is Test {
         // Initially operational
         (bool fullyPaused, bool onlyOutboundTransfersPaused) = dualPausable.pauseStatus();
         assertFalse(fullyPaused, "Contract should not be fully paused initially");
-        assertFalse(onlyOutboundTransfersPaused, "Send should not be paused initially");
+        assertFalse(onlyOutboundTransfersPaused, "Outbound transfers should not be paused initially");
 
         // After outbount transfer pause
         vm.prank(OWNER);
@@ -129,7 +129,7 @@ contract DualPausableUpgradeableTest is Test {
 
         (fullyPaused, onlyOutboundTransfersPaused) = dualPausable.pauseStatus();
         assertFalse(fullyPaused, "Contract should not be fully paused during outbount transfer pause");
-        assertTrue(onlyOutboundTransfersPaused, "Send should be paused during outbount transfer pause state");
+        assertTrue(onlyOutboundTransfersPaused, "Outbound transfers should be paused during outbount transfers pause state");
 
         // After full pause (from outbount transfer only pause state)
         vm.prank(OWNER);
@@ -137,7 +137,7 @@ contract DualPausableUpgradeableTest is Test {
 
         (fullyPaused, onlyOutboundTransfersPaused) = dualPausable.pauseStatus();
         assertTrue(fullyPaused, "Contract should be fully paused after pause");
-        assertTrue(onlyOutboundTransfersPaused, "Send should remain paused during full pause");
+        assertTrue(onlyOutboundTransfersPaused, "Outbound transfers should remain paused during full pause");
     }
 
     // ============ dual pause workflow tests ============
@@ -183,7 +183,7 @@ contract DualPausableUpgradeableTest is Test {
         dualPausable.unpause();
         assertFalse(dualPausable.paused());
         // pauseOutboundTransfers should still be active
-        assertTrue(dualPausable.outbountTransfersPaused(), "Send should remain paused after unpause");
+        assertTrue(dualPausable.outbountTransfersPaused(), "Outbound transfers should remain paused after unpause");
         vm.stopPrank();
     }
 
