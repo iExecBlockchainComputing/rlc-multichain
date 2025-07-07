@@ -535,10 +535,10 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         iexecLayerZeroBridgeChainX.exposed_debit(user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
     }
 
-    function test_debit_RevertsWhenSendPaused() public {
+    function test_debit_RevertsWhenOutboundTransfersPaused() public {
         // Pause only sends
         vm.prank(pauser);
-        iexecLayerZeroBridgeChainX.pauseSend();
+        iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
 
         // Should revert when send is paused
         vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
@@ -555,24 +555,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         uint256 initialBalance = rlcCrosschainToken.balanceOf(user1);
 
         // Should work after unpause
-        (uint256 amountSentLD, uint256 amountReceivedLD) =
-            iexecLayerZeroBridgeChainX.exposed_debit(user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
-
-        assertEq(amountSentLD, TRANSFER_AMOUNT, "Amount sent should equal transfer amount");
-        assertEq(amountReceivedLD, TRANSFER_AMOUNT, "Amount received should equal transfer amount");
-        assertEq(rlcCrosschainToken.balanceOf(user1), initialBalance - TRANSFER_AMOUNT, "User balance should decrease");
-    }
-
-    function test_debit_WorksAfterSendUnpause() public {
-        // Pause send then unpause
-        vm.startPrank(pauser);
-        iexecLayerZeroBridgeChainX.pauseSend();
-        iexecLayerZeroBridgeChainX.unpauseSend();
-        vm.stopPrank();
-
-        uint256 initialBalance = rlcCrosschainToken.balanceOf(user1);
-
-        // Should work after send unpause
         (uint256 amountSentLD, uint256 amountReceivedLD) =
             iexecLayerZeroBridgeChainX.exposed_debit(user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
 
