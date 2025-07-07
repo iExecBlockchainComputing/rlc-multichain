@@ -87,7 +87,6 @@ contract Configure is Script {
             rlcCrosschainToken.grantRole(bridgeTokenRoleId, address(sourceBridge));
         }
 
-
         vm.stopBroadcast();
     }
 }
