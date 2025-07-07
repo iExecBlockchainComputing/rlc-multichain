@@ -1,5 +1,5 @@
 # IexecLayerZeroBridge
-[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/e45e89d2b74018386866544b530e980898300784/src/bridges/layerZero/IexecLayerZeroBridge.sol)
+[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/61326e3abe32aee8683989ab94220c30da0cb2e6/src/bridges/layerZero/IexecLayerZeroBridge.sol)
 
 **Inherits:**
 UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, OFTCoreUpgradeable, [DualPausableUpgradeable](/src/bridges/utils/DualPausableUpgradeable.sol/abstract.DualPausableUpgradeable.md), [IIexecLayerZeroBridge](/src/interfaces/IIexecLayerZeroBridge.sol/interface.IIexecLayerZeroBridge.md)
