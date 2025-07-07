@@ -119,8 +119,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address tokenAddress,
         bool approvalRequired
     ) internal {
-        // This interface can be use for both token as we only use balanceOf func
-        RLCMock token = RLCMock(tokenAddress);
+        IERC20 token = IERC20(tokenAddress);
 
         // Check initial balances
         uint256 initialBalance = token.balanceOf(user1);
