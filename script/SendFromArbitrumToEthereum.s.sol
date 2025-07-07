@@ -6,10 +6,9 @@ import {Script, console} from "forge-std/Script.sol";
 import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-
 import {ConfigLib} from "./lib/ConfigLib.sol";
 
-contract SendTokensToSepolia is Script {
+contract SendTokensFromArbitrumToEthereum is Script {
     /**
      * @dev Converts an address to bytes32.
      * @param _addr The address to convert.
@@ -31,29 +30,23 @@ contract SendTokensToSepolia is Script {
 
         // Transfer parameters
         uint16 destinationChainId = uint16(targetParams.lzChainId); // LayerZero chain ID for Ethereum Sepolia
-        address recipientAddress = sourceParams.initialAdmin; // TODO read recipient address from env variables.
+        address recipientAddress = vm.envAddress("RECIPIENT_ADDRESS");
         console.log("Recipient: %s", recipientAddress);
 
-        uint256 amount = 5 * 10 ** 18; // RLC tokens (adjust the amount as needed)
+        uint256 amount = 5 * 10 ** 9; // RLC tokens (adjust the amount as needed)
 
         // Send tokens cross-chain
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
         console.log("Sending %s RLC to Ethereum Sepolia", amount / 10 ** 9);
 
-        // Estimate gas for the OFT endpoint
-        // TODO extract in function and document
-        bytes memory _extraOptions =
-            abi.encodePacked(uint16(3), uint8(1), uint16(33), uint8(1), uint128(65000), uint128(0));
-
-        vm.startBroadcast();
         SendParam memory sendParam = SendParam(
-            destinationChainId,
-            addressToBytes32(recipientAddress),
-            amount,
-            amount * 9 / 10, // minAmount (allowing 10% slippage)
-            _extraOptions,
-            "",
-            ""
+            destinationChainId, // Destination endpoint ID.
+            addressToBytes32(recipientAddress), // Recipient address.
+            amount, // amount (in local decimals, e.g., 5 RLC = 5 * 10 ** 9)
+            amount * 99 / 100, // minAmount (allowing 1% slippage)
+            "", // Extra options, not used in this case, already setup using `setEnforcedOptions`
+            "", // Composed message, not used in this case
+            "" // OFT command to be executed, unused in default OFT implementations.
         );
 
         // Get the fee for the transfer
