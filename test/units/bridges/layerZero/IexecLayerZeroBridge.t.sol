@@ -167,7 +167,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         iexecLayerZeroBridgeChainX.pause();
     }
 
-    function test_Pause_BlocksOutgoingTransfers() public {
+    function test_Pause_BlocksAllTransfers() public {
+        // TODO make check outbound and inbound transfers.
         // Pause the bridge
         vm.prank(pauser);
         iexecLayerZeroBridgeChainX.pause();
@@ -218,48 +219,48 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
-    // ============ LEVEL 2 PAUSE TESTS (Send Pause) ============
+    // ============ LEVEL 2 PAUSE TESTS (Outbount transfer pause) ============
 
-    function test_PauseSend_OnlyPauserRole() public {
+    function test_PauseOutboundTransfers_OnlyPauserRole() public {
         vm.expectRevert();
         vm.prank(unauthorizedUser);
-        iexecLayerZeroBridgeChainX.pauseSend();
+        iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
     }
 
-    function test_PauseSend_BlocksOutgoingOnly() public {
-        // Pause send
+    function test_PauseOutboundTransfers_BlocksOutboundOnly() public {
+        // Pause outbound transfers
         vm.prank(pauser);
-        iexecLayerZeroBridgeChainX.pauseSend();
+        iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
 
         // Verify state
         assertFalse(iexecLayerZeroBridgeChainX.paused());
-        assertTrue(iexecLayerZeroBridgeChainX.sendPaused());
+        assertTrue(iexecLayerZeroBridgeChainX.outbountTransfersPaused());
 
         // Prepare send parameters
         (SendParam memory sendParam, MessagingFee memory fee) =
             TestUtils.prepareSend(iexecLayerZeroBridgeChainX, addressToBytes32(user2), TRANSFER_AMOUNT, SOURCE_EID);
 
-        // Attempt to send tokens - should revert with EnforcedSendPause
+        // Attempt to send tokens - should revert with EnforcedOutboundTransfersPause
         vm.deal(user1, fee.nativeFee);
         vm.prank(user1);
-        vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
+        vm.expectRevert(DualPausableUpgradeable.EnforcedOutboundTransfersPause.selector);
         iexecLayerZeroBridgeChainX.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
         // Verify no tokens were burned
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
     }
 
-    function test_UnpauseSend_RestoresOutgoingTransfers() public {
+    function test_unpauseOutboundTransfers_RestoresboundgoingTransfers() public {
         // Pause then unpause send
         vm.startPrank(pauser);
-        iexecLayerZeroBridgeChainX.pauseSend();
+        iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
 
-        iexecLayerZeroBridgeChainX.unpauseSend();
+        iexecLayerZeroBridgeChainX.unpauseOutboundTransfers();
         vm.stopPrank();
 
         // Should now work normally
         assertFalse(iexecLayerZeroBridgeChainX.paused());
-        assertFalse(iexecLayerZeroBridgeChainX.sendPaused());
+        assertFalse(iexecLayerZeroBridgeChainX.outbountTransfersPaused());
 
         test_SendToken_WhenOperational_WithoutApproval();
     }
