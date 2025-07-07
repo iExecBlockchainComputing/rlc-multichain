@@ -50,7 +50,9 @@ contract DualPausableUpgradeableTest is Test {
         vm.prank(OWNER);
         dualPausable.pauseOutboundTransfers();
 
-        assertTrue(dualPausable.outbountTransfersPaused(), "Outbound transfers should be paused after pauseOutboundTransfers");
+        assertTrue(
+            dualPausable.outbountTransfersPaused(), "Outbound transfers should be paused after pauseOutboundTransfers"
+        );
 
         vm.expectRevert(DualPausableUpgradeable.EnforcedOutboundTransfersPause.selector);
         dualPausable.mockOperation();
@@ -129,7 +131,9 @@ contract DualPausableUpgradeableTest is Test {
 
         (fullyPaused, onlyOutboundTransfersPaused) = dualPausable.pauseStatus();
         assertFalse(fullyPaused, "Contract should not be fully paused during outbount transfer pause");
-        assertTrue(onlyOutboundTransfersPaused, "Outbound transfers should be paused during outbount transfers pause state");
+        assertTrue(
+            onlyOutboundTransfersPaused, "Outbound transfers should be paused during outbount transfers pause state"
+        );
 
         // After full pause (from outbount transfer only pause state)
         vm.prank(OWNER);
