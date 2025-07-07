@@ -20,7 +20,8 @@ import {IRLCLiquidityUnifier} from "./interfaces/IRLCLiquidityUnifier.sol";
  *
  * The implementation is inspired by the OpenZeppelin ERC20Bridgeable contract
  * without being an ERC20 token itself. Functions are overridden to lock/unlock
- * tokens on an external ERC20 contract.
+ * tokens on an external ERC20 contract. ERC20Bridgeable is not used directly
+ * because it embarks the ERC20 token logic, which is not needed here.
  */
 contract RLCLiquidityUnifier is
     UUPSUpgradeable,
