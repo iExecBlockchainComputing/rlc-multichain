@@ -3,13 +3,14 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
-import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
+// import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
+import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
 
-contract SendTokensToSepolia is Script {
+contract SendTokensFromEthereumToArbitrum is Script {
     /**
      * @dev Converts an address to bytes32.
      * @param _addr The address to convert.
@@ -28,41 +29,43 @@ contract SendTokensToSepolia is Script {
 
         // Contract addresses
         address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
-        address rlcArbitrumTokenAddress = sourceParams.rlcCrosschainTokenAddress; // RLC
+        address rlcMainnetTokenAddress = sourceParams.rlcToken;
 
         // Transfer parameters
-        uint16 destinationChainId = uint16(targetParams.lzChainId); // LayerZero chain ID for Ethereum Sepolia
+        uint16 destinationChainId = uint16(targetParams.lzChainId);
         address recipientAddress = vm.envAddress("RECIPIENT_ADDRESS");
-        console.log("Recipient: %s", recipientAddress);
+        uint256 amount = 5 * 10 ** 9; //  RLC tokens (adjust the amount as needed)
 
-        uint256 amount = 5 * 10 ** 9; // RLC tokens (adjust the amount as needed)
+        vm.startBroadcast();
+        // First, approve the adapter to spend your tokens
+        IERC20 rlcToken = IERC20(rlcMainnetTokenAddress);
+        console.log("Approving RLCLiquidityUnifier contract to spend %s RLC", amount / 10 ** 9);
 
-        IERC20 rlcToken = IERC20(rlcArbitrumTokenAddress);
-        console.log("Approving RLC token transfer of %s", amount / 10 ** 9);
+        //TODO: when new workflow is deployed, use the new liquidity unifier address
         rlcToken.approve(iexecLayerZeroBridgeAddress, amount);
 
-        // Send tokens cross-chain
-        IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
-        console.log("Sending %s RLC to Ethereum Sepolia", amount / 10 ** 9);
+        // Then, send tokens cross-chain
+        IexecLayerZeroBridge adapter = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
+        console.log("Sending %s RLC to Arbitrum Sepolia", amount / 10 ** 9);
+        console.log("Recipient: %s", recipientAddress);
 
         SendParam memory sendParam = SendParam(
             destinationChainId, // Destination endpoint ID.
             addressToBytes32(recipientAddress), // Recipient address.
-            amount, // amount (in local decimals, e.g., 5 RLC = 5 * 10 ** 9)
-            amount * 9 / 10, // minAmount (allowing 10% slippage)
-            "", // Extra options, not used in this case used setEnforcedOptions
-            "", // Composed message, not used in this case
+            amount, // Amount to send in local decimals.
+            amount * 99 / 100, // Minimum amount to send in local decimals (allowing 1% slippage).
+            "", // Extra options, not used in this case, already setup using `setEnforcedOptions`
+            "", // Composed message for the send() operation, unused in this context.
             "" // OFT command to be executed, unused in default OFT implementations.
         );
 
-        // Get the fee for the transfer
-        MessagingFee memory fee = iexecLayerZeroBridge.quoteSend(sendParam, false);
+        MessagingFee memory fee = adapter.quoteSend(sendParam, false);
+
         console.log("Fee amount: ", fee.nativeFee);
 
-        // Execute the cross-chain transfer
-        iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, msg.sender);
+        adapter.send{value: fee.nativeFee}(sendParam, fee, msg.sender);
 
-        console.log("Cross-chain transfer from Arbitrum to Ethereum initiated!");
+        console.log("Cross-chain transfer initiated!");
         vm.stopBroadcast();
     }
 }

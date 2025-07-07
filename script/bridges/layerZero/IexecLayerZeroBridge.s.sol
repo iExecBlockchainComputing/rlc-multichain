@@ -74,14 +74,13 @@ contract Configure is Script {
             targetParams.lzChainId, bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)))
         );
         if (sourceParams.approvalRequired) {
-            RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(sourceParams.rlcLiquidityUnifierAddress);
-            bytes32 bridgeTokenRoleId = liquidityUnifier.TOKEN_BRIDGE_ROLE();
-            sourceBridge.grantRole(bridgeTokenRoleId, sourceParams.rlcLiquidityUnifierAddress);
+            RLCLiquidityUnifier rlcLiquidityUnifier = RLCLiquidityUnifier(sourceParams.rlcLiquidityUnifierAddress);
+            bytes32 bridgeTokenRoleId = rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE();
+            rlcLiquidityUnifier.grantRole(bridgeTokenRoleId, address(sourceBridge));
         } else {
-            RLCCrosschainToken sourceBridgeToken = RLCCrosschainToken(sourceParams.rlcCrosschainTokenAddress);
-            bytes32 bridgeTokenRoleId = sourceBridgeToken.TOKEN_BRIDGE_ROLE();
-            address crosschainToken = sourceParams.rlcCrosschainTokenAddress;
-            sourceBridge.grantRole(bridgeTokenRoleId, crosschainToken);
+            RLCCrosschainToken rlcCrosschainToken = RLCCrosschainToken(sourceParams.rlcCrosschainTokenAddress);
+            bytes32 bridgeTokenRoleId = rlcCrosschainToken.TOKEN_BRIDGE_ROLE();
+            rlcCrosschainToken.grantRole(bridgeTokenRoleId, address(sourceBridge));
         }
 
         EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](1);
