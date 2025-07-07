@@ -59,6 +59,13 @@ contract Deploy is Script {
     }
 }
 
+/**
+ * This script is used to configure the IexecLayerZeroBridge contract on both source
+ * and target chains.
+ * It sets required LayerZero bridge config: peer address and enforced options.
+ * It also grants the bridge the necessary roles in the RLCCrosschainToken contract
+ * or RLCLiquidityUnifier contract, depending on the configuration.
+ */
 contract Configure is Script {
     using OptionsBuilder for bytes;
 
