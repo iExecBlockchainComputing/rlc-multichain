@@ -21,20 +21,20 @@ library UUPSProxyDeployer {
      * @param contractName The name of the contract to deploy (used to fetch creation code)
      * @param constructorData The constructor arguments for the implementation contract
      * @param initializeData The initialization data for the proxy contract
-     * @param createXFactory The address of the CreateX factory
+     * @param createxFactory The address of the CreateX factory
      * @param createxSalt The salt for deterministic deployment
      * @return The address of the deployed proxy
      */
-    function deployUUPSProxyWithCreateX(
+    function deployUsingCreateX(
         string memory contractName,
         bytes memory constructorData,
         bytes memory initializeData,
-        address createXFactory,
+        address createxFactory,
         bytes32 createxSalt
     ) internal returns (address) {
         address implementation =
-            deployImplementationUsingCreateX(contractName, constructorData, createXFactory, createxSalt);
-        address proxy = ICreateX(createXFactory).deployCreate2AndInit(
+            deployImplementationUsingCreateX(contractName, constructorData, createxFactory, createxSalt);
+        address proxy = ICreateX(createxFactory).deployCreate2AndInit(
             createxSalt,
             abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(implementation, "")), // initCode
             initializeData,
