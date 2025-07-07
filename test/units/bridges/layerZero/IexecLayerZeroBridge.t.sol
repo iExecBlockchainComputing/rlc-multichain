@@ -343,7 +343,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         );
     }
 
-    function test_credit_RevertsWhenFullyPaused() public {
+    function test_credit_RevertsWhenPaused() public {
         // Test that _credit reverts when contract is fully paused
         // Pause the contract
         vm.prank(pauser);
@@ -353,13 +353,13 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
     }
 
-    function test_credit_WorksWhenOnlySendPaused() public {
+    function test_credit_WorksWhenOutboundTransfersPaused() public {
         // Test that _credit still works when only sends are paused (Level 2 pause)
         uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
 
         // Pause only sends
         vm.prank(pauser);
-        iexecLayerZeroBridgeChainX.pauseSend();
+        iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
 
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
