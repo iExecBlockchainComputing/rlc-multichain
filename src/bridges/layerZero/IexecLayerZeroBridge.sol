@@ -31,8 +31,8 @@ import {IRLCLiquidityUnifier} from "../../interfaces/IRLCLiquidityUnifier.sol";
  * chain are minted on another, maintaining a 1:1 peg across the entire ecosystem.
  *
  * Dual-Pause Emergency System:
- * 1. Complete Pause: Blocks all bridge operations (incoming and outgoing transfers)
- * 2. Send Pause: Blocks only outgoing transfers, allows users to receive/withdraw funds
+ * 1. Complete pause: Blocks all bridge operations (inbound and outbound transfers)
+ * 2. Only outbout transfers pause: Blocks only outbound transfers, allows users to receive/withdraw funds
  *
  * Architecture Overview:
  * This bridge supports two distinct deployment scenarios:
@@ -124,8 +124,8 @@ contract IexecLayerZeroBridge is
      * @dev Can only be called by accounts with PAUSER_ROLE
      *
      * When fully paused:
-     * - All _debit operations (outgoing transfers) are blocked
-     * - All _credit operations (incoming transfers) are blocked
+     * - All _debit operations (outbound transfers) are blocked
+     * - All _credit operations (inbound transfers) are blocked
      * - Use this for critical security incidents (e.g., LayerZero exploit)
      *
      * @custom:security Critical emergency function for complete bridge shutdown
@@ -143,27 +143,28 @@ contract IexecLayerZeroBridge is
     }
 
     /**
-     * @notice LEVEL 2: Pauses only outgoing transfers (send pause)
+     * @notice LEVEL 2: Pauses only outbound transfers.
      * @dev Can only be called by accounts with PAUSER_ROLE
      *
-     * When send is paused:
-     * - All _debit operations (outgoing transfers) are blocked
-     * - All _credit operations (incoming transfers) still work
+     * When outbount transfers are paused:
+     * - All _debit operations (outbound transfers) are blocked
+     * - All _credit operations (inbound transfers) still work
      * - Users can still receive funds and "exit" their positions
      * - Use this for less critical issues or when you want to allow withdrawals
      *
-     * @custom:security Moderate emergency function allowing exits while blocking send
+     * @custom:security Moderate emergency function allowing inbound messages
+     * while blocking outbound transfers.
      */
-    function pauseSend() external onlyRole(PAUSER_ROLE) {
-        _pauseSend();
+    function pauseOutboundTransfers() external onlyRole(PAUSER_ROLE) {
+        _pauseOutboundTransfers();
     }
 
     /**
-     * @notice LEVEL 2: Unpauses outgoing transfers (restores send functionality)
+     * @notice LEVEL 2: Unpauses outbound transfers (restores send functionality)
      * @dev Can only be called by accounts with PAUSER_ROLE
      */
-    function unpauseSend() external onlyRole(PAUSER_ROLE) {
-        _unpauseSend();
+    function unpauseOutboundTransfers() external onlyRole(PAUSER_ROLE) {
+        _unpauseOutboundTransfers();
     }
 
     // ============ OFT CONFIGURATION ============
@@ -222,11 +223,11 @@ contract IexecLayerZeroBridge is
      * - If BRIDGEABLE_TOKEN implements transfer fees, burn fees, or any other fee mechanism,
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
-     * @dev This function is called for OUTGOING transfers (when sending to another chain)
+     * @dev This function is called for outbound transfers (when sending to another chain)
      * Pause Behavior:
      * - Blocked when contract is fully paused (Level 1 pause)
-     * - Blocked when sends are paused (Level 2 pause)
-     * - Uses both whenNotPaused and whenSendNotPaused modifiers
+     * - Blocked when outbound transfers are paused (Level 2 pause)
+     * - Uses both whenNotPaused and whenOutboundTransfersNotPaused modifiers
      *
      * @custom:security Requires the RLC token to have granted burn permissions to this contract
      *
@@ -241,7 +242,7 @@ contract IexecLayerZeroBridge is
         internal
         override
         whenNotPaused
-        whenSendNotPaused
+        whenOutboundTransfersNotPaused
         returns (uint256 amountSentLD, uint256 amountReceivedLD)
     {
         // Calculate the amounts using the parent's logic (handles slippage protection)
@@ -273,10 +274,10 @@ contract IexecLayerZeroBridge is
      *   this function will NOT work correctly and would need to be modified
      * - The function would need pre/post balance checks to handle fee scenarios
      *
-     * @dev This function is called for INCOMING transfers (when receiving from another chain)
+     * @dev This function is called for inbound transfers (when receiving from another chain)
      * Pause Behavior:
      * - Blocked ONLY when contract is fully paused (Level 1 pause)
-     * - NOT blocked when sends are paused (Level 2) - users can still receive/exit
+     * - NOT blocked when outbound transfers are paused (Level 2) - users can still receive/exit
      * - Uses only whenNotPaused modifier
      *
      * @custom:security Requires the RLC token to have granted mint permissions to this contract

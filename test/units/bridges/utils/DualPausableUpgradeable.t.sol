@@ -12,7 +12,7 @@ import {AccessControlDefaultAdminRulesUpgradeable} from
 /**
  * @title DualPausableUpgradeableTest
  * @dev Test suite for DualPausableUpgradeable abstract contract
- * Tests the dual-pause mechanism with Level 1 (complete) and Level 2 (send-only) pause functionality
+ * Tests the dual-pause mechanism with Level 1 (complete) and Level 2 (outbound transfers only) pause functionality
  */
 contract DualPausableUpgradeableTest is Test {
     address private OWNER = makeAddr("owner");
@@ -30,70 +30,72 @@ contract DualPausableUpgradeableTest is Test {
     // ============ initialize ============
 
     function test_initialize_SetsCorrectInitialStates() public view {
-        assertFalse(dualPausable.sendPaused(), "Send should not be paused initially");
+        assertFalse(dualPausable.outbountTransfersPaused(), "Outbound transfers should not be paused initially");
 
-        (bool fullyPaused, bool onlySendPaused) = dualPausable.pauseStatus();
+        (bool fullyPaused, bool onlyOutboundTransfersPaused) = dualPausable.pauseStatus();
         assertFalse(fullyPaused, "Contract should not be fully paused initially");
-        assertFalse(onlySendPaused, "Send should not be paused initially");
+        assertFalse(onlyOutboundTransfersPaused, "Outbound transfers should not be paused initially");
     }
 
-    // ============ pauseSend ============
+    // ============ pauseOutboundTransfers ============
 
-    function test_pauseSend_EmitsCorrectEvent() public {
+    function test_pauseOutboundTransfers_EmitsCorrectEvent() public {
         vm.expectEmit(true, true, true, true);
-        emit DualPausableUpgradeable.SendPaused(OWNER);
+        emit DualPausableUpgradeable.OutboundTransfersPaused(OWNER);
         vm.prank(OWNER);
-        dualPausable.pauseSend();
+        dualPausable.pauseOutboundTransfers();
     }
 
-    function test_pauseSend_BlocksOperations() public {
+    function test_pauseOutboundTransfers_BlocksOperations() public {
         vm.prank(OWNER);
-        dualPausable.pauseSend();
+        dualPausable.pauseOutboundTransfers();
 
-        assertTrue(dualPausable.sendPaused(), "Send should be paused after pauseSend");
+        assertTrue(
+            dualPausable.outbountTransfersPaused(), "Outbound transfers should be paused after pauseOutboundTransfers"
+        );
 
-        vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
+        vm.expectRevert(DualPausableUpgradeable.EnforcedOutboundTransfersPause.selector);
         dualPausable.mockOperation();
     }
 
-    function test_RevertWhen_SendAlreadyPaused() public {
+    function test_RevertWhen_OutboundTransferAlreadyPaused() public {
         vm.startPrank(OWNER);
-        dualPausable.pauseSend();
+        dualPausable.pauseOutboundTransfers();
 
-        vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
-        dualPausable.pauseSend();
+        vm.expectRevert(DualPausableUpgradeable.EnforcedOutboundTransfersPause.selector);
+        dualPausable.pauseOutboundTransfers();
         vm.stopPrank();
     }
 
-    // ============ unpauseSend ============
+    // ============ unpauseOutboundTransfers ============
 
-    function test_unpauseSend_EmitsCorrectEvent() public {
+    function test_unpauseOutboundTransfers_EmitsCorrectEvent() public {
         vm.startPrank(OWNER);
-        dualPausable.pauseSend();
+        dualPausable.pauseOutboundTransfers();
 
         vm.expectEmit(true, true, true, true);
-        emit DualPausableUpgradeable.SendUnpaused(OWNER);
-        dualPausable.unpauseSend();
+        emit DualPausableUpgradeable.OutboundTransfersUnpaused(OWNER);
+        dualPausable.unpauseOutboundTransfers();
         vm.stopPrank();
     }
 
-    function test_unpauseSend_RestoresOperations() public {
+    function test_unpauseOutboundTransfers_RestoresOperations() public {
         vm.startPrank(OWNER);
-        dualPausable.pauseSend();
-        assertTrue(dualPausable.sendPaused(), "Send should be paused before unpause");
+        dualPausable.pauseOutboundTransfers();
+        assertTrue(dualPausable.outbountTransfersPaused(), "Outbound transfers should be paused before unpause");
 
-        dualPausable.unpauseSend();
+        dualPausable.unpauseOutboundTransfers();
         vm.stopPrank();
 
-        assertFalse(dualPausable.sendPaused(), "Send should not be paused after unpause");
+        assertFalse(dualPausable.outbountTransfersPaused(), "Outbound transfers should not be paused after unpause");
 
         // Operation should work normally
         assertTrue(dualPausable.mockOperation(), "Mock operation should succeed after unpause");
     }
 
-    function test_RevertWhen_SendNotPaused() public {
-        vm.expectRevert(DualPausableUpgradeable.ExpectedSendPause.selector);
-        dualPausable.unpauseSend();
+    function test_RevertWhen_OutbountTransfersNotPaused() public {
+        vm.expectRevert(DualPausableUpgradeable.ExpectedOutboundTransfersPause.selector);
+        dualPausable.unpauseOutboundTransfers();
     }
 
     // ============ unpause ============
@@ -119,101 +121,103 @@ contract DualPausableUpgradeableTest is Test {
 
     function test_pauseStatus_ReturnsCorrectStatesInAllScenarios() public {
         // Initially operational
-        (bool fullyPaused, bool onlySendPaused) = dualPausable.pauseStatus();
+        (bool fullyPaused, bool onlyOutboundTransfersPaused) = dualPausable.pauseStatus();
         assertFalse(fullyPaused, "Contract should not be fully paused initially");
-        assertFalse(onlySendPaused, "Send should not be paused initially");
+        assertFalse(onlyOutboundTransfersPaused, "Outbound transfers should not be paused initially");
 
-        // After send pause
+        // After outbount transfer pause
         vm.prank(OWNER);
-        dualPausable.pauseSend();
+        dualPausable.pauseOutboundTransfers();
 
-        (fullyPaused, onlySendPaused) = dualPausable.pauseStatus();
-        assertFalse(fullyPaused, "Contract should not be fully paused during send pause");
-        assertTrue(onlySendPaused, "Send should be paused during send pause state");
+        (fullyPaused, onlyOutboundTransfersPaused) = dualPausable.pauseStatus();
+        assertFalse(fullyPaused, "Contract should not be fully paused during outbount transfer pause");
+        assertTrue(
+            onlyOutboundTransfersPaused, "Outbound transfers should be paused during outbount transfers pause state"
+        );
 
-        // After full pause (from send pause state)
+        // After full pause (from outbount transfer only pause state)
         vm.prank(OWNER);
         dualPausable.pause();
 
-        (fullyPaused, onlySendPaused) = dualPausable.pauseStatus();
+        (fullyPaused, onlyOutboundTransfersPaused) = dualPausable.pauseStatus();
         assertTrue(fullyPaused, "Contract should be fully paused after pause");
-        assertTrue(onlySendPaused, "Send should remain paused during full pause");
+        assertTrue(onlyOutboundTransfersPaused, "Outbound transfers should remain paused during full pause");
     }
 
     // ============ dual pause workflow tests ============
 
-    // Make sure `pause()` does not impact `pauseSend()`.
-    function test_DualPause_PauseFromSendToFull() public {
-        // Start with send pause
+    // Make sure `pause()` does not impact `pauseOutboundTransfers()`.
+    function test_DualPause_PauseFromOnlyOutboundTransfersToFull() public {
+        // Start with outbount transfer pause
         vm.startPrank(OWNER);
-        dualPausable.pauseSend();
-        assertTrue(dualPausable.sendPaused());
+        dualPausable.pauseOutboundTransfers();
+        assertTrue(dualPausable.outbountTransfersPaused());
         assertFalse(dualPausable.paused());
 
         dualPausable.pause();
         vm.stopPrank();
 
         assertTrue(dualPausable.paused());
-        assertTrue(dualPausable.sendPaused());
+        assertTrue(dualPausable.outbountTransfersPaused());
     }
 
-    // Make sure `pauseSend()` does not impact `pause()`.
-    function test_DualPause_PauseFromFullToSend() public {
+    // Make sure `pauseOutboundTransfers()` does not impact `pause()`.
+    function test_DualPause_PauseFromFullToOnlyOutboundTransfers() public {
         // pause
         vm.startPrank(OWNER);
         dualPausable.pause();
         assertTrue(dualPausable.paused());
-        assertFalse(dualPausable.sendPaused());
-        // pauseSend
-        dualPausable.pauseSend();
+        assertFalse(dualPausable.outbountTransfersPaused());
+        // pauseOutboundTransfers
+        dualPausable.pauseOutboundTransfers();
         vm.stopPrank();
         // Check status
         assertTrue(dualPausable.paused());
-        assertTrue(dualPausable.sendPaused());
+        assertTrue(dualPausable.outbountTransfersPaused());
     }
 
-    function test_DualPause_PauseShouldNotImpactSendPause() public {
+    function test_DualPause_PauseShouldNotImpactOutboundTransfersPause() public {
         vm.startPrank(OWNER);
-        // pause & pauseSend
+        // pause & pauseOutboundTransfers
         dualPausable.pause();
-        dualPausable.pauseSend();
+        dualPausable.pauseOutboundTransfers();
         assertTrue(dualPausable.paused());
-        assertTrue(dualPausable.sendPaused());
+        assertTrue(dualPausable.outbountTransfersPaused());
         // unpause
         dualPausable.unpause();
         assertFalse(dualPausable.paused());
-        // pauseSend should still be active
-        assertTrue(dualPausable.sendPaused(), "Send should remain paused after unpause");
+        // pauseOutboundTransfers should still be active
+        assertTrue(dualPausable.outbountTransfersPaused(), "Outbound transfers should remain paused after unpause");
         vm.stopPrank();
     }
 
-    function test_DualPause_SendPauseShouldNotImpactPause() public {
+    function test_DualPause_OutboundTransfersPauseShouldNotImpactPause() public {
         vm.startPrank(OWNER);
-        // pause & pauseSend
+        // pause & pauseOutboundTransfers
         dualPausable.pause();
-        dualPausable.pauseSend();
+        dualPausable.pauseOutboundTransfers();
         assertTrue(dualPausable.paused());
-        assertTrue(dualPausable.sendPaused());
-        // unpauseSend
-        dualPausable.unpauseSend();
-        assertFalse(dualPausable.sendPaused());
+        assertTrue(dualPausable.outbountTransfersPaused());
+        // unpauseOutboundTransfers
+        dualPausable.unpauseOutboundTransfers();
+        assertFalse(dualPausable.outbountTransfersPaused());
         // pause should still be active
-        assertTrue(dualPausable.paused(), "Pause should remain active after unpauseSend");
+        assertTrue(dualPausable.paused(), "Pause should remain active after unpauseOutboundTransfers");
         vm.stopPrank();
     }
 
     // ============ modifier ============
 
-    function test_whenSendNotPaused_AllowsOperationWhenOperational() public view {
+    function test_whenOutboundTransfersNotPaused_AllowsAllTransfersWhenLifted() public view {
         // Should work when fully operational
         assertTrue(dualPausable.mockOperation(), "Mock operation should succeed when operational");
     }
 
-    function test_RevertWhen_whenSendNotPaused_SendIsPaused() public {
+    function test_RevertWhen_whenOutboundTransfersNotPaused_OutboundTransfersArePaused() public {
         vm.prank(OWNER);
-        dualPausable.pauseSend();
+        dualPausable.pauseOutboundTransfers();
 
-        vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
+        vm.expectRevert(DualPausableUpgradeable.EnforcedOutboundTransfersPause.selector);
         dualPausable.mockOperation();
     }
 }
@@ -221,7 +225,7 @@ contract DualPausableUpgradeableTest is Test {
 /**
  * @title DualPausableUpgradeableImpl
  * @dev Concrete implementation of DualPausableUpgradeable for testing
- * Includes a mock functions that use `whenSendNotPaused` modifiers
+ * Includes a mock functions that use `whenOutboundTransfersNotPaused` modifiers
  */
 contract DualPausableUpgradeableImpl is DualPausableUpgradeable {
     function initialize() public initializer {
@@ -236,18 +240,18 @@ contract DualPausableUpgradeableImpl is DualPausableUpgradeable {
         _unpause();
     }
 
-    function pauseSend() external {
-        _pauseSend();
+    function pauseOutboundTransfers() external {
+        _pauseOutboundTransfers();
     }
 
-    function unpauseSend() external {
-        _unpauseSend();
+    function unpauseOutboundTransfers() external {
+        _unpauseOutboundTransfers();
     }
 
     /**
-     * @dev Mock function that uses whenNotSendPaused modifier
+     * @dev Mock function that uses whenOutboundTransfersNotPaused modifier
      */
-    function mockOperation() external view whenSendNotPaused returns (bool) {
+    function mockOperation() external view whenOutboundTransfersNotPaused returns (bool) {
         return true;
     }
 }
