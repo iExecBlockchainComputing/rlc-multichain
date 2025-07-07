@@ -509,7 +509,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
     function testFuzz_debit_Address(address from) public {
         // Fuzz test with different addresses
-        vm.assume(from != address(iexecLayerZeroBridgeChainX));
+        vm.assume(from != address(0) && from != address(iexecLayerZeroBridgeChainX));
 
         // Setup: Give the address some tokens
         vm.prank(address(iexecLayerZeroBridgeChainX));
@@ -541,7 +541,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
 
         // Should revert when send is paused
-        vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
+        vm.expectRevert(DualPausableUpgradeable.EnforcedOutboundTransfersPause.selector);
         iexecLayerZeroBridgeChainX.exposed_debit(user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
     }
 
