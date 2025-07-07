@@ -20,6 +20,10 @@ contract LiquidityUnifierTest is Test {
     function setUp() public {}
 
     function test_Deploy() public {
+        // Check that CreateX salt is used to deploy the contract.
+        vm.expectEmit(false, true, false, false);
+        // CreateX uses a guarded salt (see CreateX._guard()), so we need to hash it to match the expected event.
+        emit CreateX.ContractCreation(address(0), keccak256(abi.encode(salt)));
         address rlcLiquidityUnifierAddress = deployer.deploy(rlcToken, admin, upgrader, createx, salt);
         RLCLiquidityUnifier rlcLiquidityUnifier = RLCLiquidityUnifier(rlcLiquidityUnifierAddress);
         assertEq(rlcLiquidityUnifier.owner(), admin);
@@ -30,13 +34,5 @@ contract LiquidityUnifierTest is Test {
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
         rlcLiquidityUnifier.initialize(admin, upgrader);
         // TODO check that the proxy address is saved.
-    }
-
-    // Makes sure create2 deployment is well implemented.
-    function test_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        address random = makeAddr("random");
-        deployer.deploy(rlcToken, admin, upgrader, createx, salt);
-        vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", createx));
-        deployer.deploy(rlcToken, random, random, createx, salt);
     }
 }

@@ -21,6 +21,10 @@ contract RLCCrosschainTokenTest is Test {
     function setUp() public {}
 
     function test_Deploy() public {
+        // Check that CreateX salt is used to deploy the contract.
+        vm.expectEmit(false, true, false, false);
+        // CreateX uses a guarded salt (see CreateX._guard()), so we need to hash it to match the expected event.
+        emit CreateX.ContractCreation(address(0), keccak256(abi.encode(salt)));
         address crosschainTokenAddress = deployer.deploy(name, symbol, admin, upgrader, createx, salt);
         RLCCrosschainToken rlcCrosschainToken = RLCCrosschainToken(crosschainTokenAddress);
         assertEq(rlcCrosschainToken.name(), name);
@@ -37,13 +41,5 @@ contract RLCCrosschainTokenTest is Test {
         vm.label(address(rlcCrosschainToken), "rlcCrosschainToken");
 
         // TODO check that the proxy address is saved.
-    }
-
-    // Makes sure create2 deployment is well implemented.
-    function test_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        address random = makeAddr("random");
-        deployer.deploy(name, symbol, admin, upgrader, createx, salt);
-        vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", createx));
-        deployer.deploy("Foo", "BAR", random, random, createx, salt);
     }
 }
