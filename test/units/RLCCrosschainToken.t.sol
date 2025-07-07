@@ -32,22 +32,25 @@ contract RLCCrosschainTokenTest is Test {
 
     bytes32 private bridgeTokenRoleId;
 
-    RLCCrosschainToken private crosschainToken;
+    RLCCrosschainToken private rlcCrosschainToken;
 
     function setUp() public {
-        crosschainToken = RLCCrosschainToken(
+        rlcCrosschainToken = RLCCrosschainToken(
             new RLCCrosschainTokenDeployScript().deploy(
                 "iEx.ec Network Token", "RLC", admin, upgrader, address(new CreateX()), keccak256("salt")
             )
         );
-        bridgeTokenRoleId = crosschainToken.TOKEN_BRIDGE_ROLE();
+        bridgeTokenRoleId = rlcCrosschainToken.TOKEN_BRIDGE_ROLE();
+
+        //Add label to make logs more readable
+        vm.label(address(rlcCrosschainToken), "rlcCrosschainToken");
     }
 
     // ============ initialize ============
 
     function test_RevertWhen_InitializedMoreThanOnce() public {
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
-        crosschainToken.initialize("Foo", "BAR", admin, upgrader);
+        rlcCrosschainToken.initialize("Foo", "BAR", admin, upgrader);
     }
 
     // ============ approveAndCall ============
@@ -59,9 +62,9 @@ contract RLCCrosschainTokenTest is Test {
         emit IERC20.Approval(user, spender, allowance);
         // Approve the spender to spend tokens and call its receiveApproval function.
         vm.prank(user);
-        crosschainToken.approveAndCall(spender, allowance, approveAndCallData);
+        rlcCrosschainToken.approveAndCall(spender, allowance, approveAndCallData);
         // Check allowance.
-        assertEq(crosschainToken.allowance(user, spender), allowance);
+        assertEq(rlcCrosschainToken.allowance(user, spender), allowance);
     }
 
     function test_ApproveAndCallWithEmptyData() public {
@@ -71,9 +74,9 @@ contract RLCCrosschainTokenTest is Test {
         emit IERC20.Approval(user, spender, allowance);
         // Approve the spender to spend tokens and call its receiveApproval function.
         vm.prank(user);
-        crosschainToken.approveAndCall(spender, allowance, "");
+        rlcCrosschainToken.approveAndCall(spender, allowance, "");
         // Check allowance.
-        assertEq(crosschainToken.allowance(user, spender), allowance);
+        assertEq(rlcCrosschainToken.allowance(user, spender), allowance);
     }
 
     function test_ApproveAndCallWithZeroAllowance() public {
@@ -83,9 +86,9 @@ contract RLCCrosschainTokenTest is Test {
         emit IERC20.Approval(user, spender, 0);
         // Approve the spender.
         vm.prank(user);
-        crosschainToken.approveAndCall(spender, 0, approveAndCallData);
+        rlcCrosschainToken.approveAndCall(spender, 0, approveAndCallData);
         // Check allowance.
-        assertEq(crosschainToken.allowance(user, spender), 0);
+        assertEq(rlcCrosschainToken.allowance(user, spender), 0);
     }
 
     function test_ApproveAndCallWithMaxUintAllowance() public {
@@ -95,9 +98,9 @@ contract RLCCrosschainTokenTest is Test {
         emit IERC20.Approval(user, spender, type(uint256).max);
         // Approve the spender with max uint allowance.
         vm.prank(user);
-        crosschainToken.approveAndCall(spender, type(uint256).max, approveAndCallData);
+        rlcCrosschainToken.approveAndCall(spender, type(uint256).max, approveAndCallData);
         // Check allowance.
-        assertEq(crosschainToken.allowance(user, spender), type(uint256).max);
+        assertEq(rlcCrosschainToken.allowance(user, spender), type(uint256).max);
     }
 
     function test_ApproveAndCallShouldOverrideAllowanceAmount() public {
@@ -107,46 +110,46 @@ contract RLCCrosschainTokenTest is Test {
         // 1st call
         vm.expectEmit(true, true, true, true);
         emit IERC20.Approval(user, spender, allowance);
-        crosschainToken.approveAndCall(spender, allowance, approveAndCallData);
-        assertEq(crosschainToken.allowance(user, spender), allowance);
+        rlcCrosschainToken.approveAndCall(spender, allowance, approveAndCallData);
+        assertEq(rlcCrosschainToken.allowance(user, spender), allowance);
         // 2nd call
         vm.expectEmit(true, true, true, true);
         emit IERC20.Approval(user, spender, allowance2);
-        crosschainToken.approveAndCall(spender, allowance2, approveAndCallData);
-        assertEq(crosschainToken.allowance(user, spender), allowance2);
+        rlcCrosschainToken.approveAndCall(spender, allowance2, approveAndCallData);
+        assertEq(rlcCrosschainToken.allowance(user, spender), allowance2);
         vm.stopPrank();
     }
 
     function test_RevertWhen_ApproveAndCallWithZeroSpenderAddress() public {
         vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidSpender.selector, address(0)));
         vm.prank(user);
-        crosschainToken.approveAndCall(address(0), allowance, approveAndCallData);
+        rlcCrosschainToken.approveAndCall(address(0), allowance, approveAndCallData);
     }
 
     function test_RevertWhen_ApproveAndCallFromZeroAddress() public {
         vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidApprover.selector, address(0)));
         vm.prank(address(0));
-        crosschainToken.approveAndCall(spender, allowance, approveAndCallData);
+        rlcCrosschainToken.approveAndCall(spender, allowance, approveAndCallData);
     }
 
     function test_RevertWhen_CallToTheSpenderReverts() public {
         vm.mockCallRevert(
             spender,
             abi.encodeWithSelector(
-                ITokenSpender.receiveApproval.selector, user, allowance, address(crosschainToken), approveAndCallData
+                ITokenSpender.receiveApproval.selector, user, allowance, address(rlcCrosschainToken), approveAndCallData
             ),
             new bytes(0)
         );
         vm.expectRevert();
         vm.prank(user);
-        crosschainToken.approveAndCall(spender, allowance, approveAndCallData);
+        rlcCrosschainToken.approveAndCall(spender, allowance, approveAndCallData);
     }
 
     function test_RevertWhen_SpenderIsNotAContract() public {
         address eoaSpender = makeAddr("EOA"); // No mocking to simulate an EOA.
         vm.expectRevert();
         vm.prank(user);
-        crosschainToken.approveAndCall(eoaSpender, allowance, approveAndCallData);
+        rlcCrosschainToken.approveAndCall(eoaSpender, allowance, approveAndCallData);
     }
 
     // ============ crosschainMint ============
@@ -154,7 +157,7 @@ contract RLCCrosschainTokenTest is Test {
     function test_MintForOneUserFromOneBridge() public {
         _authorizeBridge(bridge);
         // Check the initial state.
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
         // Expect events to be emitted.
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user, amount);
@@ -162,33 +165,33 @@ contract RLCCrosschainTokenTest is Test {
         emit IERC7802.CrosschainMint(user, amount, bridge);
         // Send mint request from the bridge.
         vm.prank(bridge);
-        crosschainToken.crosschainMint(user, amount);
+        rlcCrosschainToken.crosschainMint(user, amount);
         // Check that tokens are minted.
-        assertEq(crosschainToken.totalSupply(), amount);
-        assertEq(crosschainToken.balanceOf(user), amount);
-        assertEq(crosschainToken.balanceOf(bridge), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), amount);
+        assertEq(rlcCrosschainToken.balanceOf(user), amount);
+        assertEq(rlcCrosschainToken.balanceOf(bridge), 0);
     }
 
     function test_MintForOneUserFromOneBridgeMultipleTimes() public {
         _authorizeBridge(bridge);
         // Check the initial state.
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
         // Mint 1
         vm.prank(bridge);
-        crosschainToken.crosschainMint(user, amount);
+        rlcCrosschainToken.crosschainMint(user, amount);
         // Mint 2
         vm.prank(bridge);
-        crosschainToken.crosschainMint(user, amount);
+        rlcCrosschainToken.crosschainMint(user, amount);
         // Check that tokens are minted.
-        assertEq(crosschainToken.totalSupply(), 2 * amount);
-        assertEq(crosschainToken.balanceOf(user), 2 * amount);
-        assertEq(crosschainToken.balanceOf(bridge), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 2 * amount);
+        assertEq(rlcCrosschainToken.balanceOf(user), 2 * amount);
+        assertEq(rlcCrosschainToken.balanceOf(bridge), 0);
     }
 
     function test_MintForOneUserFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
         // Bridge 1
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user, amount);
@@ -196,7 +199,7 @@ contract RLCCrosschainTokenTest is Test {
         emit IERC7802.CrosschainMint(user, amount, bridge);
         // Send mint request from the bridge.
         vm.prank(bridge);
-        crosschainToken.crosschainMint(user, amount);
+        rlcCrosschainToken.crosschainMint(user, amount);
         // Bridge 2
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user, amount);
@@ -204,112 +207,112 @@ contract RLCCrosschainTokenTest is Test {
         emit IERC7802.CrosschainMint(user, amount, bridge2);
         // Send mint request from the bridge.
         vm.prank(bridge2);
-        crosschainToken.crosschainMint(user, amount);
+        rlcCrosschainToken.crosschainMint(user, amount);
         // Check that tokens are minted.
-        assertEq(crosschainToken.totalSupply(), 2 * amount);
-        assertEq(crosschainToken.balanceOf(user), 2 * amount);
-        assertEq(crosschainToken.balanceOf(bridge), 0);
-        assertEq(crosschainToken.balanceOf(bridge2), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 2 * amount);
+        assertEq(rlcCrosschainToken.balanceOf(user), 2 * amount);
+        assertEq(rlcCrosschainToken.balanceOf(bridge), 0);
+        assertEq(rlcCrosschainToken.balanceOf(bridge2), 0);
     }
 
     function test_MintForMultipleUsersFromOneBridge() public {
         _authorizeBridge(bridge);
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
         // User 1
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge);
         vm.prank(bridge);
-        crosschainToken.crosschainMint(user, amount);
+        rlcCrosschainToken.crosschainMint(user, amount);
         // User 2
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user2, amount2);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user2, amount2, bridge);
         vm.prank(bridge);
-        crosschainToken.crosschainMint(user2, amount2);
+        rlcCrosschainToken.crosschainMint(user2, amount2);
         // User 3
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user3, amount3);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user3, amount3, bridge);
         vm.prank(bridge);
-        crosschainToken.crosschainMint(user3, amount3);
+        rlcCrosschainToken.crosschainMint(user3, amount3);
         // Check that tokens are minted.
-        assertEq(crosschainToken.totalSupply(), amount + amount2 + amount3);
-        assertEq(crosschainToken.balanceOf(user), amount);
-        assertEq(crosschainToken.balanceOf(user2), amount2);
-        assertEq(crosschainToken.balanceOf(user3), amount3);
-        assertEq(crosschainToken.balanceOf(bridge), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), amount + amount2 + amount3);
+        assertEq(rlcCrosschainToken.balanceOf(user), amount);
+        assertEq(rlcCrosschainToken.balanceOf(user2), amount2);
+        assertEq(rlcCrosschainToken.balanceOf(user3), amount3);
+        assertEq(rlcCrosschainToken.balanceOf(bridge), 0);
     }
 
     function test_MintForMultipleUsersFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
         // Bridge 1, user 1
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge);
         vm.prank(bridge);
-        crosschainToken.crosschainMint(user, amount);
+        rlcCrosschainToken.crosschainMint(user, amount);
         // Bridge 2, user 2
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user2, amount2);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user2, amount2, bridge2);
         vm.prank(bridge2);
-        crosschainToken.crosschainMint(user2, amount2);
+        rlcCrosschainToken.crosschainMint(user2, amount2);
         // Bridge 2, user 1
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge2);
         vm.prank(bridge2);
-        crosschainToken.crosschainMint(user, amount);
+        rlcCrosschainToken.crosschainMint(user, amount);
         // Bridge 2, user 3
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user3, amount3);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user3, amount3, bridge2);
         vm.prank(bridge2);
-        crosschainToken.crosschainMint(user3, amount3);
+        rlcCrosschainToken.crosschainMint(user3, amount3);
         // Check that tokens are minted.
-        assertEq(crosschainToken.totalSupply(), 2 * amount + amount2 + amount3);
-        assertEq(crosschainToken.balanceOf(user), 2 * amount); // Bridge 1 and bridge 2
-        assertEq(crosschainToken.balanceOf(user2), amount2); // Bridge 1
-        assertEq(crosschainToken.balanceOf(user3), amount3); // Bridge 2
-        assertEq(crosschainToken.balanceOf(bridge), 0);
-        assertEq(crosschainToken.balanceOf(bridge2), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 2 * amount + amount2 + amount3);
+        assertEq(rlcCrosschainToken.balanceOf(user), 2 * amount); // Bridge 1 and bridge 2
+        assertEq(rlcCrosschainToken.balanceOf(user2), amount2); // Bridge 1
+        assertEq(rlcCrosschainToken.balanceOf(user3), amount3); // Bridge 2
+        assertEq(rlcCrosschainToken.balanceOf(bridge), 0);
+        assertEq(rlcCrosschainToken.balanceOf(bridge2), 0);
     }
 
     function test_RevertWhen_UnauthorizedCaller() public {
-        assertEq(crosschainToken.balanceOf(user), 0);
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.balanceOf(user), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
         // Attempt to mint tokens from an unauthorized account.
         vm.expectRevert(
             abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, anyone, bridgeTokenRoleId)
         );
         vm.prank(anyone);
-        crosschainToken.crosschainMint(user, amount);
+        rlcCrosschainToken.crosschainMint(user, amount);
         // Check that no tokens were minted.
-        assertEq(crosschainToken.balanceOf(user), 0);
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.balanceOf(user), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
     }
 
     function test_RevertWhen_MintToZeroAddress() public {
         _authorizeBridge(bridge);
-        assertEq(crosschainToken.balanceOf(address(0)), 0);
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.balanceOf(address(0)), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
         // Attempt to mint tokens the zero address.
         vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidReceiver.selector, address(0)));
         vm.prank(bridge);
-        crosschainToken.crosschainMint(address(0), amount);
+        rlcCrosschainToken.crosschainMint(address(0), amount);
         // Check that no tokens were minted.
-        assertEq(crosschainToken.balanceOf(address(0)), 0);
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.balanceOf(address(0)), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
     }
 
     // ============ crosschainBurn ============
@@ -318,8 +321,8 @@ contract RLCCrosschainTokenTest is Test {
         _authorizeBridge(bridge);
         _mintForUser(user, amount);
         // Check the initial state.
-        assertEq(crosschainToken.totalSupply(), amount);
-        assertEq(crosschainToken.balanceOf(user), amount);
+        assertEq(rlcCrosschainToken.totalSupply(), amount);
+        assertEq(rlcCrosschainToken.balanceOf(user), amount);
         // Expect events to be emitted.
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user, address(0), amount);
@@ -327,53 +330,53 @@ contract RLCCrosschainTokenTest is Test {
         emit IERC7802.CrosschainBurn(user, amount, bridge);
         // Send burn request from the bridge.
         vm.prank(bridge);
-        crosschainToken.crosschainBurn(user, amount);
+        rlcCrosschainToken.crosschainBurn(user, amount);
         // Check that tokens are burned.
-        assertEq(crosschainToken.totalSupply(), 0);
-        assertEq(crosschainToken.balanceOf(user), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.balanceOf(user), 0);
     }
 
     function test_BurnForOneUserFromOneBridgeMultipleTimes() public {
         _authorizeBridge(bridge);
         _mintForUser(user, 2 * amount);
         // Check the initial state.
-        assertEq(crosschainToken.totalSupply(), 2 * amount);
-        assertEq(crosschainToken.balanceOf(user), 2 * amount);
+        assertEq(rlcCrosschainToken.totalSupply(), 2 * amount);
+        assertEq(rlcCrosschainToken.balanceOf(user), 2 * amount);
 
         // Burn 1
         vm.prank(bridge);
-        crosschainToken.crosschainBurn(user, amount);
-        assertEq(crosschainToken.balanceOf(user), amount);
+        rlcCrosschainToken.crosschainBurn(user, amount);
+        assertEq(rlcCrosschainToken.balanceOf(user), amount);
         // Burn 2
         vm.prank(bridge);
-        crosschainToken.crosschainBurn(user, amount);
+        rlcCrosschainToken.crosschainBurn(user, amount);
         // Check that tokens are burned.
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
     }
 
     function test_BurnForOneUserFromMultipleBridges() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
         _mintForUser(user, 2 * amount);
-        assertEq(crosschainToken.totalSupply(), 2 * amount);
-        assertEq(crosschainToken.balanceOf(user), 2 * amount);
+        assertEq(rlcCrosschainToken.totalSupply(), 2 * amount);
+        assertEq(rlcCrosschainToken.balanceOf(user), 2 * amount);
         // Bridge 1
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user, address(0), amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge);
         vm.prank(bridge);
-        crosschainToken.crosschainBurn(user, amount);
-        assertEq(crosschainToken.balanceOf(user), amount);
+        rlcCrosschainToken.crosschainBurn(user, amount);
+        assertEq(rlcCrosschainToken.balanceOf(user), amount);
         // Bridge 2
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user, address(0), amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge2);
         vm.prank(bridge2);
-        crosschainToken.crosschainBurn(user, amount);
+        rlcCrosschainToken.crosschainBurn(user, amount);
         // Check that tokens are burned.
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
     }
 
     function test_BurnForMultipleUsersFromOneBridge() public {
@@ -387,23 +390,23 @@ contract RLCCrosschainTokenTest is Test {
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge);
         vm.prank(bridge);
-        crosschainToken.crosschainBurn(user, amount);
+        rlcCrosschainToken.crosschainBurn(user, amount);
         // User 2
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user2, address(0), amount2);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user2, amount2, bridge);
         vm.prank(bridge);
-        crosschainToken.crosschainBurn(user2, amount2);
+        rlcCrosschainToken.crosschainBurn(user2, amount2);
         // User 3
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user3, address(0), amount3);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user3, amount3, bridge);
         vm.prank(bridge);
-        crosschainToken.crosschainBurn(user3, amount3);
+        rlcCrosschainToken.crosschainBurn(user3, amount3);
         // Check that tokens are burned.
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
     }
 
     function test_BurnForMultipleUsersFromMultipleBridges() public {
@@ -412,77 +415,77 @@ contract RLCCrosschainTokenTest is Test {
         _mintForUser(user, 2 * amount);
         _mintForUser(user2, amount2);
         _mintForUser(user3, amount3);
-        assertEq(crosschainToken.totalSupply(), 2 * amount + amount2 + amount3);
-        assertEq(crosschainToken.balanceOf(user), 2 * amount);
-        assertEq(crosschainToken.balanceOf(user2), amount2);
-        assertEq(crosschainToken.balanceOf(user3), amount3);
+        assertEq(rlcCrosschainToken.totalSupply(), 2 * amount + amount2 + amount3);
+        assertEq(rlcCrosschainToken.balanceOf(user), 2 * amount);
+        assertEq(rlcCrosschainToken.balanceOf(user2), amount2);
+        assertEq(rlcCrosschainToken.balanceOf(user3), amount3);
         // Bridge 1, user 1
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user, address(0), amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge);
         vm.prank(bridge);
-        crosschainToken.crosschainBurn(user, amount);
+        rlcCrosschainToken.crosschainBurn(user, amount);
         // Bridge 2, user 2
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user2, address(0), amount2);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user2, amount2, bridge2);
         vm.prank(bridge2);
-        crosschainToken.crosschainBurn(user2, amount2);
+        rlcCrosschainToken.crosschainBurn(user2, amount2);
         // Bridge 2, user 1
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user, address(0), amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge2);
         vm.prank(bridge2);
-        crosschainToken.crosschainBurn(user, amount);
+        rlcCrosschainToken.crosschainBurn(user, amount);
         // Bridge 2, user 3
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user3, address(0), amount3);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user3, amount3, bridge2);
         vm.prank(bridge2);
-        crosschainToken.crosschainBurn(user3, amount3);
+        rlcCrosschainToken.crosschainBurn(user3, amount3);
         // Check that tokens are burned.
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
     }
 
     function test_BurnForUserEvenWhenMintIsDoneByDifferentBridge() public {
         _authorizeBridge(bridge);
         _authorizeBridge(bridge2);
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
         // Bridge 1 mints
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(address(0), user, amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user, amount, bridge);
         vm.prank(bridge);
-        crosschainToken.crosschainMint(user, amount);
-        assertEq(crosschainToken.balanceOf(user), amount);
+        rlcCrosschainToken.crosschainMint(user, amount);
+        assertEq(rlcCrosschainToken.balanceOf(user), amount);
         // Bridge 2 burns
         vm.expectEmit(true, true, true, true);
         emit IERC20.Transfer(user, address(0), amount);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainBurn(user, amount, bridge2);
         vm.prank(bridge2);
-        crosschainToken.crosschainBurn(user, amount);
+        rlcCrosschainToken.crosschainBurn(user, amount);
         // Check that tokens are burned.
-        assertEq(crosschainToken.totalSupply(), 0);
+        assertEq(rlcCrosschainToken.totalSupply(), 0);
     }
 
     function test_RevertWhen_UnauthorizedBurnCaller() public {
         _authorizeBridge(bridge);
         _mintForUser(user, amount);
-        assertEq(crosschainToken.balanceOf(user), amount);
+        assertEq(rlcCrosschainToken.balanceOf(user), amount);
         // Attempt to burn tokens from an unauthorized account.
         vm.expectRevert(
             abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, anyone, bridgeTokenRoleId)
         );
         vm.prank(anyone);
-        crosschainToken.crosschainBurn(user, amount);
+        rlcCrosschainToken.crosschainBurn(user, amount);
         // Check that tokens were not burned.
-        assertEq(crosschainToken.balanceOf(user), amount);
+        assertEq(rlcCrosschainToken.balanceOf(user), amount);
     }
 
     function test_RevertWhen_BurnFromZeroAddress() public {
@@ -490,7 +493,7 @@ contract RLCCrosschainTokenTest is Test {
         // Attempt to burn tokens from the zero address.
         vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidSender.selector, address(0)));
         vm.prank(bridge);
-        crosschainToken.crosschainBurn(address(0), amount);
+        rlcCrosschainToken.crosschainBurn(address(0), amount);
     }
 
     function test_RevertWhen_BurnMoreThanBalance() public {
@@ -501,21 +504,21 @@ contract RLCCrosschainTokenTest is Test {
             abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, user, amount, amount + 1)
         );
         vm.prank(bridge);
-        crosschainToken.crosschainBurn(user, amount + 1);
-        assertEq(crosschainToken.balanceOf(user), amount);
+        rlcCrosschainToken.crosschainBurn(user, amount + 1);
+        assertEq(rlcCrosschainToken.balanceOf(user), amount);
     }
 
     // ============ supportsInterface ============
 
     function test_SupportErc7802Interface() public view {
         assertEq(type(IERC7802).interfaceId, bytes4(0x33331994));
-        assertTrue(crosschainToken.supportsInterface(type(IERC7802).interfaceId));
+        assertTrue(rlcCrosschainToken.supportsInterface(type(IERC7802).interfaceId));
     }
 
     // ============ decimals ============
 
     function test_DecimalsShouldBeTheSameAsTheRlcToken() public view {
-        assertEq(crosschainToken.decimals(), 9, "Decimals should be the same as the RLC token (9)");
+        assertEq(rlcCrosschainToken.decimals(), 9, "Decimals should be the same as the RLC token (9)");
     }
 
     // ============ upgradeToAndCall ============
@@ -526,11 +529,11 @@ contract RLCCrosschainTokenTest is Test {
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 unauthorizedUpgrader,
-                crosschainToken.UPGRADER_ROLE()
+                rlcCrosschainToken.UPGRADER_ROLE()
             )
         );
         vm.prank(unauthorizedUpgrader);
-        crosschainToken.upgradeToAndCall(makeAddr("newImpl"), "");
+        rlcCrosschainToken.upgradeToAndCall(makeAddr("newImpl"), "");
     }
 
     // Helper functions
@@ -541,7 +544,7 @@ contract RLCCrosschainTokenTest is Test {
      */
     function _authorizeBridge(address bridgeAddress) internal {
         vm.prank(admin);
-        crosschainToken.grantRole(bridgeTokenRoleId, bridgeAddress);
+        rlcCrosschainToken.grantRole(bridgeTokenRoleId, bridgeAddress);
     }
 
     /**
@@ -550,7 +553,7 @@ contract RLCCrosschainTokenTest is Test {
      */
     function _mintForUser(address userAddress, uint256 mintAmount) internal {
         vm.prank(bridge);
-        crosschainToken.crosschainMint(userAddress, mintAmount);
+        rlcCrosschainToken.crosschainMint(userAddress, mintAmount);
     }
 
     /**
@@ -562,7 +565,7 @@ contract RLCCrosschainTokenTest is Test {
         vm.mockCall(
             spender,
             abi.encodeWithSelector(
-                ITokenSpender.receiveApproval.selector, user, allowance, address(crosschainToken), data
+                ITokenSpender.receiveApproval.selector, user, allowance, address(rlcCrosschainToken), data
             ),
             new bytes(0) // No return data expected.
         );
