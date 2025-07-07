@@ -101,6 +101,16 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         // TODO check that the proxy address is saved.
     }
 
+    function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
+        deployer.deploy(
+            false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
+        );
+        vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", params.createxFactory));
+        deployer.deploy(
+            false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
+        );
+    }
+
     // TODO: add tests for the configuration script.
 
     function testFork_ConfigureContractCorrectly() public {
