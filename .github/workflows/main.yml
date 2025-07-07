@@ -9,8 +9,6 @@ concurrency:
 
 env:
   FOUNDRY_PROFILE: ci
-  SEPOLIA_RPC_URL: secrets.SEPOLIA_RPC_URL
-  ARBITRUM_SEPOLIA_RPC_URL: secrets.ARBITRUM_SEPOLIA_RPC_URL
 
 jobs:
   build-and-test:
@@ -37,6 +35,8 @@ jobs:
         run: make generate-coverage
         env:
           CI: true
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com' }}
+          ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL || 'https://arbitrum-sepolia.blockpi.network/v1/rpc/public' }}
         
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
