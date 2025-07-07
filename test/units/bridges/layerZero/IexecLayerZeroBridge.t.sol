@@ -398,4 +398,186 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
         assertEq(rlcCrosschainToken.balanceOf(user2), initialBalance + TRANSFER_AMOUNT, "User balance should increase");
     }
+
+    // ============ _debit ============
+    function test_debit_WithApproval_SuccessfulTransfer() public {
+        vm.prank(user1);
+        rlcToken.approve(address(iexecLayerZeroBridgeEthereum), TRANSFER_AMOUNT);
+
+        _test_debit(iexecLayerZeroBridgeEthereum, address(rlcToken), true);
+    }
+
+    function test_debit_WithoutApproval_SuccessfulBurn() public {
+        _test_debit(iexecLayerZeroBridgeChainX, address(rlcCrosschainToken), false);
+    }
+
+    function _test_debit(IexecLayerZeroBridgeHarness iexecLayerZeroBridge, address tokenAddress, bool approvalRequired)
+        internal
+    {
+        RLCMock token = RLCMock(tokenAddress);
+        uint256 initialUserBalance = token.balanceOf(user1);
+
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Transfer(user1, approvalRequired ? address(rlcLiquidityUnifier) : address(0), TRANSFER_AMOUNT);
+        if (!approvalRequired) {
+            vm.expectEmit(true, true, true, true);
+            emit IERC7802.CrosschainBurn(user1, TRANSFER_AMOUNT, address(iexecLayerZeroBridge));
+        }
+
+        (uint256 amountSentLD, uint256 amountReceivedLD) = iexecLayerZeroBridge.exposed_debit(
+            user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, approvalRequired ? DEST_EID : SOURCE_EID
+        );
+
+        if (approvalRequired) {
+            assertEq(
+                token.balanceOf(address(rlcLiquidityUnifier)),
+                TRANSFER_AMOUNT,
+                "Unifier balance should increase by the transferred amount"
+            );
+        } else {
+            assertEq(token.totalSupply(), INITIAL_BALANCE - TRANSFER_AMOUNT, "Total supply should decrease");
+        }
+        assertEq(token.balanceOf(user1), initialUserBalance - TRANSFER_AMOUNT, "User balance should decrease");
+        assertEq(amountSentLD, TRANSFER_AMOUNT, "Amount sent should equal transfer amount");
+        assertEq(amountReceivedLD, TRANSFER_AMOUNT, "Amount received should equal transfer amount");
+    }
+
+    function test_debit_WithApproval_InsufficientApproval() public {
+        // Setup: User approves less than required
+        vm.prank(user1);
+        rlcToken.approve(address(iexecLayerZeroBridgeEthereum), TRANSFER_AMOUNT - 1);
+
+        // Should revert with insufficient allowance
+        vm.expectRevert();
+        iexecLayerZeroBridgeEthereum.exposed_debit(user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
+    }
+
+    function test_debit_WithApproval_InsufficientBalance() public {
+        _test_debit_InsufficientBalance(iexecLayerZeroBridgeEthereum, address(rlcToken), true);
+    }
+
+    function test_debit_WithoutApproval_InsufficientBalance() public {
+        _test_debit_InsufficientBalance(iexecLayerZeroBridgeChainX, address(rlcCrosschainToken), false);
+    }
+
+    function _test_debit_InsufficientBalance(
+        IexecLayerZeroBridgeHarness bridge,
+        address tokenAddress,
+        bool approvalRequired
+    ) internal {
+        uint256 excessiveAmount = INITIAL_BALANCE + 1;
+        if (approvalRequired) {
+            vm.prank(user1);
+            IERC20(tokenAddress).approve(address(bridge), excessiveAmount);
+        }
+        vm.expectRevert();
+        bridge.exposed_debit(user1, excessiveAmount, excessiveAmount, DEST_EID);
+    }
+
+    function testFuzz_debit_WithApproval_Amount(uint256 amount) public {
+        vm.prank(user1);
+        rlcToken.approve(address(iexecLayerZeroBridgeEthereum), amount);
+
+        _testFuzz_debit_Amount(iexecLayerZeroBridgeEthereum, rlcToken, amount, true);
+    }
+
+    function testFuzz_debit_WithoutApproval_Amount(uint256 amount) public {
+        _testFuzz_debit_Amount(iexecLayerZeroBridgeChainX, rlcCrosschainToken, amount, false);
+    }
+
+    function _testFuzz_debit_Amount(
+        IexecLayerZeroBridgeHarness bridge,
+        IERC20 token,
+        uint256 amount,
+        bool approvalRequired
+    ) internal {
+        vm.assume(amount <= INITIAL_BALANCE);
+
+        uint256 initialBalance = token.balanceOf(user1);
+        uint256 conversionRate = bridge.decimalConversionRate();
+        uint256 expectedMinAmount = (amount / conversionRate) * conversionRate;
+
+        (uint256 amountSentLD, uint256 amountReceivedLD) =
+            bridge.exposed_debit(user1, amount, expectedMinAmount, DEST_EID);
+
+        assertEq(amountSentLD, expectedMinAmount, "Amount sent should equal dust-removed input");
+        assertEq(amountReceivedLD, expectedMinAmount, "Amount received should equal dust-removed input");
+        assertEq(
+            token.balanceOf(user1), initialBalance - expectedMinAmount, "User balance should decrease by sent amount"
+        );
+    }
+
+    function testFuzz_debit_Address(address from) public {
+        // Fuzz test with different addresses
+        vm.assume(from != address(iexecLayerZeroBridgeChainX));
+
+        // Setup: Give the address some tokens
+        vm.prank(address(iexecLayerZeroBridgeChainX));
+        rlcCrosschainToken.crosschainMint(from, TRANSFER_AMOUNT);
+
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(from);
+
+        (uint256 amountSentLD, uint256 amountReceivedLD) =
+            iexecLayerZeroBridgeChainX.exposed_debit(from, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
+
+        assertEq(amountSentLD, TRANSFER_AMOUNT, "Amount sent should equal transfer amount");
+        assertEq(amountReceivedLD, TRANSFER_AMOUNT, "Amount received should equal transfer amount");
+        assertEq(rlcCrosschainToken.balanceOf(from), initialBalance - TRANSFER_AMOUNT, "Balance should decrease");
+    }
+
+    function test_debit_RevertsWhenFullyPaused() public {
+        // Pause the contract
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.pause();
+
+        // Should revert when fully paused
+        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
+        iexecLayerZeroBridgeChainX.exposed_debit(user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
+    }
+
+    function test_debit_RevertsWhenSendPaused() public {
+        // Pause only sends
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.pauseSend();
+
+        // Should revert when send is paused
+        vm.expectRevert(DualPausableUpgradeable.EnforcedSendPause.selector);
+        iexecLayerZeroBridgeChainX.exposed_debit(user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
+    }
+
+    function test_debit_WorksAfterUnpause() public {
+        // Pause then unpause
+        vm.startPrank(pauser);
+        iexecLayerZeroBridgeChainX.pause();
+        iexecLayerZeroBridgeChainX.unpause();
+        vm.stopPrank();
+
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(user1);
+
+        // Should work after unpause
+        (uint256 amountSentLD, uint256 amountReceivedLD) =
+            iexecLayerZeroBridgeChainX.exposed_debit(user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
+
+        assertEq(amountSentLD, TRANSFER_AMOUNT, "Amount sent should equal transfer amount");
+        assertEq(amountReceivedLD, TRANSFER_AMOUNT, "Amount received should equal transfer amount");
+        assertEq(rlcCrosschainToken.balanceOf(user1), initialBalance - TRANSFER_AMOUNT, "User balance should decrease");
+    }
+
+    function test_debit_WorksAfterSendUnpause() public {
+        // Pause send then unpause
+        vm.startPrank(pauser);
+        iexecLayerZeroBridgeChainX.pauseSend();
+        iexecLayerZeroBridgeChainX.unpauseSend();
+        vm.stopPrank();
+
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(user1);
+
+        // Should work after send unpause
+        (uint256 amountSentLD, uint256 amountReceivedLD) =
+            iexecLayerZeroBridgeChainX.exposed_debit(user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
+
+        assertEq(amountSentLD, TRANSFER_AMOUNT, "Amount sent should equal transfer amount");
+        assertEq(amountReceivedLD, TRANSFER_AMOUNT, "Amount received should equal transfer amount");
+        assertEq(rlcCrosschainToken.balanceOf(user1), initialBalance - TRANSFER_AMOUNT, "User balance should decrease");
+    }
 }
