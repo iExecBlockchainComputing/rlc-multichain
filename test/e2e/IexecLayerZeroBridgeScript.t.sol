@@ -4,6 +4,7 @@
 pragma solidity ^0.8.22;
 
 import {Test} from "forge-std/Test.sol";
+import {CreateX} from "@createx/contracts/CreateX.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Deploy as IexecLayerZeroBridgeDeploy} from "../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
 import {Deploy as RLCLiquidityUnifierDeployScript} from "../../script/RLCLiquidityUnifier.s.sol";
@@ -65,6 +66,10 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     }
 
     function _test_Deployment(bool requireApproval, address bridgeableToken) internal {
+        // Check that CreateX salt is used to deploy the contract.
+        vm.expectEmit(false, true, false, false);
+        // CreateX uses a guarded salt (see CreateX._guard()), so we need to hash it to match the expected event.
+        emit CreateX.ContractCreation(address(0), keccak256(abi.encode(salt)));
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
             deployer.deploy(
                 requireApproval,
@@ -94,16 +99,6 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         iexecLayerZeroBridge.initialize(admin, upgrader, pauser);
         // TODO check that the contract has the correct LayerZero endpoint.
         // TODO check that the proxy address is saved.
-    }
-
-    function testFork_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
-        deployer.deploy(
-            false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
-        );
-        vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", params.createxFactory));
-        deployer.deploy(
-            false, address(rlcCrosschainToken), params.lzEndpoint, admin, upgrader, pauser, params.createxFactory, salt
-        );
     }
 
     // TODO: add tests for the configuration script.

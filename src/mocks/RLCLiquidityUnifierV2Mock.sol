@@ -12,7 +12,7 @@ import {RLCLiquidityUnifier} from "../RLCLiquidityUnifier.sol";
  * @custom:oz-upgrades-from src/RLCLiquidityUnifier.sol:RLCLiquidityUnifier
  */
 contract RLCLiquidityUnifierV2 is RLCLiquidityUnifier {
-    /// NEW STATE VARIABLES FOR V2
+    /// New state variable for v2.
     uint256 public newStateVariable;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
