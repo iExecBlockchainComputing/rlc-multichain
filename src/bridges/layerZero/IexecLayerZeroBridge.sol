@@ -32,7 +32,7 @@ import {IRLCLiquidityUnifier} from "../../interfaces/IRLCLiquidityUnifier.sol";
  *
  * Dual-Pause Emergency System:
  * 1. Complete pause: Blocks all bridge operations (inbound and outbound transfers)
- * 2. Outbout transfers only pause: Blocks only outbound transfers, allows users to receive/withdraw funds
+ * 2. Only outbout transfers pause: Blocks only outbound transfers, allows users to receive/withdraw funds
  *
  * Architecture Overview:
  * This bridge supports two distinct deployment scenarios:
