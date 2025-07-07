@@ -104,18 +104,13 @@ contract RLCCrosschainToken is
      * @dev Authorizes upgrades of the proxy. It can only be called by
      * an account with the UPGRADER_ROLE.
      */
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+    function _authorizeUpgrade(address /*newImplementation*/) internal override onlyRole(UPGRADER_ROLE) {}
 
     /**
      * Checks if the caller is a trusted token bridge that is allowed by iExec to call
      * `crosschainMint` or `crosschainBurn` functions.
      * @dev This function is called by the modifier `onlyTokenBridge` in the
      * `ERC20BridgeableUpgradeable` contract.
-     * @param caller The address of the caller that is trying to mint or burn tokens.
      */
-    function _checkTokenBridge(address caller) internal view override {
-        if (!hasRole(TOKEN_BRIDGE_ROLE, caller)) {
-            revert IAccessControl.AccessControlUnauthorizedAccount(caller, TOKEN_BRIDGE_ROLE);
-        }
-    }
+    function _checkTokenBridge(address /*caller*/) internal view override onlyRole(TOKEN_BRIDGE_ROLE) {}
 }
