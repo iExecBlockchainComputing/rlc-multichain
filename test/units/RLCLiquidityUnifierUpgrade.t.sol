@@ -57,16 +57,12 @@ contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
 
         // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(upgrader);
-
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+        UpgradeUtils.executeUpgrade({
             proxyAddress: proxyAddress,
+            contractName:  "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
             constructorData: abi.encode(rlcToken),
-            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
-            newStateVariable: NEW_STATE_VARIABLE
+            initData: abi.encodeWithSignature("initializeV2(uint256)", NEW_STATE_VARIABLE)
         });
-
-        UpgradeUtils.executeUpgrade(params);
-
         vm.stopPrank();
 
         rlcLiquidityUnifierV2 = RLCLiquidityUnifierV2(proxyAddress);

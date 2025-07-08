@@ -65,17 +65,13 @@ contract Deploy is Script {
 
 contract Upgrade is Script {
     function run() external {
-        string memory chain = vm.envString("CHAIN");
-        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(chain);
-
         vm.startBroadcast();
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: commonParams.rlcLiquidityUnifierAddress,
-            constructorData: abi.encode(commonParams.rlcToken),
-            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2", // Would be production contract in real deployment
-            newStateVariable: 1000000 * 10 ** 9
+        UpgradeUtils.executeUpgrade({
+            proxyAddress: address(0), // Replace with the actual proxy address
+            contractName: "", // e.g., "ContractV2.sol:ContractV2"
+            constructorData: new bytes(0), // Replace with the actual constructor data
+            initData: new bytes(0) // Replace with the actual initialization data
         });
-        UpgradeUtils.executeUpgrade(params);
         vm.stopBroadcast();
     }
 }

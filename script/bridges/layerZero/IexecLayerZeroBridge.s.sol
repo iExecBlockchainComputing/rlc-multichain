@@ -100,22 +100,13 @@ contract Configure is Script {
 
 contract Upgrade is Script {
     function run() external {
-        string memory chain = vm.envString("CHAIN");
-        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(chain);
-
-        // For testing purpose
-        uint256 newStateVariable = 1000000 * 10 ** 9;
-        address bridgeableToken = commonParams.approvalRequired
-            ? commonParams.rlcLiquidityUnifierAddress
-            : commonParams.rlcCrosschainTokenAddress;
         vm.startBroadcast();
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: commonParams.iexecLayerZeroBridgeAddress,
-            constructorData: abi.encode(commonParams.approvalRequired, bridgeableToken, commonParams.lzEndpoint),
-            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
-            newStateVariable: newStateVariable
+        UpgradeUtils.executeUpgrade({
+            proxyAddress: address(0), // Replace with the actual proxy address
+            contractName: "", // e.g., "ContractV2.sol:ContractV2"
+            constructorData: new bytes(0), // Replace with the actual constructor data
+            initData: new bytes(0) // Replace with the actual initialization data
         });
-        UpgradeUtils.executeUpgrade(params);
         vm.stopBroadcast();
     }
 }
