@@ -74,8 +74,8 @@ contract Configure is Script {
         );
         EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](2);
         bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(70_000, 0); // 70_000 gas limit for the receiving executor and 0 for the executor's value
-        enforcedOptions[0] = EnforcedOptionParam(targetParams.lzChainId, 1, _extraOptions);
-        enforcedOptions[1] = EnforcedOptionParam(targetParams.lzChainId, 2, _extraOptions);
+        enforcedOptions[0] = EnforcedOptionParam(targetParams.lzChainId, 1, _extraOptions); // lzReceive
+        enforcedOptions[1] = EnforcedOptionParam(targetParams.lzChainId, 2, _extraOptions); // lzCompose
         sourceBridge.setEnforcedOptions(enforcedOptions);
         // Authorize bridge in the relevant contract.
         if (sourceParams.approvalRequired) {
