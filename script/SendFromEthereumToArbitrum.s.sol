@@ -49,8 +49,6 @@ contract SendTokensFromEthereumToArbitrum is Script {
         console.log("Recipient: %s", recipientAddress);
 
         // Build options with gas limit for the receiving chain
-        // bytes memory extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(80_000, 0);
-        bytes memory extraOptions = OptionsBuilder.newOptions().addExecutorLzComposeOption(0, 90_000, 0);
 
         SendParam memory sendParam = SendParam(
             destinationChainId, // Destination endpoint ID.
