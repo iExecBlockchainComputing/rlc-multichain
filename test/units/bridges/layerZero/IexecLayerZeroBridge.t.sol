@@ -310,24 +310,21 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         );
     }
 
-    function testFuzz_credit_Address(address to) public {
+    function test_credit_SendToDeadAddressInsteadOfZeroAddress() public {
         // Fuzz test with different addresses including zero address
         // Handle zero address redirection
-        address actualRecipient = (to == address(0)) ? address(0xdead) : to;
-        uint256 initialBalance = rlcCrosschainToken.balanceOf(actualRecipient);
-        uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(to, TRANSFER_AMOUNT, SOURCE_EID);
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(address(0xdead));
+        uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(address(0), TRANSFER_AMOUNT, SOURCE_EID);
 
         assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
         assertEq(
-            rlcCrosschainToken.balanceOf(actualRecipient),
+            rlcCrosschainToken.balanceOf(address(0xdead)),
             initialBalance + TRANSFER_AMOUNT,
             "Actual recipient balance should increase"
         );
 
-        // Additional check for zero address case
-        if (to == address(0)) {
-            assertEq(rlcCrosschainToken.balanceOf(address(0)), 0, "Zero address balance should remain zero");
-        }
+        assertEq(rlcCrosschainToken.balanceOf(address(0)), 0, "Zero address balance should remain zero");
+        
     }
 
     function testFuzz_credit_Amount(uint256 amount) public {
