@@ -52,7 +52,7 @@ contract SendTokensFromArbitrumToEthereum is Script {
         // Get the fee for the transfer
         MessagingFee memory fee = iexecLayerZeroBridge.quoteSend(sendParam, false);
         console.log("Fee amount: ", fee.nativeFee);
-
+        vm.startBroadcast();
         // Execute the cross-chain transfer
         iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, msg.sender);
 
