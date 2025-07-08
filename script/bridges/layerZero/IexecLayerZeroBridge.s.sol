@@ -101,7 +101,7 @@ contract Configure is Script {
 contract Upgrade is Script {
     function run() external {
         vm.startBroadcast();
-        UpgradeUtils.executeUpgrade({
+        UpgradeUtils.upgrade({
             proxyAddress: address(0), // Replace with the actual proxy address
             contractName: "", // e.g., "ContractV2.sol:ContractV2"
             constructorData: new bytes(0), // Replace with the actual constructor data

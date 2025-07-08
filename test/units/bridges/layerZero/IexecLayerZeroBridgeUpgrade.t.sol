@@ -53,7 +53,7 @@ contract IexecLayerZeroBridgeUpgradeTest is TestHelperOz5 {
 
         // 3. Perform upgrade using UpgradeUtils directly
         vm.startPrank(upgrader);
-        UpgradeUtils.executeUpgrade({
+        UpgradeUtils.upgrade({
             proxyAddress: proxyAddress,
             contractName:  "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             constructorData: abi.encode(false, rlcCrosschainToken, mockEndpoint),

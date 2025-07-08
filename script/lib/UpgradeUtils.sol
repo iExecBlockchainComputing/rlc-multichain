@@ -10,7 +10,7 @@ import {console} from "forge-std/console.sol";
  * @notice Utility library for handling UUPS upgrades in a parameterized way
  */
 library UpgradeUtils {
-    function executeUpgrade(
+    function upgrade(
         address proxyAddress,
         string memory contractName,
         bytes memory constructorData,
