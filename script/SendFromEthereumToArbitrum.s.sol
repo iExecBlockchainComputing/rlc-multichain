@@ -6,11 +6,12 @@ import {Script, console} from "forge-std/Script.sol";
 import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
-// import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
+import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
 
 contract SendTokensFromEthereumToArbitrum is Script {
+    using OptionsBuilder for bytes;
     /**
      * @dev Converts an address to bytes32.
      * @param _addr The address to convert.
@@ -47,12 +48,16 @@ contract SendTokensFromEthereumToArbitrum is Script {
         console.log("Sending %s RLC to Arbitrum Sepolia", amount / 10 ** 9);
         console.log("Recipient: %s", recipientAddress);
 
+        // Build options with gas limit for the receiving chain
+        // bytes memory extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(80_000, 0);
+        bytes memory extraOptions = OptionsBuilder.newOptions().addExecutorLzComposeOption(0, 90_000, 0);
+
         SendParam memory sendParam = SendParam(
             destinationChainId, // Destination endpoint ID.
             addressToBytes32(recipientAddress), // Recipient address.
             amount, // Amount to send in local decimals.
             amount * 99 / 100, // Minimum amount to send in local decimals (allowing 1% slippage).
-            "", // Extra options, not used in this case, already setup using `setEnforcedOptions`
+            extraOptions, // Extra options with gas limit for the destination chain
             "", // Composed message for the send() operation, unused in this context.
             "" // OFT command to be executed, unused in default OFT implementations.
         );
