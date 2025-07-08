@@ -5,7 +5,7 @@ pragma solidity ^0.8.22;
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
-import {UUPSProxyDeployer} from "../../script/lib/UUPSProxyDeployer.sol";
+import {UUPSProxyUtils} from "../../script/lib/UUPSProxyUtils.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 import {RLCLiquidityUnifierV2} from "./mocks/RLCLiquidityUnifierV2Mock.sol";
 
@@ -57,7 +57,7 @@ contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
 
         // 3. Perform upgrade
         vm.startPrank(upgrader);
-        UUPSProxyDeployer.upgrade({
+        UUPSProxyUtils.upgrade({
             proxyAddress: proxyAddress,
             contractName:  "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
             constructorData: abi.encode(rlcToken),

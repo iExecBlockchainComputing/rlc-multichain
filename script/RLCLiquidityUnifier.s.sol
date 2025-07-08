@@ -6,7 +6,7 @@ pragma solidity ^0.8.22;
 import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCLiquidityUnifier} from "../src/RLCLiquidityUnifier.sol";
-import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
+import {UUPSProxyUtils} from "./lib/UUPSProxyUtils.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
 /**
  * Deployment script for the RLCLiquidityUnifier contract.
@@ -56,7 +56,7 @@ contract Deploy is Script {
         bytes memory constructorData = abi.encode(rlcToken);
         bytes memory initData =
             abi.encodeWithSelector(RLCLiquidityUnifier.initialize.selector, initialAdmin, initialUpgrader);
-        return UUPSProxyDeployer.deployUsingCreateX(
+        return UUPSProxyUtils.deployUsingCreateX(
             "RLCLiquidityUnifier", constructorData, initData, createxFactory, createxSalt
         );
     }
@@ -65,7 +65,7 @@ contract Deploy is Script {
 contract Upgrade is Script {
     function run() external {
         vm.startBroadcast();
-        UUPSProxyDeployer.upgrade({
+        UUPSProxyUtils.upgrade({
             proxyAddress: address(0), // Replace with the actual proxy address
             contractName: "", // e.g., "ContractV2.sol:ContractV2"
             constructorData: new bytes(0), // Replace with the actual constructor data

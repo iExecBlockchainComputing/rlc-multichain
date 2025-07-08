@@ -6,7 +6,7 @@ import {CreateX} from "@createx/contracts/CreateX.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
-import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
+import {UUPSProxyUtils} from "../../../script/lib/UUPSProxyUtils.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
@@ -45,7 +45,7 @@ library TestUtils {
 
         // Deploy Liquidity Unifier
         rlcLiquidityUnifier = RLCLiquidityUnifier(
-            UUPSProxyDeployer.deployUsingCreateX(
+            UUPSProxyUtils.deployUsingCreateX(
                 "RLCLiquidityUnifier",
                 abi.encode(rlcToken),
                 abi.encodeWithSelector(RLCLiquidityUnifier.initialize.selector, initialAdmin, initialUpgrader),
@@ -56,7 +56,7 @@ library TestUtils {
 
         // Deploy IexecLayerZeroBridgeAdapter
         iexecLayerZeroBridgeChainA = IexecLayerZeroBridge(
-            UUPSProxyDeployer.deployUsingCreateX(
+            UUPSProxyUtils.deployUsingCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(true, rlcLiquidityUnifier, lzEndpointSource),
                 abi.encodeWithSelector(
@@ -75,7 +75,7 @@ library TestUtils {
         );
         // Deploy IexecLayerZeroBridge
         iexecLayerZeroBridgeChainB = IexecLayerZeroBridge(
-            UUPSProxyDeployer.deployUsingCreateX(
+            UUPSProxyUtils.deployUsingCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(false, rlcCrosschainToken, lzEndpointDestination),
                 abi.encodeWithSelector(

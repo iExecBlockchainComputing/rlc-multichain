@@ -5,7 +5,7 @@ pragma solidity ^0.8.22;
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {IexecLayerZeroBridgeV2} from "../../mocks/IexecLayerZeroBridgeV2Mock.sol";
 import {TestUtils} from "./../../utils/TestUtils.sol";
-import {UUPSProxyDeployer} from "../../../../script/lib/UUPSProxyDeployer.sol";
+import {UUPSProxyUtils} from "../../../../script/lib/UUPSProxyUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
 
@@ -53,7 +53,7 @@ contract IexecLayerZeroBridgeUpgradeTest is TestHelperOz5 {
 
         // 3. Perform upgrade
         vm.startPrank(upgrader);
-        UUPSProxyDeployer.upgrade({
+        UUPSProxyUtils.upgrade({
             proxyAddress: proxyAddress,
             contractName:  "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             constructorData: abi.encode(false, rlcCrosschainToken, mockEndpoint),

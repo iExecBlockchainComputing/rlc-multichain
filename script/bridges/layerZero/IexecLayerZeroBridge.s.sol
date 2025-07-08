@@ -10,7 +10,7 @@ import {ConfigLib} from "./../../lib/ConfigLib.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
-import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
+import {UUPSProxyUtils} from "../../lib/UUPSProxyUtils.sol";
 
 contract Deploy is Script {
     /**
@@ -52,7 +52,7 @@ contract Deploy is Script {
         bytes memory initializeData = abi.encodeWithSelector(
             IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
         );
-        return UUPSProxyDeployer.deployUsingCreateX(
+        return UUPSProxyUtils.deployUsingCreateX(
             "IexecLayerZeroBridge", constructorData, initializeData, createxFactory, createxSalt
         );
     }
@@ -100,7 +100,7 @@ contract Configure is Script {
 contract Upgrade is Script {
     function run() external {
         vm.startBroadcast();
-        UUPSProxyDeployer.upgrade({
+        UUPSProxyUtils.upgrade({
             proxyAddress: address(0), // Replace with the actual proxy address
             contractName: "", // e.g., "ContractV2.sol:ContractV2"
             constructorData: new bytes(0), // Replace with the actual constructor data
