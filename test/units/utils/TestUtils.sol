@@ -85,7 +85,7 @@ library TestUtils {
     ) private returns (IexecLayerZeroBridge) {
         return IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUsingCreateX(
-                "IexecLayerZeroBridge",
+                params.iexecLayerZeroBridgeContractName,
                 abi.encode(
                     approvalRequired,
                     bridgeableToken,
