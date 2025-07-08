@@ -17,25 +17,25 @@ library UUPSProxyDeployer {
     Vm private constant vm = StdConstants.VM;
 
     /**
-     * Deploys a UUPS proxy contract and its implementation using the CreateX Factory
+     * Deploys a UUPS proxy contract and its implementation in create2 mode using CreateX Factory.
      * @param contractName The name of the contract to deploy (used to fetch creation code)
      * @param constructorData The constructor arguments for the implementation contract
      * @param initializeData The initialization data for the proxy contract
-     * @param createXFactory The address of the CreateX factory
-     * @param salt The salt for deterministic deployment
+     * @param createxFactory The address of the CreateX factory
+     * @param createxSalt The salt for deterministic deployment
      * @return The address of the deployed proxy
      */
-    function deployUUPSProxyWithCreateX(
+    function deployUsingCreateX(
         string memory contractName,
         bytes memory constructorData,
         bytes memory initializeData,
-        address createXFactory,
-        bytes32 salt
+        address createxFactory,
+        bytes32 createxSalt
     ) internal returns (address) {
-        ICreateX createX = ICreateX(createXFactory);
-        address implementation = deployImplementation(contractName, constructorData, createX);
-        address proxy = createX.deployCreate2AndInit(
-            salt,
+        address implementation =
+            deployImplementationUsingCreateX(contractName, constructorData, createxFactory, createxSalt);
+        address proxy = ICreateX(createxFactory).deployCreate2AndInit(
+            createxSalt,
             abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(implementation, "")), // initCode
             initializeData,
             ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
@@ -45,18 +45,22 @@ library UUPSProxyDeployer {
     }
 
     /**
-     * Deploys the implementation contract using tradition `create`.
+     * Deploys the implementation contract in create2 mode using CreateX factory.
      * @param contractName The name of the contract to deploy (used to fetch creation code)
      * @param constructorData The constructor arguments for the implementation contract
      * @param createxFactory The address of the CreateX factory
+     * @param createxSalt The salt for deterministic deployment
      * @return The address of the deployed implementation contract
      */
-    function deployImplementation(string memory contractName, bytes memory constructorData, ICreateX createxFactory)
-        internal
-        returns (address)
-    {
+    function deployImplementationUsingCreateX(
+        string memory contractName,
+        bytes memory constructorData,
+        address createxFactory,
+        bytes32 createxSalt
+    ) internal returns (address) {
         bytes memory creationCode = vm.getCode(contractName);
-        address implementation = createxFactory.deployCreate(abi.encodePacked(creationCode, constructorData));
+        address implementation =
+            ICreateX(createxFactory).deployCreate2(createxSalt, abi.encodePacked(creationCode, constructorData));
         console.log("Implementation deployed at:", implementation);
         return implementation;
     }

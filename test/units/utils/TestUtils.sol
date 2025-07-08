@@ -45,7 +45,7 @@ library TestUtils {
 
         // Deploy Liquidity Unifier
         rlcLiquidityUnifier = RLCLiquidityUnifier(
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+            UUPSProxyDeployer.deployUsingCreateX(
                 "RLCLiquidityUnifier",
                 abi.encode(rlcToken),
                 abi.encodeWithSelector(RLCLiquidityUnifier.initialize.selector, initialAdmin, initialUpgrader),
@@ -56,7 +56,7 @@ library TestUtils {
 
         // Deploy IexecLayerZeroBridgeAdapter
         iexecLayerZeroBridgeChainA = IexecLayerZeroBridge(
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+            UUPSProxyDeployer.deployUsingCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(true, rlcLiquidityUnifier, lzEndpointSource),
                 abi.encodeWithSelector(
@@ -75,7 +75,7 @@ library TestUtils {
         );
         // Deploy IexecLayerZeroBridge
         iexecLayerZeroBridgeChainB = IexecLayerZeroBridge(
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+            UUPSProxyDeployer.deployUsingCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(false, rlcCrosschainToken, lzEndpointDestination),
                 abi.encodeWithSelector(
