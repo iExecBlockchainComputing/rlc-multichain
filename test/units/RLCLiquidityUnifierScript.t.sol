@@ -35,4 +35,12 @@ contract LiquidityUnifierTest is Test {
         rlcLiquidityUnifier.initialize(admin, upgrader);
         // TODO check that the proxy address is saved.
     }
+
+    // Makes sure create2 deployment is well implemented.
+    function test_RevertWhen_TwoDeploymentsWithTheSameSalt() public {
+        address random = makeAddr("random");
+        deployer.deploy(rlcToken, admin, upgrader, createx, salt);
+        vm.expectRevert(abi.encodeWithSignature("FailedContractCreation(address)", createx));
+        deployer.deploy(rlcToken, random, random, createx, salt);
+    }
 }

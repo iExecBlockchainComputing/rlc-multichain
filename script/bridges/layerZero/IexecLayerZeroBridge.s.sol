@@ -53,7 +53,7 @@ contract Deploy is Script {
         bytes memory initializeData = abi.encodeWithSelector(
             IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
         );
-        return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+        return UUPSProxyDeployer.deployUsingCreateX(
             "IexecLayerZeroBridge", constructorData, initializeData, createxFactory, createxSalt
         );
     }

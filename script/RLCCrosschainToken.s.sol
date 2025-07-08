@@ -58,8 +58,6 @@ contract Deploy is Script {
     ) public returns (address) {
         bytes memory initData =
             abi.encodeWithSelector(RLCCrosschainToken.initialize.selector, name, symbol, initialAdmin, initialUpgrader);
-        return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-            "RLCCrosschainToken", "", initData, createxFactory, createxSalt
-        );
+        return UUPSProxyDeployer.deployUsingCreateX("RLCCrosschainToken", "", initData, createxFactory, createxSalt);
     }
 }
