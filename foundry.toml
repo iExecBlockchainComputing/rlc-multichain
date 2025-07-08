@@ -23,6 +23,11 @@ runs = 1000
 # TODO configure this profile and use it in CI.
 # [profile.ci]
 
+[doc]
+out = "docs/soldoc"
+title = "RLC Multichain Bridge"
+ignore = ["src/mocks/**/*"]
+
 # TODO use vm.rpcUrl("arbitrumSepolia") instead of env variable.
 # https://getfoundry.sh/config/reference/testing#rpc_endpoints
 # https://getfoundry.sh/reference/cheatcodes/rpc

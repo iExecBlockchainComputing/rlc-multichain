@@ -11,7 +11,6 @@ import {RLCMock} from "../mocks/RLCMock.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
-import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
 
 library TestUtils {
     using OptionsBuilder for bytes;
@@ -53,8 +52,7 @@ library TestUtils {
             _deployBridge(params, true, address(result.rlcLiquidityUnifier), createXFactory, salt);
 
         // Deploy RLC Crosschain token and Bridge for ChainX
-        result.rlcCrosschainToken =
-            _deployCrosschainToken(name, symbol, params.initialAdmin, params.initialUpgrader, createXFactory, salt);
+        result.rlcCrosschainToken = _deployCrosschainToken(params, name, symbol, createXFactory, salt);
 
         result.iexecLayerZeroBridgeChainWithoutApproval =
             _deployBridge(params, false, address(result.rlcCrosschainToken), createXFactory, salt);
@@ -68,7 +66,7 @@ library TestUtils {
         bytes32 salt
     ) private returns (RLCLiquidityUnifier) {
         return RLCLiquidityUnifier(
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+            UUPSProxyDeployer.deployUsingCreateX(
                 "RLCLiquidityUnifier",
                 abi.encode(rlcToken),
                 abi.encodeWithSelector(RLCLiquidityUnifier.initialize.selector, initialAdmin, initialUpgrader),
@@ -86,12 +84,10 @@ library TestUtils {
         bytes32 salt
     ) private returns (IexecLayerZeroBridge) {
         return IexecLayerZeroBridge(
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                params.iexecLayerZeroBridgeContractName,
+            UUPSProxyDeployer.deployUsingCreateX(
+                "IexecLayerZeroBridge",
                 abi.encode(
-                    approvalRequired,
-                    bridgeableToken,
-                    approvalRequired ? params.lzEndpointSource : params.lzEndpointDestination
+                    true, bridgeableToken, approvalRequired ? params.lzEndpointSource : params.lzEndpointDestination
                 ),
                 abi.encodeWithSelector(
                     IexecLayerZeroBridge.initialize.selector,
@@ -106,16 +102,26 @@ library TestUtils {
     }
 
     function _deployCrosschainToken(
+        DeploymentParams memory params,
         string memory name,
         string memory symbol,
-        address initialAdmin,
-        address initialUpgrader,
         address createXFactory,
         bytes32 salt
     ) private returns (RLCCrosschainToken) {
         return RLCCrosschainToken(
-            new RLCCrosschainTokenDeployScript().deploy(
-                name, symbol, initialAdmin, initialUpgrader, createXFactory, salt
+            UUPSProxyDeployer.deployUsingCreateX(
+                "RLCCrosschainToken",
+                abi.encode(),
+                abi.encodeWithSelector(
+                    RLCCrosschainToken.initialize.selector,
+                    name,
+                    symbol,
+                    params.initialAdmin,
+                    params.initialUpgrader,
+                    params.initialPauser
+                ),
+                createXFactory,
+                salt
             )
         );
     }
