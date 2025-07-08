@@ -10,7 +10,9 @@ import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
+import {Deploy as RLCLiquidityUnifierDeployScript} from "../../../script/RLCLiquidityUnifier.s.sol";
 import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
+import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
 
 library TestUtils {
     using OptionsBuilder for bytes;
@@ -44,8 +46,7 @@ library TestUtils {
         result.rlcToken = new RLCMock();
 
         // Deploy Liquidity Unifier
-        result.rlcLiquidityUnifier =
-            _deployLiquidityUnifier(result.rlcToken, params.initialAdmin, params.initialUpgrader, createXFactory, salt);
+        result.rlcLiquidityUnifier = _deployLiquidityUnifier(params, result.rlcToken, createXFactory, salt);
 
         // Deploy IexecLayerZeroBridge for Sepolia
         result.iexecLayerZeroBridgeChainWithApproval =
@@ -59,19 +60,14 @@ library TestUtils {
     }
 
     function _deployLiquidityUnifier(
+        DeploymentParams memory params,
         RLCMock rlcToken,
-        address initialAdmin,
-        address initialUpgrader,
         address createXFactory,
         bytes32 salt
     ) private returns (RLCLiquidityUnifier) {
         return RLCLiquidityUnifier(
-            UUPSProxyDeployer.deployUsingCreateX(
-                "RLCLiquidityUnifier",
-                abi.encode(rlcToken),
-                abi.encodeWithSelector(RLCLiquidityUnifier.initialize.selector, initialAdmin, initialUpgrader),
-                createXFactory,
-                salt
+            new RLCLiquidityUnifierDeployScript().deploy(
+                address(rlcToken), params.initialAdmin, params.initialUpgrader, createXFactory, salt
             )
         );
     }
@@ -111,19 +107,8 @@ library TestUtils {
         bytes32 salt
     ) private returns (RLCCrosschainToken) {
         return RLCCrosschainToken(
-            UUPSProxyDeployer.deployUsingCreateX(
-                "RLCCrosschainToken",
-                abi.encode(),
-                abi.encodeWithSelector(
-                    RLCCrosschainToken.initialize.selector,
-                    name,
-                    symbol,
-                    params.initialAdmin,
-                    params.initialUpgrader,
-                    params.initialPauser
-                ),
-                createXFactory,
-                salt
+            new RLCCrosschainTokenDeployScript().deploy(
+                name, symbol, params.initialAdmin, params.initialUpgrader, createXFactory, salt
             )
         );
     }
