@@ -1,24 +1,24 @@
 {
   "createxFactory": "0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed",
-  "initialAdmin": "0x29d9Fb59587Af02AE3Bee909BabdD0aC75580009",
-  "initialUpgrader": "0x29d9Fb59587Af02AE3Bee909BabdD0aC75580009",
-  "initialPauser": "0x29d9Fb59587Af02AE3Bee909BabdD0aC75580009",
+  "initialAdmin": "0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3",
+  "initialUpgrader": "0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3",
+  "initialPauser": "0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3",
   "chains": {
     "sepolia": {
       "approvalRequired": true,
       "rlcAddress": "0x26A738b6D33EF4D94FF084D3552961b8f00639Cd",
-      "rlcLiquidityUnifierAddress": "0x6B4147eb1f2b30eF13758cB803A706286443d959",
+      "rlcLiquidityUnifierAddress": "0x7C84A73D0eBb7b2Db5160d34D812DC8632eE99DA",
       "rlcLiquidityUnifierCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
-      "iexecLayerZeroBridgeAddress": "0x68cc55914CBC2630C2C60F49531E4b70b33399fF",
+      "iexecLayerZeroBridgeAddress": "0xcF9A304C10bCfB7f00b290B6B6efa7DB071b4d0F",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "lzChainId": 40161
     },
     "arbitrum_sepolia": {
       "approvalRequired": false,
-      "rlcCrosschainTokenAddress": "0xE377Ac9b7075421997ebaf0267813090b0277B39",
+      "rlcCrosschainTokenAddress": "0x84391E46F519131c66719dddF9be48a0a7808116",
       "rlcCrosschainTokenCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
-      "iexecLayerZeroBridgeAddress": "0x62Fa14C85638Eb81Ef38121591DCB8E4E12ce9Fc",
+      "iexecLayerZeroBridgeAddress": "0x4FcE023890F5c9aCdb04645b2801fF89793DD84e",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "lzChainId": 40231
