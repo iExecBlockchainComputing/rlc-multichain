@@ -57,7 +57,7 @@ contract SendTokensFromEthereumToArbitrum is Script {
             addressToBytes32(recipientAddress), // Recipient address.
             amount, // Amount to send in local decimals.
             amount * 99 / 100, // Minimum amount to send in local decimals (allowing 1% slippage).
-            extraOptions, // Extra options with gas limit for the destination chain
+            "", // Extra options with gas limit for the destination chain
             "", // Composed message for the send() operation, unused in this context.
             "" // OFT command to be executed, unused in default OFT implementations.
         );
