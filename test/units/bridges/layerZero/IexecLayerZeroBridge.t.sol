@@ -8,7 +8,7 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {IexecLayerZeroBridgeHarness} from "../../../../src/mocks/IexecLayerZeroBridgeHarness.sol";
+import {IexecLayerZeroBridgeHarness} from "../../mocks/IexecLayerZeroBridgeHarness.sol";
 import {DualPausableUpgradeable} from "../../../../src/bridges/utils/DualPausableUpgradeable.sol";
 import {TestUtils} from "../../utils/TestUtils.sol";
 import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
@@ -297,7 +297,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         // Expect the Transfer & CrosschainMint event
         vm.expectEmit(true, true, true, true, address(rlcCrosschainToken));
         emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
-        vm.expectEmit(true, true, true, true, address(iexecLayerZeroBridgeChainX));
+        vm.expectEmit(true, true, true, true, address(rlcCrosschainToken));
         emit IERC7802.CrosschainMint(user2, TRANSFER_AMOUNT, address(iexecLayerZeroBridgeChainX));
 
         uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
@@ -324,7 +324,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         );
 
         assertEq(rlcCrosschainToken.balanceOf(address(0)), 0, "Zero address balance should remain zero");
-        
     }
 
     function testFuzz_credit_Amount(uint256 amount) public {
