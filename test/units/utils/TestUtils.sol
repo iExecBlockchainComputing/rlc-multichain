@@ -87,7 +87,9 @@ library TestUtils {
             UUPSProxyDeployer.deployUsingCreateX(
                 "IexecLayerZeroBridge",
                 abi.encode(
-                    true, bridgeableToken, approvalRequired ? params.lzEndpointSource : params.lzEndpointDestination
+                    approvalRequired,
+                    bridgeableToken,
+                    approvalRequired ? params.lzEndpointSource : params.lzEndpointDestination
                 ),
                 abi.encodeWithSelector(
                     IexecLayerZeroBridge.initialize.selector,
