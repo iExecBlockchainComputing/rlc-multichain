@@ -7,6 +7,7 @@ import {Vm} from "forge-std/Vm.sol";
 import {StdConstants} from "forge-std/StdConstants.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
+import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 
 /**
  * @notice Utility library for deploying UUPS proxy contracts and their implementations
@@ -63,5 +64,33 @@ library UUPSProxyDeployer {
             ICreateX(createxFactory).deployCreate2(createxSalt, abi.encodePacked(creationCode, constructorData));
         console.log("Implementation deployed at:", implementation);
         return implementation;
+    }
+
+    /**
+     * Upgrades a UUPS proxy contract to a new implementation.
+     * @param proxyAddress address of the UUPS proxy contract to upgrade
+     * @param contractName name of the contract to upgrade (used to fetch creation code)
+     * @param constructorData constructor arguments for the new implementation contract
+     * @param initData initialization data for the proxy contract after upgrade
+     * @return newImplementation address of the new implementation contract
+     */
+    function upgrade(
+        address proxyAddress,
+        string memory contractName,
+        bytes memory constructorData,
+        bytes memory initData
+    ) internal returns (address newImplementation) {
+        Options memory opts;
+        opts.constructorData = constructorData;
+        // Ignore checks related to LayerZero contracts:
+        // - OAppSenderUpgradeable
+        // - OAppReceiverUpgradeable
+        // - OFTCoreUpgradeable
+        // - OAppCoreUpgradeable
+        opts.unsafeAllow = "constructor,state-variable-immutable,missing-initializer-call";
+        Upgrades.upgradeProxy(proxyAddress, contractName, initData, opts);
+        newImplementation = Upgrades.getImplementationAddress(proxyAddress);
+        console.log("Upgraded", contractName, " proxy to new implementation", newImplementation);
+        return newImplementation;
     }
 }

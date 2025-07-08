@@ -8,7 +8,6 @@ import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCLiquidityUnifier} from "../src/RLCLiquidityUnifier.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
-import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 /**
  * Deployment script for the RLCLiquidityUnifier contract.
  * It reads configuration from a JSON file and deploys the contract using CreateX.
@@ -66,7 +65,7 @@ contract Deploy is Script {
 contract Upgrade is Script {
     function run() external {
         vm.startBroadcast();
-        UpgradeUtils.upgrade({
+        UUPSProxyDeployer.upgrade({
             proxyAddress: address(0), // Replace with the actual proxy address
             contractName: "", // e.g., "ContractV2.sol:ContractV2"
             constructorData: new bytes(0), // Replace with the actual constructor data

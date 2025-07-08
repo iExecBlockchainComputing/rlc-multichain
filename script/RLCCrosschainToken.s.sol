@@ -8,7 +8,6 @@ import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
-import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 
 /**
  * Deployment script for the RLCCrosschainToken contract.
@@ -66,7 +65,7 @@ contract Deploy is Script {
 contract Upgrade is Script {
     function run() external {
         vm.startBroadcast();
-        UpgradeUtils.upgrade({
+        UUPSProxyDeployer.upgrade({
             proxyAddress: address(0), // Replace with the actual proxy address
             contractName: "", // e.g., "ContractV2.sol:ContractV2"
             constructorData: new bytes(0), // Replace with the actual constructor data
