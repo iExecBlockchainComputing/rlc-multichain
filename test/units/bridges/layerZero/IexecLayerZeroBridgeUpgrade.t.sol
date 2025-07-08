@@ -40,7 +40,7 @@ contract IexecLayerZeroBridgeUpgradeTest is TestHelperOz5 {
             })
         );
 
-        iexecLayerZeroBridgeV1 = deploymentResult1.iexecLayerZeroBridgeChainWithoutApproval;
+        iexecLayerZeroBridgeV1 = deploymentResult1.iexecLayerZeroBridgeWithoutApproval;
         rlcCrosschainToken = deploymentResult1.rlcCrosschainToken;
 
         proxyAddress = address(iexecLayerZeroBridgeV1);

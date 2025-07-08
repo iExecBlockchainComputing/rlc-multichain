@@ -57,8 +57,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
             })
         );
 
-        address iexecLayerZeroBridgeEthereumAddress = address(deploymentResult.iexecLayerZeroBridgeChainWithApproval);
-        address iexecLayerZeroBridgeChainXAddress = address(deploymentResult.iexecLayerZeroBridgeChainWithoutApproval);
+        address iexecLayerZeroBridgeEthereumAddress = address(deploymentResult.iexecLayerZeroBridgeWithApproval);
+        address iexecLayerZeroBridgeChainXAddress = address(deploymentResult.iexecLayerZeroBridgeWithoutApproval);
 
         iexecLayerZeroBridgeEthereum = IexecLayerZeroBridgeHarness(iexecLayerZeroBridgeEthereumAddress);
         iexecLayerZeroBridgeChainX = IexecLayerZeroBridgeHarness(iexecLayerZeroBridgeChainXAddress);
