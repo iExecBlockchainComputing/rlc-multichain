@@ -295,7 +295,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
 
         // Expect the Transfer & CrosschainMint event
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(true, true, true, true, address(rlcCrosschainToken));
         emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
         vm.expectEmit(true, true, true, true);
         emit IERC7802.CrosschainMint(user2, TRANSFER_AMOUNT, address(iexecLayerZeroBridgeChainX));
