@@ -8,7 +8,9 @@ import {TestUtils} from "./utils/TestUtils.sol";
 import {UUPSProxyUtils} from "../../script/lib/UUPSProxyUtils.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 import {RLCLiquidityUnifierV2} from "./mocks/RLCLiquidityUnifierV2Mock.sol";
+import {Upgrade as RLCLiquidityUnifierUpgradeScript} from "../../script/RLCLiquidityUnifier.s.sol";
 
+// TODO remove useless LZ setup (endpoint, ...).
 contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
     using TestUtils for *;
 
@@ -57,7 +59,7 @@ contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
 
         // 3. Perform upgrade
         vm.startPrank(upgrader);
-        UUPSProxyUtils.upgrade({
+        new RLCLiquidityUnifierUpgradeScript().upgrade({
             proxyAddress: proxyAddress,
             contractName:  "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
             constructorData: abi.encode(rlcToken),

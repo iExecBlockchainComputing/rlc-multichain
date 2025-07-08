@@ -8,6 +8,7 @@ import {TestUtils} from "./../../utils/TestUtils.sol";
 import {UUPSProxyUtils} from "../../../../script/lib/UUPSProxyUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
+import {Upgrade as IexecLayerZeroBridgeUpgradeScript} from "../../../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
 
 contract IexecLayerZeroBridgeUpgradeTest is TestHelperOz5 {
     using TestUtils for *;
@@ -53,7 +54,7 @@ contract IexecLayerZeroBridgeUpgradeTest is TestHelperOz5 {
 
         // 3. Perform upgrade
         vm.startPrank(upgrader);
-        UUPSProxyUtils.upgrade({
+        new IexecLayerZeroBridgeUpgradeScript().upgrade({
             proxyAddress: proxyAddress,
             contractName:  "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2",
             constructorData: abi.encode(false, rlcCrosschainToken, mockEndpoint),
