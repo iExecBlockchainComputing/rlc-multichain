@@ -27,6 +27,7 @@ async function exampleUsage() {
     console.log('📋 Required configuration for Safe integration:');
     console.log('   - SAFE_ADDRESS: Your Safe multisig address');
     console.log('   - RPC_URL: Network RPC endpoint');
+    console.log('   - SAFE_API_KEY: API key for Safe Transaction Service');
     console.log('   - PROPOSER_1_ADDRESS & PROPOSER_1_PRIVATE_KEY: Proposer credentials for proposing transactions');
     console.log('');
 

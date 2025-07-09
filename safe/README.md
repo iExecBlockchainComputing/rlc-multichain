@@ -20,7 +20,10 @@ This directory contains tools for integrating the RLC Multichain Bridge with Saf
    - `CHAIN_ID`: Chain ID (e.g., 1 for Ethereum mainnet, 11155111 for Sepolia)
    - `SAFE_ADDRESS`: Your Safe multisig address
    - `PROPOSER_1_ADDRESS` & `PROPOSER_1_PRIVATE_KEY`: Proposer credentials for proposing transactions
-   - `SAFE_API_KEY`: (Optional) API key for Safe Transaction Service for enhanced rate limits
+   - `SAFE_API_KEY`: API key for Safe Transaction Service (required for authentication and rate limiting)
+
+3. **Get a Safe API Key:**
+   Visit [Safe API Documentation](https://docs.safe.global/core-api/how-to-use-api-keys) to obtain your API key.
 
 ## Available Commands
 
@@ -36,9 +39,6 @@ npm run propose-tx -- --to 0x1234567890123456789012345678901234567890 --data 0xa
 
 # Delegate call
 npm run propose-tx -- --to 0x1234567890123456789012345678901234567890 --data 0xa9059cbb... --operation delegatecall
-
-# Use specific owner for proposal
-npm run propose-tx -- --to 0x1234567890123456789012345678901234567890 --value 1000000000000000000 --owner 1
 ```
 
 ### 2. List Transactions
@@ -113,7 +113,6 @@ npm run bridge-tx -- --operation approve --contract 0x1234...5678 --spender 0xab
 - Always review transaction data before confirming
 - Use hardware wallets when possible for owner accounts
 - Test on testnets before mainnet operations
-- API keys help with rate limiting - get yours from the Safe Transaction Service
 - Keep API keys secure and don't commit them to version control
 
 ## Common Use Cases

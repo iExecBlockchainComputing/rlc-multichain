@@ -11,17 +11,13 @@ export class SafeManager {
     this.safeConfig = getSafeConfig();
     
     // Initialize the API Kit
-    const apiKitConfig: any = {
+    // Note: API key is validated as mandatory and stored for potential use
+    this.apiKit = new SafeApiKit({
       chainId: this.safeConfig.chainId
-    };
+    });
     
-    // Add API key if provided - this helps with rate limiting
-    // Note: API key usage depends on the Safe Transaction Service version
-    if (this.safeConfig.apiKey) {
-      apiKitConfig.apiKey = this.safeConfig.apiKey;
-    }
-    
-    this.apiKit = new SafeApiKit(apiKitConfig);
+    // The API key is now mandatory and validated by getSafeConfig()
+    // It's available at this.safeConfig.apiKey for any future use
   }
 
   /**

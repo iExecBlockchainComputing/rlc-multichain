@@ -8,7 +8,7 @@ export interface SafeConfig {
   rpcUrl: string;
   chainId: bigint;
   safeAddress: string;
-  apiKey?: string;
+  apiKey: string;
 }
 
 export interface OwnerConfig {
@@ -28,6 +28,10 @@ export function getSafeConfig(): SafeConfig {
 
   if (!safeAddress) {
     throw new Error('SAFE_ADDRESS is required in .env.safe');
+  }
+
+  if (!apiKey) {
+    throw new Error('SAFE_API_KEY is required in .env.safe');
   }
 
   return {
