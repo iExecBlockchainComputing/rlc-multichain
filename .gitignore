@@ -12,7 +12,13 @@ broadcast/*/*/run-*.json
 
 # Dotenv file
 .env
+.env.safe
 .last_deploy.json
+
+# Node.js dependencies and build artifacts
+node_modules/
+dist/
+*.tsbuildinfo
 
 .idea
 .DS_Store
