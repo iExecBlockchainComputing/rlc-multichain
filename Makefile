@@ -170,3 +170,89 @@ send-tokens-to-sepolia:
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
+
+#
+# Safe multisig integration targets
+#
+
+# Configure bridge using Safe multisig (propose transactions)
+safe-configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
+	@echo "Configuring LayerZero Bridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN) via Safe multisig"
+	npm run bridge-config -- \
+		--source-chain $(SOURCE_CHAIN) \
+		--target-chain $(TARGET_CHAIN) \
+		--rpc-url $(RPC_URL) \
+		--script IexecLayerZeroBridge
+
+# Dry run to see what transactions would be proposed
+safe-configure-bridge-dry: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
+	@echo "DRY RUN: Configuring LayerZero Bridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN) via Safe multisig"
+	npm run bridge-config -- \
+		--source-chain $(SOURCE_CHAIN) \
+		--target-chain $(TARGET_CHAIN) \
+		--rpc-url $(RPC_URL) \
+		--script IexecLayerZeroBridge \
+		--dry-run
+
+# Configure bridge for both directions using Safe
+safe-configure-bridge-bidirectional: # SOURCE_CHAIN, TARGET_CHAIN, SOURCE_RPC, TARGET_RPC
+	@echo "Configuring bidirectional bridge $(SOURCE_CHAIN) <-> $(TARGET_CHAIN) via Safe multisig"
+	$(MAKE) safe-configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
+	$(MAKE) safe-configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
+
+# Configure other bridge components via Safe
+safe-configure-rlc-adapter: # CHAIN, RPC_URL
+	@echo "Configuring RLC Adapter for $(CHAIN) via Safe multisig"
+	npm run bridge-config -- \
+		--source-chain $(CHAIN) \
+		--target-chain $(CHAIN) \
+		--rpc-url $(RPC_URL) \
+		--script ConfigureRLCAdapter
+
+safe-configure-rlc-oft: # CHAIN, RPC_URL
+	@echo "Configuring RLC OFT for $(CHAIN) via Safe multisig"
+	npm run bridge-config -- \
+		--source-chain $(CHAIN) \
+		--target-chain $(CHAIN) \
+		--rpc-url $(RPC_URL) \
+		--script ConfigureRLCOFT
+
+# Convenience targets for common networks
+safe-configure-sepolia-arbitrum:
+	$(MAKE) safe-configure-bridge-bidirectional \
+		SOURCE_CHAIN=sepolia \
+		TARGET_CHAIN=arbitrum_sepolia \
+		SOURCE_RPC=$(SEPOLIA_RPC_URL) \
+		TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL)
+
+safe-configure-mainnet-arbitrum:
+	$(MAKE) safe-configure-bridge-bidirectional \
+		SOURCE_CHAIN=ethereum \
+		TARGET_CHAIN=arbitrum \
+		SOURCE_RPC=$(ETHEREUM_RPC_URL) \
+		TARGET_RPC=$(ARBITRUM_RPC_URL)
+
+# Show help for Safe targets
+safe-help:
+	@echo "Safe Multisig Integration Commands:"
+	@echo ""
+	@echo "  safe-configure-bridge                     - Configure bridge via Safe (one direction)"
+	@echo "    Usage: make safe-configure-bridge SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=\$$SEPOLIA_RPC_URL"
+	@echo ""
+	@echo "  safe-configure-bridge-dry                 - Dry run to see what would be proposed"
+	@echo "    Usage: make safe-configure-bridge-dry SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=\$$SEPOLIA_RPC_URL"
+	@echo ""
+	@echo "  safe-configure-bridge-bidirectional       - Configure bridge both directions"
+	@echo "    Usage: make safe-configure-bridge-bidirectional SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia SOURCE_RPC=\$$SEPOLIA_RPC_URL TARGET_RPC=\$$ARBITRUM_SEPOLIA_RPC_URL"
+	@echo ""
+	@echo "  safe-configure-sepolia-arbitrum           - Configure Sepolia <-> Arbitrum Sepolia"
+	@echo "  safe-configure-mainnet-arbitrum           - Configure Mainnet <-> Arbitrum"
+	@echo ""
+	@echo "  safe-configure-rlc-adapter                - Configure RLC Adapter"
+	@echo "  safe-configure-rlc-oft                    - Configure RLC OFT"
+	@echo ""
+	@echo "Direct CLI usage:"
+	@echo "  npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url \$$SEPOLIA_RPC_URL"
+	@echo "  npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url \$$SEPOLIA_RPC_URL --dry-run"
+	@echo ""
+	@echo "Available scripts: \$$(cd safe && npm run bridge-config 2>/dev/null | grep 'Available scripts:' | cut -d: -f2 || echo 'Run npm run bridge-config for list')"

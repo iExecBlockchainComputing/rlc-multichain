@@ -86,6 +86,43 @@ npm run bridge-tx -- --operation transfer --contract 0x1234...5678 --to 0xabcd..
 npm run bridge-tx -- --operation approve --contract 0x1234...5678 --spender 0xabcd...ef00 --amount 1000000000000000000
 ```
 
+### 4. Bridge Configuration Workflow
+A comprehensive workflow for configuring the RLC Bridge via Safe multisig:
+
+```bash
+# Configure bridge from Sepolia to Arbitrum Sepolia
+npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url $SEPOLIA_RPC_URL
+
+# Dry run to see what transactions would be proposed
+npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url $SEPOLIA_RPC_URL --dry-run
+
+# Configure with a different script
+npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url $SEPOLIA_RPC_URL --script ConfigureRLCAdapter
+```
+
+**Make targets for convenience:**
+```bash
+# Configure bridge (one direction)
+make safe-configure-bridge SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=$SEPOLIA_RPC_URL
+
+# Configure bridge (both directions)
+make safe-configure-bridge-bidirectional SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia SOURCE_RPC=$SEPOLIA_RPC_URL TARGET_RPC=$ARBITRUM_SEPOLIA_RPC_URL
+
+# Common network pairs
+make safe-configure-sepolia-arbitrum
+make safe-configure-mainnet-arbitrum
+
+# Show all Safe targets
+make safe-help
+```
+
+**How it works:**
+1. Runs the Foundry configuration script on a fork
+2. Reads the generated `broadcast/*/run-latest.json` file
+3. Extracts all CALL transactions from the broadcast
+4. Proposes each transaction to your Safe multisig
+5. Provides Safe transaction hashes for review and execution
+
 ## Architecture
 
 ### Core Components

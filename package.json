@@ -7,6 +7,8 @@
     "propose-tx": "ts-node safe/propose-transaction.ts",
     "list-pending": "ts-node safe/list-pending.ts",
     "bridge-tx": "ts-node safe/bridge-operations.ts",
+    "bridge-config": "ts-node safe/bridge-config.ts",
+    "bridge-config-example": "ts-node safe/bridge-config-example.ts",
     "safe-example": "ts-node safe/example.ts",
     "build": "tsc",
     "dev": "ts-node-dev --respawn --transpile-only"
