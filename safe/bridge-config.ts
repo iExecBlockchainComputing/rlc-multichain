@@ -61,9 +61,38 @@ export class BridgeConfigurator {
     console.log(`🔧 Configuring bridge ${args.sourceChain} -> ${args.targetChain}`);
     
     try {
-      // Step 1: Run the Foundry script
+      let chainId: string;
+      let useExistingBroadcast = false;
+      
+      // Step 1: Try to run the Foundry script
       console.log('📡 Running Foundry configuration script...');
-      const chainId = await this.runFoundryScript(args);
+      try {
+        chainId = await this.runFoundryScript(args);
+      } catch (foundryError) {
+        console.warn('⚠️  Foundry script failed, checking for existing broadcast file...');
+        chainId = this.getChainIdFromRpc(args.rpcUrl);
+        useExistingBroadcast = true;
+        
+        // Check if broadcast file exists before continuing
+        const broadcastPath = path.join(
+          process.cwd(),
+          'broadcast',
+          `${args.scriptName}.s.sol`,
+          chainId,
+          'run-latest.json'
+        );
+        
+        if (!fs.existsSync(broadcastPath)) {
+          console.error('❌ Foundry script failed and no existing broadcast file found.');
+          console.error('Common issues:');
+          console.error('   - Invalid RPC URL or network issues');
+          console.error('   - Missing environment variables (ACCOUNT, etc.)');
+          console.error('   - Contract not deployed or configuration issues');
+          throw foundryError;
+        }
+        
+        console.log('✅ Found existing broadcast file, continuing...');
+      }
       
       // Step 2: Read broadcast file
       console.log('📄 Reading broadcast transactions...');
@@ -75,6 +104,10 @@ export class BridgeConfigurator {
       }
 
       console.log(`📋 Found ${transactions.length} transactions to propose`);
+      
+      if (useExistingBroadcast) {
+        console.log('ℹ️  Note: Using existing broadcast file due to Foundry script failure');
+      }
       
       // Step 3: Propose transactions to Safe
       if (args.dryRun) {
@@ -284,9 +317,6 @@ Examples:
 
   # Dry run to see what would be proposed
   npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url https://sepolia.infura.io/v3/YOUR_KEY --dry-run
-
-  # Use a different script
-  npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url https://sepolia.infura.io/v3/YOUR_KEY --script ConfigureRLCAdapter
 
 Available scripts: ${BridgeConfigurator.getAvailableScripts().join(', ')}
     `);
