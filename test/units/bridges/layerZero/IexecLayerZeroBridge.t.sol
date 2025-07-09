@@ -104,227 +104,227 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     //TODO: Add more tests for send functionality, in both directions
 
     // ============ BASIC BRIDGE FUNCTIONALITY TESTS ============
-    // function test_SendToken_WhenOperational_WithApproval() public {
-    //     vm.prank(user1);
-    //     rlcToken.approve(address(iexecLayerZeroBridgeEthereum), TRANSFER_AMOUNT);
-    //     _test_SendToken_WhenOperational(iexecLayerZeroBridgeEthereum, address(rlcToken), true);
-    // }
+    function test_SendToken_WhenOperational_WithApproval() public {
+        vm.prank(user1);
+        rlcToken.approve(address(iexecLayerZeroBridgeEthereum), TRANSFER_AMOUNT);
+        _test_SendToken_WhenOperational(iexecLayerZeroBridgeEthereum, address(rlcToken), true);
+    }
 
-    // function test_SendToken_WhenOperational_WithoutApproval() public {
-    //     _test_SendToken_WhenOperational(iexecLayerZeroBridgeChainX, address(rlcCrosschainToken), false);
-    // }
+    function test_SendToken_WhenOperational_WithoutApproval() public {
+        _test_SendToken_WhenOperational(iexecLayerZeroBridgeChainX, address(rlcCrosschainToken), false);
+    }
 
-    // function _test_SendToken_WhenOperational(
-    //     IexecLayerZeroBridgeHarness iexecLayerZeroBridge,
-    //     address tokenAddress,
-    //     bool approvalRequired
-    // ) internal {
-    //     IERC20 token = IERC20(tokenAddress);
+    function _test_SendToken_WhenOperational(
+        IexecLayerZeroBridgeHarness iexecLayerZeroBridge,
+        address tokenAddress,
+        bool approvalRequired
+    ) internal {
+        IERC20 token = IERC20(tokenAddress);
 
-    //     // Check initial balances
-    //     uint256 initialBalance = token.balanceOf(user1);
-    //     assertEq(initialBalance, INITIAL_BALANCE, "Initial balance should match expected amount");
+        // Check initial balances
+        uint256 initialBalance = token.balanceOf(user1);
+        assertEq(initialBalance, INITIAL_BALANCE, "Initial balance should match expected amount");
 
-    //     // Prepare send parameters using utility
-    //     (SendParam memory sendParam, MessagingFee memory fee) = TestUtils.prepareSend(
-    //         iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, approvalRequired ? DEST_EID : SOURCE_EID
-    //     );
+        // Prepare send parameters using utility
+        (SendParam memory sendParam, MessagingFee memory fee) = TestUtils.prepareSend(
+            iexecLayerZeroBridge, addressToBytes32(user2), TRANSFER_AMOUNT, approvalRequired ? DEST_EID : SOURCE_EID
+        );
 
-    //     // For approval flow, expect Transfer event from ERC20 token
-    //     vm.expectEmit(true, true, true, true);
-    //     emit IERC20.Transfer(user1, approvalRequired ? address(rlcLiquidityUnifier) : address(0), TRANSFER_AMOUNT);
+        // For approval flow, expect Transfer event from ERC20 token
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Transfer(user1, approvalRequired ? address(rlcLiquidityUnifier) : address(0), TRANSFER_AMOUNT);
 
-    //     if (!approvalRequired) {
-    //         // For non-approval flow, expect CrosschainBurn event
-    //         vm.expectEmit(true, true, true, true);
-    //         emit IERC7802.CrosschainBurn(user1, TRANSFER_AMOUNT, address(iexecLayerZeroBridge));
-    //     }
+        if (!approvalRequired) {
+            // For non-approval flow, expect CrosschainBurn event
+            vm.expectEmit(true, true, true, true);
+            emit IERC7802.CrosschainBurn(user1, TRANSFER_AMOUNT, address(iexecLayerZeroBridge));
+        }
 
-    //     // Expect OFTSent event from the bridge (this should be emitted by the parent OFT contract)
-    //     vm.expectEmit(false, true, true, true);
-    //     emit IOFT.OFTSent(
-    //         bytes32(0), // ignore this value
-    //         sendParam.dstEid,
-    //         user1,
-    //         TRANSFER_AMOUNT,
-    //         TRANSFER_AMOUNT
-    //     );
+        // Expect OFTSent event from the bridge (this should be emitted by the parent OFT contract)
+        vm.expectEmit(false, true, true, true);
+        emit IOFT.OFTSent(
+            bytes32(0), // ignore this value
+            sendParam.dstEid,
+            user1,
+            TRANSFER_AMOUNT,
+            TRANSFER_AMOUNT
+        );
 
-    //     // Send tokens
-    //     vm.prank(user1);
-    //     vm.deal(user1, fee.nativeFee);
-    //     iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        // Send tokens
+        vm.prank(user1);
+        vm.deal(user1, fee.nativeFee);
+        iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
-    //     // Verify source state - tokens should be burned/locked
-    //     assertEq(token.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT, "Tokens should be deducted from sender");
-    // }
+        // Verify source state - tokens should be burned/locked
+        assertEq(token.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT, "Tokens should be deducted from sender");
+    }
 
-    // // ============ LEVEL 1 PAUSE TESTS (Complete Pause) ============
-    // function test_Pause_OnlyPauserRole() public {
-    //     vm.expectRevert();
-    //     vm.prank(unauthorizedUser);
-    //     iexecLayerZeroBridgeChainX.pause();
-    // }
+    // ============ LEVEL 1 PAUSE TESTS (Complete Pause) ============
+    function test_Pause_OnlyPauserRole() public {
+        vm.expectRevert();
+        vm.prank(unauthorizedUser);
+        iexecLayerZeroBridgeChainX.pause();
+    }
 
-    // function test_Pause_BlocksAllTransfers() public {
-    //     // TODO make check outbound and inbound transfers.
-    //     // Pause the bridge
-    //     vm.prank(pauser);
-    //     iexecLayerZeroBridgeChainX.pause();
+    function test_Pause_BlocksAllTransfers() public {
+        // TODO make check outbound and inbound transfers.
+        // Pause the bridge
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.pause();
 
-    //     // Prepare send parameters
-    //     (SendParam memory sendParam, MessagingFee memory fee) =
-    //         TestUtils.prepareSend(iexecLayerZeroBridgeChainX, addressToBytes32(user2), TRANSFER_AMOUNT, SOURCE_EID);
+        // Prepare send parameters
+        (SendParam memory sendParam, MessagingFee memory fee) =
+            TestUtils.prepareSend(iexecLayerZeroBridgeChainX, addressToBytes32(user2), TRANSFER_AMOUNT, SOURCE_EID);
 
-    //     // Attempt to send tokens - should revert
-    //     vm.deal(user1, fee.nativeFee);
-    //     vm.prank(user1);
-    //     vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-    //     iexecLayerZeroBridgeChainX.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        // Attempt to send tokens - should revert
+        vm.deal(user1, fee.nativeFee);
+        vm.prank(user1);
+        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
+        iexecLayerZeroBridgeChainX.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
-    //     // Verify no tokens were burned
-    //     assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
-    // }
+        // Verify no tokens were burned
+        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
+    }
 
-    // function test_Unpause_RestoresFullFunctionality() public {
-    //     // Pause then unpause the bridge
-    //     vm.startPrank(pauser);
-    //     iexecLayerZeroBridgeChainX.pause();
+    function test_Unpause_RestoresFullFunctionality() public {
+        // Pause then unpause the bridge
+        vm.startPrank(pauser);
+        iexecLayerZeroBridgeChainX.pause();
 
-    //     iexecLayerZeroBridgeChainX.unpause();
-    //     vm.stopPrank();
+        iexecLayerZeroBridgeChainX.unpause();
+        vm.stopPrank();
 
-    //     // Should now work normally
-    //     test_SendToken_WhenOperational_WithoutApproval();
-    // }
+        // Should now work normally
+        test_SendToken_WhenOperational_WithoutApproval();
+    }
 
-    // function test_sendRLCWhenSourceLayerZeroBridgeUnpaused() public {
-    //     // Pause then unpause the bridge
-    //     vm.startPrank(pauser);
-    //     iexecLayerZeroBridgeChainX.pause();
-    //     iexecLayerZeroBridgeChainX.unpause();
-    //     vm.stopPrank();
+    function test_sendRLCWhenSourceLayerZeroBridgeUnpaused() public {
+        // Pause then unpause the bridge
+        vm.startPrank(pauser);
+        iexecLayerZeroBridgeChainX.pause();
+        iexecLayerZeroBridgeChainX.unpause();
+        vm.stopPrank();
 
-    //     // Prepare send parameters using utility
-    //     (SendParam memory sendParam, MessagingFee memory fee) =
-    //         TestUtils.prepareSend(iexecLayerZeroBridgeChainX, addressToBytes32(user2), TRANSFER_AMOUNT, SOURCE_EID);
+        // Prepare send parameters using utility
+        (SendParam memory sendParam, MessagingFee memory fee) =
+            TestUtils.prepareSend(iexecLayerZeroBridgeChainX, addressToBytes32(user2), TRANSFER_AMOUNT, SOURCE_EID);
 
-    //     // Send tokens
-    //     vm.deal(user1, fee.nativeFee);
-    //     vm.prank(user1);
-    //     iexecLayerZeroBridgeChainX.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        // Send tokens
+        vm.deal(user1, fee.nativeFee);
+        vm.prank(user1);
+        iexecLayerZeroBridgeChainX.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
-    //     // Verify source state - tokens should be burned
-    //     assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
-    // }
+        // Verify source state - tokens should be burned
+        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
+    }
 
-    // // ============ LEVEL 2 PAUSE TESTS (Outbount transfer pause) ============
+    // ============ LEVEL 2 PAUSE TESTS (Outbount transfer pause) ============
 
-    // function test_PauseOutboundTransfers_OnlyPauserRole() public {
-    //     vm.expectRevert();
-    //     vm.prank(unauthorizedUser);
-    //     iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
-    // }
+    function test_PauseOutboundTransfers_OnlyPauserRole() public {
+        vm.expectRevert();
+        vm.prank(unauthorizedUser);
+        iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
+    }
 
-    // function test_PauseOutboundTransfers_BlocksOutboundOnly() public {
-    //     // Pause outbound transfers
-    //     vm.prank(pauser);
-    //     iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
+    function test_PauseOutboundTransfers_BlocksOutboundOnly() public {
+        // Pause outbound transfers
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
 
-    //     // Verify state
-    //     assertFalse(iexecLayerZeroBridgeChainX.paused());
-    //     assertTrue(iexecLayerZeroBridgeChainX.outbountTransfersPaused());
+        // Verify state
+        assertFalse(iexecLayerZeroBridgeChainX.paused());
+        assertTrue(iexecLayerZeroBridgeChainX.outbountTransfersPaused());
 
-    //     // Prepare send parameters
-    //     (SendParam memory sendParam, MessagingFee memory fee) =
-    //         TestUtils.prepareSend(iexecLayerZeroBridgeChainX, addressToBytes32(user2), TRANSFER_AMOUNT, SOURCE_EID);
+        // Prepare send parameters
+        (SendParam memory sendParam, MessagingFee memory fee) =
+            TestUtils.prepareSend(iexecLayerZeroBridgeChainX, addressToBytes32(user2), TRANSFER_AMOUNT, SOURCE_EID);
 
-    //     // Attempt to send tokens - should revert with EnforcedOutboundTransfersPause
-    //     vm.deal(user1, fee.nativeFee);
-    //     vm.prank(user1);
-    //     vm.expectRevert(DualPausableUpgradeable.EnforcedOutboundTransfersPause.selector);
-    //     iexecLayerZeroBridgeChainX.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
+        // Attempt to send tokens - should revert with EnforcedOutboundTransfersPause
+        vm.deal(user1, fee.nativeFee);
+        vm.prank(user1);
+        vm.expectRevert(DualPausableUpgradeable.EnforcedOutboundTransfersPause.selector);
+        iexecLayerZeroBridgeChainX.send{value: fee.nativeFee}(sendParam, fee, payable(user1));
 
-    //     // Verify no tokens were burned
-    //     assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
-    // }
+        // Verify no tokens were burned
+        assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE);
+    }
 
-    // function test_unpauseOutboundTransfers_RestoresboundgoingTransfers() public {
-    //     // Pause then unpause send
-    //     vm.startPrank(pauser);
-    //     iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
+    function test_unpauseOutboundTransfers_RestoresboundgoingTransfers() public {
+        // Pause then unpause send
+        vm.startPrank(pauser);
+        iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
 
-    //     iexecLayerZeroBridgeChainX.unpauseOutboundTransfers();
-    //     vm.stopPrank();
+        iexecLayerZeroBridgeChainX.unpauseOutboundTransfers();
+        vm.stopPrank();
 
-    //     // Should now work normally
-    //     assertFalse(iexecLayerZeroBridgeChainX.paused());
-    //     assertFalse(iexecLayerZeroBridgeChainX.outbountTransfersPaused());
+        // Should now work normally
+        assertFalse(iexecLayerZeroBridgeChainX.paused());
+        assertFalse(iexecLayerZeroBridgeChainX.outbountTransfersPaused());
 
-    //     test_SendToken_WhenOperational_WithoutApproval();
-    // }
+        test_SendToken_WhenOperational_WithoutApproval();
+    }
 
-    // // ============ token and approvalRequired ============
-    // function test_ReturnsApprovalRequired_WithApproval() public view {
-    //     assertEq(iexecLayerZeroBridgeEthereum.approvalRequired(), true, "approvalRequired() should return true");
-    // }
+    // ============ token and approvalRequired ============
+    function test_ReturnsApprovalRequired_WithApproval() public view {
+        assertEq(iexecLayerZeroBridgeEthereum.approvalRequired(), true, "approvalRequired() should return true");
+    }
 
-    // function test_ReturnsApprovalRequired_WithoutApproval() public view {
-    //     assertEq(iexecLayerZeroBridgeChainX.approvalRequired(), false, "approvalRequired() should return false");
-    // }
+    function test_ReturnsApprovalRequired_WithoutApproval() public view {
+        assertEq(iexecLayerZeroBridgeChainX.approvalRequired(), false, "approvalRequired() should return false");
+    }
 
-    // function test_ReturnsBridgeableTokenAddress_WithApproval() public view {
-    //     assertEq(
-    //         iexecLayerZeroBridgeEthereum.token(),
-    //         address(rlcToken),
-    //         "token() should return the correct token contract address"
-    //     );
-    // }
+    function test_ReturnsBridgeableTokenAddress_WithApproval() public view {
+        assertEq(
+            iexecLayerZeroBridgeEthereum.token(),
+            address(rlcToken),
+            "token() should return the correct token contract address"
+        );
+    }
 
-    // function test_ReturnsBridgeableTokenAddress_WithoutApproval() public view {
-    //     assertEq(
-    //         iexecLayerZeroBridgeChainX.token(),
-    //         address(rlcCrosschainToken),
-    //         "token() should return the correct token contract address"
-    //     );
-    // }
+    function test_ReturnsBridgeableTokenAddress_WithoutApproval() public view {
+        assertEq(
+            iexecLayerZeroBridgeChainX.token(),
+            address(rlcCrosschainToken),
+            "token() should return the correct token contract address"
+        );
+    }
 
-    // // ============ _credit ============
-    // function test_credit_SuccessfulMintToUser() public {
-    //     // Test successful minting to a regular user address
-    //     uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
+    // ============ _credit ============
+    function test_credit_SuccessfulMintToUser() public {
+        // Test successful minting to a regular user address
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
 
-    //     // Expect the Transfer & CrosschainMint event
-    //     vm.expectEmit(true, true, true, true, address(rlcCrosschainToken));
-    //     emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
-    //     vm.expectEmit(true, true, true, true, address(rlcCrosschainToken));
-    //     emit IERC7802.CrosschainMint(user2, TRANSFER_AMOUNT, address(iexecLayerZeroBridgeChainX));
+        // Expect the Transfer & CrosschainMint event
+        vm.expectEmit(true, true, true, true, address(rlcCrosschainToken));
+        emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
+        vm.expectEmit(true, true, true, true, address(rlcCrosschainToken));
+        emit IERC7802.CrosschainMint(user2, TRANSFER_AMOUNT, address(iexecLayerZeroBridgeChainX));
 
-    //     uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
+        uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
 
-    //     assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
-    //     assertEq(
-    //         rlcCrosschainToken.balanceOf(user2),
-    //         initialBalance + TRANSFER_AMOUNT,
-    //         "User balance should increase by mint amount"
-    //     );
-    // }
+        assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
+        assertEq(
+            rlcCrosschainToken.balanceOf(user2),
+            initialBalance + TRANSFER_AMOUNT,
+            "User balance should increase by mint amount"
+        );
+    }
 
-    // function test_credit_SendToDeadAddressInsteadOfZeroAddress() public {
-    //     // Fuzz test with different addresses including zero address
-    //     // Handle zero address redirection
-    //     uint256 initialBalance = rlcCrosschainToken.balanceOf(address(0xdead));
-    //     uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(address(0), TRANSFER_AMOUNT, SOURCE_EID);
+    function test_credit_SendToDeadAddressInsteadOfZeroAddress() public {
+        // Fuzz test with different addresses including zero address
+        // Handle zero address redirection
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(address(0xdead));
+        uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(address(0), TRANSFER_AMOUNT, SOURCE_EID);
 
-    //     assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
-    //     assertEq(
-    //         rlcCrosschainToken.balanceOf(address(0xdead)),
-    //         initialBalance + TRANSFER_AMOUNT,
-    //         "Actual recipient balance should increase"
-    //     );
+        assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
+        assertEq(
+            rlcCrosschainToken.balanceOf(address(0xdead)),
+            initialBalance + TRANSFER_AMOUNT,
+            "Actual recipient balance should increase"
+        );
 
-    //     assertEq(rlcCrosschainToken.balanceOf(address(0)), 0, "Zero address balance should remain zero");
-    // }
+        assertEq(rlcCrosschainToken.balanceOf(address(0)), 0, "Zero address balance should remain zero");
+    }
 
     function testFuzz_credit_Amount(uint256 amount) public {
         // Fuzz test with different amounts for testing edge case (0 & max RLC supply)
