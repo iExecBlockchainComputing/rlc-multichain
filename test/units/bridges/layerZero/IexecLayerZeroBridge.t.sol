@@ -340,60 +340,60 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         );
     }
 
-    // function test_credit_RevertsWhenPaused() public {
-    //     // Test that _credit reverts when contract is fully paused
-    //     // Pause the contract
-    //     vm.prank(pauser);
-    //     iexecLayerZeroBridgeChainX.pause();
+    function test_credit_RevertsWhenPaused() public {
+        // Test that _credit reverts when contract is fully paused
+        // Pause the contract
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.pause();
 
-    //     vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-    //     iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
-    // }
+        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
+        iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
+    }
 
-    // function test_credit_WorksWhenOutboundTransfersPaused() public {
-    //     // Test that _credit still works when only sends are paused (Level 2 pause)
-    //     uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
+    function test_credit_WorksWhenOutboundTransfersPaused() public {
+        // Test that _credit still works when only sends are paused (Level 2 pause)
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
 
-    //     // Pause only sends
-    //     vm.prank(pauser);
-    //     iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
+        // Pause only sends
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.pauseOutboundTransfers();
 
-    //     vm.expectEmit(true, true, true, true);
-    //     emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
-    //     vm.expectEmit(true, true, true, true);
-    //     emit IERC7802.CrosschainMint(user2, TRANSFER_AMOUNT, address(iexecLayerZeroBridgeChainX));
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
+        vm.expectEmit(true, true, true, true);
+        emit IERC7802.CrosschainMint(user2, TRANSFER_AMOUNT, address(iexecLayerZeroBridgeChainX));
 
-    //     uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
+        uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
 
-    //     assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
-    //     assertEq(rlcCrosschainToken.balanceOf(user2), initialBalance + TRANSFER_AMOUNT, "User balance should increase");
-    // }
+        assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
+        assertEq(rlcCrosschainToken.balanceOf(user2), initialBalance + TRANSFER_AMOUNT, "User balance should increase");
+    }
 
-    // function test_credit_WorksAfterUnpause() public {
-    //     // Test that _credit works after unpausing
-    //     uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
+    function test_credit_WorksAfterUnpause() public {
+        // Test that _credit works after unpausing
+        uint256 initialBalance = rlcCrosschainToken.balanceOf(user2);
 
-    //     // Pause the contract
-    //     vm.prank(pauser);
-    //     iexecLayerZeroBridgeChainX.pause();
+        // Pause the contract
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.pause();
 
-    //     // Verify it's paused
-    //     vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
-    //     iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
+        // Verify it's paused
+        vm.expectRevert(PausableUpgradeable.EnforcedPause.selector);
+        iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
 
-    //     // Unpause the contract
-    //     vm.prank(pauser);
-    //     iexecLayerZeroBridgeChainX.unpause();
+        // Unpause the contract
+        vm.prank(pauser);
+        iexecLayerZeroBridgeChainX.unpause();
 
-    //     // Now it should work
-    //     vm.expectEmit(true, true, true, true);
-    //     emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
-    //     vm.expectEmit(true, true, true, true);
-    //     emit IERC7802.CrosschainMint(user2, TRANSFER_AMOUNT, address(iexecLayerZeroBridgeChainX));
+        // Now it should work
+        vm.expectEmit(true, true, true, true);
+        emit IERC20.Transfer(address(0), user2, TRANSFER_AMOUNT);
+        vm.expectEmit(true, true, true, true);
+        emit IERC7802.CrosschainMint(user2, TRANSFER_AMOUNT, address(iexecLayerZeroBridgeChainX));
 
-    //     uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
+        uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(user2, TRANSFER_AMOUNT, SOURCE_EID);
 
-    //     assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
-    //     assertEq(rlcCrosschainToken.balanceOf(user2), initialBalance + TRANSFER_AMOUNT, "User balance should increase");
-    // }
+        assertEq(amountReceived, TRANSFER_AMOUNT, "Amount received should equal mint amount");
+        assertEq(rlcCrosschainToken.balanceOf(user2), initialBalance + TRANSFER_AMOUNT, "User balance should increase");
+    }
 }
