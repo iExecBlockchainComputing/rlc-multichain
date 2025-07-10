@@ -183,7 +183,7 @@ safe-configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 	@npm run bridge-config -- \
 		--source-chain $(SOURCE_CHAIN) \
 		--target-chain $(TARGET_CHAIN) \
-		--rpc-url http://localhost:8545 \
+		--rpc-url $(RPC_URL) \
 		--script IexecLayerZeroBridge \
 		--forge-options="--unlocked --sender 0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3" || true
 	@pkill -f "anvil.*--port 8545" || true
@@ -195,7 +195,7 @@ safe-configure-bridge-dry: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 	@npm run bridge-config -- \
 		--source-chain $(SOURCE_CHAIN) \
 		--target-chain $(TARGET_CHAIN) \
-		--rpc-url http://localhost:8545 \
+		--rpc-url $(RPC_URL) \
 		--script IexecLayerZeroBridge \
 		--forge-options="--unlocked --sender 0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3" \
 		--dry-run || true

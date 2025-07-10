@@ -133,7 +133,7 @@ export class BridgeConfigurator {
         'configure-bridge',
         `SOURCE_CHAIN=${args.sourceChain}`,
         `TARGET_CHAIN=${args.targetChain}`,
-        `RPC_URL=${args.rpcUrl}`
+        `RPC_URL=http://localhost:8545`
       ];
 
       // Add forge options if provided
