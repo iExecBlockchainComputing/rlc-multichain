@@ -175,58 +175,9 @@ send-tokens-to-sepolia:
 #
 # Safe multisig integration targets
 #
-
-# Configure bridge using Safe multisig (propose transactions)
-safe-configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
-	@echo "Configuring LayerZero Bridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN) via Safe multisig"
-	npm run bridge-config -- \
-		--source-chain $(SOURCE_CHAIN) \
-		--target-chain $(TARGET_CHAIN) \
-		--rpc-url $(RPC_URL) \
-		--script IexecLayerZeroBridge
-
-# Dry run to see what transactions would be proposed
-safe-configure-bridge-dry: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
-	@echo "DRY RUN: Configuring LayerZero Bridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN) via Safe multisig"
-	npm run bridge-config -- \
-		--source-chain $(SOURCE_CHAIN) \
-		--target-chain $(TARGET_CHAIN) \
-		--rpc-url $(RPC_URL) \
-		--script IexecLayerZeroBridge \
-		--dry-run
-
-# Configure bridge for both directions using Safe
-safe-configure-bridge-bidirectional: # SOURCE_CHAIN, TARGET_CHAIN, SOURCE_RPC, TARGET_RPC
-	@echo "Configuring bidirectional bridge $(SOURCE_CHAIN) <-> $(TARGET_CHAIN) via Safe multisig"
-	$(MAKE) safe-configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
-	$(MAKE) safe-configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
-
-# Configure other bridge components via Safe
-safe-configure-rlc-adapter: # CHAIN, RPC_URL
-	@echo "Configuring RLC Adapter for $(CHAIN) via Safe multisig"
-	npm run bridge-config -- \
-		--source-chain $(CHAIN) \
-		--target-chain $(CHAIN) \
-		--rpc-url $(RPC_URL) \
-		--script ConfigureRLCAdapter
-
-safe-configure-rlc-oft: # CHAIN, RPC_URL
-	@echo "Configuring RLC OFT for $(CHAIN) via Safe multisig"
-	npm run bridge-config -- \
-		--source-chain $(CHAIN) \
-		--target-chain $(CHAIN) \
-		--rpc-url $(RPC_URL) \
-		--script ConfigureRLCOFT
-
 # Configure bridge using Safe multisig with automatic forking
-safe-configure-bridge-fork: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
-	@if [ -z "$(SOURCE_CHAIN)" ] || [ -z "$(TARGET_CHAIN)" ] || [ -z "$(RPC_URL)" ]; then \
-		echo "❌ Error: SOURCE_CHAIN, TARGET_CHAIN, and RPC_URL are required"; \
-		echo "Usage: make safe-configure-bridge-fork SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=\$$SEPOLIA_RPC_URL"; \
-		exit 1; \
-	fi
-	@echo "🍴 Starting fork and configuring LayerZero Bridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN) via Safe multisig"
-	@echo "🔄 Starting local fork of $(SOURCE_CHAIN)..."
+safe-configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
+	@echo "Starting fork and configuring LayerZero Bridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN) via Safe multisig"
 	@(anvil --fork-url $(RPC_URL) --port 8545 --silent &) && sleep 3
 	@echo "📡 Running configuration on local fork with unlocked account..."
 	@npm run bridge-config -- \
@@ -235,20 +186,12 @@ safe-configure-bridge-fork: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 		--rpc-url http://localhost:8545 \
 		--script IexecLayerZeroBridge \
 		--forge-options="--unlocked --sender 0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3" || true
-	@echo "🛑 Stopping local fork..."
 	@pkill -f "anvil.*--port 8545" || true
 
 # Dry run with automatic forking
-safe-configure-bridge-fork-dry: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
-	@if [ -z "$(SOURCE_CHAIN)" ] || [ -z "$(TARGET_CHAIN)" ] || [ -z "$(RPC_URL)" ]; then \
-		echo "❌ Error: SOURCE_CHAIN, TARGET_CHAIN, and RPC_URL are required"; \
-		echo "Usage: make safe-configure-bridge-fork-dry SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=\$$SEPOLIA_RPC_URL"; \
-		exit 1; \
-	fi
-	@echo "🍴 DRY RUN: Starting fork and configuring LayerZero Bridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN) via Safe multisig"
-	@echo "🔄 Starting local fork of $(SOURCE_CHAIN)..."
+safe-configure-bridge-dry: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
+	@echo "DRY RUN: Starting fork and configuring LayerZero Bridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN) via Safe multisig"
 	@(anvil --fork-url $(RPC_URL) --port 8545 --silent &) && sleep 3
-	@echo "📡 Running configuration on local fork with unlocked account (DRY RUN)..."
 	@npm run bridge-config -- \
 		--source-chain $(SOURCE_CHAIN) \
 		--target-chain $(TARGET_CHAIN) \
@@ -256,28 +199,25 @@ safe-configure-bridge-fork-dry: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 		--script IexecLayerZeroBridge \
 		--forge-options="--unlocked --sender 0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3" \
 		--dry-run || true
-	@echo "🛑 Stopping local fork..."
 	@pkill -f "anvil.*--port 8545" || true
-
 # Convenience targets for common networks
+
 safe-configure-sepolia-arbitrum:
-	$(MAKE) safe-configure-bridge-bidirectional \
-		SOURCE_CHAIN=sepolia \
-		TARGET_CHAIN=arbitrum_sepolia \
-		SOURCE_RPC=$(SEPOLIA_RPC_URL) \
-		TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL)
-
-safe-configure-sepolia-arbitrum-fork:
-	$(MAKE) safe-configure-bridge-fork \
+	$(MAKE) safe-configure-bridge \
 		SOURCE_CHAIN=sepolia \
 		TARGET_CHAIN=arbitrum_sepolia \
 		RPC_URL=$(SEPOLIA_RPC_URL)
 
-safe-configure-sepolia-arbitrum-fork-dry:
-	$(MAKE) safe-configure-bridge-fork-dry \
+safe-configure-sepolia-arbitrum-dry:
+	$(MAKE) safe-configure-bridge-dry \
 		SOURCE_CHAIN=sepolia \
 		TARGET_CHAIN=arbitrum_sepolia \
 		RPC_URL=$(SEPOLIA_RPC_URL)
+
+safe-configure-bridge-bidirectional: # SOURCE_CHAIN, TARGET_CHAIN, SOURCE_RPC, TARGET_RPC
+	@echo "Configuring bidirectional bridge $(SOURCE_CHAIN) <-> $(TARGET_CHAIN) via Safe multisig"
+	$(MAKE) safe-configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
+	$(MAKE) safe-configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
 
 safe-configure-mainnet-arbitrum:
 	$(MAKE) safe-configure-bridge-bidirectional \
@@ -285,35 +225,3 @@ safe-configure-mainnet-arbitrum:
 		TARGET_CHAIN=arbitrum \
 		SOURCE_RPC=$(ETHEREUM_RPC_URL) \
 		TARGET_RPC=$(ARBITRUM_RPC_URL)
-
-# Show help for Safe targets
-safe-help:
-	@echo "Safe Multisig Integration Commands:"
-	@echo ""
-	@echo "  safe-configure-bridge                     - Configure bridge via Safe (one direction)"
-	@echo "    Usage: make safe-configure-bridge SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=\$$SEPOLIA_RPC_URL"
-	@echo ""
-	@echo "  safe-configure-bridge-dry                 - Dry run to see what would be proposed"
-	@echo "    Usage: make safe-configure-bridge-dry SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=\$$SEPOLIA_RPC_URL"
-	@echo ""
-	@echo "  safe-configure-bridge-fork                - Configure bridge via Safe with automatic forking (uses unlocked account)"
-	@echo "    Usage: make safe-configure-bridge-fork SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=\$$SEPOLIA_RPC_URL"
-	@echo ""
-	@echo "  safe-configure-bridge-fork-dry            - Dry run with automatic forking (uses unlocked account)"
-	@echo "    Usage: make safe-configure-bridge-fork-dry SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia RPC_URL=\$$SEPOLIA_RPC_URL"
-	@echo ""
-	@echo "  safe-configure-bridge-bidirectional       - Configure bridge both directions"
-	@echo "    Usage: make safe-configure-bridge-bidirectional SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia SOURCE_RPC=\$$SEPOLIA_RPC_URL TARGET_RPC=\$$ARBITRUM_SEPOLIA_RPC_URL"
-	@echo ""
-	@echo "  safe-configure-sepolia-arbitrum           - Configure Sepolia <-> Arbitrum Sepolia"
-	@echo "  safe-configure-mainnet-arbitrum           - Configure Mainnet <-> Arbitrum"
-	@echo ""
-	@echo "  safe-configure-rlc-adapter                - Configure RLC Adapter"
-	@echo "  safe-configure-rlc-oft                    - Configure RLC OFT"
-	@echo ""
-	@echo "Direct CLI usage:"
-	@echo "  npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url \$$SEPOLIA_RPC_URL"
-	@echo "  npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url \$$SEPOLIA_RPC_URL --dry-run"
-	@echo "  npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url http://localhost:8545 --forge-options=\"--unlocked --sender 0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3\""
-	@echo ""
-	@echo "Available scripts: \$$(cd safe && npm run bridge-config 2>/dev/null | grep 'Available scripts:' | cut -d: -f2 || echo 'Run npm run bridge-config for list')"
