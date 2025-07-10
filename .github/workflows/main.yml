@@ -31,7 +31,7 @@ jobs:
         run: forge fmt --check
 
       - name: Run Forge build
-        run: forge build --sizes && cp .env.template .env
+        run: forge build && forge build './src' --sizes && cp .env.template .env
 
       - name: Run Foundry coverage
         run: make generate-coverage
