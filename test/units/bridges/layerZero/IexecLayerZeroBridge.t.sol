@@ -311,8 +311,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     function test_credit_SendToDeadAddressInsteadOfZeroAddress() public {
-        // Fuzz test with different addresses including zero address
-        // Handle zero address redirection
         uint256 initialBalance = rlcCrosschainToken.balanceOf(address(0xdead));
         uint256 amountReceived = iexecLayerZeroBridgeChainX.exposed_credit(address(0), TRANSFER_AMOUNT, SOURCE_EID);
 
