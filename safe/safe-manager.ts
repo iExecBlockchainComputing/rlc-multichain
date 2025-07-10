@@ -10,14 +10,9 @@ export class SafeManager {
   constructor() {
     this.safeConfig = getSafeConfig();
     
-    // Initialize the API Kit
-    // Note: API key is validated as mandatory and stored for potential use
     this.apiKit = new SafeApiKit({
       chainId: this.safeConfig.chainId
     });
-    
-    // The API key is now mandatory and validated by getSafeConfig()
-    // It's available at this.safeConfig.apiKey for any future use
   }
 
   /**

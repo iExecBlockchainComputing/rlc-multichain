@@ -9,10 +9,8 @@ interface ListPendingArgs {
 }
 
 async function main() {
-  // Parse command line arguments
   const args = process.argv.slice(2);
   
-  // Parse arguments
   const parsedArgs: ListPendingArgs = {};
   for (let i = 0; i < args.length; i += 2) {
     const key = args[i];
@@ -39,13 +37,8 @@ Options:
   --limit <number>        Limit number of results
 
 Examples:
-  # List pending transactions
   npm run list-pending
-
-  # List all transactions
   npm run list-pending -- --type all
-
-  # List first 10 pending transactions
   npm run list-pending -- --type pending --limit 10
         `);
         process.exit(0);
@@ -58,7 +51,6 @@ Examples:
   }
 
   try {
-    // Validate environment
     validateEnvironment();
     
     const safeManager = new SafeManager();
@@ -103,7 +95,7 @@ Examples:
     console.log('');
 
     transactionsToShow.forEach((tx: any, index: number) => {
-      console.log(`📄 Transaction ${index + 1}:`);
+      console.log(`Transaction ${index + 1}:`);
       console.log(`   Hash: ${tx.safeTxHash}`);
       console.log(`   To: ${tx.to}`);
       console.log(`   Value: ${tx.value} wei`);
@@ -131,12 +123,12 @@ Examples:
     
     if (transactionType === 'pending' && transactionsToShow.length > 0) {
       console.log('');
-      console.log('💡 To confirm pending transactions, use the Safe web interface');
+      console.log('To confirm pending transactions, use the Safe web interface');
       console.log('   Visit: https://app.safe.global/');
     }
 
   } catch (error) {
-    console.error('❌ Error fetching transactions:', error);
+    console.error('Error fetching transactions:', error);
     process.exit(1);
   }
 }

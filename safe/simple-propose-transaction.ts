@@ -11,7 +11,6 @@ interface ProposeTransactionArgs {
 }
 
 async function main() {
-  // Parse command line arguments
   const args = process.argv.slice(2);
   
   if (args.length === 0) {
@@ -25,19 +24,13 @@ Options:
   --operation <type>       Operation type: call or delegatecall (default: call)
 
 Examples:
-  # Simple ETH transfer
   npm run propose-tx -- --to 0x1234...5678 --value 1000000000000000000
-
-  # Contract call
   npm run propose-tx -- --to 0x1234...5678 --data 0xa9059cbb...
-
-  # Delegate call
   npm run propose-tx -- --to 0x1234...5678 --data 0xa9059cbb... --operation delegatecall
     `);
     process.exit(1);
   }
 
-  // Parse arguments
   const parsedArgs: ProposeTransactionArgs = { to: '' };
   for (let i = 0; i < args.length; i += 2) {
     const key = args[i];
@@ -68,12 +61,10 @@ Examples:
   }
 
   try {
-    // Validate environment
     validateEnvironment();
     
     const safeManager = new SafeManager();
     
-    // Create transaction data
     const transactionData = parsedArgs.operation === 'delegatecall'
       ? safeManager.createDelegateCallTransaction(
           parsedArgs.to,
@@ -91,7 +82,7 @@ Examples:
 
     const safeTxHash = await safeManager.proposeTransaction(transactionData);
     
-    console.log('✅ Transaction proposed successfully!');
+    console.log('Transaction proposed successfully!');
     console.log(`Safe Transaction Hash: ${safeTxHash}`);
     console.log('');
     console.log('Next steps:');
@@ -100,7 +91,7 @@ Examples:
     console.log(`3. Execute the transaction once threshold is reached through the Safe UI`);
 
   } catch (error) {
-    console.error('❌ Error proposing transaction:', error);
+    console.error('Error proposing transaction:', error);
     process.exit(1);
   }
 }

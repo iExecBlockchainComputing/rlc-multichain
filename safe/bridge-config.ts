@@ -54,26 +54,19 @@ export class BridgeConfigurator {
     this.safeManager = new SafeManager();
   }
 
-  /**
-   * Main method to configure bridge and propose transactions to Safe
-   */
   async configureBridge(args: BridgeConfigArgs): Promise<void> {
-    console.log(`🔧 Configuring bridge ${args.sourceChain} -> ${args.targetChain}`);
+    console.log(`Configuring bridge ${args.sourceChain} -> ${args.targetChain}`);
     
     try {
       let chainId: string;
       let useExistingBroadcast = false;
       
-      // Step 1: Try to run the Foundry script
-      console.log('📡 Running Foundry configuration script...');
       try {
         chainId = await this.runFoundryScript(args);
       } catch (foundryError) {
-        console.warn('⚠️  Foundry script failed, checking for existing broadcast file...');
         chainId = this.getChainIdFromRpc(args.rpcUrl);
         useExistingBroadcast = true;
         
-        // Check if broadcast file exists before continuing
         const broadcastPath = path.join(
           process.cwd(),
           'broadcast',
@@ -83,43 +76,29 @@ export class BridgeConfigurator {
         );
         
         if (!fs.existsSync(broadcastPath)) {
-          console.error('❌ Foundry script failed and no existing broadcast file found.');
-          console.error('Common issues:');
-          console.error('   - Invalid RPC URL or network issues');
-          console.error('   - Missing environment variables (ACCOUNT, etc.)');
-          console.error('   - Contract not deployed or configuration issues');
           throw foundryError;
         }
-        
-        console.log('✅ Found existing broadcast file, continuing...');
       }
       
-      // Step 2: Read broadcast file
-      console.log('📄 Reading broadcast transactions...');
       const transactions = await this.readBroadcastFile(args.scriptName, chainId);
       
       if (transactions.length === 0) {
-        console.log('ℹ️  No transactions found in broadcast file');
+        console.log('No transactions found in broadcast file');
         return;
       }
 
-      console.log(`📋 Found ${transactions.length} transactions to propose`);
+      console.log(`Found ${transactions.length} transactions to propose`);
       
-      if (useExistingBroadcast) {
-        console.log('ℹ️  Note: Using existing broadcast file due to Foundry script failure');
-      }
-      
-      // Step 3: Propose transactions to Safe
       if (args.dryRun) {
-        console.log('🏃 DRY RUN - Transactions that would be proposed:');
+        console.log('DRY RUN - Transactions that would be proposed:');
         this.displayTransactions(transactions);
       } else {
-        console.log('🔐 Proposing transactions to Safe...');
+        console.log('Proposing transactions to Safe...');
         await this.proposeTransactionsToSafe(transactions);
       }
 
     } catch (error) {
-      console.error('❌ Error configuring bridge:', error);
+      console.error('Error configuring bridge:', error);
       throw error;
     }
   }
@@ -136,9 +115,7 @@ export class BridgeConfigurator {
         `RPC_URL=http://localhost:8545`
       ];
 
-      // Add forge options if provided
       if (args.forgeOptions) {
-        // Parse the forge options string and add each option as a separate argument
         const options = args.forgeOptions.trim().split(/\s+/);
         makeArgs.push(`FORGE_OPTIONS=${options.join(' ')}`);
       }
@@ -151,7 +128,6 @@ export class BridgeConfigurator {
 
       makeProcess.on('close', (code) => {
         if (code === 0) {
-          // Extract chain ID from RPC URL or use a mapping
           const chainId = this.getChainIdFromRpc(args.rpcUrl);
           resolve(chainId);
         } else {
@@ -169,7 +145,6 @@ export class BridgeConfigurator {
    * Get chain ID from RPC URL or use default mapping
    */
   private getChainIdFromRpc(rpcUrl: string): string {
-    // Common chain ID mappings
     const chainMappings: Record<string, string> = {
       'sepolia': '11155111',
       'arbitrum-sepolia': '421614',
@@ -184,8 +159,6 @@ export class BridgeConfigurator {
       }
     }
 
-    // Default to Sepolia if can't determine
-    console.warn(`⚠️  Could not determine chain ID from RPC URL: ${rpcUrl}, defaulting to Sepolia`);
     return '11155111';
   }
 
@@ -216,7 +189,7 @@ export class BridgeConfigurator {
    */
   private displayTransactions(transactions: BroadcastTransaction[]): void {
     transactions.forEach((tx, index) => {
-      console.log(`\n📝 Transaction ${index + 1}:`);
+      console.log(`\nTransaction ${index + 1}:`);
       console.log(`   To: ${tx.contractAddress}`);
       console.log(`   Function: ${tx.function}`);
       console.log(`   Value: ${tx.transaction.value}`);
@@ -234,7 +207,7 @@ export class BridgeConfigurator {
     for (let i = 0; i < transactions.length; i++) {
       const tx = transactions[i];
       
-      console.log(`\n🔐 Proposing transaction ${i + 1}/${transactions.length}:`);
+      console.log(`\nProposing transaction ${i + 1}/${transactions.length}:`);
       console.log(`   To: ${tx.contractAddress}`);
       console.log(`   Function: ${tx.function}`);
       
@@ -248,27 +221,21 @@ export class BridgeConfigurator {
         const safeTxHash = await this.safeManager.proposeTransaction(transactionData);
         proposedHashes.push(safeTxHash);
         
-        console.log(`   ✅ Proposed! Safe TX Hash: ${safeTxHash}`);
+        console.log(`   Proposed! Safe TX Hash: ${safeTxHash}`);
         
-        // Small delay between transactions
         await new Promise(resolve => setTimeout(resolve, 1000));
         
       } catch (error) {
-        console.error(`   ❌ Failed to propose transaction ${i + 1}:`, error);
+        console.error(`   Failed to propose transaction ${i + 1}:`, error);
         throw error;
       }
     }
 
-    console.log('\n🎉 All transactions proposed successfully!');
-    console.log('\n📋 Safe Transaction Hashes:');
+    console.log('\nAll transactions proposed successfully!');
+    console.log('\nSafe Transaction Hashes:');
     proposedHashes.forEach((hash, index) => {
       console.log(`   ${index + 1}. ${hash}`);
     });
-    
-    console.log('\n🔗 Next steps:');
-    console.log('   1. Review the transactions in the Safe web interface');
-    console.log('   2. Collect additional signatures from other owners');
-    console.log('   3. Execute the transactions once threshold is reached');
   }
 
   /**
@@ -305,7 +272,7 @@ async function main() {
   
   if (args.length === 0) {
     console.log(`
-🌉 Safe Bridge Configurator
+Safe Bridge Configurator
 
 Usage: npm run bridge-config -- [options]
 
@@ -314,18 +281,13 @@ Options:
   --target-chain <chain>     Target chain name (required)
   --rpc-url <url>           RPC URL for the source chain (required)
   --script <name>           Script name (default: IexecLayerZeroBridge)
-  --forge-options <options>  Additional forge options (e.g. "--unlocked --sender 0x...") Use = format: --forge-options="value"
+  --forge-options <options>  Additional forge options (e.g. "--unlocked --sender 0x...")
   --dry-run                 Show transactions without proposing
   --help                    Show this help message
 
 Examples:
-  # Configure bridge from Sepolia to Arbitrum Sepolia
   npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url https://sepolia.infura.io/v3/YOUR_KEY
-
-  # Dry run to see what would be proposed
   npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url https://sepolia.infura.io/v3/YOUR_KEY --dry-run
-
-  # Use with forge options for unlocked accounts
   npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url http://localhost:8545 --forge-options="--unlocked --sender 0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3"
 
 Available scripts: ${BridgeConfigurator.getAvailableScripts().join(', ')}
@@ -333,6 +295,7 @@ Available scripts: ${BridgeConfigurator.getAvailableScripts().join(', ')}
     process.exit(1);
   }
 
+  
   // Parse arguments
   const config: BridgeConfigArgs = {
     sourceChain: '',
@@ -346,7 +309,6 @@ Available scripts: ${BridgeConfigurator.getAvailableScripts().join(', ')}
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     
-    // Handle --forge-options=value format
     if (arg.startsWith('--forge-options=')) {
       config.forgeOptions = arg.substring('--forge-options='.length);
       continue;
@@ -355,35 +317,35 @@ Available scripts: ${BridgeConfigurator.getAvailableScripts().join(', ')}
     switch (arg) {
       case '--source-chain':
         if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
-          console.error('❌ Error: --source-chain requires a value');
+          console.error('Error: --source-chain requires a value');
           process.exit(1);
         }
         config.sourceChain = args[++i];
         break;
       case '--target-chain':
         if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
-          console.error('❌ Error: --target-chain requires a value');
+          console.error('Error: --target-chain requires a value');
           process.exit(1);
         }
         config.targetChain = args[++i];
         break;
       case '--rpc-url':
         if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
-          console.error('❌ Error: --rpc-url requires a value');
+          console.error('Error: --rpc-url requires a value');
           process.exit(1);
         }
         config.rpcUrl = args[++i];
         break;
       case '--script':
         if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
-          console.error('❌ Error: --script requires a value');
+          console.error('Error: --script requires a value');
           process.exit(1);
         }
         config.scriptName = args[++i];
         break;
       case '--forge-options':
         if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
-          console.error('❌ Error: --forge-options requires a value');
+          console.error('Error: --forge-options requires a value');
           process.exit(1);
         }
         config.forgeOptions = args[++i];
@@ -402,19 +364,18 @@ Available scripts: ${BridgeConfigurator.getAvailableScripts().join(', ')}
 
   // Validate required arguments
   if (!config.sourceChain || !config.targetChain || !config.rpcUrl) {
-    console.error('❌ Error: --source-chain, --target-chain, and --rpc-url are required');
+    console.error('Error: --source-chain, --target-chain, and --rpc-url are required');
     process.exit(1);
   }
 
   try {
-    // Validate environment
     validateEnvironment();
     
     const configurator = new BridgeConfigurator();
     await configurator.configureBridge(config);
     
   } catch (error) {
-    console.error('❌ Configuration failed:', error);
+    console.error('Configuration failed:', error);
     process.exit(1);
   }
 }
