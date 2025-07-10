@@ -44,7 +44,7 @@ interface BridgeConfigArgs {
   rpcUrl: string;
   scriptName: string;
   dryRun?: boolean;
-  skipFork?: boolean;
+  forgeOptions?: string;
 }
 
 export class BridgeConfigurator {
@@ -135,6 +135,13 @@ export class BridgeConfigurator {
         `TARGET_CHAIN=${args.targetChain}`,
         `RPC_URL=${args.rpcUrl}`
       ];
+
+      // Add forge options if provided
+      if (args.forgeOptions) {
+        // Parse the forge options string and add each option as a separate argument
+        const options = args.forgeOptions.trim().split(/\s+/);
+        makeArgs.push(`FORGE_OPTIONS=${options.join(' ')}`);
+      }
 
       const makeProcess = spawn('make', makeArgs, {
         cwd: process.cwd(),
@@ -307,8 +314,8 @@ Options:
   --target-chain <chain>     Target chain name (required)
   --rpc-url <url>           RPC URL for the source chain (required)
   --script <name>           Script name (default: IexecLayerZeroBridge)
+  --forge-options <options>  Additional forge options (e.g. "--unlocked --sender 0x...") Use = format: --forge-options="value"
   --dry-run                 Show transactions without proposing
-  --skip-fork               Skip anvil fork (use direct RPC)
   --help                    Show this help message
 
 Examples:
@@ -317,6 +324,9 @@ Examples:
 
   # Dry run to see what would be proposed
   npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url https://sepolia.infura.io/v3/YOUR_KEY --dry-run
+
+  # Use with forge options for unlocked accounts
+  npm run bridge-config -- --source-chain sepolia --target-chain arbitrum-sepolia --rpc-url http://localhost:8545 --forge-options="--unlocked --sender 0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3"
 
 Available scripts: ${BridgeConfigurator.getAvailableScripts().join(', ')}
     `);
@@ -330,30 +340,56 @@ Available scripts: ${BridgeConfigurator.getAvailableScripts().join(', ')}
     rpcUrl: '',
     scriptName: 'IexecLayerZeroBridge',
     dryRun: false,
-    skipFork: false
+    forgeOptions: undefined
   };
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     
+    // Handle --forge-options=value format
+    if (arg.startsWith('--forge-options=')) {
+      config.forgeOptions = arg.substring('--forge-options='.length);
+      continue;
+    }
+    
     switch (arg) {
       case '--source-chain':
+        if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
+          console.error('❌ Error: --source-chain requires a value');
+          process.exit(1);
+        }
         config.sourceChain = args[++i];
         break;
       case '--target-chain':
+        if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
+          console.error('❌ Error: --target-chain requires a value');
+          process.exit(1);
+        }
         config.targetChain = args[++i];
         break;
       case '--rpc-url':
+        if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
+          console.error('❌ Error: --rpc-url requires a value');
+          process.exit(1);
+        }
         config.rpcUrl = args[++i];
         break;
       case '--script':
+        if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
+          console.error('❌ Error: --script requires a value');
+          process.exit(1);
+        }
         config.scriptName = args[++i];
+        break;
+      case '--forge-options':
+        if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
+          console.error('❌ Error: --forge-options requires a value');
+          process.exit(1);
+        }
+        config.forgeOptions = args[++i];
         break;
       case '--dry-run':
         config.dryRun = true;
-        break;
-      case '--skip-fork':
-        config.skipFork = true;
         break;
       case '--help':
         console.log('Help message already shown above');
