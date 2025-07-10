@@ -20,7 +20,6 @@
  */
 
 export { SafeManager } from './safe-manager';
-export { RLCBridgeTransactions } from './bridge-transactions';
 export { getSafeConfig, getProposerConfig, validateEnvironment } from './config';
 export type { SafeConfig, OwnerConfig } from './config';
 
