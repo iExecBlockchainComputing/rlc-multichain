@@ -223,7 +223,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(rlcCrosschainToken.balanceOf(user1), INITIAL_BALANCE - TRANSFER_AMOUNT);
     }
 
-    // ============ LEVEL 2 PAUSE TESTS (Outbount transfer pause) ============
+    // ============ LEVEL 2 PAUSE TESTS (Outbound transfer pause) ============
 
     function test_PauseOutboundTransfers_OnlyPauserRole() public {
         vm.expectRevert();
@@ -238,7 +238,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
         // Verify state
         assertFalse(iexecLayerZeroBridgeChainX.paused());
-        assertTrue(iexecLayerZeroBridgeChainX.outbountTransfersPaused());
+        assertTrue(iexecLayerZeroBridgeChainX.outboundTransfersPaused());
 
         // Prepare send parameters
         (SendParam memory sendParam, MessagingFee memory fee) =
@@ -264,7 +264,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
         // Should now work normally
         assertFalse(iexecLayerZeroBridgeChainX.paused());
-        assertFalse(iexecLayerZeroBridgeChainX.outbountTransfersPaused());
+        assertFalse(iexecLayerZeroBridgeChainX.outboundTransfersPaused());
 
         test_SendToken_WhenOperational_WithoutApproval();
     }
