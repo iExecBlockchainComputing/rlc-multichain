@@ -100,8 +100,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         vm.label(address(rlcLiquidityUnifier), "rlcLiquidityUnifier");
     }
 
-    // TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
-    // TODO: Add more tests for send functionality, in both directions
+    //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
+    //TODO: Add more tests for send functionality, in both directions
 
     // ============ BASIC BRIDGE FUNCTIONALITY TESTS ============
     function test_SendToken_WhenOperational_WithApproval() public {
