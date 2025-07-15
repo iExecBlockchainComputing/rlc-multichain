@@ -219,8 +219,8 @@ contract IexecLayerZeroBridge is
 
     /**
      * Accepts the default admin transfer and sets the owner to the new admin.
-     * @dev This ensures the state variale `OwnableUpgradeable._owner` is set correctly after the default
-     * admin transfer. Even though `OwnableUpgradeable._owner` is not used in `ower()` accessor, we chose
+     * @dev This ensures the state variable `OwnableUpgradeable._owner` is set correctly after the default
+     * admin transfer. Even though `OwnableUpgradeable._owner` is not used in `owner()` accessor, we chose
      * to update it for consistency purposes.
      */
     function _acceptDefaultAdminTransfer() internal override {
