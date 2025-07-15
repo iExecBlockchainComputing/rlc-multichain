@@ -294,19 +294,35 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     function test_acceptDefaultAdminTransfer_UpdatesOwnerInOwnable() public {
+        // Init admin transfer.
+        vm.expectEmit(true, true, true, true, address(iexecLayerZeroBridgeChainX));
+        emit IAccessControlDefaultAdminRules.DefaultAdminTransferScheduled(user1, 1); // block.timestamp == 1
         vm.startPrank(admin);
-        vm.expectEmit(true, true, true, false, address(iexecLayerZeroBridgeChainX));
-        emit IAccessControlDefaultAdminRules.DefaultAdminTransferScheduled(user1, 0);
         iexecLayerZeroBridgeChainX.beginDefaultAdminTransfer(user1);
+        vm.stopPrank();
+        (, uint48 acceptSchedule) = iexecLayerZeroBridgeChainX.pendingDefaultAdmin();
+        // Finalize admin transfer.
         vm.expectEmit(true, true, true, true, address(iexecLayerZeroBridgeChainX));
-        emit IAccessControl.RoleRevoked(iexecLayerZeroBridgeChainX.DEFAULT_ADMIN_ROLE(),admin, admin);
+        emit IAccessControl.RoleRevoked(iexecLayerZeroBridgeChainX.DEFAULT_ADMIN_ROLE(), admin, user1);
         vm.expectEmit(true, true, true, true, address(iexecLayerZeroBridgeChainX));
-        emit IAccessControl.RoleGranted(iexecLayerZeroBridgeChainX.DEFAULT_ADMIN_ROLE(),user1, admin);
+        emit IAccessControl.RoleGranted(iexecLayerZeroBridgeChainX.DEFAULT_ADMIN_ROLE(),user1, user1);
         vm.expectEmit(true, true, true, true, address(iexecLayerZeroBridgeChainX));
         emit OwnableUpgradeable.OwnershipTransferred(admin, user1);
+        vm.warp(acceptSchedule + 1); // Time travel to after the accept schedule.
+        vm.startPrank(user1);
         iexecLayerZeroBridgeChainX.acceptDefaultAdminTransfer();
         vm.stopPrank();
-        test_owner_ReturnsDefaultAdmin();
+        // Check the new owner.
+        assertEq(
+            iexecLayerZeroBridgeChainX.owner(),
+            user1,
+            "owner() should return user1"
+        );
+        assertEq(
+            iexecLayerZeroBridgeChainX.owner(),
+            iexecLayerZeroBridgeChainX.defaultAdmin(),
+            "owner() should be equal to defaultAdmin()"
+        );
     }
 
     // ============ token and approvalRequired ============
