@@ -7,7 +7,8 @@ import {MessagingFee, SendParam, IOFT} from "@layerzerolabs/oft-evm/contracts/in
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC7802} from "@openzeppelin/contracts/interfaces/draft-IERC7802.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {IAccessControlDefaultAdminRules} from "@openzeppelin/contracts/access/extensions/IAccessControlDefaultAdminRules.sol";
+import {IAccessControlDefaultAdminRules} from
+    "@openzeppelin/contracts/access/extensions/IAccessControlDefaultAdminRules.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
@@ -271,21 +272,27 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     // ============ renounceOwnership, transferOwnership, owner ============
 
     function test_renounceOwnership_IsNotAllowed() public {
-        vm.expectRevert(abi.encodeWithSelector(IIexecLayerZeroBridge.OperationNotAllowed.selector, "Use AccessControlDefaultAdminRulesUpgradeable instead"));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IIexecLayerZeroBridge.OperationNotAllowed.selector,
+                "Use AccessControlDefaultAdminRulesUpgradeable instead"
+            )
+        );
         iexecLayerZeroBridgeChainX.renounceOwnership();
     }
 
     function test_transferOwnership_IsNotAllowed() public {
-        vm.expectRevert(abi.encodeWithSelector(IIexecLayerZeroBridge.OperationNotAllowed.selector, "Use AccessControlDefaultAdminRulesUpgradeable instead"));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IIexecLayerZeroBridge.OperationNotAllowed.selector,
+                "Use AccessControlDefaultAdminRulesUpgradeable instead"
+            )
+        );
         iexecLayerZeroBridgeChainX.transferOwnership(user1);
     }
 
     function test_owner_ReturnsDefaultAdmin() public view {
-        assertEq(
-            iexecLayerZeroBridgeChainX.owner(),
-            admin,
-            "owner() should return the correct owner"
-        );
+        assertEq(iexecLayerZeroBridgeChainX.owner(), admin, "owner() should return the correct owner");
         assertEq(
             iexecLayerZeroBridgeChainX.owner(),
             iexecLayerZeroBridgeChainX.defaultAdmin(),
@@ -305,7 +312,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         vm.expectEmit(true, true, true, true, address(iexecLayerZeroBridgeChainX));
         emit IAccessControl.RoleRevoked(iexecLayerZeroBridgeChainX.DEFAULT_ADMIN_ROLE(), admin, user1);
         vm.expectEmit(true, true, true, true, address(iexecLayerZeroBridgeChainX));
-        emit IAccessControl.RoleGranted(iexecLayerZeroBridgeChainX.DEFAULT_ADMIN_ROLE(),user1, user1);
+        emit IAccessControl.RoleGranted(iexecLayerZeroBridgeChainX.DEFAULT_ADMIN_ROLE(), user1, user1);
         vm.expectEmit(true, true, true, true, address(iexecLayerZeroBridgeChainX));
         emit OwnableUpgradeable.OwnershipTransferred(admin, user1);
         vm.warp(acceptSchedule + 1); // Time travel to after the accept schedule.
@@ -313,11 +320,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         iexecLayerZeroBridgeChainX.acceptDefaultAdminTransfer();
         vm.stopPrank();
         // Check the new owner.
-        assertEq(
-            iexecLayerZeroBridgeChainX.owner(),
-            user1,
-            "owner() should return user1"
-        );
+        assertEq(iexecLayerZeroBridgeChainX.owner(), user1, "owner() should return user1");
         assertEq(
             iexecLayerZeroBridgeChainX.owner(),
             iexecLayerZeroBridgeChainX.defaultAdmin(),
