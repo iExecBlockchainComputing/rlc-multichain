@@ -167,6 +167,25 @@ contract IexecLayerZeroBridge is
         _unpauseOutboundTransfers();
     }
 
+    // ============ OFT CONFIGURATION ============
+
+    /**
+     * @notice Indicates whether the OFT contract requires approval to send tokens
+     * Approval is only required on the Ethereum Mainnet where the original RLC contract is deployed.
+     * @return requiresApproval Returns true if deployed on Ethereum Mainnet, false otherwise
+     */
+    function approvalRequired() external view virtual returns (bool) {
+        return APPROVAL_REQUIRED;
+    }
+
+    /**
+     * @notice Returns the address of the underlying token being bridged
+     * @return The address of the RLC token contract
+     */
+    function token() external view returns (address) {
+        return APPROVAL_REQUIRED ? address(IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN()) : BRIDGEABLE_TOKEN;
+    }
+
     // ============ OWNABLE OVERRIDES ============
 
     /**
@@ -207,25 +226,6 @@ contract IexecLayerZeroBridge is
     function _acceptDefaultAdminTransfer() internal override {
         super._acceptDefaultAdminTransfer();
         _transferOwnership(defaultAdmin());
-    }
-
-    // ============ OFT CONFIGURATION ============
-
-    /**
-     * @notice Indicates whether the OFT contract requires approval to send tokens
-     * Approval is only required on the Ethereum Mainnet where the original RLC contract is deployed.
-     * @return requiresApproval Returns true if deployed on Ethereum Mainnet, false otherwise
-     */
-    function approvalRequired() external view virtual returns (bool) {
-        return APPROVAL_REQUIRED;
-    }
-
-    /**
-     * @notice Returns the address of the underlying token being bridged
-     * @return The address of the RLC token contract
-     */
-    function token() external view returns (address) {
-        return APPROVAL_REQUIRED ? address(IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN()) : BRIDGEABLE_TOKEN;
     }
 
     // ============ CORE BRIDGE FUNCTIONS ============
