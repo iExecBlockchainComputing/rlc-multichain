@@ -4,11 +4,10 @@
 pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
-import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCLiquidityUnifier} from "../src/RLCLiquidityUnifier.sol";
-import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
+import {UUPSProxyUtils} from "./lib/UUPSProxyUtils.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
-import {UpgradeUtils} from "./lib/UpgradeUtils.sol";
 /**
  * Deployment script for the RLCLiquidityUnifier contract.
  * It reads configuration from a JSON file and deploys the contract using CreateX.
@@ -57,7 +56,7 @@ contract Deploy is Script {
         bytes memory constructorData = abi.encode(rlcToken);
         bytes memory initData =
             abi.encodeWithSelector(RLCLiquidityUnifier.initialize.selector, initialAdmin, initialUpgrader);
-        return UUPSProxyDeployer.deployUsingCreateX(
+        return UUPSProxyUtils.deployUsingCreateX(
             "RLCLiquidityUnifier", constructorData, initData, createxFactory, createxSalt
         );
     }
@@ -65,17 +64,24 @@ contract Deploy is Script {
 
 contract Upgrade is Script {
     function run() external {
-        string memory chain = vm.envString("CHAIN");
-        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(chain);
-
         vm.startBroadcast();
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: commonParams.rlcLiquidityUnifierAddress,
-            constructorData: abi.encode(commonParams.rlcToken),
-            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2", // Would be production contract in real deployment
-            newStateVariable: 1000000 * 10 ** 9
+        upgrade({
+            proxyAddress: address(0), // Replace with the actual proxy address
+            contractName: "", // e.g., "ContractV2.sol:ContractV2"
+            constructorData: new bytes(0), // Replace with the actual constructor data
+            initData: new bytes(0) // Replace with the actual initialization data
         });
-        UpgradeUtils.executeUpgrade(params);
         vm.stopBroadcast();
+    }
+
+    function upgrade(
+        address proxyAddress,
+        string memory contractName,
+        bytes memory constructorData,
+        bytes memory initData
+    ) public {
+        Options memory opts;
+        opts.constructorData = constructorData;
+        UUPSProxyUtils.executeUpgrade(proxyAddress, contractName, initData, opts);
     }
 }

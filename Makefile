@@ -78,32 +78,6 @@ deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
 	# TODO verify contracts after deployment.
 
 #
-# High-level upgrade targets
-#
-
-upgrade-on-anvil:
-	$(MAKE) upgrade-all \
-		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
-
-upgrade-on-mainnets:
-	$(MAKE) upgrade-all \
-		SOURCE_CHAIN=ethereum SOURCE_RPC=$(ETHEREUM_RPC_URL) \
-		TARGET_CHAIN=arbitrum TARGET_RPC=$(ARBITRUM_RPC_URL) \
-		OPTIONS=--verify
-
-# TODO : RLCMultichain and RLCLiquidityUnifier upgrades
-upgrade-on-testnets:
-	$(MAKE) upgrade-all \
-		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
-		OPTIONS=--verify
-
-upgrade-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
-	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)
-	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)
-
-#
 # Generic deployment targets
 #
 
@@ -114,19 +88,6 @@ deploy-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
 		--account $(ACCOUNT) \
 		$(OPTIONS) \
 		--broadcast \
-		-vvv
-
-#
-# Generic upgrade targets
-#
-
-upgrade-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
-	@echo "Upgrading $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
-	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Upgrade \
-		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
-		--broadcast \
-		$(OPTIONS) \
 		-vvv
 
 #
@@ -141,13 +102,6 @@ configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
-
-#
-# Individual upgrade targets
-#
-
-upgrade-layerzero-bridge: # CHAIN, RPC_URL
-	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
 
 #
 # Bridge operations.

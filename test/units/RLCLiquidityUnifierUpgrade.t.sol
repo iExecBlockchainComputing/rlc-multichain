@@ -5,10 +5,12 @@ pragma solidity ^0.8.22;
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
-import {UpgradeUtils} from "../../script/lib/UpgradeUtils.sol";
+import {UUPSProxyUtils} from "../../script/lib/UUPSProxyUtils.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
 import {RLCLiquidityUnifierV2} from "./mocks/RLCLiquidityUnifierV2Mock.sol";
+import {Upgrade as RLCLiquidityUnifierUpgradeScript} from "../../script/RLCLiquidityUnifier.s.sol";
 
+// TODO remove useless LZ setup (endpoint, ...).
 contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
     using TestUtils for *;
 
@@ -55,18 +57,14 @@ contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
         assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.DEFAULT_ADMIN_ROLE(), admin));
         assertTrue(rlcLiquidityUnifierV1.hasRole(rlcLiquidityUnifierV1.UPGRADER_ROLE(), upgrader));
 
-        // 3. Perform upgrade using UpgradeUtils directly
+        // 3. Perform upgrade
         vm.startPrank(upgrader);
-
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
+        new RLCLiquidityUnifierUpgradeScript().upgrade({
             proxyAddress: proxyAddress,
+            contractName:  "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
             constructorData: abi.encode(rlcToken),
-            contractName: "RLCLiquidityUnifierV2Mock.sol:RLCLiquidityUnifierV2",
-            newStateVariable: NEW_STATE_VARIABLE
+            initData: abi.encodeWithSignature("initializeV2(uint256)", NEW_STATE_VARIABLE)
         });
-
-        UpgradeUtils.executeUpgrade(params);
-
         vm.stopPrank();
 
         rlcLiquidityUnifierV2 = RLCLiquidityUnifierV2(proxyAddress);

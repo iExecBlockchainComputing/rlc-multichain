@@ -4,9 +4,9 @@
 pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
-import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
-import {UUPSProxyDeployer} from "./lib/UUPSProxyDeployer.sol";
+import {UUPSProxyUtils} from "./lib/UUPSProxyUtils.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
 
 /**
@@ -58,8 +58,31 @@ contract Deploy is Script {
     ) public returns (address) {
         bytes memory initData =
             abi.encodeWithSelector(RLCCrosschainToken.initialize.selector, name, symbol, initialAdmin, initialUpgrader);
-        return UUPSProxyDeployer.deployUsingCreateX("RLCCrosschainToken", "", initData, createxFactory, createxSalt);
+        return UUPSProxyUtils.deployUsingCreateX("RLCCrosschainToken", "", initData, createxFactory, createxSalt);
     }
 }
 
-// TODO add upgrade script.
+contract Upgrade is Script {
+    function run() external {
+        vm.startBroadcast();
+        upgrade({
+            proxyAddress: address(0), // Replace with the actual proxy address
+            contractName: "", // e.g., "ContractV2.sol:ContractV2"
+            constructorData: new bytes(0), // Replace with the actual constructor data
+            initData: new bytes(0) // Replace with the actual initialization data
+        });
+        vm.stopBroadcast();
+    }
+
+    // TODO add tests in `RLCCrosschainTokenUpgrade.t.sol`.
+    function upgrade(
+        address proxyAddress,
+        string memory contractName,
+        bytes memory constructorData,
+        bytes memory initData
+    ) public {
+        Options memory opts;
+        opts.constructorData = constructorData;
+        UUPSProxyUtils.executeUpgrade(proxyAddress, contractName, initData, opts);
+    }
+}

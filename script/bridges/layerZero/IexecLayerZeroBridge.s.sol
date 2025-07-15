@@ -3,15 +3,14 @@
 pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
-import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {ConfigLib} from "./../../lib/ConfigLib.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
-import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
-import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
+import {UUPSProxyUtils} from "../../lib/UUPSProxyUtils.sol";
 
 contract Deploy is Script {
     /**
@@ -53,7 +52,7 @@ contract Deploy is Script {
         bytes memory initializeData = abi.encodeWithSelector(
             IexecLayerZeroBridge.initialize.selector, initialAdmin, initialUpgrader, initialPauser
         );
-        return UUPSProxyDeployer.deployUsingCreateX(
+        return UUPSProxyUtils.deployUsingCreateX(
             "IexecLayerZeroBridge", constructorData, initializeData, createxFactory, createxSalt
         );
     }
@@ -100,22 +99,30 @@ contract Configure is Script {
 
 contract Upgrade is Script {
     function run() external {
-        string memory chain = vm.envString("CHAIN");
-        ConfigLib.CommonConfigParams memory commonParams = ConfigLib.readCommonConfig(chain);
-
-        // For testing purpose
-        uint256 newStateVariable = 1000000 * 10 ** 9;
-        address bridgeableToken = commonParams.approvalRequired
-            ? commonParams.rlcLiquidityUnifierAddress
-            : commonParams.rlcCrosschainTokenAddress;
         vm.startBroadcast();
-        UpgradeUtils.UpgradeParams memory params = UpgradeUtils.UpgradeParams({
-            proxyAddress: commonParams.iexecLayerZeroBridgeAddress,
-            constructorData: abi.encode(commonParams.approvalRequired, bridgeableToken, commonParams.lzEndpoint),
-            contractName: "IexecLayerZeroBridgeV2Mock.sol:IexecLayerZeroBridgeV2", // Would be production contract in real deployment
-            newStateVariable: newStateVariable
+        upgrade({
+            proxyAddress: address(0), // Replace with the actual proxy address
+            contractName: "", // e.g., "ContractV2.sol:ContractV2"
+            constructorData: new bytes(0), // Replace with the actual constructor data
+            initData: new bytes(0) // Replace with the actual initialization data
         });
-        UpgradeUtils.executeUpgrade(params);
         vm.stopBroadcast();
+    }
+
+    function upgrade(
+        address proxyAddress,
+        string memory contractName,
+        bytes memory constructorData,
+        bytes memory initData
+    ) public {
+        Options memory opts;
+        opts.constructorData = constructorData;
+        // Ignore checks related to LayerZero contracts:
+        // - OAppSenderUpgradeable
+        // - OAppReceiverUpgradeable
+        // - OFTCoreUpgradeable
+        // - OAppCoreUpgradeable
+        opts.unsafeAllow = "constructor,state-variable-immutable,missing-initializer-call";
+        UUPSProxyUtils.executeUpgrade(proxyAddress, contractName, initData, opts);
     }
 }

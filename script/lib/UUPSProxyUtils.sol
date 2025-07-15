@@ -7,12 +7,13 @@ import {Vm} from "forge-std/Vm.sol";
 import {StdConstants} from "forge-std/StdConstants.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {ICreateX} from "@createx/contracts/ICreateX.sol";
+import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 
 /**
  * @notice Utility library for deploying UUPS proxy contracts and their implementations
  * using the CreateX Factory.
  */
-library UUPSProxyDeployer {
+library UUPSProxyUtils {
     /// @dev Reference to the VM cheat codes from forge-std
     Vm private constant vm = StdConstants.VM;
 
@@ -63,5 +64,25 @@ library UUPSProxyDeployer {
             ICreateX(createxFactory).deployCreate2(createxSalt, abi.encodePacked(creationCode, constructorData));
         console.log("Implementation deployed at:", implementation);
         return implementation;
+    }
+
+    /**
+     * Upgrades a UUPS proxy contract to a new implementation.
+     * @param proxyAddress address of the UUPS proxy contract to upgrade
+     * @param contractName name of the contract to upgrade (e.g. "ContractV2.sol:ContractV2")
+     * @param opts options for the upgrade, such as unsafeAllow and others.
+     * @param initData initialization data for the proxy contract after upgrade
+     * @return newImplementation address of the new implementation contract
+     */
+    function executeUpgrade(
+        address proxyAddress,
+        string memory contractName,
+        bytes memory initData,
+        Options memory opts
+    ) internal returns (address newImplementation) {
+        Upgrades.upgradeProxy(proxyAddress, contractName, initData, opts);
+        newImplementation = Upgrades.getImplementationAddress(proxyAddress);
+        console.log("Upgraded", contractName, " proxy to new implementation", newImplementation);
+        return newImplementation;
     }
 }
