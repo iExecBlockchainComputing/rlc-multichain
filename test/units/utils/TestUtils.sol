@@ -10,6 +10,7 @@ import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
+import {Deploy as RLCLiquidityUnifierDeployScript} from "../../../script/RLCLiquidityUnifier.s.sol";
 import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
 
@@ -28,8 +29,8 @@ library TestUtils {
 
     // Struct to hold deployment results
     struct DeploymentResult {
-        IexecLayerZeroBridge iexecLayerZeroBridgeChainWithApproval;
-        IexecLayerZeroBridge iexecLayerZeroBridgeChainWithoutApproval;
+        IexecLayerZeroBridge iexecLayerZeroBridgeWithApproval;
+        IexecLayerZeroBridge iexecLayerZeroBridgeWithoutApproval;
         RLCMock rlcToken;
         RLCCrosschainToken rlcCrosschainToken;
         RLCLiquidityUnifier rlcLiquidityUnifier;
@@ -45,35 +46,28 @@ library TestUtils {
         result.rlcToken = new RLCMock();
 
         // Deploy Liquidity Unifier
-        result.rlcLiquidityUnifier =
-            _deployLiquidityUnifier(result.rlcToken, params.initialAdmin, params.initialUpgrader, createXFactory, salt);
+        result.rlcLiquidityUnifier = _deployLiquidityUnifier(params, result.rlcToken, createXFactory, salt);
 
         // Deploy IexecLayerZeroBridge for Sepolia
-        result.iexecLayerZeroBridgeChainWithApproval =
+        result.iexecLayerZeroBridgeWithApproval =
             _deployBridge(params, true, address(result.rlcLiquidityUnifier), createXFactory, salt);
 
         // Deploy RLC Crosschain token and Bridge for ChainX
-        result.rlcCrosschainToken =
-            _deployCrosschainToken(name, symbol, params.initialAdmin, params.initialUpgrader, createXFactory, salt);
+        result.rlcCrosschainToken = _deployCrosschainToken(params, name, symbol, createXFactory, salt);
 
-        result.iexecLayerZeroBridgeChainWithoutApproval =
+        result.iexecLayerZeroBridgeWithoutApproval =
             _deployBridge(params, false, address(result.rlcCrosschainToken), createXFactory, salt);
     }
 
     function _deployLiquidityUnifier(
+        DeploymentParams memory params,
         RLCMock rlcToken,
-        address initialAdmin,
-        address initialUpgrader,
         address createXFactory,
         bytes32 salt
     ) private returns (RLCLiquidityUnifier) {
         return RLCLiquidityUnifier(
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
-                "RLCLiquidityUnifier",
-                abi.encode(rlcToken),
-                abi.encodeWithSelector(RLCLiquidityUnifier.initialize.selector, initialAdmin, initialUpgrader),
-                createXFactory,
-                salt
+            new RLCLiquidityUnifierDeployScript().deploy(
+                address(rlcToken), params.initialAdmin, params.initialUpgrader, createXFactory, salt
             )
         );
     }
@@ -86,7 +80,7 @@ library TestUtils {
         bytes32 salt
     ) private returns (IexecLayerZeroBridge) {
         return IexecLayerZeroBridge(
-            UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+            UUPSProxyDeployer.deployUsingCreateX(
                 params.iexecLayerZeroBridgeContractName,
                 abi.encode(
                     approvalRequired,
@@ -106,16 +100,15 @@ library TestUtils {
     }
 
     function _deployCrosschainToken(
+        DeploymentParams memory params,
         string memory name,
         string memory symbol,
-        address initialAdmin,
-        address initialUpgrader,
         address createXFactory,
         bytes32 salt
     ) private returns (RLCCrosschainToken) {
         return RLCCrosschainToken(
             new RLCCrosschainTokenDeployScript().deploy(
-                name, symbol, initialAdmin, initialUpgrader, createXFactory, salt
+                name, symbol, params.initialAdmin, params.initialUpgrader, createXFactory, salt
             )
         );
     }

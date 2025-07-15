@@ -21,6 +21,10 @@ contract RLCCrosschainTokenTest is Test {
     function setUp() public {}
 
     function test_Deploy() public {
+        // Check that CreateX salt is used to deploy the contract.
+        vm.expectEmit(false, true, false, false);
+        // CreateX uses a guarded salt (see CreateX._guard()), so we need to hash it to match the expected event.
+        emit CreateX.ContractCreation(address(0), keccak256(abi.encode(salt)));
         address crosschainTokenAddress = deployer.deploy(name, symbol, admin, upgrader, createx, salt);
         RLCCrosschainToken rlcCrosschainToken = RLCCrosschainToken(crosschainTokenAddress);
         assertEq(rlcCrosschainToken.name(), name);

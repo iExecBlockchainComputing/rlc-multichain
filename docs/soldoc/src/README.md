@@ -4,8 +4,8 @@ This project implements a cross-chain token bridge system for the RLC token usin
 
 ## Diagrams and source code docs (soldocs):
 
-  - [Diagrams](docs/diagrams)
-  - [Source code docs](docs/soldoc/src/SUMMARY.md)
+  - [Diagrams](../../diagrams/)
+  - [Source code docs](../../soldoc/src/SUMMARY.md)
 
 ## Architecture
 

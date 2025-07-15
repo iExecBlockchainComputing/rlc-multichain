@@ -57,7 +57,7 @@ contract Deploy is Script {
         bytes memory constructorData = abi.encode(rlcToken);
         bytes memory initData =
             abi.encodeWithSelector(RLCLiquidityUnifier.initialize.selector, initialAdmin, initialUpgrader);
-        return UUPSProxyDeployer.deployUUPSProxyWithCreateX(
+        return UUPSProxyDeployer.deployUsingCreateX(
             "RLCLiquidityUnifier", constructorData, initData, createxFactory, createxSalt
         );
     }

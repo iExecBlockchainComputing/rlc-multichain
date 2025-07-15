@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.22;
 
-import {IexecLayerZeroBridge} from "../bridges/layerZero/IexecLayerZeroBridge.sol";
+import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 
 contract IexecLayerZeroBridgeHarness is IexecLayerZeroBridge {
     constructor(bool approvalRequired_, address bridgeableToken, address lzEndpoint)
