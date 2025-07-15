@@ -186,7 +186,7 @@ contract IexecLayerZeroBridge is
         return APPROVAL_REQUIRED ? address(IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN()) : BRIDGEABLE_TOKEN;
     }
 
-    // ============ OWNABLE OVERRIDES ============
+    // ============ ACCESS CONTROL OVERRIDES ============
 
     /**
      * @dev Overridden to prevent ownership renouncement.
