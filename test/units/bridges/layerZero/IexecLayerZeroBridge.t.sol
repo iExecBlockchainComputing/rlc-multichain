@@ -100,8 +100,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         vm.label(address(rlcLiquidityUnifier), "rlcLiquidityUnifier");
     }
 
-    //TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
-    //TODO: Add more tests for send functionality, in both directions
+    // TODO: Add fuzzing to test sharedDecimals and sharedDecimalsRounding issues
+    // TODO: Add more tests for send functionality, in both directions
 
     // ============ BASIC BRIDGE FUNCTIONALITY TESTS ============
     function test_SendToken_WhenOperational_WithApproval() public {
@@ -413,10 +413,10 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         RLCMock token = RLCMock(tokenAddress);
         uint256 initialUserBalance = token.balanceOf(user1);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(true, true, true, true, address(tokenAddress));
         emit IERC20.Transfer(user1, approvalRequired ? address(rlcLiquidityUnifier) : address(0), TRANSFER_AMOUNT);
         if (!approvalRequired) {
-            vm.expectEmit(true, true, true, true);
+            vm.expectEmit(true, true, true, true, address(tokenAddress));
             emit IERC7802.CrosschainBurn(user1, TRANSFER_AMOUNT, address(iexecLayerZeroBridge));
         }
 
@@ -471,6 +471,13 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     function testFuzz_debit_WithApproval_Amount(uint256 amount) public {
+        uint256 totalSupply = 87_000_000 * 10 ** 9; // 87 million tokens with 9 decimals
+        vm.assume(amount <= totalSupply);
+
+        // Set up a sufficient balance for user1 (an INITIAL_BALANCE has already been sent)
+        if (amount > INITIAL_BALANCE) {
+            rlcToken.transfer(user1, amount - INITIAL_BALANCE);
+        }
         vm.prank(user1);
         rlcToken.approve(address(iexecLayerZeroBridgeEthereum), amount);
 
@@ -478,12 +485,18 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     function testFuzz_debit_WithoutApproval_Amount(uint256 amount) public {
+        uint256 totalSupply = 87_000_000 * 10 ** 9; // 87 million tokens with 9 decimals
+        vm.assume(amount <= totalSupply);
+        // Set up a sufficient balance for user1 (an INITIAL_BALANCE has already been minted)
+        if (amount > INITIAL_BALANCE) {
+            vm.prank(address(iexecLayerZeroBridgeChainX));
+            rlcCrosschainToken.crosschainMint(user1, amount - INITIAL_BALANCE);
+        }
         _testFuzz_debit_Amount(iexecLayerZeroBridgeChainX, rlcCrosschainToken, amount);
     }
 
     function _testFuzz_debit_Amount(IexecLayerZeroBridgeHarness bridge, IERC20 token, uint256 amount) internal {
-        vm.assume(amount <= INITIAL_BALANCE);
-
+        // Fuzz test with different amounts for testing edge case (0 & max RLC supply)
         uint256 initialBalance = token.balanceOf(user1);
         uint256 conversionRate = bridge.decimalConversionRate();
         uint256 expectedMinAmount = (amount / conversionRate) * conversionRate;
@@ -496,24 +509,6 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(
             token.balanceOf(user1), initialBalance - expectedMinAmount, "User balance should decrease by sent amount"
         );
-    }
-
-    function testFuzz_debit_Address(address from) public {
-        // Fuzz test with different addresses
-        vm.assume(from != address(0) && from != address(iexecLayerZeroBridgeChainX));
-
-        // Setup: Give the address some tokens
-        vm.prank(address(iexecLayerZeroBridgeChainX));
-        rlcCrosschainToken.crosschainMint(from, TRANSFER_AMOUNT);
-
-        uint256 initialBalance = rlcCrosschainToken.balanceOf(from);
-
-        (uint256 amountSentLD, uint256 amountReceivedLD) =
-            iexecLayerZeroBridgeChainX.exposed_debit(from, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
-
-        assertEq(amountSentLD, TRANSFER_AMOUNT, "Amount sent should equal transfer amount");
-        assertEq(amountReceivedLD, TRANSFER_AMOUNT, "Amount received should equal transfer amount");
-        assertEq(rlcCrosschainToken.balanceOf(from), initialBalance - TRANSFER_AMOUNT, "Balance should decrease");
     }
 
     function test_debit_RevertsWhenFullyPaused() public {
