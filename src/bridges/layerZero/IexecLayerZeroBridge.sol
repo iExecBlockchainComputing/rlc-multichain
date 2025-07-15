@@ -167,6 +167,48 @@ contract IexecLayerZeroBridge is
         _unpauseOutboundTransfers();
     }
 
+    // ============ OWNABLE OVERRIDES ============
+
+    /**
+     * @dev Overridden to prevent ownership renouncement.
+     * AccessControlDefaultAdminRulesUpgradeable is used to manage ownership.
+     */
+    function renounceOwnership() public pure override {
+        revert OperationNotAllowed("Use AccessControlDefaultAdminRulesUpgradeable instead");
+    }
+
+    /**
+     * @dev Overridden to prevent ownership transfer.
+     * AccessControlDefaultAdminRulesUpgradeable is used to manage ownership.
+     */
+    function transferOwnership(address) public pure override {
+        revert OperationNotAllowed("Use AccessControlDefaultAdminRulesUpgradeable instead");
+    }
+
+    /**
+     * Returns the owner of the contract which is also the default admin.
+     * @return The address of the current owner and default admin
+     */
+    function owner()
+        public
+        view
+        override(OwnableUpgradeable, AccessControlDefaultAdminRulesUpgradeable)
+        returns (address)
+    {
+        return AccessControlDefaultAdminRulesUpgradeable.owner();
+    }
+
+    /**
+     * Accepts the default admin transfer and sets the owner to the new admin.
+     * @dev This ensures the state variale `OwnableUpgradeable._owner` is set correctly after the default
+     * admin transfer. Even though `OwnableUpgradeable._owner` is not used in `ower()` accessor, we chose
+     * to update it for consistency purposes.
+     */
+    function _acceptDefaultAdminTransfer() internal override {
+        super._acceptDefaultAdminTransfer();
+        _transferOwnership(defaultAdmin());
+    }
+
     // ============ OFT CONFIGURATION ============
 
     /**
@@ -184,25 +226,6 @@ contract IexecLayerZeroBridge is
      */
     function token() external view returns (address) {
         return APPROVAL_REQUIRED ? address(IRLCLiquidityUnifier(BRIDGEABLE_TOKEN).RLC_TOKEN()) : BRIDGEABLE_TOKEN;
-    }
-
-    // ============ ACCESS CONTROL OVERRIDES ============
-
-    /**
-     * @notice Returns the owner of the contract
-     * @return The address of the current owner
-     *
-     * @dev This override resolves the conflict between OwnableUpgradeable and
-     * AccessControlDefaultAdminRulesUpgradeable, both of which define owner().
-     * We use the OwnableUpgradeable version for consistency.
-     */
-    function owner()
-        public
-        view
-        override(OwnableUpgradeable, AccessControlDefaultAdminRulesUpgradeable)
-        returns (address)
-    {
-        return OwnableUpgradeable.owner();
     }
 
     // ============ CORE BRIDGE FUNCTIONS ============
