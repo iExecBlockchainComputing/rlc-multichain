@@ -22,8 +22,6 @@ contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
     address private upgrader = makeAddr("upgrader");
 
     address public proxyAddress;
-    string private name = "iEx.ec Network Token";
-    string public symbol = "RLC";
     uint256 public constant NEW_STATE_VARIABLE = 2;
 
     function setUp() public virtual override {
@@ -31,8 +29,20 @@ contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
         mockEndpoint = address(endpoints[1]);
 
-        (,, rlcToken,, rlcLiquidityUnifierV1) =
-            TestUtils.setupDeployment(name, symbol, mockEndpoint, mockEndpoint, admin, upgrader, pauser);
+        TestUtils.DeploymentResult memory deploymentResult = TestUtils.setupDeployment(
+            TestUtils.DeploymentParams({
+                iexecLayerZeroBridgeContractName: "IexecLayerZeroBridge",
+                lzEndpointSource: mockEndpoint,
+                lzEndpointDestination: mockEndpoint,
+                initialAdmin: admin,
+                initialUpgrader: upgrader,
+                initialPauser: pauser
+            })
+        );
+
+        rlcToken = deploymentResult.rlcToken;
+        rlcLiquidityUnifierV1 = deploymentResult.rlcLiquidityUnifier;
+
         proxyAddress = address(rlcLiquidityUnifierV1);
 
         //Add label to make logs more readable
