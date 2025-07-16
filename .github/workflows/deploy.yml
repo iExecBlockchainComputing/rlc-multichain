@@ -43,13 +43,11 @@ jobs:
   # Build and test before deploying.
   ci:
     needs: validate
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    steps:
-        - uses: ./.github/workflows/main.yml
-          with:
-            SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
-            ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+    uses: ./.github/workflows/main.yml
+    with:
+      SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+      ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+    secrets: inherit
 
   # Deploy and verify contract.
   deploy:

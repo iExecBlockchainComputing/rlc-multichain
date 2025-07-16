@@ -15,8 +15,6 @@ concurrency:
 
 env:
   FOUNDRY_PROFILE: ci
-  SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
-  ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
 
 jobs:
   build-and-test:
@@ -46,6 +44,8 @@ jobs:
       - name: Run Foundry coverage
         env:
           CI: true
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
         run: make generate-coverage
         
       - name: Upload coverage reports to Codecov
