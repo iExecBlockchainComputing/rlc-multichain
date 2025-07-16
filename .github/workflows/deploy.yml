@@ -72,7 +72,8 @@ jobs:
           ANVIL_SEPOLIA_RPC_URL: http://localhost:8545
           ANVIL_ARBITRUM_SEPOLIA_RPC_URL: http://localhost:8546
         run: |
-          make fork-sepolia & make fork-arbitrum-sepolia
+          make fork-sepolia &
+          make fork-arbitrum-sepolia &
           
           # Wait for anvil instances to be ready
           sleep 5
