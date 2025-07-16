@@ -67,7 +67,7 @@ jobs:
         if: inputs.network == 'anvil'
         env:
           CI: true
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
           ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
           ANVIL_SEPOLIA_RPC_URL: http://localhost:8545
@@ -86,7 +86,7 @@ jobs:
         if: inputs.network == 'sepolia' || inputs.network == 'ethereum'
         env:
           CI: true
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           CHAIN: ${{ inputs.network }}
           RPC_URL: ${{ inputs.network == 'sepolia' && secrets.SEPOLIA_RPC_URL || secrets.ETHEREUM_RPC_URL }}
         run: |
@@ -97,7 +97,7 @@ jobs:
         if: inputs.network == 'arbitrumSepolia' || inputs.network == 'arbitrum'
         env:
           CI: true
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           CHAIN: ${{ inputs.network == 'arbitrumSepolia' && 'arbitrum_sepolia' || 'arbitrum' }}
           RPC_URL: ${{ inputs.network == 'arbitrumSepolia' && secrets.ARBITRUM_SEPOLIA_RPC_URL || secrets.ARBITRUM_RPC_URL }}
         run: |
