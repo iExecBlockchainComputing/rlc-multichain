@@ -32,6 +32,7 @@ e2e-test:
 
 # Full coverage with HTML report
 generate-coverage:
+	@echo "CI value: $$CI"
 	rm -rf coverage lcov.info && \
 	FOUNDRY_PROFILE=test forge coverage \
 		--ir-minimum \
