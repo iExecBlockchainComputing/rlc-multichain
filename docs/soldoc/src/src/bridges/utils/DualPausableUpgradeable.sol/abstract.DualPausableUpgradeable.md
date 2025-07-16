@@ -38,24 +38,24 @@ function _getDualPausableStorage() private pure returns (DualPausableStorage sto
 
 ### whenOutboundTransfersNotPaused
 
-Use this modifier for functions that should be blocked during outbount transfer pause
+Use this modifier for functions that should be blocked during outbound transfer pause
 
-*Modifier for send operations - blocks when outbount transfer is paused*
+*Modifier for send operations - blocks when outbound transfer is paused*
 
 
 ```solidity
 modifier whenOutboundTransfersNotPaused();
 ```
 
-### whenOutbountTransfersPaused
+### whenOutboundTransfersPaused
 
-Use this modifier for administrative functions that should only work during outbount transfer pause
+Use this modifier for administrative functions that should only work during outbound transfer pause
 
 *Modifier to make a function callable only when send operations are paused*
 
 
 ```solidity
-modifier whenOutbountTransfersPaused();
+modifier whenOutboundTransfersPaused();
 ```
 
 ### __DualPausable_init
@@ -72,13 +72,13 @@ function __DualPausable_init() internal onlyInitializing;
 function __DualPausable_init_unchained() internal onlyInitializing;
 ```
 
-### outbountTransfersPaused
+### outboundTransfersPaused
 
 *Returns true if send operations are paused, false otherwise*
 
 
 ```solidity
-function outbountTransfersPaused() public view virtual returns (bool);
+function outboundTransfersPaused() public view virtual returns (bool);
 ```
 
 ### pauseStatus
@@ -94,30 +94,30 @@ function pauseStatus() public view virtual returns (bool fullyPaused, bool onlyO
 |Name|Type|Description|
 |----|----|-----------|
 |`fullyPaused`|`bool`|True if complete pause is active (blocks all operations)|
-|`onlyOutboundTransfersPaused`|`bool`|True if outbount transfer pause is active (blocks only send operations)|
+|`onlyOutboundTransfersPaused`|`bool`|True if outbound transfer pause is active (blocks only send operations)|
 
 
-### _requireOutbountTransfersNotPaused
+### _requireOutboundTransfersNotPaused
 
 *Throws if send operations are paused*
 
 
 ```solidity
-function _requireOutbountTransfersNotPaused() internal view virtual;
+function _requireOutboundTransfersNotPaused() internal view virtual;
 ```
 
-### _requireOutbountTransfersPaused
+### _requireOutboundTransfersPaused
 
 *Throws if send operations are not paused*
 
 
 ```solidity
-function _requireOutbountTransfersPaused() internal view virtual;
+function _requireOutboundTransfersPaused() internal view virtual;
 ```
 
 ### _pauseOutboundTransfers
 
-*Triggers outbount transfers pause.
+*Triggers outbound transfers pause.
 Requirements:
 - Send operations must not already be paused*
 
@@ -128,18 +128,18 @@ function _pauseOutboundTransfers() internal virtual whenOutboundTransfersNotPaus
 
 ### _unpauseOutboundTransfers
 
-*Unpauses outbount transfers.
+*Unpauses outbound transfers.
 Requirements:
 - Send operations must already be paused*
 
 
 ```solidity
-function _unpauseOutboundTransfers() internal virtual whenOutbountTransfersPaused;
+function _unpauseOutboundTransfers() internal virtual whenOutboundTransfersPaused;
 ```
 
 ## Events
 ### OutboundTransfersPaused
-*Emitted when outbount transfer pause is triggered by `account`*
+*Emitted when outbound transfer pause is triggered by `account`*
 
 
 ```solidity
@@ -147,7 +147,7 @@ event OutboundTransfersPaused(address account);
 ```
 
 ### OutboundTransfersUnpaused
-*Emitted when outbount transfer pause is lifted by `account`*
+*Emitted when outbound transfer pause is lifted by `account`*
 
 
 ```solidity
