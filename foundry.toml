@@ -20,9 +20,6 @@ optimizer = false
 fuzz = true
 runs = 1000
 
-# TODO configure this profile and use it in CI.
-# [profile.ci]
-
 [doc]
 out = "docs/soldoc"
 title = "RLC Multichain Bridge"

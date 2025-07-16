@@ -9,8 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CI: true
-  FOUNDRY_PROFILE: ci
+  FOUNDRY_PROFILE: test
   SEPOLIA_RPC_URL: secrets.SEPOLIA_RPC_URL
   ARBITRUM_SEPOLIA_RPC_URL: secrets.ARBITRUM_SEPOLIA_RPC_URL
 
@@ -45,6 +44,8 @@ jobs:
         
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
+        env:
+          CI: true
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: iExecBlockchainComputing/rlc-multichain
