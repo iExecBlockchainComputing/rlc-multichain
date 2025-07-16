@@ -66,7 +66,8 @@ jobs:
       - name: Deploy contracts on Anvil (All networks)
         if: inputs.network == 'anvil'
         env:
-          ACCOUNT: ${{ secrets.ACCOUNT }}
+          CI: true
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
           ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
           ANVIL_SEPOLIA_RPC_URL: http://localhost:8545
@@ -84,7 +85,8 @@ jobs:
       - name: Deploy contracts on Ethereum Mainnet or Sepolia
         if: inputs.network == 'sepolia' || inputs.network == 'ethereum'
         env:
-          ACCOUNT: ${{ secrets.ACCOUNT }}
+          CI: true
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           CHAIN: ${{ inputs.network }}
           RPC_URL: ${{ inputs.network == 'sepolia' && secrets.SEPOLIA_RPC_URL || secrets.ETHEREUM_RPC_URL }}
         run: |
@@ -94,7 +96,8 @@ jobs:
       - name: Deploy contracts on Arbitrum/Arbitrum Sepolia (L2)
         if: inputs.network == 'arbitrumSepolia' || inputs.network == 'arbitrum'
         env:
-          ACCOUNT: ${{ secrets.ACCOUNT }}
+          CI: true
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           CHAIN: ${{ inputs.network == 'arbitrumSepolia' && 'arbitrum_sepolia' || 'arbitrum' }}
           RPC_URL: ${{ inputs.network == 'arbitrumSepolia' && secrets.ARBITRUM_SEPOLIA_RPC_URL || secrets.ARBITRUM_RPC_URL }}
         run: |

@@ -111,7 +111,7 @@ deploy-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
 	@echo "Deploying $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
 	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		$(OPTIONS) \
 		--broadcast \
 		-vvv
@@ -124,7 +124,7 @@ upgrade-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
 	@echo "Upgrading $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
 	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Upgrade \
 		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
 		$(OPTIONS) \
 		-vvv
@@ -138,7 +138,7 @@ configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 	SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) \
 	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Configure \
 		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
 		-vvv
 
@@ -158,7 +158,7 @@ send-tokens-to-arbitrum-sepolia:
 	SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia \
 	forge script script/SendFromEthereumToArbitrum.s.sol:SendTokensFromEthereumToArbitrum \
 		--rpc-url $(SEPOLIA_RPC_URL) \
-		--account $(ACCOUNT) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
 		-vvv
 
@@ -167,6 +167,6 @@ send-tokens-to-sepolia:
 	SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia \
 	forge script script/SendFromArbitrumToEthereum.s.sol:SendTokensFromArbitrumToEthereum \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
-		--account $(ACCOUNT) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
 		-vvv
