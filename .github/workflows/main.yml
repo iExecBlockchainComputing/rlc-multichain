@@ -35,12 +35,14 @@ jobs:
         run: forge fmt --check
 
       - name: Run Forge build
-        run: forge build && forge build './src' --sizes && cp .env.template .env
+        run: forge build && forge build './src' --sizes
 
       - name: Run Foundry coverage
-        run: make generate-coverage
         env:
           CI: true
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+        run: make generate-coverage
         
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
