@@ -2,6 +2,8 @@
 pragma solidity ^0.8.22;
 
 interface IIexecLayerZeroBridge {
+    error OperationNotAllowed(string message);
+
     /**
      * @notice Pauses the contract, disabling `_credit` & `_debit` functions.
      * @dev Should only be callable by authorized accounts: PAUSER_ROLE.
