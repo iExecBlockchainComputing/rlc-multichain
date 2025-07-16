@@ -44,7 +44,7 @@ jobs:
   ci:
     needs: validate
     uses: ./.github/workflows/main.yml
-    with:
+    secrets:
       SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
       ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
 
