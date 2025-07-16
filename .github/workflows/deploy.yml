@@ -1,0 +1,116 @@
+name: Deploy contracts
+
+on:
+  workflow_dispatch: # Manual trigger
+    inputs:
+      network:
+        description: 'Network'
+        required: true
+        type: choice
+        options:
+          - anvil
+          - sepolia
+          - ethereum
+          - arbitrumSepolia
+          - arbitrum
+        default: 'anvil'
+      environment:
+        description: 'Environment'
+        required: true
+        type: choice
+        options:
+          - testnets
+          - mainnets
+        default: 'testnets'
+
+jobs:
+
+  # Validate deployment network and environment.
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      # On Github, the environment `mainnets` is restricted to
+      # the main branch. Here we check that it's only used with
+      # mainnet networks.
+      - name: Validate mainnet deployment
+        run: |
+          if [[ "${{ inputs.environment }}" == "mainnets" && "${{ inputs.network }}" != "arbitrum" && "${{ inputs.network }}" != "ethereum" ]]; then
+              echo "::error::mainnets environment can only be used with mainnet networks (ethereum, arbitrum)."
+              exit 1
+          fi
+          echo "Deploying to network '${{ inputs.network }}' with environment '${{ inputs.environment }}'."
+
+  # Build and test before deploying.
+  ci:
+    needs: validate
+    uses: ./.github/workflows/main.yml
+
+  # Deploy and verify contract.
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to commit deployment files.
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+
+      - name: Deploy contracts on Anvil (All networks)
+        if: inputs.network == 'anvil'
+        env:
+          ACCOUNT: ${{ secrets.ACCOUNT }}
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+          ANVIL_SEPOLIA_RPC_URL: http://localhost:8545
+          ANVIL_ARBITRUM_SEPOLIA_RPC_URL: http://localhost:8546
+        run: |
+          make fork-sepolia & make fork-arbitrum-sepolia
+          
+          # Wait for anvil instances to be ready
+          sleep 5
+          
+          # Deploy all contracts using the Makefile target
+          make deploy-on-anvil
+
+      - name: Deploy contracts on Ethereum Mainnet or Sepolia
+        if: inputs.network == 'sepolia' || inputs.network == 'ethereum'
+        env:
+          ACCOUNT: ${{ secrets.ACCOUNT }}
+          CHAIN: ${{ inputs.network }}
+          RPC_URL: ${{ inputs.network == 'sepolia' && secrets.SEPOLIA_RPC_URL || secrets.ETHEREUM_RPC_URL }}
+        run: |
+          CONTRACT=RLCLiquidityUnifier make deploy-contract
+          CONTRACT=bridges/layerZero/IexecLayerZeroBridge make deploy-contract
+
+      - name: Deploy contracts on Arbitrum/Arbitrum Sepolia (L2)
+        if: inputs.network == 'arbitrumSepolia' || inputs.network == 'arbitrum'
+        env:
+          ACCOUNT: ${{ secrets.ACCOUNT }}
+          CHAIN: ${{ inputs.network == 'arbitrumSepolia' && 'arbitrum_sepolia' || 'arbitrum' }}
+          RPC_URL: ${{ inputs.network == 'arbitrumSepolia' && secrets.ARBITRUM_SEPOLIA_RPC_URL || secrets.ARBITRUM_RPC_URL }}
+        run: |
+          CONTRACT=RLCCrosschainToken make deploy-contract
+          CONTRACT=bridges/layerZero/IexecLayerZeroBridge make deploy-contract
+
+      - name: Save deployment artifacts
+        if: inputs.network != 'anvil'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: save deployment artifacts for ${{ inputs.network }} (${{ inputs.environment }}, ${{ github.run_id }})'
+          file_pattern: 'config/config.json broadcast/'
+          commit_user_name: 'GitHub Actions Bot'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_author: 'GitHub Actions Bot <github-actions[bot]@users.noreply.github.com>'
+
+      - name: Verify contracts
+        if: inputs.network != 'anvil'
+        run: |
+          echo "TODO: Implement contract verification for ${{ inputs.network }}."
