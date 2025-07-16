@@ -3,6 +3,11 @@ name: Default
 on:
   pull_request:
   workflow_call:
+    secrets:
+      SEPOLIA_RPC_URL:
+        required: true
+      ARBITRUM_SEPOLIA_RPC_URL:
+        required: true
 
 concurrency:
   group: ${{ github.ref }}-ci
@@ -17,7 +22,6 @@ jobs:
   build-and-test:
     name: Build and test
     runs-on: ubuntu-latest
-    environment: testnets
     steps:
       - uses: actions/checkout@v4
         with:

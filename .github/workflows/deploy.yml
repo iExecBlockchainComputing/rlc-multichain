@@ -44,6 +44,9 @@ jobs:
   ci:
     needs: validate
     uses: ./.github/workflows/main.yml
+    secrets:
+      SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+      ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
 
   # Deploy and verify contract.
   deploy:
