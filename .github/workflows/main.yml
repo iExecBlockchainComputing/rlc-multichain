@@ -2,6 +2,7 @@ name: Default
 
 on:
   pull_request:
+  workflow_call:
 
 concurrency:
   group: ${{ github.ref }}-ci
