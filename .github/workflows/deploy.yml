@@ -76,15 +76,7 @@ jobs:
           ANVIL_SEPOLIA_RPC_URL: http://localhost:8545
           ANVIL_ARBITRUM_SEPOLIA_RPC_URL: http://localhost:8546
         run: |
-          forge cache clean all &
-          make fork-sepolia &
-          make fork-arbitrum-sepolia &
-          
-          # Wait for anvil instances to be ready
-          sleep 5
-          
-          # Deploy all contracts using the Makefile target
-          make deploy-on-anvil
+          forge cache clean --all && make fork-sepolia & make fork-arbitrum-sepolia & sleep 5 && make deploy-on-anvil
 
       - name: Deploy contracts on Ethereum Mainnet or Sepolia
         if: inputs.network == 'sepolia' || inputs.network == 'ethereum'
