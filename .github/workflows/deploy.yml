@@ -18,7 +18,7 @@ on:
 jobs:
 
   # Build and test before deploying.
-  ci:
+  build-and-test:
     uses: ./.github/workflows/main.yml
     with:
       SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
@@ -26,7 +26,7 @@ jobs:
 
   # Deploy and verify contract.
   deploy:
-    needs: ci
+    needs: build-and-test
     runs-on: ubuntu-latest
     permissions:
       contents: write # Required to commit deployment files.
@@ -46,7 +46,7 @@ jobs:
         if: inputs.network == 'anvil'
         env:
           CI: true
-          PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          PRIVATE_KEY: ${{ vars.ANVIL_PRIVATE_KEY }}
           SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
           ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
           ANVIL_SEPOLIA_RPC_URL: ${{ vars.ANVIL_SEPOLIA_RPC_URL }}
