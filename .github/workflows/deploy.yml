@@ -79,6 +79,9 @@ jobs:
           make fork-sepolia &
           make fork-arbitrum-sepolia &
           
+          # Wait for anvil instances to be ready
+          sleep 5
+          
           # Deploy all contracts using the Makefile target
           make deploy-on-anvil
 
