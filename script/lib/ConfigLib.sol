@@ -123,7 +123,7 @@ library ConfigLib {
 
     /**
      * @dev Updates the config file with a new address for a specific chain
-     * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia")
+     * @param chain The chain identifier (e.g., "sepolia", "arbitrumSepolia")
      * @param fieldName The field name to update (e.g., "iexecLayerZeroBridgeAddress")
      * @param value The address value to set
      */

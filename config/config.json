@@ -14,7 +14,7 @@
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "lzChainId": 40161
     },
-    "arbitrum_sepolia": {
+    "arbitrumSepolia": {
       "approvalRequired": false,
       "rlcCrosschainTokenAddress": "0x5ba6945Ef517F455783D4978a6F1761Bc49f97F8",
       "rlcCrosschainTokenCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c81",

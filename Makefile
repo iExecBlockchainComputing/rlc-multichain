@@ -51,7 +51,7 @@ clean:
 deploy-on-anvil:
 	$(MAKE) deploy-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrumSepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL) \
 		OPTIONS=
 
 deploy-on-mainnets:
@@ -63,7 +63,7 @@ deploy-on-mainnets:
 deploy-on-testnets:
 	$(MAKE) deploy-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrumSepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
 		OPTIONS="--verify --verifier etherscan --verifier-api-key $(ETHERSCAN_API_KEY) --verifier-url $(ETHERSCAN_API_URL)"
 
 deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
@@ -84,7 +84,7 @@ deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
 upgrade-on-anvil:
 	$(MAKE) upgrade-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+		TARGET_CHAIN=arbitrumSepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
 upgrade-on-mainnets:
 	$(MAKE) upgrade-all \
@@ -96,7 +96,7 @@ upgrade-on-mainnets:
 upgrade-on-testnets:
 	$(MAKE) upgrade-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrumSepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
 		OPTIONS=--verify
 
 upgrade-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
@@ -155,7 +155,7 @@ upgrade-layerzero-bridge: # CHAIN, RPC_URL
 
 send-tokens-to-arbitrum-sepolia:
 	@echo "Sending tokens cross-chain... from SEPOLIA to Arbitrum SEPOLIA"
-	SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia \
+	SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrumSepolia \
 	forge script script/SendFromEthereumToArbitrum.s.sol:SendTokensFromEthereumToArbitrum \
 		--rpc-url $(SEPOLIA_RPC_URL) \
 		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
@@ -164,7 +164,7 @@ send-tokens-to-arbitrum-sepolia:
 
 send-tokens-to-sepolia:
 	@echo "Sending tokens cross-chain... from Arbitrum SEPOLIA to SEPOLIA"
-	SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia \
+	SOURCE_CHAIN=arbitrumSepolia TARGET_CHAIN=sepolia \
 	forge script script/SendFromArbitrumToEthereum.s.sol:SendTokensFromArbitrumToEthereum \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \

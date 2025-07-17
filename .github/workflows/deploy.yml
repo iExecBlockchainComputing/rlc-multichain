@@ -14,39 +14,15 @@ on:
           - arbitrumSepolia
           - arbitrum
         default: 'anvil'
-      environment:
-        description: 'Environment'
-        required: true
-        type: choice
-        options:
-          - testnets
-          - mainnets
-        default: 'testnets'
 
 jobs:
 
-  # Validate deployment network and environment.
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      # On Github, the environment `mainnets` is restricted to
-      # the main branch. Here we check that it's only used with
-      # mainnet networks.
-      - name: Validate mainnet deployment
-        run: |
-          if [[ "${{ inputs.environment }}" == "mainnets" && "${{ inputs.network }}" != "arbitrum" && "${{ inputs.network }}" != "ethereum" ]]; then
-              echo "::error::mainnets environment can only be used with mainnet networks (ethereum, arbitrum)."
-              exit 1
-          fi
-          echo "Deploying to network '${{ inputs.network }}' with environment '${{ inputs.environment }}'."
-
   # Build and test before deploying.
   ci:
-    needs: validate
     uses: ./.github/workflows/main.yml
     secrets:
-      SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
-      ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+      SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
+      ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
 
   # Deploy and verify contract.
   deploy:
@@ -54,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # Required to commit deployment files.
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.network }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -71,31 +47,31 @@ jobs:
         env:
           CI: true
           PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
-          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
-          ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
-          ANVIL_SEPOLIA_RPC_URL: http://localhost:8545
-          ANVIL_ARBITRUM_SEPOLIA_RPC_URL: http://localhost:8546
+          SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
+          ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
+          ANVIL_SEPOLIA_RPC_URL: ${{ vars.ANVIL_SEPOLIA_RPC_URL }}
+          ANVIL_ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ANVIL_ARBITRUM_SEPOLIA_RPC_URL }}
         run: |
           make fork-sepolia & make fork-arbitrum-sepolia & sleep 10 && make deploy-on-anvil
 
-      - name: Deploy contracts on Ethereum Mainnet or Sepolia
+      - name: Deploy contracts on Sepolia/EthereumMainnet
         if: inputs.network == 'sepolia' || inputs.network == 'ethereum'
         env:
           CI: true
           PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           CHAIN: ${{ inputs.network }}
-          RPC_URL: ${{ inputs.network == 'sepolia' && secrets.SEPOLIA_RPC_URL || secrets.ETHEREUM_RPC_URL }}
+          RPC_URL: ${{ secrets.RPC_URL }}
         run: |
           CONTRACT=RLCLiquidityUnifier make deploy-contract
           CONTRACT=bridges/layerZero/IexecLayerZeroBridge make deploy-contract
 
-      - name: Deploy contracts on Arbitrum/Arbitrum Sepolia (L2)
-        if: inputs.network == 'arbitrumSepolia' || inputs.network == 'arbitrum'
+      - name: Deploy contracts on ChainX
+        if: inputs.network != 'sepolia' && inputs.network != 'ethereum'
         env:
           CI: true
           PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
-          CHAIN: ${{ inputs.network == 'arbitrumSepolia' && 'arbitrum_sepolia' || 'arbitrum' }}
-          RPC_URL: ${{ inputs.network == 'arbitrumSepolia' && secrets.ARBITRUM_SEPOLIA_RPC_URL || secrets.ARBITRUM_RPC_URL }}
+          CHAIN: ${{ inputs.network }}
+          RPC_URL: ${{ secrets.RPC_URL }}
         run: |
           CONTRACT=RLCCrosschainToken make deploy-contract
           CONTRACT=bridges/layerZero/IexecLayerZeroBridge make deploy-contract
@@ -104,7 +80,7 @@ jobs:
         if: inputs.network != 'anvil'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore: save deployment artifacts for ${{ inputs.network }} (${{ inputs.environment }}, ${{ github.run_id }})'
+          commit_message: 'chore: save deployment artifacts for ${{ inputs.network }} (${{ github.run_id }})'
           file_pattern: 'config/config.json broadcast/'
           commit_user_name: 'GitHub Actions Bot'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
