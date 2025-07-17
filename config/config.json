@@ -8,18 +8,18 @@
       "approvalRequired": true,
       "rlcAddress": "0x26A738b6D33EF4D94FF084D3552961b8f00639Cd",
       "rlcLiquidityUnifierAddress": "0x7C84A73D0eBb7b2Db5160d34D812DC8632eE99DA",
-      "rlcLiquidityUnifierCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
+      "rlcLiquidityUnifierCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c81",
       "iexecLayerZeroBridgeAddress": "0xcF9A304C10bCfB7f00b290B6B6efa7DB071b4d0F",
-      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
+      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c81",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "lzChainId": 40161
     },
     "arbitrum_sepolia": {
       "approvalRequired": false,
       "rlcCrosschainTokenAddress": "0x84391E46F519131c66719dddF9be48a0a7808116",
-      "rlcCrosschainTokenCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
+      "rlcCrosschainTokenCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c81",
       "iexecLayerZeroBridgeAddress": "0x4FcE023890F5c9aCdb04645b2801fF89793DD84e",
-      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c80",
+      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c81",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "lzChainId": 40231
     }
