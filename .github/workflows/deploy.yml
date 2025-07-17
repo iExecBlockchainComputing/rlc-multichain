@@ -24,13 +24,6 @@ jobs:
       SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
       ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
 
-  # Build and test before deploying.
-  ci:
-    uses: ./.github/workflows/main.yml
-    secrets:
-      SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
-      ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
-
   # Deploy and verify contract.
   deploy:
     needs: ci
