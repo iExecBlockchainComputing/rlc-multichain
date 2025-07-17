@@ -76,14 +76,34 @@ jobs:
           ANVIL_SEPOLIA_RPC_URL: http://localhost:8545
           ANVIL_ARBITRUM_SEPOLIA_RPC_URL: http://localhost:8546
         run: |
+          # Clean up any existing anvil processes
+          make cleanup-anvil
+          
+          # Start anvil forks in background
           make fork-sepolia &
+          ANVIL_SEPOLIA_PID=$!
           make fork-arbitrum-sepolia &
+          ANVIL_ARBITRUM_PID=$!
           
           # Wait for anvil instances to be ready
+          echo "Waiting for anvil instances to start..."
           sleep 5
+          
+          # Check if anvil processes are running
+          if ! kill -0 $ANVIL_SEPOLIA_PID 2>/dev/null; then
+            echo "Error: Anvil Sepolia fork failed to start"
+            exit 1
+          fi
+          if ! kill -0 $ANVIL_ARBITRUM_PID 2>/dev/null; then
+            echo "Error: Anvil Arbitrum fork failed to start"
+            exit 1
+          fi
           
           # Deploy all contracts using the Makefile target
           make deploy-on-anvil
+          
+          # Clean up anvil processes
+          make cleanup-anvil
 
       - name: Deploy contracts on Ethereum Mainnet or Sepolia
         if: inputs.network == 'sepolia' || inputs.network == 'ethereum'
