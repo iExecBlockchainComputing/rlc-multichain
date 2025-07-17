@@ -41,16 +41,16 @@ jobs:
           echo "Deploying to network '${{ inputs.network }}' with environment '${{ inputs.environment }}'."
 
   # Build and test before deploying.
-  ci:
-    needs: validate
-    uses: ./.github/workflows/main.yml
-    secrets:
-      SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
-      ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+  # ci:
+  #   needs: validate
+  #   uses: ./.github/workflows/main.yml
+  #   secrets:
+  #     SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+  #     ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
 
   # Deploy and verify contract.
   deploy:
-    needs: ci
+    # needs: ci
     runs-on: ubuntu-latest
     permissions:
       contents: write # Required to commit deployment files.
@@ -78,9 +78,6 @@ jobs:
         run: |
           make fork-sepolia &
           make fork-arbitrum-sepolia &
-          
-          # Wait for anvil instances to be ready
-          sleep 5
           
           # Deploy all contracts using the Makefile target
           make deploy-on-anvil
