@@ -3,11 +3,13 @@ name: Default
 on:
   pull_request:
   workflow_call:
-    secrets:
+    inputs:
       SEPOLIA_RPC_URL:
         required: true
+        type: string
       ARBITRUM_SEPOLIA_RPC_URL:
         required: true
+        type: string
 
 concurrency:
   group: ${{ github.ref }}-ci
@@ -20,7 +22,6 @@ jobs:
   build-and-test:
     name: Build and test
     runs-on: ubuntu-latest
-    environment: 'testnets'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,8 +45,8 @@ jobs:
       - name: Run Foundry coverage
         env:
           CI: true
-          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
-          ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+          SEPOLIA_RPC_URL: ${{ inputs.SEPOLIA_RPC_URL || vars.SEPOLIA_RPC_URL }}
+          ARBITRUM_SEPOLIA_RPC_URL: ${{ inputs.ARBITRUM_SEPOLIA_RPC_URL || vars.ARBITRUM_SEPOLIA_RPC_URL }}
         run: make generate-coverage
         
       - name: Upload coverage reports to Codecov
