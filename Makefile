@@ -46,7 +46,7 @@ clean:
 
 cleanup-anvil:
 	@echo "Stopping all anvil processes..."
-	@pkill -f "anvil.*port" || true
+	@-pkill -f "anvil.*port" 2>/dev/null || echo "No anvil processes found to stop"
 	@sleep 2
 	@echo "Anvil cleanup completed."
 
