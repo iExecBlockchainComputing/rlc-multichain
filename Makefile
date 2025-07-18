@@ -51,7 +51,7 @@ clean:
 deploy-on-anvil:
 	$(MAKE) deploy-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrumSepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL) \
 		OPTIONS=
 
 deploy-on-mainnets:
@@ -63,14 +63,20 @@ deploy-on-mainnets:
 deploy-on-testnets:
 	$(MAKE) deploy-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrumSepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
 		OPTIONS="--verify --verifier etherscan --verifier-api-key $(ETHERSCAN_API_KEY) --verifier-url $(ETHERSCAN_API_URL)"
 
+deploy-liquidity-unifier-and-bridge:
+	$(MAKE) deploy-contract CONTRACT=RLCLiquidityUnifier CHAIN=$(CHAIN) RPC_URL=$(RPC_URL) OPTIONS="$(OPTIONS)"
+	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL) OPTIONS="$(OPTIONS)"
+
+deploy-crosschain-token-and-bridge:
+	$(MAKE) deploy-contract CONTRACT=RLCCrosschainToken CHAIN=$(CHAIN) RPC_URL=$(RPC_URL) OPTIONS="$(OPTIONS)"
+	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL) OPTIONS="$(OPTIONS)"
+
 deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
-	$(MAKE) deploy-contract CONTRACT=RLCLiquidityUnifier CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS="$(OPTIONS)"
-	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS="$(OPTIONS)"
-	$(MAKE) deploy-contract CONTRACT=RLCCrosschainToken CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS="$(OPTIONS)"
-	$(MAKE) deploy-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS="$(OPTIONS)"
+	$(MAKE) deploy-liquidity-unifier-and-bridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)
+	$(MAKE) deploy-crosschain-token-and-bridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)
 	$(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
 	$(MAKE) configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
 	@echo "Deployment completed."
@@ -84,7 +90,7 @@ deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
 upgrade-on-anvil:
 	$(MAKE) upgrade-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+		TARGET_CHAIN=arbitrumSepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
 upgrade-on-mainnets:
 	$(MAKE) upgrade-all \
@@ -96,7 +102,7 @@ upgrade-on-mainnets:
 upgrade-on-testnets:
 	$(MAKE) upgrade-all \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrumSepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
 		OPTIONS=--verify
 
 upgrade-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
@@ -111,7 +117,7 @@ deploy-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
 	@echo "Deploying $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
 	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		$(OPTIONS) \
 		--broadcast \
 		-vvv
@@ -124,7 +130,7 @@ upgrade-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
 	@echo "Upgrading $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
 	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Upgrade \
 		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
 		$(OPTIONS) \
 		-vvv
@@ -138,7 +144,7 @@ configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 	SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) \
 	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Configure \
 		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
 		-vvv
 
@@ -155,18 +161,18 @@ upgrade-layerzero-bridge: # CHAIN, RPC_URL
 
 send-tokens-to-arbitrum-sepolia:
 	@echo "Sending tokens cross-chain... from SEPOLIA to Arbitrum SEPOLIA"
-	SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia \
+	SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrumSepolia \
 	forge script script/SendFromEthereumToArbitrum.s.sol:SendTokensFromEthereumToArbitrum \
 		--rpc-url $(SEPOLIA_RPC_URL) \
-		--account $(ACCOUNT) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
 		-vvv
 
 send-tokens-to-sepolia:
 	@echo "Sending tokens cross-chain... from Arbitrum SEPOLIA to SEPOLIA"
-	SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia \
+	SOURCE_CHAIN=arbitrumSepolia TARGET_CHAIN=sepolia \
 	forge script script/SendFromArbitrumToEthereum.s.sol:SendTokensFromArbitrumToEthereum \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
-		--account $(ACCOUNT) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
 		-vvv
