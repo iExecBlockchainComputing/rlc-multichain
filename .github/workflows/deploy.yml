@@ -28,6 +28,8 @@ jobs:
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
+    env:
+      CI: true
     permissions:
       contents: write # Required to commit deployment files.
     environment: ${{ inputs.network }}
@@ -45,7 +47,6 @@ jobs:
       - name: Deploy contracts on Anvil (All networks)
         if: inputs.network == 'anvil'
         env:
-          CI: true
           PRIVATE_KEY: ${{ vars.ANVIL_PRIVATE_KEY }}
           SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
           ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
@@ -57,24 +58,20 @@ jobs:
       - name: Deploy contracts on Sepolia/EthereumMainnet
         if: inputs.network == 'sepolia' || inputs.network == 'ethereum'
         env:
-          CI: true
           PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           CHAIN: ${{ inputs.network }}
           RPC_URL: ${{ secrets.RPC_URL }}
         run: |
-          CONTRACT=RLCLiquidityUnifier make deploy-contract
-          CONTRACT=bridges/layerZero/IexecLayerZeroBridge make deploy-contract
+          make deploy-liquidity-unifier-and-bridge
 
       - name: Deploy contracts on ChainX
         if: inputs.network != 'sepolia' && inputs.network != 'ethereum'
         env:
-          CI: true
           PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           CHAIN: ${{ inputs.network }}
           RPC_URL: ${{ secrets.RPC_URL }}
         run: |
-          CONTRACT=RLCCrosschainToken make deploy-contract
-          CONTRACT=bridges/layerZero/IexecLayerZeroBridge make deploy-contract
+          make deploy-crosschain-token-and-bridge
 
       - name: Save deployment artifacts
         if: inputs.network != 'anvil'
