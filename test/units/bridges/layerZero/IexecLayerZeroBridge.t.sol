@@ -484,9 +484,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
             emit IERC7802.CrosschainBurn(user1, TRANSFER_AMOUNT, address(iexecLayerZeroBridge));
         }
 
-        (uint256 amountSentLD, uint256 amountReceivedLD) = iexecLayerZeroBridge.exposed_debit(
-            user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, approvalRequired ? DEST_EID : SOURCE_EID
-        );
+        (uint256 amountSentLD, uint256 amountReceivedLD) =
+            iexecLayerZeroBridge.exposed_debit(user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
 
         if (approvalRequired) {
             assertEq(
