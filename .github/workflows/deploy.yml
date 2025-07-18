@@ -15,10 +15,6 @@ on:
           - arbitrum
         default: 'anvil'
 
-concurrency:
-  group: deploy-${{ inputs.network }}
-  cancel-in-progress: true
-
 jobs:
 
   # Build and test before deploying.
@@ -27,11 +23,15 @@ jobs:
     with:
       SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
       ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
+      network: ${{ inputs.network }}
 
   # Deploy and verify contract.
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-${{ inputs.network }}
+      cancel-in-progress: true
     env:
       CI: true
     permissions:
