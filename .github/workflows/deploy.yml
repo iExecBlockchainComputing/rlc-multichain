@@ -15,6 +15,10 @@ on:
           - arbitrum
         default: 'anvil'
 
+concurrency:
+  group: deploy-${{ inputs.network }}
+  cancel-in-progress: true
+
 jobs:
 
   # Build and test before deploying.
