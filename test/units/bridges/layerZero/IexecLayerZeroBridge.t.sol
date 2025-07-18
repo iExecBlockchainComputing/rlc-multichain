@@ -12,6 +12,7 @@ import {IAccessControlDefaultAdminRules} from
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
+import {stdError} from "forge-std/StdError.sol";
 import {IexecLayerZeroBridgeHarness} from "../../mocks/IexecLayerZeroBridgeHarness.sol";
 import {IIexecLayerZeroBridge} from "../../../../src/interfaces/IIexecLayerZeroBridge.sol";
 import {DualPausableUpgradeable} from "../../../../src/bridges/utils/DualPausableUpgradeable.sol";
@@ -506,8 +507,8 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         vm.prank(user1);
         rlcToken.approve(address(iexecLayerZeroBridgeEthereum), TRANSFER_AMOUNT - 1);
 
-        // Should revert with insufficient allowance
-        vm.expectRevert();
+        // Should revert with arithmetic underflow or overflow
+        vm.expectRevert(stdError.arithmeticError);
         iexecLayerZeroBridgeEthereum.exposed_debit(user1, TRANSFER_AMOUNT, TRANSFER_AMOUNT, DEST_EID);
     }
 
@@ -529,7 +530,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
             vm.prank(user1);
             IERC20(tokenAddress).approve(address(bridge), excessiveAmount);
         }
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSignature("SlippageExceeded(uint256,uint256)", INITIAL_BALANCE, excessiveAmount));
         bridge.exposed_debit(user1, excessiveAmount, excessiveAmount, DEST_EID);
     }
 
