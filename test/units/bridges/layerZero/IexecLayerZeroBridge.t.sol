@@ -535,14 +535,39 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
             // Should revert with ERC20InsufficientBalance from crosschainBurn
             vm.expectRevert(
                 abi.encodeWithSignature(
-                    "ERC20InsufficientBalance(address,uint256,uint256)", 
-                    user1, 
-                    INITIAL_BALANCE, 
-                    excessiveAmount
+                    "ERC20InsufficientBalance(address,uint256,uint256)", user1, INITIAL_BALANCE, excessiveAmount
                 )
             );
         }
         bridge.exposed_debit(user1, excessiveAmount, excessiveAmount, DEST_EID);
+    }
+
+    function test_debit_WithApproval_SlippageExceeded() public {
+        _test_debit_SlippageExceeded(iexecLayerZeroBridgeEthereum, address(rlcToken), true);
+    }
+
+    function test_debit_WithoutApproval_SlippageExceeded() public {
+        _test_debit_SlippageExceeded(iexecLayerZeroBridgeChainX, address(rlcCrosschainToken), false);
+    }
+
+    function _test_debit_SlippageExceeded(
+        IexecLayerZeroBridgeHarness bridge,
+        address tokenAddress,
+        bool approvalRequired
+    ) internal {
+        uint256 actualExpectedAmount = _removeDust(bridge, TRANSFER_AMOUNT);
+        uint256 excessiveMinAmount = actualExpectedAmount + 1; // Demand more than what's possible
+
+        if (approvalRequired) {
+            vm.prank(user1);
+            IERC20(tokenAddress).approve(address(bridge), TRANSFER_AMOUNT);
+        }
+
+        // Should revert with SlippageExceeded
+        vm.expectRevert(
+            abi.encodeWithSignature("SlippageExceeded(uint256,uint256)", actualExpectedAmount, excessiveMinAmount)
+        );
+        bridge.exposed_debit(user1, TRANSFER_AMOUNT, excessiveMinAmount, DEST_EID);
     }
 
     function testFuzz_debit_WithApproval_Amount(uint256 amount) public {
@@ -624,7 +649,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     }
 
     // ============ UTILITY FUNCTIONS ============
-    
+
     /// @dev Removes dust from amount based on the bridge's decimal conversion rate
     /// @param bridge The bridge contract to get the conversion rate from
     /// @param amount The amount to remove dust from
