@@ -556,7 +556,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         bool approvalRequired
     ) internal {
         uint256 actualExpectedAmount = _removeDust(bridge, TRANSFER_AMOUNT);
-        uint256 excessiveMinAmount = actualExpectedAmount + 1; // Demand more than what's possible
+        uint256 excessiveMinAmount = actualExpectedAmount + 1; // Unacceptable slippage because actualAmount < minAmount.
 
         if (approvalRequired) {
             vm.prank(user1);
