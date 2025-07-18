@@ -148,7 +148,7 @@ function unpause() external onlyRole(PAUSER_ROLE);
 LEVEL 2: Pauses only outbound transfers.
 
 *Can only be called by accounts with PAUSER_ROLE
-When outbount transfers are paused:
+When outbound transfers are paused:
 - All _debit operations (outbound transfers) are blocked
 - All _credit operations (inbound transfers) still work
 - Users can still receive funds and "exit" their positions
