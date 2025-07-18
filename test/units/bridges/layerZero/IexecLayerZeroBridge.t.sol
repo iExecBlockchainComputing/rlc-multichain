@@ -525,12 +525,23 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         address tokenAddress,
         bool approvalRequired
     ) internal {
-        uint256 excessiveAmount = INITIAL_BALANCE + 1;
+        uint256 excessiveAmount = INITIAL_BALANCE * 2;
         if (approvalRequired) {
             vm.prank(user1);
             IERC20(tokenAddress).approve(address(bridge), excessiveAmount);
+            // Should revert with arithmetic underflow or overflow from transferFrom
+            vm.expectRevert(stdError.arithmeticError);
+        } else {
+            // Should revert with ERC20InsufficientBalance from crosschainBurn
+            vm.expectRevert(
+                abi.encodeWithSignature(
+                    "ERC20InsufficientBalance(address,uint256,uint256)", 
+                    user1, 
+                    INITIAL_BALANCE, 
+                    excessiveAmount
+                )
+            );
         }
-        vm.expectRevert(abi.encodeWithSignature("SlippageExceeded(uint256,uint256)", INITIAL_BALANCE, excessiveAmount));
         bridge.exposed_debit(user1, excessiveAmount, excessiveAmount, DEST_EID);
     }
 
@@ -562,8 +573,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
     function _testFuzz_debit_Amount(IexecLayerZeroBridgeHarness bridge, IERC20 token, uint256 amount) internal {
         // Fuzz test with different amounts for testing edge case (0 & max RLC supply)
         uint256 initialBalance = token.balanceOf(user1);
-        uint256 conversionRate = bridge.decimalConversionRate();
-        uint256 expectedMinAmount = (amount / conversionRate) * conversionRate;
+        uint256 expectedMinAmount = _removeDust(bridge, amount);
 
         (uint256 amountSentLD, uint256 amountReceivedLD) =
             bridge.exposed_debit(user1, amount, expectedMinAmount, DEST_EID);
@@ -611,5 +621,16 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
         assertEq(amountSentLD, TRANSFER_AMOUNT, "Amount sent should equal transfer amount");
         assertEq(amountReceivedLD, TRANSFER_AMOUNT, "Amount received should equal transfer amount");
         assertEq(rlcCrosschainToken.balanceOf(user1), initialBalance - TRANSFER_AMOUNT, "User balance should decrease");
+    }
+
+    // ============ UTILITY FUNCTIONS ============
+    
+    /// @dev Removes dust from amount based on the bridge's decimal conversion rate
+    /// @param bridge The bridge contract to get the conversion rate from
+    /// @param amount The amount to remove dust from
+    /// @return The amount with dust removed
+    function _removeDust(IexecLayerZeroBridgeHarness bridge, uint256 amount) internal view returns (uint256) {
+        uint256 conversionRate = bridge.decimalConversionRate();
+        return (amount / conversionRate) * conversionRate;
     }
 }
