@@ -35,7 +35,7 @@ define verify-impl
 		forge verify-contract \
 			--chain-id $(4) \
 			--watch \
-			--constructor-args $(8) \
+			$(8) \
 			--etherscan-api-key $(ETHERSCAN_API_KEY) \
 			$$impl_address \
 			$(6); \
@@ -68,7 +68,7 @@ verify-layerzero-bridge-proxy-sepolia:
 verify-rlc-liquidity-unifier-impl-sepolia:
 	@rlc_address=$$(./tools/get_config_address.sh sepolia rlcAddress); \
 	constructor_args=$$(cast abi-encode "constructor(address)" $$rlc_address); \
-	$(MAKE) _verify-rlc-liquidity-unifier-impl-sepolia CONSTRUCTOR_ARGS=$$constructor_args
+	$(MAKE) _verify-rlc-liquidity-unifier-impl-sepolia CONSTRUCTOR_ARGS="--constructor-args $$constructor_args"
 
 _verify-rlc-liquidity-unifier-impl-sepolia:
 	$(call verify-impl,RLCLiquidityUnifier,sepolia,rlcLiquidityUnifierAddress,$(SEPOLIA_CHAIN_ID),Sepolia Etherscan,src/RLCLiquidityUnifier.sol:RLCLiquidityUnifier,$(SEPOLIA_RPC_URL),$(CONSTRUCTOR_ARGS))
@@ -78,7 +78,7 @@ verify-layerzero-bridge-impl-sepolia:
 	@rlc_liquidity_unifier_address=$$(./tools/get_config_address.sh sepolia rlcLiquidityUnifierAddress); \
 	lz_endpoint_address=$$(./tools/get_config_address.sh sepolia lzEndpointAddress); \
 	constructor_args=$$(cast abi-encode "constructor(bool,address,address)" true $$rlc_liquidity_unifier_address $$lz_endpoint_address); \
-	$(MAKE) _verify-layerzero-bridge-impl-sepolia CONSTRUCTOR_ARGS=$$constructor_args
+	$(MAKE) _verify-layerzero-bridge-impl-sepolia CONSTRUCTOR_ARGS="--constructor-args $$constructor_args"
 
 _verify-layerzero-bridge-impl-sepolia:
 	$(call verify-impl,IexecLayerZeroBridge,sepolia,iexecLayerZeroBridgeAddress,$(SEPOLIA_CHAIN_ID),Sepolia Etherscan,src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge,$(SEPOLIA_RPC_URL),$(CONSTRUCTOR_ARGS))
@@ -105,7 +105,7 @@ verify-layerzero-bridge-impl-arbitrum-sepolia:
 	@rlc_crosschain_token_address=$$(./tools/get_config_address.sh arbitrum_sepolia rlcCrosschainTokenAddress); \
 	lz_endpoint_address=$$(./tools/get_config_address.sh arbitrum_sepolia lzEndpointAddress); \
 	constructor_args=$$(cast abi-encode "constructor(bool,address,address)" false $$rlc_crosschain_token_address $$lz_endpoint_address); \
-	$(MAKE) _verify-layerzero-bridge-impl-arbitrum-sepolia CONSTRUCTOR_ARGS=$$constructor_args
+	$(MAKE) _verify-layerzero-bridge-impl-arbitrum-sepolia CONSTRUCTOR_ARGS="--constructor-args $$constructor_args"
 
 _verify-layerzero-bridge-impl-arbitrum-sepolia:
 	$(call verify-impl,IexecLayerZeroBridge,arbitrum_sepolia,iexecLayerZeroBridgeAddress,$(ARBITRUM_SEPOLIA_CHAIN_ID),Arbitrum Sepolia,src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge,$(ARBITRUM_SEPOLIA_RPC_URL),$(CONSTRUCTOR_ARGS))
