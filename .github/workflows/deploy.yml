@@ -51,7 +51,7 @@ jobs:
       - name: Deploy contracts on Anvil (All networks)
         if: inputs.network == 'anvil'
         env:
-          PRIVATE_KEY: ${{ vars.ANVIL_PRIVATE_KEY }}
+          DEPLOYER_PRIVATE_KEY: ${{ vars.ANVIL_PRIVATE_KEY }}
           SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
           ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
           ANVIL_SEPOLIA_RPC_URL: ${{ vars.ANVIL_SEPOLIA_RPC_URL }}
@@ -62,7 +62,7 @@ jobs:
       - name: Deploy contracts on Sepolia/EthereumMainnet
         if: inputs.network == 'sepolia' || inputs.network == 'ethereum'
         env:
-          PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           CHAIN: ${{ inputs.network }}
           RPC_URL: ${{ secrets.RPC_URL }}
         run: |
@@ -71,7 +71,7 @@ jobs:
       - name: Deploy contracts on ChainX
         if: inputs.network != 'sepolia' && inputs.network != 'ethereum' && inputs.network != 'anvil'
         env:
-          PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           CHAIN: ${{ inputs.network }}
           RPC_URL: ${{ secrets.RPC_URL }}
         run: |

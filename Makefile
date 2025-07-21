@@ -77,14 +77,6 @@ deploy-crosschain-token-and-bridge:
 deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
 	$(MAKE) deploy-liquidity-unifier-and-bridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)
 	$(MAKE) deploy-crosschain-token-and-bridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)
-	$(MAKE) configure-all SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) SOURCE_RPC=$(SOURCE_RPC) TARGET_RPC=$(TARGET_RPC)
-	@echo "Deployment completed."
-	@echo "⚠️ Please authorize bridges on RLCLiquidityUnifier and RLCCrosschainToken contracts."
-	# TODO verify contracts after deployment.
-
-deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
-	$(MAKE) deploy-liquidity-unifier-and-bridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)
-	$(MAKE) deploy-crosschain-token-and-bridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)
 	@echo "Contracts deployment completed."
 	@echo "⚠️ Run 'make configure-all' to configure bridges."
 	@echo "⚠️ Please configure the bridges. Do not forget to authorize the RLCLiquidityUnifier and RLCCrosschainToken contracts on the bridges."
@@ -128,7 +120,7 @@ deploy-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
 	@echo "Deploying $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
 	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Deploy \
 		--rpc-url $(RPC_URL) \
-		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(DEPLOYER_PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		$(OPTIONS) \
 		--broadcast \
 		-vvv
@@ -141,7 +133,7 @@ upgrade-contract: # CONTRACT, CHAIN, RPC_URL, OPTIONS
 	@echo "Upgrading $(CONTRACT) on $(CHAIN) with options: $(OPTIONS)"
 	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Upgrade \
 		--rpc-url $(RPC_URL) \
-		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
+		--account $(ACCOUNT) \
 		--broadcast \
 		$(OPTIONS) \
 		-vvv
@@ -155,7 +147,7 @@ configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 	SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) \
 	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Configure \
 		--rpc-url $(RPC_URL) \
-		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
+		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 
@@ -175,7 +167,7 @@ send-tokens-to-arbitrum-sepolia:
 	SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia \
 	forge script script/SendFromEthereumToArbitrum.s.sol:SendTokensFromEthereumToArbitrum \
 		--rpc-url $(SEPOLIA_RPC_URL) \
-		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
+		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 
@@ -184,6 +176,6 @@ send-tokens-to-sepolia:
 	SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia \
 	forge script script/SendFromArbitrumToEthereum.s.sol:SendTokensFromArbitrumToEthereum \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
-		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
+		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
