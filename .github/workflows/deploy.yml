@@ -69,7 +69,7 @@ jobs:
           make deploy-liquidity-unifier-and-bridge
 
       - name: Deploy contracts on ChainX
-        if: inputs.network != 'sepolia' && inputs.network != 'ethereum'
+        if: inputs.network != 'sepolia' && inputs.network != 'ethereum' && inputs.network != 'anvil'
         env:
           PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           CHAIN: ${{ inputs.network }}
