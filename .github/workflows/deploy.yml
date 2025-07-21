@@ -77,7 +77,7 @@ jobs:
         if: inputs.network != 'anvil'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore: save deployment artifacts for ${{ inputs.network }} (${{ github.run_id }})'
+          commit_message: 'chore: save deployment artifacts for ${{ inputs.network }} (Github run_id: ${{ github.run_id }})'
           file_pattern: 'config/config.json broadcast/'
           commit_user_name: 'GitHub Actions Bot'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
