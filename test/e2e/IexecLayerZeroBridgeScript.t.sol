@@ -29,14 +29,14 @@ contract IexecLayerZeroBridgeScriptTest is Test {
 
     // Forks ID
     uint256 private sepoliaFork;
-    uint256 private arbitrumSepolia;
+    uint256 private arbitrumSepoliaFork;
 
     function setUp() public {
         deployer = new IexecLayerZeroBridgeDeploy();
 
         // Create a forks
         sepoliaFork = vm.createFork(vm.envString("SEPOLIA_RPC_URL"));
-        arbitrumSepolia = vm.createFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
+        arbitrumSepoliaFork = vm.createFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
 
         // Setup Ethereum Mainnet fork
         vm.selectFork(sepoliaFork);
@@ -45,7 +45,7 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         );
 
         // Setup Arbitrum Sepolia fork
-        vm.selectFork(arbitrumSepolia);
+        vm.selectFork(arbitrumSepoliaFork);
         rlcCrosschainToken = new RLCCrosschainTokenDeployScript().deploy(
             "iEx.ec Network Token", "RLC", admin, admin, params.createxFactory, salt
         );
@@ -61,7 +61,7 @@ contract IexecLayerZeroBridgeScriptTest is Test {
     }
 
     function testFork_Deployment_WithoutApproval() public {
-        vm.selectFork(arbitrumSepolia);
+        vm.selectFork(arbitrumSepoliaFork);
         _test_Deployment(false, rlcCrosschainToken);
     }
 
