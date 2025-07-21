@@ -2,6 +2,16 @@
 # ========================================================================
 #                          SMART CONTRACT VERIFICATION
 # ========================================================================
+# This makefile provides targets for verifying deployed smart contracts on Etherscan.
+# It uses Foundry's GetConfigInfo script for robust configuration parsing and 
+# implementation address retrieval, replacing the previous bash-based approach.
+#
+# Dependencies:
+# - forge (Foundry toolkit)
+# - cast (for ABI encoding constructor arguments)
+# - GetConfigInfo.s.sol script
+# - Properly configured config/config.json
+#
 # Chain IDs for supported networks
 SEPOLIA_CHAIN_ID := 11155111
 ARBITRUM_SEPOLIA_CHAIN_ID := 421614
@@ -18,7 +28,7 @@ define verify-proxy
 		--chain-id $(4) \
 		--watch \
 		--etherscan-api-key $(ETHERSCAN_API_KEY) \
-		$$(./tools/get_config_address.sh $(2) $(3)) \
+		$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" $(2) $(3) 2>/dev/null | grep "0x" | tail -n1) \
 		lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 	@echo "Proxy verification completed for $(1) on $(5)"
 endef
@@ -27,8 +37,8 @@ endef
 # Parameters: CONTRACT_NAME, NETWORK, CONFIG_KEY, CHAIN_ID, DISPLAY_NAME, CONTRACT_PATH, RPC_URL, CONSTRUCTOR_ARGS
 define verify-impl
 	@echo "Verifying $(1) Implementation on $(5)..."
-	@proxy_address=$$(./tools/get_config_address.sh $(2) $(3)); \
-	impl_address=$$(./tools/get_implementation_address.sh $$proxy_address $(7) | tail -n 1); \
+	@proxy_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" $(2) $(3) 2>/dev/null | grep "0x" | tail -n1); \
+	impl_address=$$(forge script script/GetConfigInfo.s.sol --sig "getImplementationAddress(string,string)" $(2) $(3) --rpc-url $(7) 2>/dev/null | grep "0x" | tail -n1); \
 	echo "Proxy address: $$proxy_address"; \
 	echo "Implementation address: $$impl_address"; \
 	forge verify-contract \
@@ -57,7 +67,7 @@ verify-layerzero-bridge-proxy-sepolia:
 # Implementation Verifications - Sepolia
 # --------------------------------------
 verify-rlc-liquidity-unifier-impl-sepolia:
-	@rlc_address=$$(./tools/get_config_address.sh sepolia rlcAddress); \
+	@rlc_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" sepolia rlcToken 2>/dev/null | grep "0x" | tail -n1); \
 	constructor_args=$$(cast abi-encode "constructor(address)" $$rlc_address); \
 	$(MAKE) _verify-rlc-liquidity-unifier-impl-sepolia CONSTRUCTOR_ARGS="--constructor-args $$constructor_args"
 
@@ -66,8 +76,8 @@ _verify-rlc-liquidity-unifier-impl-sepolia:
 
 verify-layerzero-bridge-impl-sepolia:
 	@echo "Building constructor arguments for IexecLayerZeroBridge..."
-	@rlc_liquidity_unifier_address=$$(./tools/get_config_address.sh sepolia rlcLiquidityUnifierAddress); \
-	lz_endpoint_address=$$(./tools/get_config_address.sh sepolia lzEndpointAddress); \
+	@rlc_liquidity_unifier_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" sepolia rlcLiquidityUnifierAddress 2>/dev/null | grep "0x" | tail -n1); \
+	lz_endpoint_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" sepolia lzEndpoint 2>/dev/null | grep "0x" | tail -n1); \
 	constructor_args=$$(cast abi-encode "constructor(bool,address,address)" true $$rlc_liquidity_unifier_address $$lz_endpoint_address); \
 	$(MAKE) _verify-layerzero-bridge-impl-sepolia CONSTRUCTOR_ARGS="--constructor-args $$constructor_args"
 
@@ -92,9 +102,9 @@ verify-rlc-crosschain-token-impl-arbitrum-sepolia:
 	$(call verify-impl,RLCCrosschainToken,arbitrum_sepolia,rlcCrosschainTokenAddress,$(ARBITRUM_SEPOLIA_CHAIN_ID),Arbitrum Sepolia,src/RLCCrosschainToken.sol:RLCCrosschainToken,$(ARBITRUM_SEPOLIA_RPC_URL),)
 
 verify-layerzero-bridge-impl-arbitrum-sepolia:
-	@echo "🔧 Building constructor arguments for IexecLayerZeroBridge..."
-	@rlc_crosschain_token_address=$$(./tools/get_config_address.sh arbitrum_sepolia rlcCrosschainTokenAddress); \
-	lz_endpoint_address=$$(./tools/get_config_address.sh arbitrum_sepolia lzEndpointAddress); \
+	@echo "Building constructor arguments for IexecLayerZeroBridge..."
+	@rlc_crosschain_token_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" arbitrum_sepolia rlcCrosschainTokenAddress 2>/dev/null | grep "0x" | tail -n1); \
+	lz_endpoint_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" arbitrum_sepolia lzEndpoint 2>/dev/null | grep "0x" | tail -n1); \
 	constructor_args=$$(cast abi-encode "constructor(bool,address,address)" false $$rlc_crosschain_token_address $$lz_endpoint_address); \
 	$(MAKE) _verify-layerzero-bridge-impl-arbitrum-sepolia CONSTRUCTOR_ARGS="--constructor-args $$constructor_args"
 
