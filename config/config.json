@@ -7,9 +7,9 @@
     "sepolia": {
       "approvalRequired": true,
       "rlcAddress": "0x26A738b6D33EF4D94FF084D3552961b8f00639Cd",
-      "rlcLiquidityUnifierAddress": "0x8dc44ce5A86915Ace85Cce1665A24a6B10c60c63",
+      "rlcLiquidityUnifierAddress": "0xe53284F20a582A494E3e84Fa89dB104EA13BAFc7",
       "rlcLiquidityUnifierCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c82",
-      "iexecLayerZeroBridgeAddress": "0xB778a2BC50b441bAAdb1A2833eACaEfF900d5Ca7",
+      "iexecLayerZeroBridgeAddress": "0x91985E36cc2c4c78DEAE6f5c33B33b13C366aE17",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000d33f5439d011d58213072dc8bd99dd22f7c6bd85ea442e75371c82",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "lzChainId": 40161
