@@ -11,7 +11,7 @@ on:
           - anvil
           - sepolia
           - ethereum
-          - arbitrumSepolia
+          - arbitrum_sepolia
           - arbitrum
         default: 'anvil'
 
@@ -86,6 +86,8 @@ jobs:
           commit_user_name: 'GitHub Actions Bot'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'GitHub Actions Bot <github-actions[bot]@users.noreply.github.com>'
+          add_options: '--force'
+          push_options: '--force-with-lease'
 
       - name: Verify contracts
         if: inputs.network != 'anvil'

@@ -28,7 +28,7 @@ out = "docs/soldoc"
 title = "RLC Multichain Bridge"
 ignore = ["src/mocks/**/*"]
 
-# TODO use vm.rpcUrl("arbitrumSepolia") instead of env variable.
+# TODO use vm.rpcUrl("arbitrum_sepolia") instead of env variable.
 # https://getfoundry.sh/config/reference/testing#rpc_endpoints
 # https://getfoundry.sh/reference/cheatcodes/rpc
 # https://github.com/foundry-rs/forge-std/blob/ff4bf7db008d096ea5a657f2c20516182252a3ed/src/StdCheats.sol#L255-L271
