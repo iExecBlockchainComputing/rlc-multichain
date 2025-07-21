@@ -83,7 +83,7 @@ jobs:
           commit_user_name: 'GitHub Actions Bot'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'GitHub Actions Bot <github-actions[bot]@users.noreply.github.com>'
-
+          
       - name: Verify contracts
         if: inputs.network != 'anvil'
         run: |
