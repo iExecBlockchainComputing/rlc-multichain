@@ -48,8 +48,6 @@ contract GetConfigInfo is Script {
             return config.createxFactory;
         } else if (keccak256(bytes(field)) == keccak256("lzEndpoint")) {
             return config.lzEndpoint;
-        // } else if (keccak256(bytes(field)) == keccak256("lzChainId")) {
-            // return string(config.lzChainId);
         } else if (keccak256(bytes(field)) == keccak256("rlcToken")) {
             return config.rlcToken;
         } else if (keccak256(bytes(field)) == keccak256("rlcLiquidityUnifierAddress")) {
