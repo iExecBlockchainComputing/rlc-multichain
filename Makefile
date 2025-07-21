@@ -77,11 +77,22 @@ deploy-crosschain-token-and-bridge:
 deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
 	$(MAKE) deploy-liquidity-unifier-and-bridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)
 	$(MAKE) deploy-crosschain-token-and-bridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)
-	$(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
-	$(MAKE) configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
+	$(MAKE) configure-all SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) SOURCE_RPC=$(SOURCE_RPC) TARGET_RPC=$(TARGET_RPC)
 	@echo "Deployment completed."
 	@echo "⚠️ Please authorize bridges on RLCLiquidityUnifier and RLCCrosschainToken contracts."
 	# TODO verify contracts after deployment.
+
+deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC, OPTIONS
+	$(MAKE) deploy-liquidity-unifier-and-bridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC) OPTIONS=$(OPTIONS)
+	$(MAKE) deploy-crosschain-token-and-bridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC) OPTIONS=$(OPTIONS)
+	@echo "Contracts deployment completed."
+	@echo "⚠️ Run 'make configure-all' to configure bridges."
+	@echo "⚠️ Please configure the bridges. Do not forget to authorize the RLCLiquidityUnifier and RLCCrosschainToken contracts on the bridges."
+
+configure-all: # SOURCE_CHAIN, TARGET_CHAIN, SOURCE_RPC, TARGET_RPC
+	$(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
+	$(MAKE) configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
+	@echo "Bridge configuration completed."
 
 #
 # High-level upgrade targets
