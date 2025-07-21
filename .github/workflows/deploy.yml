@@ -23,7 +23,6 @@ jobs:
     with:
       SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
       ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
-      network: ${{ inputs.network }}
 
   # Deploy and verify contract.
   deploy:
