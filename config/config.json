@@ -16,9 +16,9 @@
     },
     "arbitrum_sepolia": {
       "approvalRequired": false,
-      "rlcCrosschainTokenAddress": "0x5ba6945Ef517F455783D4978a6F1761Bc49f97F8",
+      "rlcCrosschainTokenAddress": "0xf0e778deA6dc251B4b854AC70c35D24F009C7A9F",
       "rlcCrosschainTokenCreatexSalt": "0xb76d6d16ef416a15c63132e046623bc9567f59fd040b953278af901c92b2c2d2",
-      "iexecLayerZeroBridgeAddress": "0xF3503fD58a95dc5e24b39a440dAc86Cfc537d99c",
+      "iexecLayerZeroBridgeAddress": "0x815Bc920267205544eceFC2b95999D69DBbFa6bc",
       "iexecLayerZeroBridgeCreatexSalt": "0xb76d6d16ef416a15c63132e046623bc9567f59fd040b953278af901c92b2c2d2",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "lzChainId": 40231
