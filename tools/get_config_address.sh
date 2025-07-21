@@ -20,16 +20,14 @@ FIELD=$2
 
 # Extract the value using jq
 VALUE=$(jq -r ".chains.${CHAIN}.${FIELD} // empty" "$CONFIG_FILE")
-
-if [ -z "$VALUE" ] || [ "$VALUE" = "null" ]; then
-    # Try global fields for admin addresses
-    GLOBAL_VALUE=$(jq -r ".${FIELD} // empty" "$CONFIG_FILE")
-    if [ -n "$GLOBAL_VALUE" ] && [ "$GLOBAL_VALUE" != "null" ]; then
-        echo "$GLOBAL_VALUE"
-    else
-        echo "Error: Field '${FIELD}' not found for chain '${CHAIN}'"
-        exit 1
-    fi
-else
+if [ -n "$VALUE" ] && [ "$VALUE" != "null" ]; then
     echo "$VALUE"
+    exit 0
 fi
+GLOBAL_VALUE=$(jq -r ".global.${FIELD} // empty" "$CONFIG_FILE")
+if [ -n "$GLOBAL_VALUE" ] && [ "$GLOBAL_VALUE" != "null" ]; then
+    echo "$GLOBAL_VALUE"
+    exit 0
+fi
+echo "Error: Field '${FIELD}' not found for chain '${CHAIN}'"
+exit 1
