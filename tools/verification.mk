@@ -2,16 +2,6 @@
 # ========================================================================
 #                          SMART CONTRACT VERIFICATION
 # ========================================================================
-# This makefile provides targets for verifying deployed smart contracts on Etherscan.
-# It uses Foundry's GetConfigInfo script for robust configuration parsing and 
-# implementation address retrieval, replacing the previous bash-based approach.
-#
-# Dependencies:
-# - forge (Foundry toolkit)
-# - cast (for ABI encoding constructor arguments)
-# - GetConfigInfo.s.sol script
-# - Properly configured config/config.json
-#
 # Chain IDs for supported networks
 SEPOLIA_CHAIN_ID := 11155111
 ARBITRUM_SEPOLIA_CHAIN_ID := 421614
