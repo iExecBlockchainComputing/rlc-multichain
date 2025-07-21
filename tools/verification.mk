@@ -31,22 +31,13 @@ define verify-impl
 	impl_address=$$(./tools/get_implementation_address.sh $$proxy_address $(7) | tail -n 1); \
 	echo "Proxy address: $$proxy_address"; \
 	echo "Implementation address: $$impl_address"; \
-	if [ -n "$(8)" ]; then \
-		forge verify-contract \
-			--chain-id $(4) \
-			--watch \
-			$(8) \
-			--etherscan-api-key $(ETHERSCAN_API_KEY) \
-			$$impl_address \
-			$(6); \
-	else \
-		forge verify-contract \
-			--chain-id $(4) \
-			--watch \
-			--etherscan-api-key $(ETHERSCAN_API_KEY) \
-			$$impl_address \
-			$(6); \
-	fi; \
+	forge verify-contract \
+		--chain-id $(4) \
+		--watch \
+		$(8) \
+		--etherscan-api-key $(ETHERSCAN_API_KEY) \
+		$$impl_address \
+		$(6); \
 	echo "Implementation verification completed for $(1) on $(5)"; \
 	echo ""
 endef
