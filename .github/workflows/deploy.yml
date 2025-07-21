@@ -29,9 +29,6 @@ jobs:
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
-    concurrency:
-      group: deploy-${{ inputs.network }}
-      cancel-in-progress: true
     env:
       CI: true
     permissions:
