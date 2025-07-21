@@ -10,10 +10,6 @@ on:
       ARBITRUM_SEPOLIA_RPC_URL:
         required: true
         type: string
-      network:
-        required: false
-        type: string
-        default: ''
 
 concurrency:
   group: ${{ github.ref }}-ci
