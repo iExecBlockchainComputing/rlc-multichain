@@ -16,7 +16,7 @@ on:
         default: ''
 
 concurrency:
-  group: ${{ github.ref }}-ci
+  group: ${{ github.ref }}-ci${{ inputs.network || '' }}
   cancel-in-progress: true
 
 env:
