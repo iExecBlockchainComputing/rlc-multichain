@@ -12,7 +12,7 @@ import {ConfigLib} from "./lib/ConfigLib.sol";
  * @title GetConfigInfo
  * @dev Script to extract configuration information and proxy implementation addresses.
  * Replaces bash scripts with type-safe Solidity implementation.
- * 
+ *
  * Usage examples:
  * - Get config field: forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" "sepolia" "rlcCrosschainTokenAddress"
  * - Get implementation: forge script script/GetConfigInfo.s.sol --sig "getImplementationAddress(string,string)" "sepolia" "rlcCrosschainTokenAddress"
@@ -20,23 +20,23 @@ import {ConfigLib} from "./lib/ConfigLib.sol";
 contract GetConfigInfo is Script {
     /**
      * @dev Get a configuration field value for a specific chain
-     * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia") 
+     * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia")
      * @param field The field name to retrieve
      */
     function getConfigField(string calldata chain, string calldata field) external view {
         address value = _getConfigFieldAddress(chain, field);
         console.log(value);
     }
-    
+
     /**
      * @dev Internal helper to get a configuration field value for a specific chain
-     * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia") 
+     * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia")
      * @param field The field name to retrieve
      * @return The address value for the specified field
      */
     function _getConfigFieldAddress(string memory chain, string memory field) internal view returns (address) {
         ConfigLib.CommonConfigParams memory config = ConfigLib.readCommonConfig(chain);
-        
+
         // Map field names to actual values
         if (keccak256(bytes(field)) == keccak256("initialAdmin")) {
             return config.initialAdmin;
@@ -77,4 +77,3 @@ contract GetConfigInfo is Script {
         console.log(impl);
     }
 }
-
