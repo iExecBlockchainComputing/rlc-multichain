@@ -25,6 +25,7 @@ contract GetConfigInfo is Script {
      * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia")
      * @param field The field name to retrieve
      */
+
     function getConfigField(string calldata chain, string calldata field) external view {
         address value = _getConfigFieldAddress(chain, field);
         console.log(value);
@@ -54,10 +55,10 @@ contract GetConfigInfo is Script {
                 : config.readAddress(string.concat(prefix, ".", field));
         }
         bytes32 fieldHash = keccak256(bytes(field));
-        if (fieldHash == keccak256("initialAdmin") ||
-            fieldHash == keccak256("initialPauser") ||
-            fieldHash == keccak256("initialUpgrader") ||
-            fieldHash == keccak256("createxFactory")) {
+        if (
+            fieldHash == keccak256("initialAdmin") || fieldHash == keccak256("initialPauser")
+                || fieldHash == keccak256("initialUpgrader") || fieldHash == keccak256("createxFactory")
+        ) {
             return config.readAddress(string.concat(".", field));
         }
         return config.readAddress(string.concat(prefix, ".", field));
