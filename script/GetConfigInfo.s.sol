@@ -7,7 +7,6 @@ import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import {ConfigLib} from "./lib/ConfigLib.sol";
 
 /**
  * @title GetConfigInfo
