@@ -67,7 +67,7 @@ _verify-rlc-liquidity-unifier-impl-sepolia:
 verify-layerzero-bridge-impl-sepolia:
 	@echo "Building constructor arguments for IexecLayerZeroBridge..."
 	@rlc_liquidity_unifier_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" sepolia rlcLiquidityUnifierAddress 2>/dev/null | grep "0x" | tail -n1); \
-	lz_endpoint_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" sepolia lzEndpoint 2>/dev/null | grep "0x" | tail -n1); \
+	lz_endpoint_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" sepolia lzEndpointAddress 2>/dev/null | grep "0x" | tail -n1); \
 	constructor_args=$$(cast abi-encode "constructor(bool,address,address)" true $$rlc_liquidity_unifier_address $$lz_endpoint_address); \
 	$(MAKE) _verify-layerzero-bridge-impl-sepolia CONSTRUCTOR_ARGS="--constructor-args $$constructor_args"
 
@@ -94,7 +94,7 @@ verify-rlc-crosschain-token-impl-arbitrum-sepolia:
 verify-layerzero-bridge-impl-arbitrum-sepolia:
 	@echo "Building constructor arguments for IexecLayerZeroBridge..."
 	@rlc_crosschain_token_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" arbitrum_sepolia rlcCrosschainTokenAddress 2>/dev/null | grep "0x" | tail -n1); \
-	lz_endpoint_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" arbitrum_sepolia lzEndpoint 2>/dev/null | grep "0x" | tail -n1); \
+	lz_endpoint_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" arbitrum_sepolia lzEndpointAddress 2>/dev/null | grep "0x" | tail -n1); \
 	constructor_args=$$(cast abi-encode "constructor(bool,address,address)" false $$rlc_crosschain_token_address $$lz_endpoint_address); \
 	$(MAKE) _verify-layerzero-bridge-impl-arbitrum-sepolia CONSTRUCTOR_ARGS="--constructor-args $$constructor_args"
 

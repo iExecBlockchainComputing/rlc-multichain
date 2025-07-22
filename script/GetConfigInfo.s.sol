@@ -5,6 +5,7 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
+import {stdJson} from "forge-std/StdJson.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
 
@@ -18,6 +19,7 @@ import {ConfigLib} from "./lib/ConfigLib.sol";
  * - Get implementation: forge script script/GetConfigInfo.s.sol --sig "getImplementationAddress(string,string)" "sepolia" "rlcCrosschainTokenAddress"
  */
 contract GetConfigInfo is Script {
+    using stdJson for string;
     /**
      * @dev Get a configuration field value for a specific chain
      * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia")
@@ -35,30 +37,30 @@ contract GetConfigInfo is Script {
      * @return The address value for the specified field
      */
     function _getConfigFieldAddress(string memory chain, string memory field) internal view returns (address) {
-        ConfigLib.CommonConfigParams memory config = ConfigLib.readCommonConfig(chain);
+        string memory config = vm.readFile("config/config.json");
+        string memory prefix = string.concat(".chains.", chain);
 
-        // Map field names to actual values
-        if (keccak256(bytes(field)) == keccak256("initialAdmin")) {
-            return config.initialAdmin;
-        } else if (keccak256(bytes(field)) == keccak256("initialPauser")) {
-            return config.initialPauser;
-        } else if (keccak256(bytes(field)) == keccak256("initialUpgrader")) {
-            return config.initialUpgrader;
-        } else if (keccak256(bytes(field)) == keccak256("createxFactory")) {
-            return config.createxFactory;
-        } else if (keccak256(bytes(field)) == keccak256("lzEndpoint")) {
-            return config.lzEndpoint;
-        } else if (keccak256(bytes(field)) == keccak256("rlcToken")) {
-            return config.rlcToken;
+        if (keccak256(bytes(field)) == keccak256("rlcToken")) {
+            return config.readBool(string.concat(prefix, ".approvalRequired"))
+                ? config.readAddress(string.concat(prefix, ".rlcAddress"))
+                : address(0);
         } else if (keccak256(bytes(field)) == keccak256("rlcLiquidityUnifierAddress")) {
-            return config.rlcLiquidityUnifierAddress;
+            return config.readBool(string.concat(prefix, ".approvalRequired"))
+                ? config.readAddress(string.concat(prefix, ".", field))
+                : address(0);
         } else if (keccak256(bytes(field)) == keccak256("rlcCrosschainTokenAddress")) {
-            return config.rlcCrosschainTokenAddress;
-        } else if (keccak256(bytes(field)) == keccak256("iexecLayerZeroBridgeAddress")) {
-            return config.iexecLayerZeroBridgeAddress;
-        } else {
-            revert("Unknown field");
+            return config.readBool(string.concat(prefix, ".approvalRequired"))
+                ? address(0)
+                : config.readAddress(string.concat(prefix, ".", field));
         }
+        bytes32 fieldHash = keccak256(bytes(field));
+        if (fieldHash == keccak256("initialAdmin") ||
+            fieldHash == keccak256("initialPauser") ||
+            fieldHash == keccak256("initialUpgrader") ||
+            fieldHash == keccak256("createxFactory")) {
+            return config.readAddress(string.concat(".", field));
+        }
+        return config.readAddress(string.concat(prefix, ".", field));
     }
 
     /**
