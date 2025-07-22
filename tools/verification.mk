@@ -57,7 +57,7 @@ verify-layerzero-bridge-proxy-sepolia:
 # Implementation Verifications - Sepolia
 # --------------------------------------
 verify-rlc-liquidity-unifier-impl-sepolia:
-	@rlc_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" sepolia rlcToken 2>/dev/null | grep "0x" | tail -n1); \
+	@rlc_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string,string)" sepolia rlcAddress 2>/dev/null | grep "0x" | tail -n1); \
 	constructor_args=$$(cast abi-encode "constructor(address)" $$rlc_address); \
 	$(MAKE) _verify-rlc-liquidity-unifier-impl-sepolia CONSTRUCTOR_ARGS="--constructor-args $$constructor_args"
 

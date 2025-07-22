@@ -40,19 +40,6 @@ contract GetConfigInfo is Script {
         string memory config = vm.readFile("config/config.json");
         string memory prefix = string.concat(".chains.", chain);
 
-        if (keccak256(bytes(field)) == keccak256("rlcToken")) {
-            return config.readBool(string.concat(prefix, ".approvalRequired"))
-                ? config.readAddress(string.concat(prefix, ".rlcAddress"))
-                : address(0);
-        } else if (keccak256(bytes(field)) == keccak256("rlcLiquidityUnifierAddress")) {
-            return config.readBool(string.concat(prefix, ".approvalRequired"))
-                ? config.readAddress(string.concat(prefix, ".", field))
-                : address(0);
-        } else if (keccak256(bytes(field)) == keccak256("rlcCrosschainTokenAddress")) {
-            return config.readBool(string.concat(prefix, ".approvalRequired"))
-                ? address(0)
-                : config.readAddress(string.concat(prefix, ".", field));
-        }
         bytes32 fieldHash = keccak256(bytes(field));
         if (
             fieldHash == keccak256("initialAdmin") || fieldHash == keccak256("initialPauser")
