@@ -79,12 +79,3 @@ jobs:
           TARGET_CHAIN: ${{ matrix.target_chain }}
           RPC_URL: ${{ secrets.RPC_URL }}
         run: make configure-bridge
-
-      - name: Save bridge configuration artifacts
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: 'chore: save bridge configuration artifacts for ${{ matrix.source_chain }}→${{ matrix.target_chain }} (run: ${{ github.run_id }})'
-          file_pattern: 'config/config.json broadcast/'
-          commit_user_name: 'GitHub Actions Bot'
-          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_author: 'GitHub Actions Bot <github-actions[bot]@users.noreply.github.com>'
