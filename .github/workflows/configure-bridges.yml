@@ -13,37 +13,51 @@ on:
         default: 'testnets'
 
 jobs:
+  setup-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set matrix based on network type
+        id: set-matrix
+        run: |
+          if [ "${{ github.event.inputs.network_type }}" == "testnets" ]; then
+            echo 'matrix=[
+              {
+                "source_chain": "sepolia",
+                "target_chain": "arbitrum_sepolia"
+              },
+              {
+                "source_chain": "arbitrum_sepolia",
+                "target_chain": "sepolia"
+              }
+            ]' >> $GITHUB_OUTPUT
+          else
+            echo 'matrix=[
+              {
+                "source_chain": "ethereum",
+                "target_chain": "arbitrum"
+              },
+              {
+                "source_chain": "arbitrum",
+                "target_chain": "ethereum"
+              }
+            ]' >> $GITHUB_OUTPUT
+          fi
+
   configure-bridges:
+    needs: setup-matrix
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        network_type: [testnets, mainnets]
-        include:
-          - environment: sepolia
-            source_chain: sepolia
-            target_chain: arbitrum_sepolia
-            network_type: testnets
-          - environment: arbitrum_sepolia
-            source_chain: arbitrum_sepolia
-            target_chain: sepolia
-            network_type: testnets
-          - environment: ethereum
-            source_chain: ethereum
-            target_chain: arbitrum
-            network_type: mainnets
-          - environment: arbitrum
-            source_chain: arbitrum
-            target_chain: ethereum
-            network_type: mainnets
-        exclude:
-          - network_type: ${{ github.event.inputs.network_type == 'testnets' && 'mainnets' || 'testnets' }}
+        include: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
       fail-fast: false
     concurrency:
       group: configure-bridges-${{ matrix.source_chain }}-${{ matrix.target_chain }}
       cancel-in-progress: true
     env:
       CI: true
-    environment: ${{ matrix.environment }}
+    environment: ${{ matrix.source_chain }}
     steps:
       - uses: actions/checkout@v4
         with:
