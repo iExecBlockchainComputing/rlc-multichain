@@ -36,6 +36,10 @@ jobs:
 
     environment: ${{ matrix.environment }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
       - name: Configure Bridge
         uses: ./.github/actions/configure-bridge
         with:
@@ -64,6 +68,10 @@ jobs:
 
     environment: ${{ matrix.environment }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
       - name: Configure Bridge
         uses: ./.github/actions/configure-bridge
         with:
