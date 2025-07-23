@@ -18,18 +18,22 @@ jobs:
     strategy:
       matrix:
         include:
-          - environment: testnets
+          - environment: sepolia
             source_chain: sepolia
             target_chain: arbitrum_sepolia
-          - environment: testnets
+            network_type: testnets
+          - environment: arbitrum_sepolia
             source_chain: arbitrum_sepolia
             target_chain: sepolia
-          - environment: mainnets
+            network_type: testnets
+          - environment: ethereum
             source_chain: ethereum
             target_chain: arbitrum
-          - environment: mainnets
+            network_type: mainnets
+          - environment: arbitrum
             source_chain: arbitrum
             target_chain: ethereum
+            network_type: mainnets
       fail-fast: false
     concurrency:
       group: configure-bridges-${{ matrix.source_chain }}-${{ matrix.target_chain }}
@@ -49,7 +53,7 @@ jobs:
           cache: true
 
       - name: Configure bridge from ${{ matrix.source_chain }} to ${{ matrix.target_chain }}
-        if: matrix.environment == github.event.inputs.network_type
+        if: matrix.network_type == github.event.inputs.network_type
         env:
           ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
           SOURCE_CHAIN: ${{ matrix.source_chain }} 
@@ -59,7 +63,7 @@ jobs:
         run: make configure-bridge
 
       - name: Save bridge configuration artifacts
-        if: matrix.environment == github.event.inputs.network_type
+        if: matrix.network_type == github.event.inputs.network_type
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: save bridge configuration artifacts for ${{ matrix.source_chain }}→${{ matrix.target_chain }} (run: ${{ github.run_id }})'
