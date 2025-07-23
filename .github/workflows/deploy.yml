@@ -13,8 +13,6 @@ on:
           - ethereum
           - arbitrum_sepolia
           - arbitrum
-          - testnets  # Configure Sepolia + Arbitrum Sepolia
-          - mainnets  # Configure Ethereum + Arbitrum
         default: 'anvil'
 
 jobs:
@@ -57,20 +55,6 @@ jobs:
         run: |
           make fork-sepolia & make fork-arbitrum-sepolia & sleep 10 && make deploy-on-anvil
 
-      - name: Configure bridges on Anvil (All networks)
-        if: inputs.network == 'anvil'
-        env:
-          DEPLOYER_PRIVATE_KEY: ${{ vars.ANVIL_PRIVATE_KEY }}
-          SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
-          ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
-          ANVIL_SEPOLIA_RPC_URL: ${{ vars.ANVIL_SEPOLIA_RPC_URL }}
-          ANVIL_ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ANVIL_ARBITRUM_SEPOLIA_RPC_URL }}
-          ACCOUNT: ${{ vars.ANVIL_ACCOUNT || 'default' }}
-        run: |
-          make configure-all \
-            SOURCE_CHAIN=sepolia SOURCE_RPC=$ANVIL_SEPOLIA_RPC_URL \
-            TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$ANVIL_ARBITRUM_SEPOLIA_RPC_URL
-
       - name: Deploy contracts on Sepolia/EthereumMainnet
         if: inputs.network == 'sepolia' || inputs.network == 'ethereum'
         env:
@@ -81,7 +65,7 @@ jobs:
           make deploy-liquidity-unifier-and-bridge
 
       - name: Deploy contracts on ChainX
-        if: "!contains(['sepolia', 'ethereum', 'anvil', 'testnets', 'mainnets'], inputs.network)"
+        if: inputs.network != 'sepolia' && inputs.network != 'ethereum' && inputs.network != 'anvil'
         env:
           DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           CHAIN: ${{ inputs.network }}
@@ -103,56 +87,3 @@ jobs:
         if: inputs.network != 'anvil'
         run: |
           echo "TODO: Implement contract verification for ${{ inputs.network }}."
-
-  # Configure bridges after deployment (only for testnet/mainnet pairs)
-  configure-bridges:
-    needs: deploy
-    runs-on: ubuntu-latest
-    if: inputs.network == 'testnets' || inputs.network == 'mainnets'
-    env:
-      CI: true
-    environment: ${{ inputs.network }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: stable
-          cache: true
-
-      - name: Configure bridges for testnets (Sepolia ↔ Arbitrum Sepolia)
-        if: inputs.network == 'testnets'
-        env:
-          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
-          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
-          ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
-          ACCOUNT: ${{ vars.ACCOUNT || 'default' }}
-        run: |
-          make configure-all \
-            SOURCE_CHAIN=sepolia SOURCE_RPC=$SEPOLIA_RPC_URL \
-            TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$ARBITRUM_SEPOLIA_RPC_URL
-
-      - name: Configure bridges for mainnets (Ethereum ↔ Arbitrum)
-        if: inputs.network == 'mainnets'
-        env:
-          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
-          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
-          ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
-          ACCOUNT: ${{ vars.ACCOUNT || 'default' }}
-        run: |
-          make configure-all \
-            SOURCE_CHAIN=ethereum SOURCE_RPC=$ETHEREUM_RPC_URL \
-            TARGET_CHAIN=arbitrum TARGET_RPC=$ARBITRUM_RPC_URL
-
-      - name: Save bridge configuration artifacts
-        if: inputs.network == 'testnets' || inputs.network == 'mainnets'
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: 'chore: save bridge configuration artifacts for ${{ inputs.network }} (Github run_id: ${{ github.run_id }})'
-          file_pattern: 'config/config.json broadcast/'
-          commit_user_name: 'GitHub Actions Bot'
-          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_author: 'GitHub Actions Bot <github-actions[bot]@users.noreply.github.com>'

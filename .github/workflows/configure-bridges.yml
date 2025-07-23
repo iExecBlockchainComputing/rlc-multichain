@@ -1,0 +1,156 @@
+name: Configure Bridges
+
+on:
+  workflow_dispatch: # Manual trigger
+    inputs:
+      source_chain:
+        description: 'Source chain network'
+        required: true
+        type: choice
+        options:
+          - sepolia
+          - ethereum
+          - arbitrum_sepolia
+          - arbitrum
+        default: 'sepolia'
+      target_chain:
+        description: 'Target chain network'
+        required: true
+        type: choice
+        options:
+          - sepolia
+          - ethereum
+          - arbitrum_sepolia
+          - arbitrum
+        default: 'arbitrum_sepolia'
+
+jobs:
+  validate-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      is_valid: ${{ steps.validate.outputs.is_valid }}
+      error_message: ${{ steps.validate.outputs.error_message }}
+    steps:
+      - name: Validate chain pair
+        id: validate
+        run: |
+          SOURCE="${{ inputs.source_chain }}"
+          TARGET="${{ inputs.target_chain }}"
+          
+          # Check if source and target are the same
+          if [ "$SOURCE" = "$TARGET" ]; then
+            echo "is_valid=false" >> $GITHUB_OUTPUT
+            echo "error_message=Source and target chains cannot be the same" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Check valid chain pairs
+          case "$SOURCE-$TARGET" in
+            "sepolia-arbitrum_sepolia"|"arbitrum_sepolia-sepolia")
+              echo "is_valid=true" >> $GITHUB_OUTPUT
+              echo "error_message=" >> $GITHUB_OUTPUT
+              ;;
+            "ethereum-arbitrum"|"arbitrum-ethereum")
+              echo "is_valid=true" >> $GITHUB_OUTPUT
+              echo "error_message=" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "is_valid=false" >> $GITHUB_OUTPUT
+              echo "error_message=Invalid chain pair. Valid pairs: sepolia↔arbitrum_sepolia, ethereum↔arbitrum" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+  configure-bridges:
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    if: needs.validate-inputs.outputs.is_valid == 'true'
+    env:
+      CI: true
+    environment: ${{ inputs.source_chain }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+
+      - name: Set environment variables
+        run: |
+          case "${{ inputs.source_chain }}" in
+            "sepolia")
+              echo "SOURCE_RPC_URL=${{ secrets.SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
+              ;;
+            "ethereum")
+              echo "SOURCE_RPC_URL=${{ secrets.ETHEREUM_RPC_URL }}" >> $GITHUB_ENV
+              ;;
+            "arbitrum_sepolia")
+              echo "SOURCE_RPC_URL=${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
+              ;;
+            "arbitrum")
+              echo "SOURCE_RPC_URL=${{ secrets.ARBITRUM_RPC_URL }}" >> $GITHUB_ENV
+              ;;
+          esac
+          
+          case "${{ inputs.target_chain }}" in
+            "sepolia")
+              echo "TARGET_RPC_URL=${{ secrets.SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
+              ;;
+            "ethereum")
+              echo "TARGET_RPC_URL=${{ secrets.ETHEREUM_RPC_URL }}" >> $GITHUB_ENV
+              ;;
+            "arbitrum_sepolia")
+              echo "TARGET_RPC_URL=${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
+              ;;
+            "arbitrum")
+              echo "TARGET_RPC_URL=${{ secrets.ARBITRUM_RPC_URL }}" >> $GITHUB_ENV
+              ;;
+          esac
+
+      - name: Configure bridge from source to target
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          ACCOUNT: ${{ vars.ACCOUNT || 'default' }}
+        run: |
+          echo "🔧 Configuring bridge: ${{ inputs.source_chain }} → ${{ inputs.target_chain }}"
+          make configure-bridge \
+            SOURCE_CHAIN=${{ inputs.source_chain }} \
+            TARGET_CHAIN=${{ inputs.target_chain }} \
+            RPC_URL=$SOURCE_RPC_URL
+
+      - name: Configure bridge from target to source
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          ACCOUNT: ${{ vars.ACCOUNT || 'default' }}
+        run: |
+          echo "🔧 Configuring bridge: ${{ inputs.target_chain }} → ${{ inputs.source_chain }}"
+          make configure-bridge \
+            SOURCE_CHAIN=${{ inputs.target_chain }} \
+            TARGET_CHAIN=${{ inputs.source_chain }} \
+            RPC_URL=$TARGET_RPC_URL
+
+      - name: Save bridge configuration artifacts
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: save bridge configuration artifacts for ${{ inputs.source_chain }}↔${{ inputs.target_chain }} (Github run_id: ${{ github.run_id }})'
+          file_pattern: 'config/config.json broadcast/'
+          commit_user_name: 'GitHub Actions Bot'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_author: 'GitHub Actions Bot <github-actions[bot]@users.noreply.github.com>'
+
+  show-validation-error:
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    if: needs.validate-inputs.outputs.is_valid == 'false'
+    steps:
+      - name: Show validation error
+        run: |
+          echo "❌ Validation failed: ${{ needs.validate-inputs.outputs.error_message }}"
+          echo ""
+          echo "Valid chain pairs:"
+          echo "  • sepolia ↔ arbitrum_sepolia (testnets)"
+          echo "  • ethereum ↔ arbitrum (mainnets)"
+          exit 1
