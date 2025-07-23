@@ -12,8 +12,12 @@ on:
           - mainnets
         default: 'testnets'
 
+env:
+  CI: true
+
 jobs:
-  configure-bridges:
+  configure-testnets:
+    if: github.event.inputs.network_type == 'testnets'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -21,53 +25,49 @@ jobs:
           - environment: sepolia
             source_chain: sepolia
             target_chain: arbitrum_sepolia
-            network_type: testnets
           - environment: arbitrum_sepolia
             source_chain: arbitrum_sepolia
             target_chain: sepolia
-            network_type: testnets
-          - environment: ethereum
-            source_chain: ethereum
-            target_chain: arbitrum
-            network_type: mainnets
-          - environment: arbitrum
-            source_chain: arbitrum
-            target_chain: ethereum
-            network_type: mainnets
       fail-fast: false
+
     concurrency:
       group: configure-bridges-${{ matrix.source_chain }}-${{ matrix.target_chain }}
       cancel-in-progress: true
-    env:
-      CI: true
+
     environment: ${{ matrix.environment }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Configure Bridge
+        uses: ./.github/actions/configure-bridge
         with:
-          submodules: recursive
+          source_chain: ${{ matrix.source_chain }}
+          target_chain: ${{ matrix.target_chain }}
+          admin_private_key: ${{ secrets.ADMIN_PRIVATE_KEY }}
+          rpc_url: ${{ secrets.RPC_URL }}
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+  configure-mainnets:
+    if: github.event.inputs.network_type == 'mainnets'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - environment: ethereum
+            source_chain: ethereum
+            target_chain: arbitrum
+          - environment: arbitrum
+            source_chain: arbitrum
+            target_chain: ethereum
+      fail-fast: false
+
+    concurrency:
+      group: configure-bridges-${{ matrix.source_chain }}-${{ matrix.target_chain }}
+      cancel-in-progress: true
+
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Configure Bridge
+        uses: ./.github/actions/configure-bridge
         with:
-          version: stable
-          cache: true
-
-      - name: Configure bridge from ${{ matrix.source_chain }} to ${{ matrix.target_chain }}
-        if: matrix.network_type == github.event.inputs.network_type
-        env:
-          ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
-          SOURCE_CHAIN: ${{ matrix.source_chain }} 
-          TARGET_CHAIN: ${{ matrix.target_chain }}
-          # Définissez RPC_URL selon vos besoins
-          RPC_URL: ${{ secrets.RPC_URL }}  # ou une autre source
-        run: make configure-bridge
-
-      - name: Save bridge configuration artifacts
-        if: matrix.network_type == github.event.inputs.network_type
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: 'chore: save bridge configuration artifacts for ${{ matrix.source_chain }}→${{ matrix.target_chain }} (run: ${{ github.run_id }})'
-          file_pattern: 'config/config.json broadcast/'
-          commit_user_name: 'GitHub Actions Bot'
-          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_author: 'GitHub Actions Bot <github-actions[bot]@users.noreply.github.com>'
+          source_chain: ${{ matrix.source_chain }}
+          target_chain: ${{ matrix.target_chain }}
+          admin_private_key: ${{ secrets.ADMIN_PRIVATE_KEY }}
+          rpc_url: ${{ secrets.RPC_URL }}

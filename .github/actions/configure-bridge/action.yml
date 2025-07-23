@@ -1,0 +1,46 @@
+name: 'Configure Bridge'
+description: 'Configure bridge between two chains'
+inputs:
+  source_chain:
+    description: 'Source chain name'
+    required: true
+  target_chain:
+    description: 'Target chain name'
+    required: true
+  admin_private_key:
+    description: 'Admin private key'
+    required: true
+  rpc_url:
+    description: 'RPC URL'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install Foundry
+      uses: foundry-rs/foundry-toolchain@v1
+      with:
+        version: stable
+        cache: true
+
+    - name: Configure bridge from ${{ inputs.source_chain }} to ${{ inputs.target_chain }}
+      shell: bash
+      env:
+        ADMIN_PRIVATE_KEY: ${{ inputs.admin_private_key }}
+        SOURCE_CHAIN: ${{ inputs.source_chain }}
+        TARGET_CHAIN: ${{ inputs.target_chain }}
+        RPC_URL: ${{ inputs.rpc_url }}
+      run: make configure-bridge
+
+    - name: Save bridge configuration artifacts
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: 'chore: save bridge configuration artifacts for ${{ inputs.source_chain }}→${{ inputs.target_chain }} (run: ${{ github.run_id }})'
+        file_pattern: 'config/config.json broadcast/'
+        commit_user_name: 'GitHub Actions Bot'
+        commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+        commit_author: 'GitHub Actions Bot <github-actions[bot]@users.noreply.github.com>'
