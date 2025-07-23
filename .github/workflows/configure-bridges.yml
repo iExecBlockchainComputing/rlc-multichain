@@ -1,6 +1,7 @@
 name: Configure Bridges
 
 on:
+  push:
   workflow_dispatch:
     inputs:
       network_type:
