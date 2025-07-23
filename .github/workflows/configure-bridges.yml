@@ -23,25 +23,13 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.network_type }}" == "testnets" ]; then
             echo 'matrix=[
-              {
-                "source_chain": "sepolia",
-                "target_chain": "arbitrum_sepolia"
-              },
-              {
-                "source_chain": "arbitrum_sepolia",
-                "target_chain": "sepolia"
-              }
+              {"source_chain":"sepolia","target_chain":"arbitrum_sepolia"},
+              {"source_chain":"arbitrum_sepolia","target_chain":"sepolia"}
             ]' >> $GITHUB_OUTPUT
           else
             echo 'matrix=[
-              {
-                "source_chain": "ethereum",
-                "target_chain": "arbitrum"
-              },
-              {
-                "source_chain": "arbitrum",
-                "target_chain": "ethereum"
-              }
+              {"source_chain":"ethereum","target_chain":"arbitrum"},
+              {"source_chain":"arbitrum","target_chain":"ethereum"}
             ]' >> $GITHUB_OUTPUT
           fi
 
