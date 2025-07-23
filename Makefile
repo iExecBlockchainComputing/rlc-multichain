@@ -147,7 +147,7 @@ configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 	SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) \
 	forge script script/bridges/layerZero/IexecLayerZeroBridge.s.sol:Configure \
 		--rpc-url $(RPC_URL) \
-		--account $(ACCOUNT) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(DEPLOYER_PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
 		-vvv
 
