@@ -82,31 +82,31 @@ jobs:
         run: |
           case "${{ inputs.source_chain }}" in
             "sepolia")
-              echo "SOURCE_RPC_URL=${{ secrets.SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
+              echo "SOURCE_RPC_URL=${{ vars.SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
               ;;
             "ethereum")
-              echo "SOURCE_RPC_URL=${{ secrets.ETHEREUM_RPC_URL }}" >> $GITHUB_ENV
+              echo "SOURCE_RPC_URL=${{ vars.ETHEREUM_RPC_URL }}" >> $GITHUB_ENV
               ;;
             "arbitrum_sepolia")
-              echo "SOURCE_RPC_URL=${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
+              echo "SOURCE_RPC_URL=${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
               ;;
             "arbitrum")
-              echo "SOURCE_RPC_URL=${{ secrets.ARBITRUM_RPC_URL }}" >> $GITHUB_ENV
+              echo "SOURCE_RPC_URL=${{ vars.ARBITRUM_RPC_URL }}" >> $GITHUB_ENV
               ;;
           esac
           
           case "${{ inputs.target_chain }}" in
             "sepolia")
-              echo "TARGET_RPC_URL=${{ secrets.SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
+              echo "TARGET_RPC_URL=${{ vars.SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
               ;;
             "ethereum")
-              echo "TARGET_RPC_URL=${{ secrets.ETHEREUM_RPC_URL }}" >> $GITHUB_ENV
+              echo "TARGET_RPC_URL=${{ vars.ETHEREUM_RPC_URL }}" >> $GITHUB_ENV
               ;;
             "arbitrum_sepolia")
-              echo "TARGET_RPC_URL=${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
+              echo "TARGET_RPC_URL=${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}" >> $GITHUB_ENV
               ;;
             "arbitrum")
-              echo "TARGET_RPC_URL=${{ secrets.ARBITRUM_RPC_URL }}" >> $GITHUB_ENV
+              echo "TARGET_RPC_URL=${{ vars.ARBITRUM_RPC_URL }}" >> $GITHUB_ENV
               ;;
           esac
 
@@ -114,23 +114,23 @@ jobs:
         env:
           DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           ACCOUNT: ${{ vars.ACCOUNT || 'default' }}
+          SOURCE_CHAIN: ${{ inputs.source_chain }} 
+          TARGET_CHAIN: ${{ inputs.target_chain }}
+          SOURCE_RPC_URL: ${{ env.SOURCE_RPC_URL }}
+          TARGET_RPC_URL: ${{ env.TARGET_RPC_URL }}
         run: |
-          echo "🔧 Configuring bridge: ${{ inputs.source_chain }} → ${{ inputs.target_chain }}"
-          make configure-bridge \
-            SOURCE_CHAIN=${{ inputs.source_chain }} \
-            TARGET_CHAIN=${{ inputs.target_chain }} \
-            RPC_URL=$SOURCE_RPC_URL
+          make configure-bridge
 
       - name: Configure bridge from target to source
         env:
           DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           ACCOUNT: ${{ vars.ACCOUNT || 'default' }}
+          SOURCE_CHAIN: ${{ inputs.target_chain }}
+          TARGET_CHAIN: ${{ inputs.source_chain }}
+          SOURCE_RPC_URL: ${{ env.TARGET_RPC_URL }}
+          TARGET_RPC_URL: ${{ env.SOURCE_RPC_URL }}
         run: |
-          echo "🔧 Configuring bridge: ${{ inputs.target_chain }} → ${{ inputs.source_chain }}"
-          make configure-bridge \
-            SOURCE_CHAIN=${{ inputs.target_chain }} \
-            TARGET_CHAIN=${{ inputs.source_chain }} \
-            RPC_URL=$TARGET_RPC_URL
+          make configure-bridge
 
       - name: Save bridge configuration artifacts
         uses: stefanzweifel/git-auto-commit-action@v5
