@@ -1,0 +1,81 @@
+name: Configure Bridges
+
+on:
+  workflow_dispatch:
+    inputs:
+      network_type:
+        description: 'Network type to configure'
+        required: true
+        type: choice
+        options:
+          - testnets
+          - mainnets
+        default: 'testnets'
+
+jobs:
+  setup-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set matrix based on network type
+        id: set-matrix
+        run: |
+          if [ "${{ github.event.inputs.network_type }}" == "testnets" ]; then
+            MATRIX='[
+              {
+                "source_chain": "sepolia",
+                "target_chain": "arbitrum_sepolia"
+              },
+              {
+                "source_chain": "arbitrum_sepolia",
+                "target_chain": "sepolia"
+              }
+            ]'
+          else
+            MATRIX='[
+              {
+                "source_chain": "ethereum",
+                "target_chain": "arbitrum"
+              },
+              {
+                "source_chain": "arbitrum",
+                "target_chain": "ethereum"
+              }
+            ]'
+          fi
+          
+          # Convertir en une ligne pour GitHub Output
+          echo "matrix=$(echo "$MATRIX" | jq -c .)" >> $GITHUB_OUTPUT
+
+  configure-bridges:
+    needs: setup-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+      fail-fast: false
+    concurrency:
+      group: configure-bridges-${{ matrix.source_chain }}-${{ matrix.target_chain }}
+      cancel-in-progress: true
+    env:
+      CI: true
+    environment: ${{ matrix.source_chain }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+
+      - name: Configure bridge from ${{ matrix.source_chain }} to ${{ matrix.target_chain }}
+        env:
+          ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
+          SOURCE_CHAIN: ${{ matrix.source_chain }} 
+          TARGET_CHAIN: ${{ matrix.target_chain }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+        run: make configure-bridge
