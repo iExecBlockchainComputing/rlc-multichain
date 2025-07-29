@@ -1,8 +1,8 @@
 # Changelog
 
-## vNEXT
+## v1.0.0-rc1 (2025-07-29)
 
-### Added
+### Features
 - Initial implementation of RLC OFT (Optimistic Fungible Token) bridge system
 - RLCOFT contract deployed on Arbitrum Sepolia with 9 decimal places
 - RLCAdapter contract deployed on Ethereum Sepolia to bridge existing RLC token
