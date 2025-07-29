@@ -130,12 +130,12 @@ $(eval $(call verify-arbitrum-type-implementations,arbitrum,$(ARBITRUM_CHAIN_ID)
 #							PROXY AND IMPLEMENTATION VERIFICATION
 # ========================================================================
 verify-proxies-sepolia: verify-rlc-liquidity-unifier-proxy-sepolia verify-layerzero-bridge-proxy-sepolia
-verify-proxies-arbitrum-sepolia: verify-rlc-crosschain-token-proxy-arbitrum_sepolia verify-layerzero-bridge-proxy-arbitrum_sepolia
+verify-proxies-arbitrum_sepolia: verify-rlc-crosschain-token-proxy-arbitrum_sepolia verify-layerzero-bridge-proxy-arbitrum_sepolia
 verify-proxies-ethereum: verify-rlc-liquidity-unifier-proxy-ethereum verify-layerzero-bridge-proxy-ethereum
 verify-proxies-arbitrum: verify-rlc-crosschain-token-proxy-arbitrum verify-layerzero-bridge-proxy-arbitrum
 
 verify-implementations-sepolia: verify-rlc-liquidity-unifier-impl-sepolia verify-layerzero-bridge-impl-sepolia
-verify-implementations-arbitrum-sepolia: verify-rlc-crosschain-token-impl-arbitrum_sepolia verify-layerzero-bridge-impl-arbitrum_sepolia
+verify-implementations-arbitrum_sepolia: verify-rlc-crosschain-token-impl-arbitrum_sepolia verify-layerzero-bridge-impl-arbitrum_sepolia
 verify-implementations-ethereum: verify-rlc-liquidity-unifier-impl-ethereum verify-layerzero-bridge-impl-ethereum
 verify-implementations-arbitrum: verify-rlc-crosschain-token-impl-arbitrum verify-layerzero-bridge-impl-arbitrum
 
@@ -145,14 +145,14 @@ verify-implementations-arbitrum: verify-rlc-crosschain-token-impl-arbitrum verif
 # ========================================================================
 
 verify-all-sepolia: verify-proxies-sepolia verify-implementations-sepolia
-verify-all-arbitrum-sepolia: verify-proxies-arbitrum-sepolia verify-implementations-arbitrum-sepolia
+verify-all-arbitrum_sepolia: verify-proxies-arbitrum_sepolia verify-implementations-arbitrum_sepolia
 verify-all-ethereum: verify-proxies-ethereum verify-implementations-ethereum
 verify-all-arbitrum: verify-proxies-arbitrum verify-implementations-arbitrum
-verify-all-testnets: verify-all-sepolia verify-all-arbitrum-sepolia
+verify-all-testnets: verify-all-sepolia verify-all-arbitrum_sepolia
 verify-all-mainnets: verify-all-ethereum verify-all-arbitrum
 verify-all: verify-all-testnets verify-all-mainnets
 
 
-.PHONY: verify-all verify-all-testnets verify-all-mainnets verify-all-sepolia verify-all-arbitrum-sepolia verify-all-ethereum verify-all-arbitrum \
-        verify-proxies-sepolia verify-proxies-arbitrum-sepolia verify-proxies-ethereum verify-proxies-arbitrum \
-        verify-implementations-sepolia verify-implementations-arbitrum-sepolia verify-implementations-ethereum verify-implementations-arbitrum
+.PHONY: verify-all verify-all-testnets verify-all-mainnets verify-all-sepolia verify-all-arbitrum_sepolia verify-all-ethereum verify-all-arbitrum \
+        verify-proxies-sepolia verify-proxies-arbitrum_sepolia verify-proxies-ethereum verify-proxies-arbitrum \
+        verify-implementations-sepolia verify-implementations-arbitrum_sepolia verify-implementations-ethereum verify-implementations-arbitrum
