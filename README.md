@@ -116,7 +116,17 @@ The core contracts of the multichain bridge system:
 
 ## Usage
 
-### Bridge RLC
+### Network Support
+
+The bridge currently supports:
+
+#### **Testnets**
+- **Ethereum Sepolia** ↔ **Arbitrum Sepolia**
+
+#### **Mainnets**  
+- **Ethereum Mainnet** ↔ **Arbitrum Mainnet**
+
+### Bridge RLC on Testnets
 
 A. To send RLC tokens from Ethereum Sepolia to Arbitrum Sepolia:
 
@@ -143,6 +153,20 @@ This will:
 1. Burn RLCCrosschainToken tokens on Arbitrum
 2. Send a cross-chain message via LayerZero to Ethereum
 3. Release the original RLC tokens from the RLCLiquidityUnifier on Ethereum
+
+### Bridge RLC on Mainnets
+
+A. To send RLC tokens from Ethereum Mainnet to Arbitrum Mainnet:
+
+```bash
+make send-tokens-to-arbitrum-mainnet
+```
+
+B. To send RLC tokens from Arbitrum Mainnet back to Ethereum Mainnet:
+
+```bash
+make send-tokens-to-ethereum-mainnet
+```
 
 ## 📊 Code Coverage Analysis
 

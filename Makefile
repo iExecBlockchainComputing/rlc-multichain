@@ -58,7 +58,7 @@ deploy-on-mainnets:
 	$(MAKE) deploy-all \
 		SOURCE_CHAIN=ethereum SOURCE_RPC=$(ETHEREUM_RPC_URL) \
 		TARGET_CHAIN=arbitrum TARGET_RPC=$(ARBITRUM_RPC_URL) \
-		OPTIONS=--verify
+		OPTIONS="--verify --verifier etherscan --verifier-api-key $(ETHERSCAN_API_KEY) --verifier-url $(ETHERSCAN_API_URL)"
 
 deploy-on-testnets:
 	$(MAKE) deploy-all \
@@ -162,6 +162,8 @@ upgrade-layerzero-bridge: # CHAIN, RPC_URL
 # Bridge operations.
 #
 
+# Testnet bridge operations
+
 send-tokens-to-arbitrum-sepolia:
 	@echo "Sending tokens cross-chain... from SEPOLIA to Arbitrum SEPOLIA"
 	SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia \
@@ -176,6 +178,25 @@ send-tokens-to-sepolia:
 	SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia \
 	forge script script/SendFromArbitrumToEthereum.s.sol:SendTokensFromArbitrumToEthereum \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
+		--account $(ACCOUNT) \
+		--broadcast \
+		-vvv
+
+# Mainnet bridge operations
+send-tokens-to-arbitrum-mainnet:
+	@echo "Sending tokens cross-chain... from ETHEREUM to Arbitrum MAINNET"
+	SOURCE_CHAIN=ethereum TARGET_CHAIN=arbitrum \
+	forge script script/SendFromEthereumToArbitrum.s.sol:SendFromEthereumToArbitrum \
+		--rpc-url $(ETHEREUM_RPC_URL) \
+		--account $(ACCOUNT) \
+		--broadcast \
+		-vvv
+
+send-tokens-to-ethereum-mainnet:
+	@echo "Sending tokens cross-chain... from Arbitrum MAINNET to ETHEREUM"
+	SOURCE_CHAIN=arbitrum TARGET_CHAIN=ethereum \
+	forge script script/SendFromArbitrumToEthereum.s.sol:SendFromArbitrumToEthereum \
+		--rpc-url $(ARBITRUM_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
