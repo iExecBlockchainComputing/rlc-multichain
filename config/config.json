@@ -22,6 +22,25 @@
       "iexecLayerZeroBridgeCreatexSalt": "0x4f2784ad07b2be2a5c5e466c91d758133f4aa33bd4cf09ddba1a1e1035e57875",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "lzChainId": 40231
+    },
+    "ethereum": {
+      "approvalRequired": true,
+      "rlcAddress": "0x607F4C5BB672230e8672085532f7e901544a7375",
+      "rlcLiquidityUnifierAddress": "",
+      "rlcLiquidityUnifierCreatexSalt": "0x4f2784ad07b2be2a5c5e466c91d758133f4aa33bd4cf09ddba1a1e1035e57875",
+      "iexecLayerZeroBridgeAddress": "",
+      "iexecLayerZeroBridgeCreatexSalt": "0x4f2784ad07b2be2a5c5e466c91d758133f4aa33bd4cf09ddba1a1e1035e57875",
+      "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
+      "lzChainId": 30101
+    },
+    "arbitrum": {
+      "approvalRequired": false,
+      "rlcCrosschainTokenAddress": "",
+      "rlcCrosschainTokenCreatexSalt": "0x4f2784ad07b2be2a5c5e466c91d758133f4aa33bd4cf09ddba1a1e1035e57875",
+      "iexecLayerZeroBridgeAddress": "",
+      "iexecLayerZeroBridgeCreatexSalt": "0x4f2784ad07b2be2a5c5e466c91d758133f4aa33bd4cf09ddba1a1e1035e57875",
+      "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
+      "lzChainId": 30110
     }
   }
 }
