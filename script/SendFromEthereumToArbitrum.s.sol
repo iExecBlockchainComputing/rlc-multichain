@@ -34,8 +34,8 @@ contract SendTokensFromEthereumToArbitrum is Script {
         IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.iexecLayerZeroBridgeAddress);
         IERC20 rlcToken = IERC20(sourceParams.rlcToken);
 
-        address sender = msg.sender;
-        address recipient = vm.envOr("RECIPIENT_ADDRESS", sender);
+        address sender = vm.envAddress("RECIPIENT_ADDRESS");
+        address recipient = vm.envAddress("RECIPIENT_ADDRESS");
         
         // Check sender's balance
         uint256 senderBalance = rlcToken.balanceOf(sender);
