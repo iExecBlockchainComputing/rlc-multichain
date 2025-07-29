@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0.0-rc1 (2025-07-29)
+## v0.1.0-rc1 (2025-07-29)
 
 ### Features
 - Initial implementation of RLC OFT (Optimistic Fungible Token) bridge system
