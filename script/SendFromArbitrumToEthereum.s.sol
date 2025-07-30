@@ -41,7 +41,7 @@ contract SendTokensFromArbitrumToEthereum is Script {
 
         address sender = vm.envAddress("RECIPIENT_ADDRESS");
         address recipient = vm.envAddress("RECIPIENT_ADDRESS");
-        
+
         // Check sender's balance
         uint256 senderBalance = rlcToken.balanceOf(sender);
         require(senderBalance >= TRANSFER_AMOUNT, "Insufficient RLC balance");
@@ -59,7 +59,7 @@ contract SendTokensFromArbitrumToEthereum is Script {
 
         // Get quote for the transfer
         MessagingFee memory fee = sourceBridge.quoteSend(sendParam, false);
-        
+
         console.log("=== Cross-Chain Transfer Details ===");
         console.log("From: Arbitrum Mainnet");
         console.log("To: Ethereum Mainnet");

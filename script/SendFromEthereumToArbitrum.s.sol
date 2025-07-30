@@ -20,6 +20,7 @@ contract SendTokensFromEthereumToArbitrum is Script {
      * @param _addr The address to convert.
      * @return The bytes32 representation of the address.
      */
+
     function addressToBytes32(address _addr) internal pure returns (bytes32) {
         return bytes32(uint256(uint160(_addr)));
     }
@@ -36,7 +37,7 @@ contract SendTokensFromEthereumToArbitrum is Script {
 
         address sender = vm.envAddress("RECIPIENT_ADDRESS");
         address recipient = vm.envAddress("RECIPIENT_ADDRESS");
-        
+
         // Check sender's balance
         uint256 senderBalance = rlcToken.balanceOf(sender);
         require(senderBalance >= TRANSFER_AMOUNT, "Insufficient RLC balance");
@@ -54,7 +55,7 @@ contract SendTokensFromEthereumToArbitrum is Script {
 
         // Get quote for the transfer
         MessagingFee memory fee = sourceBridge.quoteSend(sendParam, false);
-        
+
         console.log("=== Cross-Chain Transfer Details ===");
         console.log("From: Ethereum Mainnet");
         console.log("To: Arbitrum Mainnet");
