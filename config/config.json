@@ -26,9 +26,9 @@
     "ethereum": {
       "approvalRequired": true,
       "rlcAddress": "0x607F4C5BB672230e8672085532f7e901544a7375",
-      "rlcLiquidityUnifierAddress": "0x0000000000000000000000000000000000000000",
+      "rlcLiquidityUnifierAddress": "0x329F9f984B1364d4E01c6F9f63a1326b7E420b38",
       "rlcLiquidityUnifierCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
-      "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
+      "iexecLayerZeroBridgeAddress": "0xA8Bc0B19b955c8AC38C8Cbc9383866b834Cd33d8",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
       "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
       "lzChainId": 30101
