@@ -87,9 +87,6 @@ jobs:
         if: inputs.network != 'anvil'
         env:
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-          SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
-          ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
-          ETHEREUM_RPC_URL: ${{ secrets.RPC_URL }}
-          ARBITRUM_RPC_URL: ${{ secrets.RPC_URL }}
+          RPC_URL: ${{ secrets.RPC_URL }}
         run: |
           make verify-all-${{ inputs.network }}

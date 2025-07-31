@@ -50,7 +50,7 @@ endef
 # ========================================================================
 
 # Ethereum-type networks use RLC Liquidity Unifier + LayerZero Bridge
-# Parameters: NETWORK, CHAIN_ID, DISPLAY_NAME, RPC_URL_VAR
+# Parameters: NETWORK, CHAIN_ID, DISPLAY_NAME
 define verify-ethereum-type-proxies
 verify-rlc-liquidity-unifier-proxy-$(1):
 	$$(call verify-proxy,RLCLiquidityUnifier,$(1),rlcLiquidityUnifierAddress,$(2),$(3))
@@ -66,7 +66,7 @@ verify-rlc-liquidity-unifier-impl-$(1):
 	$$(MAKE) _verify-rlc-liquidity-unifier-impl-$(1) CONSTRUCTOR_ARGS="--constructor-args $$$$constructor_args"
 
 _verify-rlc-liquidity-unifier-impl-$(1):
-	$$(call verify-impl,RLCLiquidityUnifier,$(1),rlcLiquidityUnifierAddress,$(2),$(3),src/RLCLiquidityUnifier.sol:RLCLiquidityUnifier,$$($(4)),$$(CONSTRUCTOR_ARGS))
+	$$(call verify-impl,RLCLiquidityUnifier,$(1),rlcLiquidityUnifierAddress,$(2),$(3),src/RLCLiquidityUnifier.sol:RLCLiquidityUnifier,$$(RPC_URL),$$(CONSTRUCTOR_ARGS))
 
 verify-layerzero-bridge-impl-$(1):
 	@echo "Building constructor arguments for IexecLayerZeroBridge..."
@@ -76,7 +76,7 @@ verify-layerzero-bridge-impl-$(1):
 	$$(MAKE) _verify-layerzero-bridge-impl-$(1) CONSTRUCTOR_ARGS="--constructor-args $$$$constructor_args"
 
 _verify-layerzero-bridge-impl-$(1):
-	$$(call verify-impl,IexecLayerZeroBridge,$(1),iexecLayerZeroBridgeAddress,$(2),$(3),src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge,$$($(4)),$$(CONSTRUCTOR_ARGS))
+	$$(call verify-impl,IexecLayerZeroBridge,$(1),iexecLayerZeroBridgeAddress,$(2),$(3),src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge,$$(RPC_URL),$$(CONSTRUCTOR_ARGS))
 endef
 
 # ========================================================================
@@ -84,7 +84,7 @@ endef
 # ========================================================================
 
 # Arbitrum-type networks use RLC Crosschain Token + LayerZero Bridge
-# Parameters: NETWORK, CHAIN_ID, DISPLAY_NAME, RPC_URL_VAR
+# Parameters: NETWORK, CHAIN_ID, DISPLAY_NAME
 define verify-arbitrum-type-proxies
 verify-rlc-crosschain-token-proxy-$(1):
 	$$(call verify-proxy,RLCCrosschainToken,$(1),rlcCrosschainTokenAddress,$(2),$(3))
@@ -95,7 +95,7 @@ endef
 
 define verify-arbitrum-type-implementations
 verify-rlc-crosschain-token-impl-$(1):
-	$$(call verify-impl,RLCCrosschainToken,$(1),rlcCrosschainTokenAddress,$(2),$(3),src/RLCCrosschainToken.sol:RLCCrosschainToken,$$($(4)),)
+	$$(call verify-impl,RLCCrosschainToken,$(1),rlcCrosschainTokenAddress,$(2),$(3),src/RLCCrosschainToken.sol:RLCCrosschainToken,$$(RPC_URL),)
 
 verify-layerzero-bridge-impl-$(1):
 	@echo "Building constructor arguments for IexecLayerZeroBridge..."
@@ -105,7 +105,7 @@ verify-layerzero-bridge-impl-$(1):
 	$$(MAKE) _verify-layerzero-bridge-impl-$(1) CONSTRUCTOR_ARGS="--constructor-args $$$$constructor_args"
 
 _verify-layerzero-bridge-impl-$(1):
-	$$(call verify-impl,IexecLayerZeroBridge,$(1),iexecLayerZeroBridgeAddress,$(2),$(3),src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge,$$($(4)),$$(CONSTRUCTOR_ARGS))
+	$$(call verify-impl,IexecLayerZeroBridge,$(1),iexecLayerZeroBridgeAddress,$(2),$(3),src/bridges/layerZero/IexecLayerZeroBridge.sol:IexecLayerZeroBridge,$$(RPC_URL),$$(CONSTRUCTOR_ARGS))
 endef
 
 # ========================================================================
@@ -113,18 +113,18 @@ endef
 # ========================================================================
 
 # Generate verification targets for Ethereum-type networks (Ethereum & Sepolia)
-$(eval $(call verify-ethereum-type-proxies,sepolia,$(SEPOLIA_CHAIN_ID),Sepolia,SEPOLIA_RPC_URL))
-$(eval $(call verify-ethereum-type-implementations,sepolia,$(SEPOLIA_CHAIN_ID),Sepolia,SEPOLIA_RPC_URL))
+$(eval $(call verify-ethereum-type-proxies,sepolia,$(SEPOLIA_CHAIN_ID),Sepolia))
+$(eval $(call verify-ethereum-type-implementations,sepolia,$(SEPOLIA_CHAIN_ID),Sepolia))
 
-$(eval $(call verify-ethereum-type-proxies,ethereum,$(MAINNET_CHAIN_ID),Ethereum Mainnet,ETHEREUM_RPC_URL))
-$(eval $(call verify-ethereum-type-implementations,ethereum,$(MAINNET_CHAIN_ID),Ethereum Mainnet,ETHEREUM_RPC_URL))
+$(eval $(call verify-ethereum-type-proxies,ethereum,$(MAINNET_CHAIN_ID),Ethereum Mainnet))
+$(eval $(call verify-ethereum-type-implementations,ethereum,$(MAINNET_CHAIN_ID),Ethereum Mainnet))
 
 # Generate verification targets for Arbitrum-type networks (Arbitrum & Arbitrum Sepolia)  
-$(eval $(call verify-arbitrum-type-proxies,arbitrum_sepolia,$(ARBITRUM_SEPOLIA_CHAIN_ID),Arbitrum Sepolia,ARBITRUM_SEPOLIA_RPC_URL))
-$(eval $(call verify-arbitrum-type-implementations,arbitrum_sepolia,$(ARBITRUM_SEPOLIA_CHAIN_ID),Arbitrum Sepolia,ARBITRUM_SEPOLIA_RPC_URL))
+$(eval $(call verify-arbitrum-type-proxies,arbitrum_sepolia,$(ARBITRUM_SEPOLIA_CHAIN_ID),Arbitrum Sepolia))
+$(eval $(call verify-arbitrum-type-implementations,arbitrum_sepolia,$(ARBITRUM_SEPOLIA_CHAIN_ID),Arbitrum Sepolia))
 
-$(eval $(call verify-arbitrum-type-proxies,arbitrum,$(ARBITRUM_CHAIN_ID),Arbitrum Mainnet,ARBITRUM_RPC_URL))
-$(eval $(call verify-arbitrum-type-implementations,arbitrum,$(ARBITRUM_CHAIN_ID),Arbitrum Mainnet,ARBITRUM_RPC_URL))
+$(eval $(call verify-arbitrum-type-proxies,arbitrum,$(ARBITRUM_CHAIN_ID),Arbitrum Mainnet))
+$(eval $(call verify-arbitrum-type-implementations,arbitrum,$(ARBITRUM_CHAIN_ID),Arbitrum Mainnet))
 
 # ========================================================================
 #							PROXY AND IMPLEMENTATION VERIFICATION
