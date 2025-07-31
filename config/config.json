@@ -1,8 +1,8 @@
 {
   "createxFactory": "0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed",
-  "initialAdmin": "0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3",
-  "initialUpgrader": "0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3",
-  "initialPauser": "0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3",
+  "initialAdmin": "0x111165a109feca14e4ad4d805f6460c7d206ead1",
+  "initialUpgrader": "0x111121e2ec2557f484f65d5b1ad2b6b07b8acd23",
+  "initialPauser": "0x11113fe3513787f5a4f5f19690700e2736b3056e",
   "chains": {
     "sepolia": {
       "approvalRequired": true,
@@ -22,6 +22,25 @@
       "iexecLayerZeroBridgeCreatexSalt": "0x4f2784ad07b2be2a5c5e466c91d758133f4aa33bd4cf09ddba1a1e1035e57875",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
       "lzChainId": 40231
+    },
+    "ethereum": {
+      "approvalRequired": true,
+      "rlcAddress": "0x607F4C5BB672230e8672085532f7e901544a7375",
+      "rlcLiquidityUnifierAddress": "0x0000000000000000000000000000000000000000",
+      "rlcLiquidityUnifierCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
+      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
+      "lzChainId": 30101
+    },
+    "arbitrum": {
+      "approvalRequired": false,
+      "rlcCrosschainTokenAddress": "0x0000000000000000000000000000000000000000",
+      "rlcCrosschainTokenCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
+      "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
+      "lzChainId": 30110
     }
   }
 }
