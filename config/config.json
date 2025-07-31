@@ -26,18 +26,18 @@
     "ethereum": {
       "approvalRequired": true,
       "rlcAddress": "0x607F4C5BB672230e8672085532f7e901544a7375",
-      "rlcLiquidityUnifierAddress": "",
+      "rlcLiquidityUnifierAddress": "0x0000000000000000000000000000000000000000",
       "rlcLiquidityUnifierCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
-      "iexecLayerZeroBridgeAddress": "",
+      "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
       "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
       "lzChainId": 30101
     },
     "arbitrum": {
       "approvalRequired": false,
-      "rlcCrosschainTokenAddress": "",
+      "rlcCrosschainTokenAddress": "0x0000000000000000000000000000000000000000",
       "rlcCrosschainTokenCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
-      "iexecLayerZeroBridgeAddress": "",
+      "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
       "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
       "lzChainId": 30110
