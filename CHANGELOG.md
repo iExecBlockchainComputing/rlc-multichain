@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.0-rc.1](https://github.com/iExecBlockchainComputing/rlc-multichain/compare/v0.1.0-rc...v0.1.0-rc.1) (2025-07-31)
+
+
+### 🚀 Features
+
+* Deploy on Arbitrum mainnet ([#89](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/89)) ([0774e60](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/0774e606143bdf3e022c3c887ace0b0d638f6f19))
+* prepare mainnet ([#84](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/84)) ([67f1f54](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/67f1f5467eed743cc627afd6153f865e99977e91))
+
 ## [0.1.0-rc](https://github.com/iExecBlockchainComputing/rlc-multichain/compare/v0.1.0...v0.1.0-rc) (2025-07-30)
 
 ### 🚀 Features
