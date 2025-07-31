@@ -35,9 +35,9 @@
     },
     "arbitrum": {
       "approvalRequired": false,
-      "rlcCrosschainTokenAddress": "0x0000000000000000000000000000000000000000",
+      "rlcCrosschainTokenAddress": "0xe649e6a1F2afc63ca268C2363691ceCAF75CF47C",
       "rlcCrosschainTokenCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000001",
-      "iexecLayerZeroBridgeAddress": "0x0000000000000000000000000000000000000000",
+      "iexecLayerZeroBridgeAddress": "0x7000e96D0Bfc74cf5259aEDaE6065B39B3888699",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000001",
       "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
       "lzChainId": 30110
