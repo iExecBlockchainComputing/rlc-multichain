@@ -13,7 +13,7 @@ import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
  * Script to send tokens from Ethereum Mainnet to Arbitrum Mainnet.
  * This script demonstrates cross-chain token transfers using LayerZero bridge.
  */
-// TODO: fusion SendTokensFromArbitrumToEthereum and SendTokensFromEthereumToArbitrum into a single script with dynamic chain handling 
+// TODO: fusion SendTokensFromArbitrumToEthereum and SendTokensFromEthereumToArbitrum into a single script with dynamic chain handling
 contract SendTokensFromEthereumToArbitrum is Script {
     uint256 private constant TRANSFER_AMOUNT = 10 * 10 ** 9; // 10 RLC tokens with 9 decimals
     /**
