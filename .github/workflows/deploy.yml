@@ -85,6 +85,7 @@ jobs:
           
       - name: Verify contracts
         if: inputs.network != 'anvil'
+        continue-on-error: true
         env:
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
           RPC_URL: ${{ secrets.RPC_URL }}
