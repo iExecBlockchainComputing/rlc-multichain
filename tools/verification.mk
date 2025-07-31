@@ -14,14 +14,20 @@ ARBITRUM_SEPOLIA_CHAIN_ID := 421614
 # ========================================================================
 
 # Verify ERC1967 proxy contracts
-# Parameters: CONTRACT_NAME, NETWORK, CONFIG_KEY, CHAIN_ID, DISPLAY_NAME
+# Parameters: CONTRACT_NAME, NETWORK, CONFIG_KEY, CHAIN_ID, DISPLAY_NAME, RPC_URL
 define verify-proxy
 	@echo "Verifying $(1) Proxy on $(5)..."
+	@proxy_address=$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string)" ".chains.$(2).$(3)" 2>/dev/null | grep "0x" | tail -n1); \
+	impl_address=$$(forge script script/GetConfigInfo.s.sol --sig "getImplementationAddress(string)" ".chains.$(2).$(3)" --rpc-url $(6) 2>/dev/null | grep "0x" | tail -n1); \
+	echo "Proxy address: $$proxy_address"; \
+	echo "Implementation address: $$impl_address"; \
+	constructor_args=$$(cast abi-encode "constructor(address,bytes)" $$impl_address "0x"); \
 	forge verify-contract \
 		--chain-id $(4) \
 		--watch \
+		--constructor-args $$constructor_args \
 		--etherscan-api-key $(ETHERSCAN_API_KEY) \
-		$$(forge script script/GetConfigInfo.s.sol --sig "getConfigField(string)" ".chains.$(2).$(3)" 2>/dev/null | grep "0x" | tail -n1) \
+		$$proxy_address \
 		lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 	@echo "Proxy verification completed for $(1) on $(5)"
 endef
@@ -53,10 +59,10 @@ endef
 # Parameters: NETWORK, CHAIN_ID, DISPLAY_NAME
 define verify-ethereum-type-proxies
 verify-rlc-liquidity-unifier-proxy-$(1):
-	$$(call verify-proxy,RLCLiquidityUnifier,$(1),rlcLiquidityUnifierAddress,$(2),$(3))
+	$$(call verify-proxy,RLCLiquidityUnifier,$(1),rlcLiquidityUnifierAddress,$(2),$(3),$$(RPC_URL))
 
 verify-layerzero-bridge-proxy-$(1):
-	$$(call verify-proxy,IexecLayerZeroBridge,$(1),iexecLayerZeroBridgeAddress,$(2),$(3))
+	$$(call verify-proxy,IexecLayerZeroBridge,$(1),iexecLayerZeroBridgeAddress,$(2),$(3),$$(RPC_URL))
 endef
 
 define verify-ethereum-type-implementations
@@ -87,10 +93,10 @@ endef
 # Parameters: NETWORK, CHAIN_ID, DISPLAY_NAME
 define verify-arbitrum-type-proxies
 verify-rlc-crosschain-token-proxy-$(1):
-	$$(call verify-proxy,RLCCrosschainToken,$(1),rlcCrosschainTokenAddress,$(2),$(3))
+	$$(call verify-proxy,RLCCrosschainToken,$(1),rlcCrosschainTokenAddress,$(2),$(3),$$(RPC_URL))
 
 verify-layerzero-bridge-proxy-$(1):
-	$$(call verify-proxy,IexecLayerZeroBridge,$(1),iexecLayerZeroBridgeAddress,$(2),$(3))
+	$$(call verify-proxy,IexecLayerZeroBridge,$(1),iexecLayerZeroBridgeAddress,$(2),$(3),$$(RPC_URL))
 endef
 
 define verify-arbitrum-type-implementations
