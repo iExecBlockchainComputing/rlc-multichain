@@ -1,0 +1,41 @@
+name: Transfer Admin Role
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network to transfer admin role on'
+        required: true
+        type: choice
+        options:
+          - ethereum
+          - arbitrum
+          - sepolia
+          - arbitrum_sepolia
+        default: sepolia
+
+jobs:
+  transfer-admin:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.network }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+          
+      - name: Transfer admin role
+        env:
+          ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
+          CHAIN: ${{ inputs.network }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+          NEW_ADMIN: ${{ vars.NEW_ADMIN_ADDRESS }}
+        run: |
+          make transfer-admin-single-chain
