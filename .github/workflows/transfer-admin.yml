@@ -16,7 +16,6 @@ on:
 
 jobs:
   transfer-admin:
-    needs: build-and-test
     runs-on: ubuntu-latest
     environment: ${{ inputs.network }}
     
