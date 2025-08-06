@@ -45,7 +45,7 @@ contract SendFromEthereumToArbitrum is Script {
 
         // Prepare send parameters
         SendParam memory sendParam = SendParam(
-            uint16(targetParams.lzChainId), // Destination endpoint ID
+            uint16(targetParams.lzEndpointId), // Destination endpoint ID
             addressToBytes32(recipient), // Recipient address
             TRANSFER_AMOUNT, // Amount to send in local decimals
             TRANSFER_AMOUNT * 99 / 100, // Minimum amount to send (allowing 1% slippage)
