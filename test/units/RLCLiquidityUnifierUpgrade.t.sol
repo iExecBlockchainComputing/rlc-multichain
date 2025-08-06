@@ -31,6 +31,7 @@ contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
 
         TestUtils.DeploymentResult memory deploymentResult = TestUtils.setupDeployment(
             TestUtils.DeploymentParams({
+                iexecLayerZeroBridgeContractName: "IexecLayerZeroBridge",
                 lzEndpointSource: mockEndpoint,
                 lzEndpointDestination: mockEndpoint,
                 initialAdmin: admin,

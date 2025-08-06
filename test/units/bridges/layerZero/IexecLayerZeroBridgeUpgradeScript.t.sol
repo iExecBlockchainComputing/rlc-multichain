@@ -31,6 +31,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5 {
 
         TestUtils.DeploymentResult memory deploymentResult1 = TestUtils.setupDeployment(
             TestUtils.DeploymentParams({
+                iexecLayerZeroBridgeContractName: "IexecLayerZeroBridge",
                 lzEndpointSource: mockEndpoint,
                 lzEndpointDestination: mockEndpoint,
                 initialAdmin: admin,

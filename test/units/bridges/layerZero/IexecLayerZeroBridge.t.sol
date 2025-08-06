@@ -54,6 +54,7 @@ contract IexecLayerZeroBridgeTest is TestHelperOz5 {
 
         TestUtils.DeploymentResult memory deploymentResult = TestUtils.setupDeployment(
             TestUtils.DeploymentParams({
+                iexecLayerZeroBridgeContractName: "IexecLayerZeroBridgeHarness",
                 lzEndpointSource: lzEndpointSource,
                 lzEndpointDestination: lzEndpointDestination,
                 initialAdmin: admin,
