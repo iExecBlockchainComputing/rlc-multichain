@@ -13,10 +13,15 @@ import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
 import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
 
+/**
+ * A script to deploy and initialize the IexecLayerZeroBridge contract.
+ * It uses CreateX to deploy the contract as a UUPS proxy.
+ */
 contract Deploy is Script {
     /**
-     * Reads configuration from config file and deploys IexecLayerZeroBridge contract.
-     * @return address of the deployed IexecLayerZeroBridge proxy contract.
+     * Reads configuration from config file and deploys `IexecLayerZeroBridge` contract.
+     * @dev This function is called by `forge script run`.
+     * @return address of the deployed `IexecLayerZeroBridge` proxy contract.
      */
     function run() external returns (address) {
         string memory chain = vm.envString("CHAIN");
@@ -112,6 +117,9 @@ contract Configure is Script {
     }
 }
 
+/**
+ * A script to upgrade the IexecLayerZeroBridge contract.
+ */
 contract Upgrade is Script {
     function run() external {
         string memory chain = vm.envString("CHAIN");
