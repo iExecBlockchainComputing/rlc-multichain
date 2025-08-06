@@ -6,20 +6,19 @@ import {CreateX} from "@createx/contracts/CreateX.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
-import {UUPSProxyDeployer} from "../../../script/lib/UUPSProxyDeployer.sol";
 import {RLCMock} from "../mocks/RLCMock.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
 import {Deploy as RLCLiquidityUnifierDeployScript} from "../../../script/RLCLiquidityUnifier.s.sol";
 import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
+import {Deploy as IexecLayerZeroBridgeDeployScript} from "../../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
 
 library TestUtils {
     using OptionsBuilder for bytes;
 
     // Struct to hold deployment parameters and reduce stack depth
     struct DeploymentParams {
-        string iexecLayerZeroBridgeContractName;
         address lzEndpointSource;
         address lzEndpointDestination;
         address initialAdmin;
@@ -80,19 +79,13 @@ library TestUtils {
         bytes32 salt
     ) private returns (IexecLayerZeroBridge) {
         return IexecLayerZeroBridge(
-            UUPSProxyDeployer.deployUsingCreateX(
-                params.iexecLayerZeroBridgeContractName,
-                abi.encode(
-                    approvalRequired,
-                    bridgeableToken,
-                    approvalRequired ? params.lzEndpointSource : params.lzEndpointDestination
-                ),
-                abi.encodeWithSelector(
-                    IexecLayerZeroBridge.initialize.selector,
-                    params.initialAdmin,
-                    params.initialUpgrader,
-                    params.initialPauser
-                ),
+            new IexecLayerZeroBridgeDeployScript().deploy(
+                approvalRequired,
+                bridgeableToken,
+                approvalRequired ? params.lzEndpointSource : params.lzEndpointDestination,
+                params.initialAdmin,
+                params.initialUpgrader,
+                params.initialPauser,
                 createXFactory,
                 salt
             )
