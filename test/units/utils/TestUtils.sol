@@ -79,6 +79,9 @@ library TestUtils {
         address createXFactory,
         bytes32 salt
     ) private returns (IexecLayerZeroBridge) {
+        // `new IexecLayerZeroBridgeDeployScript().deploy()` is not used here because
+        // it deploys the contract `IexecLayerZeroBridge` by default, but in some tests
+        // we want to deploy `IexecLayerZeroBridgeHarness`.
         return IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUsingCreateX(
                 params.iexecLayerZeroBridgeContractName,
