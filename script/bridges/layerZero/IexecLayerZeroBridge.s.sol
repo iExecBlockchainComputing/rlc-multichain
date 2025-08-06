@@ -69,14 +69,34 @@ contract Configure is Script {
         ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(targetChain);
         IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.iexecLayerZeroBridgeAddress);
         vm.startBroadcast();
-        sourceBridge.setPeer(
-            targetParams.lzEndpointId, bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)))
-        );
-        EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](2);
-        bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(90_000, 0); // 90_000 gas limit for the receiving executor and 0 for the executor's value
-        enforcedOptions[0] = EnforcedOptionParam(targetParams.lzEndpointId, 1, _extraOptions); // lzReceive
-        enforcedOptions[1] = EnforcedOptionParam(targetParams.lzEndpointId, 2, _extraOptions); // lzCompose
-        sourceBridge.setEnforcedOptions(enforcedOptions);
+        //
+        // Set peer for the source bridge if not already set.
+        //
+        bytes32 peer = bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)));
+        if (!sourceBridge.isPeer(targetParams.lzEndpointId, peer)) {
+            sourceBridge.setPeer(targetParams.lzEndpointId, peer);
+        }
+        //
+        // Set enforced options for the source bridge if not already set.
+        //
+        // forge-fmt: off
+        uint16 lzReceiveMessageType = 1; // lzReceive()
+        uint16 lzComposeMessageType = 2; // lzCompose()
+        // forge-fmt: on
+        uint128 gasLimit = 90_000; // The gasLimit used on the lzReceive() function in the receiving bridge.
+        uint128 value = 0; // The msg.value passed to the lzReceive() function in the the receiving bridge.
+        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(gasLimit, value);
+        if (
+            keccak256(sourceBridge.enforcedOptions(targetParams.lzEndpointId, lzReceiveMessageType))
+                != keccak256(options)
+                || keccak256(sourceBridge.enforcedOptions(targetParams.lzEndpointId, lzComposeMessageType))
+                    != keccak256(options)
+        ) {
+            EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](2);
+            enforcedOptions[0] = EnforcedOptionParam(targetParams.lzEndpointId, lzReceiveMessageType, options);
+            enforcedOptions[1] = EnforcedOptionParam(targetParams.lzEndpointId, lzComposeMessageType, options);
+            sourceBridge.setEnforcedOptions(enforcedOptions);
+        }
         // Authorize bridge in the relevant contract.
         if (sourceParams.approvalRequired) {
             RLCLiquidityUnifier rlcLiquidityUnifier = RLCLiquidityUnifier(sourceParams.rlcLiquidityUnifierAddress);
