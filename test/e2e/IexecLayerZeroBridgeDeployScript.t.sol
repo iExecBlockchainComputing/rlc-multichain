@@ -15,7 +15,7 @@ import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
 import {ConfigLib} from "../../script/lib/ConfigLib.sol";
 
 // TODO move to test/units/bridges/layerzero/
-contract IexecLayerZeroBridgeScriptTest is Test {
+contract IexecLayerZeroBridgeDeployScriptTest is Test {
     // The chain does not matter here as the LAYERZERO_ENDPOINT address is the same for both networks (Sepolia & Arbitrum Sepolia)
     ConfigLib.CommonConfigParams params = ConfigLib.readCommonConfig("sepolia");
 
