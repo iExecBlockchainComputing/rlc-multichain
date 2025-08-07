@@ -27,6 +27,12 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
+
+      - name: Install dependencies
+        run: forge install
+      
+      - name: Build contracts
+        run: forge build
       
       - name: Execute Transfer Admin Role
         id: transfer-admin
