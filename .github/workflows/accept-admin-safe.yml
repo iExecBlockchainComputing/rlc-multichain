@@ -35,32 +35,3 @@ jobs:
           foundry-script-path: 'script/TransferAdminRole.s.sol:AcceptAdminRole'
         env:
           CHAIN: ${{ inputs.network }}
-
-      # - name: Display Results
-      #   run: |
-      #     echo "Operation Status: ${{ steps.transfer-admin.outputs.status }}"
-      #     echo "Transaction Count: ${{ steps.transfer-admin.outputs.transaction-count }}"
-          
-      #     if [[ "${{ inputs.action-mode }}" == "propose" ]]; then
-      #       echo "Transaction Hash: ${{ steps.transfer-admin.outputs.transaction-hash }}"
-      #       echo "All Transaction Hashes: ${{ steps.transfer-admin.outputs.transaction-hashes }}"
-      #       echo "✅ Admin role transfer transaction has been proposed to the Safe multisig"
-      #       echo "📋 Please review and approve the transaction in the Safe interface"
-      #     elif [[ "${{ inputs.action-mode }}" == "list-pending" ]]; then
-      #       echo "Pending Transactions:"
-      #       echo '${{ steps.transfer-admin.outputs.pending-transactions }}' | jq '.'
-      #     fi
-
-      # - name: Summary
-      #   run: |
-      #     echo "## Transfer Admin Role Summary" >> $GITHUB_STEP_SUMMARY
-      #     echo "- **Safe Address**: ${{ inputs.safe-address }}" >> $GITHUB_STEP_SUMMARY
-      #     echo "- **Chain**: ${{ inputs.chain }}" >> $GITHUB_STEP_SUMMARY
-      #     echo "- **Script**: ${{ inputs.script-path }}" >> $GITHUB_STEP_SUMMARY
-      #     echo "- **Mode**: ${{ inputs.action-mode }}" >> $GITHUB_STEP_SUMMARY
-      #     echo "- **Status**: ${{ steps.transfer-admin.outputs.status }}" >> $GITHUB_STEP_SUMMARY
-      #     echo "- **Transaction Count**: ${{ steps.transfer-admin.outputs.transaction-count }}" >> $GITHUB_STEP_SUMMARY
-          
-      #     if [[ "${{ inputs.action-mode }}" == "propose" ]]; then
-      #       echo "- **Transaction Hash**: ${{ steps.transfer-admin.outputs.transaction-hash }}" >> $GITHUB_STEP_SUMMARY
-      #     fi
