@@ -6,6 +6,7 @@ pragma solidity ^0.8.22;
 import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {ConfigLib} from "./../../lib/ConfigLib.sol";
@@ -69,11 +70,11 @@ contract Deploy is Script {
 
 /**
  * A script to configure the IexecLayerZeroBridge contract:
- * - Set the peer for the source bridge (`setPeer`).
- * - Set enforced options for the source bridge (`setEnforcedOptions`).
- * - Set DVNs config for the source bridge (`setDvnConfig`).
- * - Authorize the source bridge in RLCLiquidityUnifier or RLCCrosschainToken
- *   contract (`grantRole`).
+ * - Set the peer for the bridge (`setPeer`).
+ * - Set enforced options for the bridge (`setEnforcedOptions`).
+ * - Set DVNs config for the bridge (`setDvnConfig`).
+ * - Authorize the bridge in RLCLiquidityUnifier or RLCCrosschainToken contract (`grantRole`).
+ * The script should be called at least once for each chain where the bridge is configured.
  */
 contract Configure is Script {
     using OptionsBuilder for bytes;
@@ -87,6 +88,7 @@ contract Configure is Script {
         string memory targetChain = vm.envString("TARGET_CHAIN");
         ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(sourceChain);
         ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(targetChain);
+        console.log("Configuring bridge [chain:%s, address:%s]", sourceChain, sourceParams.iexecLayerZeroBridgeAddress);
         vm.startBroadcast();
         configure(sourceParams, targetParams);
         vm.stopBroadcast();
@@ -103,53 +105,66 @@ contract Configure is Script {
         ConfigLib.CommonConfigParams memory sourceParams,
         ConfigLib.CommonConfigParams memory targetParams
     ) public returns (bool) {
-        bool configured;
-        IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.iexecLayerZeroBridgeAddress);
-        console.log("Configuring bridge [address:%s]", address(sourceBridge));
-        //
-        // Set peer for the source bridge if not already set.
-        //
-        bytes32 peer = bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)));
-        if (!sourceBridge.isPeer(targetParams.lzEndpointId, peer)) {
+        IexecLayerZeroBridge bridge = IexecLayerZeroBridge(sourceParams.iexecLayerZeroBridgeAddress);
+        RLCLiquidityUnifier rlcLiquidityUnifier = RLCLiquidityUnifier(sourceParams.rlcLiquidityUnifierAddress);
+        RLCCrosschainToken rlcCrosschainToken = RLCCrosschainToken(sourceParams.rlcCrosschainTokenAddress);
+        bool bool1 = setBridgePeerIfNeeded(bridge, targetParams.lzEndpointId, targetParams.iexecLayerZeroBridgeAddress);
+        bool bool2 = setEnforcedOptionsIfNeeded(bridge, targetParams.lzEndpointId);
+        bool bool3 = authorizeBridgeIfNeeded(
+            address(bridge),
+            sourceParams.approvalRequired ? address(rlcLiquidityUnifier) : address(rlcCrosschainToken),
+            sourceParams.approvalRequired
+                ? rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE()
+                : rlcCrosschainToken.TOKEN_BRIDGE_ROLE()
+        );
+        return bool1 || bool2 || bool3;
+    }
+
+    function setBridgePeerIfNeeded(IexecLayerZeroBridge bridge, uint32 targetEndpointId, address targetBridgeAddress)
+        public
+        returns (bool)
+    {
+        bytes32 peer = bytes32(uint256(uint160(targetBridgeAddress)));
+        if (bridge.isPeer(targetEndpointId, peer)) {
             console.log(
-                "Setting bridge peer [endpointId:%s, peer:%s]",
-                vm.toString(targetParams.lzEndpointId),
-                vm.toString(peer)
+                "Bridge peer already set [endpointId:%s, peer:%s]", vm.toString(targetEndpointId), vm.toString(peer)
             );
-            sourceBridge.setPeer(targetParams.lzEndpointId, peer);
-            configured = true;
+            return false;
         }
-        //
-        // Set enforced options for the source bridge if not already set.
-        //
+        console.log("Setting bridge peer [endpointId:%s, peer:%s]", vm.toString(targetEndpointId), vm.toString(peer));
+        bridge.setPeer(targetEndpointId, peer);
+        return true;
+    }
+
+    function setEnforcedOptionsIfNeeded(IexecLayerZeroBridge bridge, uint32 targetEndpointId) public returns (bool) {
         bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
-        if (!LayerZeroUtils.matchesOnchainOptions(sourceBridge, targetParams.lzEndpointId, options)) {
-            EnforcedOptionParam[] memory enforcedOptions =
-                LayerZeroUtils.buildEnforcedOptions(targetParams.lzEndpointId, options);
+        if (LayerZeroUtils.matchesOnchainOptions(bridge, targetEndpointId, options)) {
             console.log(
-                "Setting bridge enforced options [endpointId:%s, options:%s]",
-                vm.toString(targetParams.lzEndpointId),
+                "Bridge enforced options already set [endpointId:%s, options:%s]",
+                vm.toString(targetEndpointId),
                 vm.toString(options)
             );
-            sourceBridge.setEnforcedOptions(enforcedOptions);
-            configured = true;
+            return false;
         }
-        // Authorize bridge in the relevant contract.
-        // TODO don't send grant tx if the bridge is already authorized.
-        if (sourceParams.approvalRequired) {
-            console.log("Granting TOKEN_BRIDGE_ROLE to bridge in RLCLiquidityUnifier");
-            RLCLiquidityUnifier rlcLiquidityUnifier = RLCLiquidityUnifier(sourceParams.rlcLiquidityUnifierAddress);
-            bytes32 bridgeTokenRoleId = rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE();
-            rlcLiquidityUnifier.grantRole(bridgeTokenRoleId, address(sourceBridge));
-            configured = true;
-        } else {
-            console.log("Granting TOKEN_BRIDGE_ROLE to bridge in RLCCrosschainToken");
-            RLCCrosschainToken rlcCrosschainToken = RLCCrosschainToken(sourceParams.rlcCrosschainTokenAddress);
-            bytes32 bridgeTokenRoleId = rlcCrosschainToken.TOKEN_BRIDGE_ROLE();
-            rlcCrosschainToken.grantRole(bridgeTokenRoleId, address(sourceBridge));
-            configured = true;
+        EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(targetEndpointId, options);
+        console.log(
+            "Setting bridge enforced options [endpointId:%s, options:%s]",
+            vm.toString(targetEndpointId),
+            vm.toString(options)
+        );
+        bridge.setEnforcedOptions(enforcedOptions);
+        return true;
+    }
+
+    function authorizeBridgeIfNeeded(address bridge, address authorizerAddress, bytes32 roleId) public returns (bool) {
+        IAccessControl authorizer = IAccessControl(authorizerAddress);
+        if (authorizer.hasRole(roleId, bridge)) {
+            console.log("Bridge already authorized");
+            return false;
         }
-        return configured;
+        console.log("Granting bridge role in contract", authorizerAddress);
+        authorizer.grantRole(roleId, bridge);
+        return true;
     }
 }
 

@@ -31,7 +31,6 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     address upgrader = makeAddr("upgrader");
     address pauser = makeAddr("pauser");
 
-    // IexecLayerZeroBridgeConfigureScript configurer;
     ConfigLib.CommonConfigParams sourceParams;
     ConfigLib.CommonConfigParams targetParams;
     address sourceBridgeAddress;
@@ -52,7 +51,6 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
                 initialPauser: pauser
             })
         );
-        // configurer = new IexecLayerZeroBridgeConfigureScript();
         // Source chain params
         sourceBridgeAddress = address(deployment.iexecLayerZeroBridgeWithApproval);
         sourceParams.lzEndpointId = 1;
@@ -70,6 +68,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
     function test_configureSourceBridgeCorrectly() public {
         bytes32 targetBridgeAddressInBytes32 = bytes32(uint256(uint160(targetBridgeAddress)));
+        // Hardcoding 90_000 here to make sure tests fail when the value is changed in the script.
         bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
         EnforcedOptionParam[] memory enforcedOptions =
             LayerZeroUtils.buildEnforcedOptions(targetParams.lzEndpointId, options);

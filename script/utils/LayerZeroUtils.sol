@@ -14,10 +14,6 @@ import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBr
 library LayerZeroUtils {
     using OptionsBuilder for bytes;
 
-    // // forge-fmt: off
-    // uint16 lzReceiveMessageType = 1; // lzReceive()
-    // uint16 lzComposeMessageType = 2; // lzCompose()
-    // // forge-fmt: on
     uint16 constant LZ_RECEIVE_MESSAGE_TYPE = 1; // lzReceive()
     uint16 constant LZ_COMPOSE_MESSAGE_TYPE = 2; // lzCompose()
 
@@ -43,8 +39,8 @@ library LayerZeroUtils {
     {
         bytes memory lzReceiveOnchainOptions = sourceBridge.enforcedOptions(targetEndpointId, LZ_RECEIVE_MESSAGE_TYPE);
         bytes memory lzComposeOnchainOptions = sourceBridge.enforcedOptions(targetEndpointId, LZ_COMPOSE_MESSAGE_TYPE);
-        return keccak256(lzReceiveOnchainOptions) != keccak256(options)
-            || keccak256(lzComposeOnchainOptions) != keccak256(options);
+        return keccak256(lzReceiveOnchainOptions) == keccak256(options)
+            && keccak256(lzComposeOnchainOptions) == keccak256(options);
     }
 
     /**
