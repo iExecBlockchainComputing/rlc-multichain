@@ -49,8 +49,9 @@ contract BeginTransferAdminRole is Script {
      * @param newAdmin The new admin address
      */
     function validateAdminTransfer(address currentDefaultAdmin, address newAdmin) internal pure {
+        require(newAdmin != address(0), "BeginTransferAdminRole: new admin cannot be zero address");
         require(
-            currentDefaultAdmin != newAdmin, "BeginTransferAdminRole: New admin must be different from current admin"
+            newAdmin != currentDefaultAdmin, "BeginTransferAdminRole: New admin must be different from current admin"
         );
     }
 
