@@ -51,11 +51,11 @@ contract BeginTransferAdminRole is Script {
 
     /**
      * @notice Transfers the default admin role to a new admin for all contracts on the current chain
-     * @param newAdmin The address that will become the new default admin
      * @dev This function automatically detects which contracts are deployed on the current chain
      * based on the configuration and transfers admin roles accordingly
      */
-    function run(address newAdmin) external {
+    function run() external {
+        address newAdmin = vm.envAddress("NEW_DEFAULT_ADMIN");
         require(newAdmin != address(0), "BeginTransferAdminRole: New admin cannot be zero address");
 
         string memory chain = vm.envString("CHAIN");

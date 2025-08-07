@@ -199,13 +199,12 @@ send-tokens-to-ethereum-mainnet:
 #
 
 # Transfer admin role for a single chain
-begin-default-admin-transfer: # CHAIN, RPC_URL, NEW_ADMIN
-	@echo "Transferring admin role on $(CHAIN) to: $(NEW_ADMIN)"
-	CHAIN=$(CHAIN) forge script script/TransferAdminRole.s.sol:BeginTransferAdminRole \
+begin-default-admin-transfer: # CHAIN, RPC_URL, NEW_DEFAULT_ADMIN
+	@echo "Transferring admin role on $(CHAIN) to: $(NEW_DEFAULT_ADMIN)"
+	CHAIN=$(CHAIN) NEW_DEFAULT_ADMIN=$(NEW_DEFAULT_ADMIN) forge script script/TransferAdminRole.s.sol:BeginTransferAdminRole \
 		--rpc-url $(RPC_URL) \
 		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(ADMIN_PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
-		--sig "run(address)" $(NEW_ADMIN) \
 		-vvv
 
 # Accept admin role for a single chain (run by new admin)
@@ -213,6 +212,6 @@ accept-default-admin-transfer: # CHAIN, RPC_URL
 	@echo "Accepting admin role on $(CHAIN)"
 	CHAIN=$(CHAIN) forge script script/TransferAdminRole.s.sol:AcceptAdminRole \
 		--rpc-url $(RPC_URL) \
-		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(NEW_ADMIN_PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(NEW_DEFAULT_ADMIN_PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
 		-vvv

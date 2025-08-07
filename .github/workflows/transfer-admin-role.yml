@@ -13,7 +13,7 @@ on:
           - sepolia
           - arbitrum_sepolia
         default: sepolia
-      new_admin_address:
+      new_default_admin_address:
         description: 'New admin address'
         required: true
         type: string
@@ -39,5 +39,5 @@ jobs:
           ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
           CHAIN: ${{ inputs.network }}
           RPC_URL: ${{ secrets.RPC_URL }}
-          NEW_ADMIN: ${{ inputs.new_admin_address }}
+          NEW_DEFAULT_ADMIN: ${{ inputs.new_default_admin_address }}
         run: make begin-default-admin-transfer
