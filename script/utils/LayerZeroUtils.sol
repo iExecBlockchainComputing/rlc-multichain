@@ -31,7 +31,11 @@ library LayerZeroUtils {
      * @param bridge The LayerZero bridge contract.
      * @param endpointId The LayerZero endpoint ID of the target chain.
      */
-    function getOnchainLzReceiveEnforcedOptions(IexecLayerZeroBridge bridge, uint32 endpointId) public view returns (bytes memory) {
+    function getOnchainLzReceiveEnforcedOptions(IexecLayerZeroBridge bridge, uint32 endpointId)
+        public
+        view
+        returns (bytes memory)
+    {
         return bridge.enforcedOptions(endpointId, LZ_RECEIVE_MESSAGE_TYPE);
     }
 
@@ -40,7 +44,11 @@ library LayerZeroUtils {
      * @param bridge The LayerZero bridge contract.
      * @param endpointId The LayerZero endpoint ID of the target chain.
      */
-    function getOnchainLzComposeEnforcedOptions(IexecLayerZeroBridge bridge, uint32 endpointId) public view returns (bytes memory) {
+    function getOnchainLzComposeEnforcedOptions(IexecLayerZeroBridge bridge, uint32 endpointId)
+        public
+        view
+        returns (bytes memory)
+    {
         return bridge.enforcedOptions(endpointId, LZ_COMPOSE_MESSAGE_TYPE);
     }
 

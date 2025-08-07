@@ -78,8 +78,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
         // Hardcoding 90_000 here to make sure tests fail when the value is changed in the script.
         bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
-        EnforcedOptionParam[] memory enforcedOptions =
-            LayerZeroUtils.buildEnforcedOptions(targetEndpointId, options);
+        EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(targetEndpointId, options);
         // Check that setPeer event is emitted.
         vm.expectEmit(true, true, true, true, sourceBridgeAddress);
         emit IOAppCore.PeerSet(targetEndpointId, addressToBytes32(targetBridgeAddress));
@@ -144,8 +143,10 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         bool result = super.setEnforcedOptionsIfNeeded(sourceBridgeAddress, targetEndpointId);
         vm.stopPrank();
         assertTrue(result, "Expected setEnforcedOptionsIfNeeded to return true");
-        bytes memory lzReceiveOnchainOptions = LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(sourceBridge, targetEndpointId);
-        bytes memory lzComposeOnchainOptions = LayerZeroUtils.getOnchainLzComposeEnforcedOptions(sourceBridge, targetEndpointId);
+        bytes memory lzReceiveOnchainOptions =
+            LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(sourceBridge, targetEndpointId);
+        bytes memory lzComposeOnchainOptions =
+            LayerZeroUtils.getOnchainLzComposeEnforcedOptions(sourceBridge, targetEndpointId);
         assertEq(lzReceiveOnchainOptions, options, "lzReceive enforced options are not equal");
         assertEq(lzComposeOnchainOptions, options, "lzCompose enforced options are not equal");
     }
@@ -156,14 +157,30 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(targetEndpointId, oldOptions);
         vm.startPrank(admin);
         sourceBridge.setEnforcedOptions(enforcedOptions);
-        assertEq(LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(sourceBridge, targetEndpointId), oldOptions, "lzReceive enforced options are not equal");
-        assertEq(LayerZeroUtils.getOnchainLzComposeEnforcedOptions(sourceBridge, targetEndpointId), oldOptions, "lzCompose enforced options are not equal");
+        assertEq(
+            LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(sourceBridge, targetEndpointId),
+            oldOptions,
+            "lzReceive enforced options are not equal"
+        );
+        assertEq(
+            LayerZeroUtils.getOnchainLzComposeEnforcedOptions(sourceBridge, targetEndpointId),
+            oldOptions,
+            "lzCompose enforced options are not equal"
+        );
         // Second call should override the options.
         bytes memory newOptions = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
         bool result = super.setEnforcedOptionsIfNeeded(sourceBridgeAddress, targetEndpointId);
         assertTrue(result, "Expected setEnforcedOptionsIfNeeded to return true");
-        assertEq(LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(sourceBridge, targetEndpointId), newOptions, "lzReceive enforced options are not equal");
-        assertEq(LayerZeroUtils.getOnchainLzComposeEnforcedOptions(sourceBridge, targetEndpointId), newOptions, "lzCompose enforced options are not equal");
+        assertEq(
+            LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(sourceBridge, targetEndpointId),
+            newOptions,
+            "lzReceive enforced options are not equal"
+        );
+        assertEq(
+            LayerZeroUtils.getOnchainLzComposeEnforcedOptions(sourceBridge, targetEndpointId),
+            newOptions,
+            "lzCompose enforced options are not equal"
+        );
         vm.stopPrank();
     }
 
@@ -188,7 +205,9 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return true"
         );
         assertTrue(
-            deployment.rlcLiquidityUnifier.hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress),
+            deployment.rlcLiquidityUnifier.hasRole(
+                deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress
+            ),
             "Expected bridge to have the role"
         );
         // rlcCrosschainToken
@@ -201,7 +220,9 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return true"
         );
         assertTrue(
-            deployment.rlcCrosschainToken.hasRole(deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), targetBridgeAddress),
+            deployment.rlcCrosschainToken.hasRole(
+                deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), targetBridgeAddress
+            ),
             "Expected bridge to have the role"
         );
         vm.stopPrank();
@@ -218,7 +239,9 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return true"
         );
         assertTrue(
-            deployment.rlcLiquidityUnifier.hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress),
+            deployment.rlcLiquidityUnifier.hasRole(
+                deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress
+            ),
             "Expected bridge to have the role"
         );
         assertFalse(
