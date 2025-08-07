@@ -61,14 +61,14 @@ contract BeginTransferAdminRole is Script {
      * @param contractName The name of the contract for logging purposes
      */
     function transferContractAdmin(address contractAddress, address newAdmin, string memory contractName) internal {
-        IAccessControlDefaultAdminRules adminContract =
+        IAccessControlDefaultAdminRules contractInstance =
             IAccessControlDefaultAdminRules(contractAddress);
 
-        address currentAdmin = adminContract.defaultAdmin();
+        address currentAdmin = contractInstance.defaultAdmin();
         console.log("Current admin for", contractName, ":", currentAdmin);
         validateAdminTransfer(currentAdmin, newAdmin);
 
-        adminContract.beginDefaultAdminTransfer(newAdmin);
+        contractInstance.beginDefaultAdminTransfer(newAdmin);
 
         console.log("Admin transfer initiated for", contractName, "at:", contractAddress);
     }
@@ -107,10 +107,10 @@ contract AcceptAdminRole is Script {
      */
     function acceptContractAdmin(address contractAddress, string memory contractName) internal {
         console.log("Accepting admin role for", contractName, "at:", contractAddress);
-        IAccessControlDefaultAdminRules adminContract =
+        IAccessControlDefaultAdminRules contractInstance =
             IAccessControlDefaultAdminRules(contractAddress);
-        adminContract.acceptDefaultAdminTransfer();
-        console.log("New admin for", contractName, ":", adminContract.defaultAdmin());
+        contractInstance.acceptDefaultAdminTransfer();
+        console.log("New admin for", contractName, ":", contractInstance.defaultAdmin());
     }
 
 }
