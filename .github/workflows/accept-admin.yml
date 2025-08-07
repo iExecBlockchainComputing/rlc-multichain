@@ -1,0 +1,40 @@
+name: Accept Admin Role Transfer
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network to accept admin role on'
+        required: true
+        type: choice
+        options:
+          - ethereum
+          - arbitrum
+          - sepolia
+          - arbitrum_sepolia
+        default: sepolia
+
+jobs:
+  accept-admin:
+    runs-on: ubuntu-latest
+    
+    environment: 
+      name: ${{ inputs.network }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+
+      - name: Accept default admin role
+        env:
+          ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
+          CHAIN: ${{ inputs.network }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+        run: make accept-default-admin-transfer
