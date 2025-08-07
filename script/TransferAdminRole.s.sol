@@ -18,7 +18,6 @@ import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridg
  * for all deployed smart contracts on the current chain.
  */
 contract BeginTransferAdminRole is Script {
-
     /**
      * @notice Validates that the new admin is different from the current admin
      * @param currentDefaultAdmin The current admin address
@@ -26,8 +25,7 @@ contract BeginTransferAdminRole is Script {
      */
     function validateAdminTransfer(address currentDefaultAdmin, address newAdmin) internal pure {
         require(
-            currentDefaultAdmin != newAdmin,
-            "BeginTransferAdminRole: New admin must be different from current admin"
+            currentDefaultAdmin != newAdmin, "BeginTransferAdminRole: New admin must be different from current admin"
         );
     }
 
@@ -38,14 +36,15 @@ contract BeginTransferAdminRole is Script {
      * @param contractName The name of the contract for logging purposes
      */
     function transferContractAdmin(address contractAddress, address newAdmin, string memory contractName) internal {
-        AccessControlDefaultAdminRulesUpgradeable adminContract = AccessControlDefaultAdminRulesUpgradeable(contractAddress);
+        AccessControlDefaultAdminRulesUpgradeable adminContract =
+            AccessControlDefaultAdminRulesUpgradeable(contractAddress);
 
         address currentAdmin = adminContract.defaultAdmin();
         console.log("Current admin for", contractName, ":", currentAdmin);
         validateAdminTransfer(currentAdmin, newAdmin);
 
         adminContract.beginDefaultAdminTransfer(newAdmin);
-        
+
         console.log("Admin transfer initiated for", contractName, "at:", contractAddress);
     }
 
@@ -88,7 +87,8 @@ contract AcceptAdminRole is Script {
      */
     function acceptContractAdmin(address contractAddress, string memory contractName) internal {
         console.log("Accepting admin role for", contractName, "at:", contractAddress);
-        AccessControlDefaultAdminRulesUpgradeable adminContract = AccessControlDefaultAdminRulesUpgradeable(contractAddress);
+        AccessControlDefaultAdminRulesUpgradeable adminContract =
+            AccessControlDefaultAdminRulesUpgradeable(contractAddress);
         adminContract.acceptDefaultAdminTransfer();
         console.log("New admin for", contractName, ":", adminContract.defaultAdmin());
     }
