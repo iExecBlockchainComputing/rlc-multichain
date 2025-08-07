@@ -35,11 +35,11 @@ contract BeginTransferAdminRole is Script {
 
         vm.startBroadcast();
         if (params.approvalRequired) {
-            transferContractAdmin(params.rlcLiquidityUnifierAddress, newAdmin, "RLCLiquidityUnifier");
+            beginTransfer(params.rlcLiquidityUnifierAddress, newAdmin, "RLCLiquidityUnifier");
         } else {
-            transferContractAdmin(params.rlcCrosschainTokenAddress, newAdmin, "RLCCrosschainToken");
+            beginTransfer(params.rlcCrosschainTokenAddress, newAdmin, "RLCCrosschainToken");
         }
-        transferContractAdmin(params.iexecLayerZeroBridgeAddress, newAdmin, "IexecLayerZeroBridge");
+        beginTransfer(params.iexecLayerZeroBridgeAddress, newAdmin, "IexecLayerZeroBridge");
         vm.stopBroadcast();
     }
 
@@ -61,7 +61,7 @@ contract BeginTransferAdminRole is Script {
      * @param newAdmin The new admin address
      * @param contractName The name of the contract for logging purposes
      */
-    function transferContractAdmin(address contractAddress, address newAdmin, string memory contractName) internal {
+    function beginTransfer(address contractAddress, address newAdmin, string memory contractName) internal {
         IAccessControlDefaultAdminRules contractInstance =
             IAccessControlDefaultAdminRules(contractAddress);
 
