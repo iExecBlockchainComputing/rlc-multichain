@@ -30,6 +30,25 @@ contract BeginTransferAdminRole is Script {
             "BeginTransferAdminRole: New admin must be different from current admin"
         );
     }
+
+    /**
+     * @notice Transfers the default admin role for any contract implementing AccessControlDefaultAdminRulesUpgradeable
+     * @param contractAddress The address of the contract
+     * @param newAdmin The new admin address
+     * @param contractName The name of the contract for logging purposes
+     */
+    function transferContractAdmin(address contractAddress, address newAdmin, string memory contractName) internal {
+        AccessControlDefaultAdminRulesUpgradeable adminContract = AccessControlDefaultAdminRulesUpgradeable(contractAddress);
+
+        address currentAdmin = adminContract.defaultAdmin();
+        console.log("Current admin for", contractName, ":", currentAdmin);
+        validateAdminTransfer(currentAdmin, newAdmin);
+
+        adminContract.beginDefaultAdminTransfer(newAdmin);
+        
+        console.log("Admin transfer initiated for", contractName, "at:", contractAddress);
+    }
+
     /**
      * @notice Transfers the default admin role to a new admin for all contracts on the current chain
      * @param newAdmin The address that will become the new default admin
@@ -47,58 +66,12 @@ contract BeginTransferAdminRole is Script {
 
         vm.startBroadcast();
         if (params.approvalRequired) {
-            transferRLCLiquidityUnifierAdmin(params.rlcLiquidityUnifierAddress, newAdmin);
+            transferContractAdmin(params.rlcLiquidityUnifierAddress, newAdmin, "RLCLiquidityUnifier");
         } else {
-            transferRLCCrosschainTokenAdmin(params.rlcCrosschainTokenAddress, newAdmin);
+            transferContractAdmin(params.rlcCrosschainTokenAddress, newAdmin, "RLCCrosschainToken");
         }
-        transferIexecLayerZeroBridgeAdmin(params.iexecLayerZeroBridgeAddress, newAdmin);
+        transferContractAdmin(params.iexecLayerZeroBridgeAddress, newAdmin, "IexecLayerZeroBridge");
         vm.stopBroadcast();
-    }
-
-    /**
-     * @notice Transfers admin role for RLCLiquidityUnifier contract
-     * @param contractAddress The address of the RLCLiquidityUnifier contract
-     * @param newAdmin The new admin address
-     */
-    function transferRLCLiquidityUnifierAdmin(address contractAddress, address newAdmin) internal {
-        RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(contractAddress);
-
-        address currentDefaultAdmin = liquidityUnifier.defaultAdmin();
-        console.log("Current admin:", currentDefaultAdmin);
-        validateAdminTransfer(currentDefaultAdmin, newAdmin);
-
-        liquidityUnifier.beginDefaultAdminTransfer(newAdmin);
-        console.log("Admin transfer initiated for RLCLiquidityUnifier at:", contractAddress);
-    }
-
-    /**
-     * @notice Transfers admin role for RLCCrosschainToken contract
-     * @param contractAddress The address of the RLCCrosschainToken contract
-     * @param newAdmin The new admin address
-     */
-    function transferRLCCrosschainTokenAdmin(address contractAddress, address newAdmin) internal {
-        RLCCrosschainToken crosschainToken = RLCCrosschainToken(contractAddress);
-
-        address currentDefaultAdmin = crosschainToken.defaultAdmin();
-        console.log("Current admin:", currentDefaultAdmin);
-        validateAdminTransfer(currentDefaultAdmin, newAdmin);
-        crosschainToken.beginDefaultAdminTransfer(newAdmin);
-        console.log("Admin transfer initiated for RLCCrosschainToken at:", contractAddress);
-    }
-
-    /**
-     * @notice Transfers admin role for IexecLayerZeroBridge contract
-     * @param contractAddress The address of the IexecLayerZeroBridge contract
-     * @param newAdmin The new admin address
-     */
-    function transferIexecLayerZeroBridgeAdmin(address contractAddress, address newAdmin) internal {
-        IexecLayerZeroBridge bridge = IexecLayerZeroBridge(contractAddress);
-
-        address currentDefaultAdmin = bridge.defaultAdmin();
-        console.log("Current admin:", currentDefaultAdmin);
-        validateAdminTransfer(currentDefaultAdmin, newAdmin);
-        bridge.beginDefaultAdminTransfer(newAdmin);
-        console.log("Admin transfer initiated for IexecLayerZeroBridge at:", contractAddress);
     }
 }
 
@@ -108,6 +81,18 @@ contract BeginTransferAdminRole is Script {
  * This script should be run by the new admin after the BeginTransferAdminRole script has been executed.
  */
 contract AcceptAdminRole is Script {
+    /**
+     * @notice Accepts the default admin role transfer for any contract implementing AccessControlDefaultAdminRulesUpgradeable
+     * @param contractAddress The address of the contract
+     * @param contractName The name of the contract for logging purposes
+     */
+    function acceptContractAdmin(address contractAddress, string memory contractName) internal {
+        console.log("Accepting admin role for", contractName, "at:", contractAddress);
+        AccessControlDefaultAdminRulesUpgradeable adminContract = AccessControlDefaultAdminRulesUpgradeable(contractAddress);
+        adminContract.acceptDefaultAdminTransfer();
+        console.log("New admin for", contractName, ":", adminContract.defaultAdmin());
+    }
+
     /**
      * @notice Accepts the default admin role transfer for all contracts on the current chain
      * @dev This function should be called by the new admin to complete the transfer process
@@ -119,50 +104,11 @@ contract AcceptAdminRole is Script {
 
         vm.startBroadcast();
         if (params.approvalRequired) {
-            acceptRLCLiquidityUnifierAdmin(params.rlcLiquidityUnifierAddress);
+            acceptContractAdmin(params.rlcLiquidityUnifierAddress, "RLCLiquidityUnifier");
         } else {
-            acceptRLCCrosschainTokenAdmin(params.rlcCrosschainTokenAddress);
+            acceptContractAdmin(params.rlcCrosschainTokenAddress, "RLCCrosschainToken");
         }
-        acceptIexecLayerZeroBridgeAdmin(params.iexecLayerZeroBridgeAddress);
+        acceptContractAdmin(params.iexecLayerZeroBridgeAddress, "IexecLayerZeroBridge");
         vm.stopBroadcast();
-    }
-
-    /**
-     * @notice Accepts admin role for RLCLiquidityUnifier contract
-     * @param contractAddress The address of the RLCLiquidityUnifier contract
-     */
-    function acceptRLCLiquidityUnifierAdmin(address contractAddress) internal {
-        console.log("Accepting admin role for RLCLiquidityUnifier at:", contractAddress);
-
-        RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(contractAddress);
-
-        liquidityUnifier.acceptDefaultAdminTransfer();
-        console.log("New admin:", liquidityUnifier.defaultAdmin());
-    }
-
-    /**
-     * @notice Accepts admin role for RLCCrosschainToken contract
-     * @param contractAddress The address of the RLCCrosschainToken contract
-     */
-    function acceptRLCCrosschainTokenAdmin(address contractAddress) internal {
-        console.log("Accepting admin role for RLCCrosschainToken at:", contractAddress);
-
-        RLCCrosschainToken crosschainToken = RLCCrosschainToken(contractAddress);
-
-        crosschainToken.acceptDefaultAdminTransfer();
-        console.log("New admin:", crosschainToken.defaultAdmin());
-    }
-
-    /**
-     * @notice Accepts admin role for IexecLayerZeroBridge contract
-     * @param contractAddress The address of the IexecLayerZeroBridge contract
-     */
-    function acceptIexecLayerZeroBridgeAdmin(address contractAddress) internal {
-        console.log("Accepting admin role for IexecLayerZeroBridge at:", contractAddress);
-
-        IexecLayerZeroBridge bridge = IexecLayerZeroBridge(contractAddress);
-
-        bridge.acceptDefaultAdminTransfer();
-        console.log("New admin:", bridge.defaultAdmin());
     }
 }
