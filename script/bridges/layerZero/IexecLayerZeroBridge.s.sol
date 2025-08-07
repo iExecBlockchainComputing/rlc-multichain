@@ -111,7 +111,11 @@ contract Configure is Script {
         //
         bytes32 peer = bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)));
         if (!sourceBridge.isPeer(targetParams.lzEndpointId, peer)) {
-            console.log("Setting bridge peer [endpointId:%s, peer:%s]", vm.toString(targetParams.lzEndpointId), vm.toString(peer));
+            console.log(
+                "Setting bridge peer [endpointId:%s, peer:%s]",
+                vm.toString(targetParams.lzEndpointId),
+                vm.toString(peer)
+            );
             sourceBridge.setPeer(targetParams.lzEndpointId, peer);
             configured = true;
         }
@@ -120,9 +124,13 @@ contract Configure is Script {
         //
         bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
         if (!LayerZeroUtils.matchesOnchainOptions(sourceBridge, targetParams.lzEndpointId, options)) {
-            EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(targetParams.lzEndpointId, options);
-            console.log("Setting bridge enforced options [endpointId:%s, options:%s]",
-                vm.toString(targetParams.lzEndpointId), vm.toString(options));
+            EnforcedOptionParam[] memory enforcedOptions =
+                LayerZeroUtils.buildEnforcedOptions(targetParams.lzEndpointId, options);
+            console.log(
+                "Setting bridge enforced options [endpointId:%s, options:%s]",
+                vm.toString(targetParams.lzEndpointId),
+                vm.toString(options)
+            );
             sourceBridge.setEnforcedOptions(enforcedOptions);
             configured = true;
         }

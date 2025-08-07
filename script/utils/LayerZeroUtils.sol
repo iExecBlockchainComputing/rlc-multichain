@@ -36,15 +36,15 @@ library LayerZeroUtils {
      * @param targetEndpointId The LayerZero endpoint ID of the target bridge.
      * @param options The options to compare against.
      */
-    function matchesOnchainOptions(
-        IexecLayerZeroBridge sourceBridge,
-        uint32 targetEndpointId,
-        bytes memory options
-    ) public view returns (bool) {
+    function matchesOnchainOptions(IexecLayerZeroBridge sourceBridge, uint32 targetEndpointId, bytes memory options)
+        public
+        view
+        returns (bool)
+    {
         bytes memory lzReceiveOnchainOptions = sourceBridge.enforcedOptions(targetEndpointId, LZ_RECEIVE_MESSAGE_TYPE);
         bytes memory lzComposeOnchainOptions = sourceBridge.enforcedOptions(targetEndpointId, LZ_COMPOSE_MESSAGE_TYPE);
         return keccak256(lzReceiveOnchainOptions) != keccak256(options)
-                || keccak256(lzComposeOnchainOptions) != keccak256(options);
+            || keccak256(lzComposeOnchainOptions) != keccak256(options);
     }
 
     /**
@@ -52,7 +52,11 @@ library LayerZeroUtils {
      * @param targetEndpointId The LayerZero endpoint ID of the receiving chain.
      * @param options The options to enforce.
      */
-    function buildEnforcedOptions(uint32 targetEndpointId, bytes memory options) public pure returns (EnforcedOptionParam[] memory) {
+    function buildEnforcedOptions(uint32 targetEndpointId, bytes memory options)
+        public
+        pure
+        returns (EnforcedOptionParam[] memory)
+    {
         EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](2);
         enforcedOptions[0] = EnforcedOptionParam(targetEndpointId, LZ_RECEIVE_MESSAGE_TYPE, options);
         enforcedOptions[1] = EnforcedOptionParam(targetEndpointId, LZ_COMPOSE_MESSAGE_TYPE, options);

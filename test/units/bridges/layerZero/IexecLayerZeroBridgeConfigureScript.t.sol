@@ -15,7 +15,8 @@ import {EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/O
 import {TestUtils} from "./../../utils/TestUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
-import {Configure as IexecLayerZeroBridgeConfigureScript} from "../../../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
+import {Configure as IexecLayerZeroBridgeConfigureScript} from
+    "../../../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
 import {ConfigLib} from "../../../../script/lib/ConfigLib.sol";
 import {LayerZeroUtils} from "../../../../script/utils/LayerZeroUtils.sol";
 
@@ -70,7 +71,8 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     function test_configureSourceBridgeCorrectly() public {
         bytes32 targetBridgeAddressInBytes32 = bytes32(uint256(uint160(targetBridgeAddress)));
         bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
-        EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(targetParams.lzEndpointId, options);
+        EnforcedOptionParam[] memory enforcedOptions =
+            LayerZeroUtils.buildEnforcedOptions(targetParams.lzEndpointId, options);
         // Check that setPeer event is emitted.
         vm.expectEmit(true, true, true, true, sourceBridgeAddress);
         emit IOAppCore.PeerSet(targetParams.lzEndpointId, targetBridgeAddressInBytes32);
@@ -142,15 +144,14 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             // Log some key configuration parameters.
             console.log("Confirmations:", decodedConfig.confirmations);
             console.log("Required DVN Count:", decodedConfig.requiredDVNCount);
-            for (uint i = 0; i < decodedConfig.requiredDVNs.length; i++) {
+            for (uint256 i = 0; i < decodedConfig.requiredDVNs.length; i++) {
                 console.log("[", i, "] Required DVN", decodedConfig.requiredDVNs[i]);
             }
             console.log("Optional DVN Count:", decodedConfig.optionalDVNCount);
-            for (uint i = 0; i < decodedConfig.optionalDVNs.length; i++) {
+            for (uint256 i = 0; i < decodedConfig.optionalDVNs.length; i++) {
                 console.log("[", i, "] Optional DVN", decodedConfig.optionalDVNs[i]);
             }
             console.log("Optional DVN Threshold:", decodedConfig.optionalDVNThreshold);
-
         }
         vm.stopBroadcast();
     }
