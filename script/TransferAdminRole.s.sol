@@ -18,6 +18,32 @@ import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridg
  * for all deployed smart contracts on the current chain.
  */
 contract BeginTransferAdminRole is Script {
+
+    /**
+     * @notice Transfers the default admin role to a new admin for all contracts on the current chain
+     * @dev This function automatically detects which contracts are deployed on the current chain
+     * based on the configuration and transfers admin roles accordingly
+     */
+    function run() external {
+        address newAdmin = vm.envAddress("NEW_DEFAULT_ADMIN");
+        require(newAdmin != address(0), "BeginTransferAdminRole: New admin cannot be zero address");
+
+        string memory chain = vm.envString("CHAIN");
+        console.log("Starting admin role transfer on chain:", chain);
+        console.log("New admin address:", newAdmin);
+
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
+
+        vm.startBroadcast();
+        if (params.approvalRequired) {
+            transferContractAdmin(params.rlcLiquidityUnifierAddress, newAdmin, "RLCLiquidityUnifier");
+        } else {
+            transferContractAdmin(params.rlcCrosschainTokenAddress, newAdmin, "RLCCrosschainToken");
+        }
+        transferContractAdmin(params.iexecLayerZeroBridgeAddress, newAdmin, "IexecLayerZeroBridge");
+        vm.stopBroadcast();
+    }
+
     /**
      * @notice Validates that the new admin is different from the current admin
      * @param currentDefaultAdmin The current admin address
@@ -47,31 +73,6 @@ contract BeginTransferAdminRole is Script {
 
         console.log("Admin transfer initiated for", contractName, "at:", contractAddress);
     }
-
-    /**
-     * @notice Transfers the default admin role to a new admin for all contracts on the current chain
-     * @dev This function automatically detects which contracts are deployed on the current chain
-     * based on the configuration and transfers admin roles accordingly
-     */
-    function run() external {
-        address newAdmin = vm.envAddress("NEW_DEFAULT_ADMIN");
-        require(newAdmin != address(0), "BeginTransferAdminRole: New admin cannot be zero address");
-
-        string memory chain = vm.envString("CHAIN");
-        console.log("Starting admin role transfer on chain:", chain);
-        console.log("New admin address:", newAdmin);
-
-        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
-
-        vm.startBroadcast();
-        if (params.approvalRequired) {
-            transferContractAdmin(params.rlcLiquidityUnifierAddress, newAdmin, "RLCLiquidityUnifier");
-        } else {
-            transferContractAdmin(params.rlcCrosschainTokenAddress, newAdmin, "RLCCrosschainToken");
-        }
-        transferContractAdmin(params.iexecLayerZeroBridgeAddress, newAdmin, "IexecLayerZeroBridge");
-        vm.stopBroadcast();
-    }
 }
 
 /**
@@ -80,19 +81,7 @@ contract BeginTransferAdminRole is Script {
  * This script should be run by the new admin after the BeginTransferAdminRole script has been executed.
  */
 contract AcceptAdminRole is Script {
-    /**
-     * @notice Accepts the default admin role transfer for any contract implementing AccessControlDefaultAdminRulesUpgradeable
-     * @param contractAddress The address of the contract
-     * @param contractName The name of the contract for logging purposes
-     */
-    function acceptContractAdmin(address contractAddress, string memory contractName) internal {
-        console.log("Accepting admin role for", contractName, "at:", contractAddress);
-        AccessControlDefaultAdminRulesUpgradeable adminContract =
-            AccessControlDefaultAdminRulesUpgradeable(contractAddress);
-        adminContract.acceptDefaultAdminTransfer();
-        console.log("New admin for", contractName, ":", adminContract.defaultAdmin());
-    }
-
+    
     /**
      * @notice Accepts the default admin role transfer for all contracts on the current chain
      * @dev This function should be called by the new admin to complete the transfer process
@@ -111,4 +100,18 @@ contract AcceptAdminRole is Script {
         acceptContractAdmin(params.iexecLayerZeroBridgeAddress, "IexecLayerZeroBridge");
         vm.stopBroadcast();
     }
+
+    /**
+     * @notice Accepts the default admin role transfer for any contract implementing AccessControlDefaultAdminRulesUpgradeable
+     * @param contractAddress The address of the contract
+     * @param contractName The name of the contract for logging purposes
+     */
+    function acceptContractAdmin(address contractAddress, string memory contractName) internal {
+        console.log("Accepting admin role for", contractName, "at:", contractAddress);
+        AccessControlDefaultAdminRulesUpgradeable adminContract =
+            AccessControlDefaultAdminRulesUpgradeable(contractAddress);
+        adminContract.acceptDefaultAdminTransfer();
+        console.log("New admin for", contractName, ":", adminContract.defaultAdmin());
+    }
+
 }
