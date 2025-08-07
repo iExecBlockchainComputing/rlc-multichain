@@ -25,8 +25,6 @@ contract BeginTransferAdminRole is Script {
      */
     function run() external {
         address newAdmin = vm.envAddress("NEW_DEFAULT_ADMIN");
-        require(newAdmin != address(0), "BeginTransferAdminRole: New admin cannot be zero address");
-
         string memory chain = vm.envString("CHAIN");
         console.log("Starting admin role transfer on chain:", chain);
         console.log("New admin address:", newAdmin);
@@ -68,7 +66,6 @@ contract BeginTransferAdminRole is Script {
         console.log("Current admin for", contractName, ":", currentAdmin);
         validateAdminTransfer(currentAdmin, newAdmin);
         contractInstance.beginDefaultAdminTransfer(newAdmin);
-
         console.log("Admin transfer initiated for", contractName, "at:", contractAddress);
     }
 }
