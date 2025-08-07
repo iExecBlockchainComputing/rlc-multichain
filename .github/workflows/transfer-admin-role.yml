@@ -1,4 +1,4 @@
-name: Transfer Admin Role
+name: Transfer Default Admin Role
 
 on:
   workflow_dispatch:
@@ -30,11 +30,10 @@ jobs:
           version: stable
           cache: true
           
-      - name: Transfer admin role
+      - name: Transfer default admin role
         env:
           ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
           CHAIN: ${{ inputs.network }}
           RPC_URL: ${{ secrets.RPC_URL }}
           NEW_ADMIN: ${{ vars.NEW_ADMIN_ADDRESS }}
-        run: |
-          make transfer-admin-single-chain
+        run: make transfer-admin-single-chain
