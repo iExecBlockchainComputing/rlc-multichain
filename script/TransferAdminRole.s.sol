@@ -18,6 +18,18 @@ import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridg
  * for all deployed smart contracts on the current chain.
  */
 contract TransferAdminRole is Script {
+
+    /**
+     * @notice Validates that the new admin is different from the current admin
+     * @param currentAdmin The current admin address
+     * @param newAdmin The new admin address
+     */
+    function validateAdminTransfer(address currentAdmin, address newAdmin) internal pure {
+        require(
+            currentAdmin != newAdmin,
+            "TransferAdminRole: New admin must be different from current admin"
+        );
+    }
     /**
      * @notice Transfers the default admin role to a new admin for all contracts on the current chain
      * @param newAdmin The address that will become the new default admin
@@ -53,6 +65,7 @@ contract TransferAdminRole is Script {
 
         address currentAdmin = liquidityUnifier.defaultAdmin();
         console.log("Current admin:", currentAdmin);
+        validateAdminTransfer(currentAdmin, newAdmin);
 
         liquidityUnifier.beginDefaultAdminTransfer(newAdmin);
         console.log("Admin transfer initiated for RLCLiquidityUnifier at:", contractAddress);
@@ -68,7 +81,7 @@ contract TransferAdminRole is Script {
 
         address currentAdmin = crosschainToken.defaultAdmin();
         console.log("Current admin:", currentAdmin);
-
+        validateAdminTransfer(currentAdmin, newAdmin);
         crosschainToken.beginDefaultAdminTransfer(newAdmin);
         console.log("Admin transfer initiated for RLCCrosschainToken at:", contractAddress);
     }
@@ -83,7 +96,7 @@ contract TransferAdminRole is Script {
 
         address currentAdmin = bridge.defaultAdmin();
         console.log("Current admin:", currentAdmin);
-
+        validateAdminTransfer(currentAdmin, newAdmin);
         bridge.beginDefaultAdminTransfer(newAdmin);
         console.log("Admin transfer initiated for IexecLayerZeroBridge at:", contractAddress);
     }
