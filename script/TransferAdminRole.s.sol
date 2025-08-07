@@ -5,7 +5,8 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
-import {IAccessControlDefaultAdminRules} from "@openzeppelin/contracts/access/extensions/IAccessControlDefaultAdminRules.sol";
+import {IAccessControlDefaultAdminRules} from
+    "@openzeppelin/contracts/access/extensions/IAccessControlDefaultAdminRules.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
 import {RLCLiquidityUnifier} from "../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
@@ -17,7 +18,6 @@ import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridg
  * for all deployed smart contracts on the current chain.
  */
 contract BeginTransferAdminRole is Script {
-
     /**
      * @notice Transfers the default admin role to a new admin for all contracts on the current chain
      * @dev This function automatically detects which contracts are deployed on the current chain
@@ -62,13 +62,11 @@ contract BeginTransferAdminRole is Script {
      * @param contractName The name of the contract for logging purposes
      */
     function beginTransfer(address contractAddress, address newAdmin, string memory contractName) internal {
-        IAccessControlDefaultAdminRules contractInstance =
-            IAccessControlDefaultAdminRules(contractAddress);
+        IAccessControlDefaultAdminRules contractInstance = IAccessControlDefaultAdminRules(contractAddress);
 
         address currentAdmin = contractInstance.defaultAdmin();
         console.log("Current admin for", contractName, ":", currentAdmin);
         validateAdminTransfer(currentAdmin, newAdmin);
-
         contractInstance.beginDefaultAdminTransfer(newAdmin);
 
         console.log("Admin transfer initiated for", contractName, "at:", contractAddress);
@@ -81,7 +79,6 @@ contract BeginTransferAdminRole is Script {
  * This script should be run by the new admin after the BeginTransferAdminRole script has been executed.
  */
 contract AcceptAdminRole is Script {
-    
     /**
      * @notice Accepts the default admin role transfer for all contracts on the current chain
      * @dev This function should be called by the new admin to complete the transfer process
@@ -108,10 +105,8 @@ contract AcceptAdminRole is Script {
      */
     function acceptContractAdmin(address contractAddress, string memory contractName) internal {
         console.log("Accepting admin role for", contractName, "at:", contractAddress);
-        IAccessControlDefaultAdminRules contractInstance =
-            IAccessControlDefaultAdminRules(contractAddress);
+        IAccessControlDefaultAdminRules contractInstance = IAccessControlDefaultAdminRules(contractAddress);
         contractInstance.acceptDefaultAdminTransfer();
         console.log("New admin for", contractName, ":", contractInstance.defaultAdmin());
     }
-
 }
