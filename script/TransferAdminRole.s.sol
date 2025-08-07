@@ -51,7 +51,7 @@ contract TransferAdminRole is Script {
     function transferRLCLiquidityUnifierAdmin(address contractAddress, address newAdmin) internal {
         RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(contractAddress);
 
-        address currentAdmin = liquidityUnifier.owner();
+        address currentAdmin = liquidityUnifier.defaultAdmin();
         console.log("Current admin:", currentAdmin);
 
         liquidityUnifier.beginDefaultAdminTransfer(newAdmin);
@@ -66,7 +66,7 @@ contract TransferAdminRole is Script {
     function transferRLCCrosschainTokenAdmin(address contractAddress, address newAdmin) internal {
         RLCCrosschainToken crosschainToken = RLCCrosschainToken(contractAddress);
 
-        address currentAdmin = crosschainToken.owner();
+        address currentAdmin = crosschainToken.defaultAdmin();
         console.log("Current admin:", currentAdmin);
 
         crosschainToken.beginDefaultAdminTransfer(newAdmin);
@@ -81,7 +81,7 @@ contract TransferAdminRole is Script {
     function transferIexecLayerZeroBridgeAdmin(address contractAddress, address newAdmin) internal {
         IexecLayerZeroBridge bridge = IexecLayerZeroBridge(contractAddress);
 
-        address currentAdmin = bridge.owner();
+        address currentAdmin = bridge.defaultAdmin();
         console.log("Current admin:", currentAdmin);
 
         bridge.beginDefaultAdminTransfer(newAdmin);
@@ -124,7 +124,7 @@ contract AcceptAdminRole is Script {
         RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(contractAddress);
 
         liquidityUnifier.acceptDefaultAdminTransfer();
-        console.log("New admin:", liquidityUnifier.owner());
+        console.log("New admin:", liquidityUnifier.defaultAdmin());
     }
 
     /**
@@ -137,7 +137,7 @@ contract AcceptAdminRole is Script {
         RLCCrosschainToken crosschainToken = RLCCrosschainToken(contractAddress);
 
         crosschainToken.acceptDefaultAdminTransfer();
-        console.log("New admin:", crosschainToken.owner());
+        console.log("New admin:", crosschainToken.defaultAdmin());
     }
 
     /**
@@ -150,6 +150,6 @@ contract AcceptAdminRole is Script {
         IexecLayerZeroBridge bridge = IexecLayerZeroBridge(contractAddress);
 
         bridge.acceptDefaultAdminTransfer();
-        console.log("New admin:", bridge.owner());
+        console.log("New admin:", bridge.defaultAdmin());
     }
 }
