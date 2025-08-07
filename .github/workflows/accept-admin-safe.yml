@@ -1,7 +1,7 @@
 name: Accept Admin Role Transfer - Safe 
 
 on:
-  pull_request:
+  push:
   workflow_call:
     inputs:
       network:
