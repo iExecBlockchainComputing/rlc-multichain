@@ -36,4 +36,4 @@ jobs:
           CHAIN: ${{ inputs.network }}
           RPC_URL: ${{ secrets.RPC_URL }}
           NEW_ADMIN: ${{ vars.NEW_ADMIN_ADDRESS }}
-        run: make transfer-admin-single-chain
+        run: make begin-default-admin-transfer
