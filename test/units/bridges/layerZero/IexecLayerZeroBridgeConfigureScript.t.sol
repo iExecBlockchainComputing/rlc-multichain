@@ -178,17 +178,6 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
     function test_authorizeBridgeIfNeeded_ShouldAuthorizeBridge() public {
         vm.startPrank(admin);
-        bool result = super.authorizeBridgeIfNeeded(
-            sourceBridgeAddress,
-            address(deployment.rlcLiquidityUnifier),
-            deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE()
-        );
-        vm.stopPrank();
-        assertTrue(result, "Expected authorizeBridgeIfNeeded to return true");
-    }
-
-    function test_authorizeBridgeIfNeeded_ShouldNotAuthorizeBridgeIfAlreadyAuthorized() public {
-        vm.startPrank(admin);
         // rlcLiquidityUnifier
         assertTrue(
             super.authorizeBridgeIfNeeded(
@@ -214,6 +203,31 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         assertTrue(
             deployment.rlcCrosschainToken.hasRole(deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), targetBridgeAddress),
             "Expected bridge to have the role"
+        );
+        vm.stopPrank();
+    }
+
+    function test_authorizeBridgeIfNeeded_ShouldNotAuthorizeBridgeIfAlreadyAuthorized() public {
+        vm.startPrank(admin);
+        assertTrue(
+            super.authorizeBridgeIfNeeded(
+                sourceBridgeAddress,
+                address(deployment.rlcLiquidityUnifier),
+                deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE()
+            ),
+            "Expected authorizeBridgeIfNeeded to return true"
+        );
+        assertTrue(
+            deployment.rlcLiquidityUnifier.hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress),
+            "Expected bridge to have the role"
+        );
+        assertFalse(
+            super.authorizeBridgeIfNeeded(
+                sourceBridgeAddress,
+                address(deployment.rlcLiquidityUnifier),
+                deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE()
+            ),
+            "Expected authorizeBridgeIfNeeded to return false"
         );
         vm.stopPrank();
     }
