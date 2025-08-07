@@ -104,13 +104,13 @@ contract Configure is Script {
         ConfigLib.CommonConfigParams memory sourceParams,
         ConfigLib.CommonConfigParams memory targetParams
     ) public returns (bool) {
-        IexecLayerZeroBridge bridge = IexecLayerZeroBridge(sourceParams.iexecLayerZeroBridgeAddress);
+        address bridge = sourceParams.iexecLayerZeroBridgeAddress;
         RLCLiquidityUnifier rlcLiquidityUnifier = RLCLiquidityUnifier(sourceParams.rlcLiquidityUnifierAddress);
         RLCCrosschainToken rlcCrosschainToken = RLCCrosschainToken(sourceParams.rlcCrosschainTokenAddress);
         bool bool1 = setBridgePeerIfNeeded(bridge, targetParams.lzEndpointId, targetParams.iexecLayerZeroBridgeAddress);
         bool bool2 = setEnforcedOptionsIfNeeded(bridge, targetParams.lzEndpointId);
         bool bool3 = authorizeBridgeIfNeeded(
-            address(bridge),
+            bridge,
             sourceParams.approvalRequired ? address(rlcLiquidityUnifier) : address(rlcCrosschainToken),
             sourceParams.approvalRequired
                 ? rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE()
@@ -119,10 +119,11 @@ contract Configure is Script {
         return bool1 || bool2 || bool3;
     }
 
-    function setBridgePeerIfNeeded(IexecLayerZeroBridge bridge, uint32 targetEndpointId, address targetBridgeAddress)
+    function setBridgePeerIfNeeded(address bridgeAddress, uint32 targetEndpointId, address targetBridgeAddress)
         public
         returns (bool)
     {
+        IexecLayerZeroBridge bridge = IexecLayerZeroBridge(bridgeAddress);
         bytes32 peer = bytes32(uint256(uint160(targetBridgeAddress)));
         if (bridge.isPeer(targetEndpointId, peer)) {
             console.log(
@@ -135,9 +136,10 @@ contract Configure is Script {
         return true;
     }
 
-    function setEnforcedOptionsIfNeeded(IexecLayerZeroBridge bridge, uint32 targetEndpointId) public returns (bool) {
+    function setEnforcedOptionsIfNeeded(address bridgeAddress, uint32 targetEndpointId) public returns (bool) {
+        IexecLayerZeroBridge bridge = IexecLayerZeroBridge(bridgeAddress);
         bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
-        if (LayerZeroUtils.matchesOnchainOptions(bridge, targetEndpointId, options)) {
+        if (LayerZeroUtils.matchesOnchainEnforcedOptions(bridge, targetEndpointId, options)) {
             console.log(
                 "Bridge enforced options already set [endpointId:%s, options:%s]",
                 vm.toString(targetEndpointId),

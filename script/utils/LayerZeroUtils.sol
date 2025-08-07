@@ -27,18 +27,36 @@ library LayerZeroUtils {
     }
 
     /**
-     * Checks if the on-chain options for the source bridge match the provided options.
-     * @param sourceBridge The source bridge contract.
-     * @param targetEndpointId The LayerZero endpoint ID of the target bridge.
+     * Gets the on-chain enforced options for `lzReceive()`.
+     * @param bridge The LayerZero bridge contract.
+     * @param endpointId The LayerZero endpoint ID of the target chain.
+     */
+    function getOnchainLzReceiveEnforcedOptions(IexecLayerZeroBridge bridge, uint32 endpointId) public view returns (bytes memory) {
+        return bridge.enforcedOptions(endpointId, LZ_RECEIVE_MESSAGE_TYPE);
+    }
+
+    /**
+     * Gets the on-chain enforced options for `lzCompose()`.
+     * @param bridge The LayerZero bridge contract.
+     * @param endpointId The LayerZero endpoint ID of the target chain.
+     */
+    function getOnchainLzComposeEnforcedOptions(IexecLayerZeroBridge bridge, uint32 endpointId) public view returns (bytes memory) {
+        return bridge.enforcedOptions(endpointId, LZ_COMPOSE_MESSAGE_TYPE);
+    }
+
+    /**
+     * Checks if the on-chain options for the bridge match the provided options for the target chain.
+     * @param bridge The source bridge contract.
+     * @param endpointId The LayerZero endpoint ID of the target chain.
      * @param options The options to compare against.
      */
-    function matchesOnchainOptions(IexecLayerZeroBridge sourceBridge, uint32 targetEndpointId, bytes memory options)
+    function matchesOnchainEnforcedOptions(IexecLayerZeroBridge bridge, uint32 endpointId, bytes memory options)
         public
         view
         returns (bool)
     {
-        bytes memory lzReceiveOnchainOptions = sourceBridge.enforcedOptions(targetEndpointId, LZ_RECEIVE_MESSAGE_TYPE);
-        bytes memory lzComposeOnchainOptions = sourceBridge.enforcedOptions(targetEndpointId, LZ_COMPOSE_MESSAGE_TYPE);
+        bytes memory lzReceiveOnchainOptions = getOnchainLzReceiveEnforcedOptions(bridge, endpointId);
+        bytes memory lzComposeOnchainOptions = getOnchainLzComposeEnforcedOptions(bridge, endpointId);
         return keccak256(lzReceiveOnchainOptions) == keccak256(options)
             && keccak256(lzComposeOnchainOptions) == keccak256(options);
     }
