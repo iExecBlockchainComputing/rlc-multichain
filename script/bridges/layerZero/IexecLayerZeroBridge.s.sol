@@ -70,12 +70,12 @@ contract Configure is Script {
         IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.iexecLayerZeroBridgeAddress);
         vm.startBroadcast();
         sourceBridge.setPeer(
-            targetParams.lzChainId, bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)))
+            targetParams.lzEndpointId, bytes32(uint256(uint160(targetParams.iexecLayerZeroBridgeAddress)))
         );
         EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](2);
         bytes memory _extraOptions = OptionsBuilder.newOptions().addExecutorLzReceiveOption(90_000, 0); // 90_000 gas limit for the receiving executor and 0 for the executor's value
-        enforcedOptions[0] = EnforcedOptionParam(targetParams.lzChainId, 1, _extraOptions); // lzReceive
-        enforcedOptions[1] = EnforcedOptionParam(targetParams.lzChainId, 2, _extraOptions); // lzCompose
+        enforcedOptions[0] = EnforcedOptionParam(targetParams.lzEndpointId, 1, _extraOptions); // lzReceive
+        enforcedOptions[1] = EnforcedOptionParam(targetParams.lzEndpointId, 2, _extraOptions); // lzCompose
         sourceBridge.setEnforcedOptions(enforcedOptions);
         // Authorize bridge in the relevant contract.
         if (sourceParams.approvalRequired) {

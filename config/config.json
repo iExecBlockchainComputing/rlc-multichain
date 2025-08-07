@@ -12,7 +12,7 @@
       "iexecLayerZeroBridgeAddress": "0xA18e571f91ab58889C348E1764fBaBF622ab89b5",
       "iexecLayerZeroBridgeCreatexSalt": "0x4f2784ad07b2be2a5c5e466c91d758133f4aa33bd4cf09ddba1a1e1035e57875",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-      "lzChainId": 40161
+      "lzEndpointId": 40161
     },
     "arbitrum_sepolia": {
       "approvalRequired": false,
@@ -21,7 +21,7 @@
       "iexecLayerZeroBridgeAddress": "0xB560ae1dD7FdF011Ead2189510ae08f2dbD168a5",
       "iexecLayerZeroBridgeCreatexSalt": "0x4f2784ad07b2be2a5c5e466c91d758133f4aa33bd4cf09ddba1a1e1035e57875",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-      "lzChainId": 40231
+      "lzEndpointId": 40231
     },
     "ethereum": {
       "approvalRequired": true,
@@ -31,7 +31,7 @@
       "iexecLayerZeroBridgeAddress": "0xA8Bc0B19b955c8AC38C8Cbc9383866b834Cd33d8",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
       "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
-      "lzChainId": 30101
+      "lzEndpointId": 30101
     },
     "arbitrum": {
       "approvalRequired": false,
@@ -40,7 +40,7 @@
       "iexecLayerZeroBridgeAddress": "0x7000e96D0Bfc74cf5259aEDaE6065B39B3888699",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000001",
       "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
-      "lzChainId": 30110
+      "lzEndpointId": 30110
     }
   }
 }

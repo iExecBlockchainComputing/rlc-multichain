@@ -123,7 +123,7 @@ The bridge currently supports:
 #### **Testnets**
 - **Ethereum Sepolia** ↔ **Arbitrum Sepolia**
 
-#### **Mainnets**  
+#### **Mainnets**
 - **Ethereum Mainnet** ↔ **Arbitrum Mainnet**
 
 ### Bridge RLC on Testnets
@@ -333,14 +333,24 @@ The scripts automatically calculate these fees and include them in the transacti
 - [Forge Coverage](https://book.getfoundry.sh/reference/forge/forge-coverage)
 - [iExec Platform Documentation](https://docs.iex.ec/)
 
+## How to release:
+
+* First, deploy on Testnets and make sure all tests are ok.
+* Create a release branch `release/X.X.X` that starts from the `main` branch.
+   - Note that GitHub environments `arbitrum` and `ethereum` can only be used with `release/*` branches. The `main` branch cannot be used as the CI will not be able to commit deployment artifacts.
+* Commit required changes (salt, ...)
+* Go to "Actions" section on GitHub
+* Trigger `Deploy contracts` job and choose the correct release branch and the target Github environment.
+
 ## TODO
 
 - Use an enterprise RPC URL for `secrets.SEPOLIA_RPC_URL` in Github environment `ci`.
 - Add git pre-commit hook to format code locally.
 - Testing Documentation
-- Parametrize config.json to not overide btw mainnet and testnets
+- Parametrize the following addresses by chain in `config.json`:
 ```
   "initialAdmin": "0x111165a109feca14e4ad4d805f6460c7d206ead1",
   "initialUpgrader": "0x111121e2ec2557f484f65d5b1ad2b6b07b8acd23",
   "initialPauser": "0x11113fe3513787f5a4f5f19690700e2736b3056e",
-``` 
+```
+- Clean README.md
