@@ -28,7 +28,7 @@ jobs:
         id: transfer-admin
         uses: iExecBlockchainComputing/safe-tx-proposer@feature/wrap-it-gha
         with:
-          safe-address: ${{ secrets.SAFE_ADDRESS }}
+          safe-address: ${{ vars.SAFE_ADDRESS }}
           safe-api-key: ${{ secrets.SAFE_API_KEY }}
           rpc-url: ${{ secrets.RPC_URL }}
           proposer-private-key: ${{ secrets.PROPOSER_PRIVATE_KEY }}
