@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2025 IEXEC BLOCKCHAIN TECH <contact@iex.ec>
 // SPDX-License-Identifier: Apache-2.0
+
 pragma solidity ^0.8.22;
 
 import {console} from "forge-std/console.sol";
@@ -13,6 +14,7 @@ import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
 import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
+import {LayerZeroUtils} from "../../utils/LayerZeroUtils.sol";
 
 /**
  * A script to deploy and initialize the IexecLayerZeroBridge contract.
@@ -103,6 +105,7 @@ contract Configure is Script {
     ) public returns (bool) {
         bool configured;
         IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.iexecLayerZeroBridgeAddress);
+        console.log("Configuring bridge [address:%s]", address(sourceBridge));
         //
         // Set peer for the source bridge if not already set.
         //
@@ -115,23 +118,11 @@ contract Configure is Script {
         //
         // Set enforced options for the source bridge if not already set.
         //
-        // forge-fmt: off
-        uint16 lzReceiveMessageType = 1; // lzReceive()
-        uint16 lzComposeMessageType = 2; // lzCompose()
-        // forge-fmt: on
-        uint128 gasLimit = 90_000; // The gasLimit used on the lzReceive() function in the receiving bridge.
-        uint128 value = 0; // The msg.value passed to the lzReceive() function in the the receiving bridge.
-        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(gasLimit, value);
-        if (
-            keccak256(sourceBridge.enforcedOptions(targetParams.lzEndpointId, lzReceiveMessageType))
-                != keccak256(options)
-                || keccak256(sourceBridge.enforcedOptions(targetParams.lzEndpointId, lzComposeMessageType))
-                    != keccak256(options)
-        ) {
-            console.log("Setting bridge enforced options");
-            EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](2);
-            enforcedOptions[0] = EnforcedOptionParam(targetParams.lzEndpointId, lzReceiveMessageType, options);
-            enforcedOptions[1] = EnforcedOptionParam(targetParams.lzEndpointId, lzComposeMessageType, options);
+        bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
+        if (!LayerZeroUtils.matchesOnchainOptions(sourceBridge, targetParams.lzEndpointId, options)) {
+            EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(targetParams.lzEndpointId, options);
+            console.log("Setting bridge enforced options [endpointId:%s, options:%s]",
+                vm.toString(targetParams.lzEndpointId), vm.toString(options));
             sourceBridge.setEnforcedOptions(enforcedOptions);
             configured = true;
         }

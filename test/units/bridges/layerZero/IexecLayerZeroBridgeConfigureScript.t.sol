@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2025 IEXEC BLOCKCHAIN TECH <contact@iex.ec>
 // SPDX-License-Identifier: Apache-2.0
+
 pragma solidity ^0.8.22;
 
 // import "forge-std/Script.sol";
@@ -9,11 +10,14 @@ import {ILayerZeroEndpointV2} from "@layerzerolabs/lz-evm-protocol-v2/contracts/
 import {UlnConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
 import {ExecutorConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/SendLibBase.sol";
 import {IOAppCore} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppCore.sol";
+import {IOAppOptionsType3} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppOptionsType3.sol";
+import {EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import {TestUtils} from "./../../utils/TestUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
 import {Configure as IexecLayerZeroBridgeConfigureScript} from "../../../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
 import {ConfigLib} from "../../../../script/lib/ConfigLib.sol";
+import {LayerZeroUtils} from "../../../../script/utils/LayerZeroUtils.sol";
 
 // This test contract inherits from `Configure` script because we need the `msg.sender` to be the admin
 // address (using vm.prank) when calling the `configure` function.
@@ -64,9 +68,15 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     }
 
     function test_configureSourceBridgeCorrectly() public {
-        vm.expectEmit(true, true, true, true, sourceBridgeAddress);
         bytes32 targetBridgeAddressInBytes32 = bytes32(uint256(uint160(targetBridgeAddress)));
+        bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
+        EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(targetParams.lzEndpointId, options);
+        // Check that setPeer event is emitted.
+        vm.expectEmit(true, true, true, true, sourceBridgeAddress);
         emit IOAppCore.PeerSet(targetParams.lzEndpointId, targetBridgeAddressInBytes32);
+        // Check that setEnforcedOptions event is emitted.
+        vm.expectEmit(true, true, true, true, sourceBridgeAddress);
+        emit IOAppOptionsType3.EnforcedOptionSet(enforcedOptions);
         vm.startPrank(admin);
         super.configure(sourceParams, targetParams);
         vm.stopPrank();
