@@ -1,17 +1,13 @@
 name: Accept Admin Role Transfer - Safe 
 
 on:
-  workflow_dispatch:
+  pull_request:
+  workflow_call:
     inputs:
       network:
         description: 'Network to accept admin role on'
         required: true
-        type: choice
-        options:
-          - ethereum
-          - arbitrum
-          - sepolia
-          - arbitrum_sepolia
+        type: string
         default: sepolia
 
 jobs:
