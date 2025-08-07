@@ -21,12 +21,12 @@ contract TransferAdminRole is Script {
 
     /**
      * @notice Validates that the new admin is different from the current admin
-     * @param currentAdmin The current admin address
+     * @param currentDefaultAdmin The current admin address
      * @param newAdmin The new admin address
      */
-    function validateAdminTransfer(address currentAdmin, address newAdmin) internal pure {
+    function validateAdminTransfer(address currentDefaultAdmin, address newAdmin) internal pure {
         require(
-            currentAdmin != newAdmin,
+            currentDefaultAdmin != newAdmin,
             "TransferAdminRole: New admin must be different from current admin"
         );
     }
@@ -63,9 +63,9 @@ contract TransferAdminRole is Script {
     function transferRLCLiquidityUnifierAdmin(address contractAddress, address newAdmin) internal {
         RLCLiquidityUnifier liquidityUnifier = RLCLiquidityUnifier(contractAddress);
 
-        address currentAdmin = liquidityUnifier.defaultAdmin();
-        console.log("Current admin:", currentAdmin);
-        validateAdminTransfer(currentAdmin, newAdmin);
+        address currentDefaultAdmin = liquidityUnifier.defaultAdmin();
+        console.log("Current admin:", currentDefaultAdmin);
+        validateAdminTransfer(currentDefaultAdmin, newAdmin);
 
         liquidityUnifier.beginDefaultAdminTransfer(newAdmin);
         console.log("Admin transfer initiated for RLCLiquidityUnifier at:", contractAddress);
@@ -79,9 +79,9 @@ contract TransferAdminRole is Script {
     function transferRLCCrosschainTokenAdmin(address contractAddress, address newAdmin) internal {
         RLCCrosschainToken crosschainToken = RLCCrosschainToken(contractAddress);
 
-        address currentAdmin = crosschainToken.defaultAdmin();
-        console.log("Current admin:", currentAdmin);
-        validateAdminTransfer(currentAdmin, newAdmin);
+        address currentDefaultAdmin = crosschainToken.defaultAdmin();
+        console.log("Current admin:", currentDefaultAdmin);
+        validateAdminTransfer(currentDefaultAdmin, newAdmin);
         crosschainToken.beginDefaultAdminTransfer(newAdmin);
         console.log("Admin transfer initiated for RLCCrosschainToken at:", contractAddress);
     }
@@ -94,9 +94,9 @@ contract TransferAdminRole is Script {
     function transferIexecLayerZeroBridgeAdmin(address contractAddress, address newAdmin) internal {
         IexecLayerZeroBridge bridge = IexecLayerZeroBridge(contractAddress);
 
-        address currentAdmin = bridge.defaultAdmin();
-        console.log("Current admin:", currentAdmin);
-        validateAdminTransfer(currentAdmin, newAdmin);
+        address currentDefaultAdmin = bridge.defaultAdmin();
+        console.log("Current admin:", currentDefaultAdmin);
+        validateAdminTransfer(currentDefaultAdmin, newAdmin);
         bridge.beginDefaultAdminTransfer(newAdmin);
         console.log("Admin transfer initiated for IexecLayerZeroBridge at:", contractAddress);
     }
