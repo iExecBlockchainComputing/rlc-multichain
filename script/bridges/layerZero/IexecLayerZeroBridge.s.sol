@@ -96,11 +96,10 @@ contract Configure is Script {
 
     /**
      * Setup bridge configuration.
-     * @param sourceParams Common configuration parameters for the source chain.
-     * @param targetParams Common configuration parameters for the target chain.
-     * @return true if the configuration was successful.
+     * @param sourceParams Configuration parameters for the source chain.
+     * @param targetParams Configuration parameters for the target chain.
+     * @return true if at least one configuration was changed, false otherwise.
      */
-    // TODO split into smaller functions.
     function configure(
         ConfigLib.CommonConfigParams memory sourceParams,
         ConfigLib.CommonConfigParams memory targetParams
