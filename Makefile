@@ -201,7 +201,7 @@ send-tokens-to-ethereum-mainnet:
 # Transfer admin role for a single chain
 begin-default-admin-transfer: # CHAIN, RPC_URL, NEW_ADMIN
 	@echo "Transferring admin role on $(CHAIN) to: $(NEW_ADMIN)"
-	CHAIN=$(CHAIN) forge script script/TransferAdminRole.s.sol:TransferAdminRole \
+	CHAIN=$(CHAIN) forge script script/TransferAdminRole.s.sol:BeginTransferAdminRole \
 		--rpc-url $(RPC_URL) \
 		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(ADMIN_PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \

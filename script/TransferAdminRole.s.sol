@@ -13,11 +13,11 @@ import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
 import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 
 /**
- * @title TransferAdminRole
+ * @title BeginTransferAdminRole
  * @dev Script to transfer the default admin role to a new admin address
  * for all deployed smart contracts on the current chain.
  */
-contract TransferAdminRole is Script {
+contract BeginTransferAdminRole is Script {
 
     /**
      * @notice Validates that the new admin is different from the current admin
@@ -27,7 +27,7 @@ contract TransferAdminRole is Script {
     function validateAdminTransfer(address currentDefaultAdmin, address newAdmin) internal pure {
         require(
             currentDefaultAdmin != newAdmin,
-            "TransferAdminRole: New admin must be different from current admin"
+            "BeginTransferAdminRole: New admin must be different from current admin"
         );
     }
     /**
@@ -37,7 +37,7 @@ contract TransferAdminRole is Script {
      * based on the configuration and transfers admin roles accordingly
      */
     function run(address newAdmin) external {
-        require(newAdmin != address(0), "TransferAdminRole: New admin cannot be zero address");
+        require(newAdmin != address(0), "BeginTransferAdminRole: New admin cannot be zero address");
 
         string memory chain = vm.envString("CHAIN");
         console.log("Starting admin role transfer on chain:", chain);
@@ -105,7 +105,7 @@ contract TransferAdminRole is Script {
 /**
  * @title AcceptAdminRole
  * @dev Script to accept the default admin role transfer for all contracts on the current chain.
- * This script should be run by the new admin after the TransferAdminRole script has been executed.
+ * This script should be run by the new admin after the BeginTransferAdminRole script has been executed.
  */
 contract AcceptAdminRole is Script {
     /**
