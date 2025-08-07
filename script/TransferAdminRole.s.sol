@@ -5,8 +5,7 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
-import {AccessControlDefaultAdminRulesUpgradeable} from
-    "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
+import {IAccessControlDefaultAdminRules} from "@openzeppelin/contracts/access/extensions/IAccessControlDefaultAdminRules.sol";
 import {ConfigLib} from "./lib/ConfigLib.sol";
 import {RLCLiquidityUnifier} from "../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
@@ -56,14 +55,14 @@ contract BeginTransferAdminRole is Script {
     }
 
     /**
-     * @notice Transfers the default admin role for any contract implementing AccessControlDefaultAdminRulesUpgradeable
+     * @notice Transfers the default admin role for any contract implementing IAccessControlDefaultAdminRules
      * @param contractAddress The address of the contract
      * @param newAdmin The new admin address
      * @param contractName The name of the contract for logging purposes
      */
     function transferContractAdmin(address contractAddress, address newAdmin, string memory contractName) internal {
-        AccessControlDefaultAdminRulesUpgradeable adminContract =
-            AccessControlDefaultAdminRulesUpgradeable(contractAddress);
+        IAccessControlDefaultAdminRules adminContract =
+            IAccessControlDefaultAdminRules(contractAddress);
 
         address currentAdmin = adminContract.defaultAdmin();
         console.log("Current admin for", contractName, ":", currentAdmin);
@@ -102,14 +101,14 @@ contract AcceptAdminRole is Script {
     }
 
     /**
-     * @notice Accepts the default admin role transfer for any contract implementing AccessControlDefaultAdminRulesUpgradeable
+     * @notice Accepts the default admin role transfer for any contract implementing IAccessControlDefaultAdminRules
      * @param contractAddress The address of the contract
      * @param contractName The name of the contract for logging purposes
      */
     function acceptContractAdmin(address contractAddress, string memory contractName) internal {
         console.log("Accepting admin role for", contractName, "at:", contractAddress);
-        AccessControlDefaultAdminRulesUpgradeable adminContract =
-            AccessControlDefaultAdminRulesUpgradeable(contractAddress);
+        IAccessControlDefaultAdminRules adminContract =
+            IAccessControlDefaultAdminRules(contractAddress);
         adminContract.acceptDefaultAdminTransfer();
         console.log("New admin for", contractName, ":", adminContract.defaultAdmin());
     }
