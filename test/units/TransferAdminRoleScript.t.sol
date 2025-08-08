@@ -16,8 +16,9 @@ import {Deploy as RLCLiquidityUnifierDeployScript} from "../../script/RLCLiquidi
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosschainToken.s.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 
-// Test wrapper contract to expose internal functions
-contract TestableBeginTransferAdminRole is BeginTransferAdminRole {
+// Test wrapper contract to expose internal functions and override msg.sender
+
+contract BeginTransferAdminRoleHarness is BeginTransferAdminRole {
     function publicBeginTransfer(address contractAddress, address newAdmin, string memory contractName) public {
         beginTransfer(contractAddress, newAdmin, contractName);
     }
@@ -38,8 +39,8 @@ contract TestableBeginTransferAdminRole is BeginTransferAdminRole {
     }
 }
 
-// Test wrapper contract to expose internal functions
-contract TestableAcceptAdminRole is AcceptAdminRole {
+// Test wrapper contract to expose internal functions and override msg.sender
+contract AcceptAdminRoleHarness is AcceptAdminRole {
     function publicAcceptContractAdmin(address contractAddress, string memory contractName) public {
         acceptContractAdmin(contractAddress, contractName);
     }
@@ -56,8 +57,8 @@ contract TestableAcceptAdminRole is AcceptAdminRole {
 contract TransferAdminRoleScriptTest is TestHelperOz5 {
     using TestUtils for *;
 
-    TestableBeginTransferAdminRole private beginTransferScript;
-    TestableAcceptAdminRole private acceptAdminScript;
+    BeginTransferAdminRoleHarness private beginTransferScript;
+    AcceptAdminRoleHarness private acceptAdminScript;
 
     // Test addresses
     address private newAdmin = makeAddr("newAdmin");
@@ -90,8 +91,8 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
         rlcLiquidityUnifier = deployment.rlcLiquidityUnifier;
         rlcCrosschainToken = deployment.rlcCrosschainToken;
 
-        beginTransferScript = new TestableBeginTransferAdminRole();
-        acceptAdminScript = new TestableAcceptAdminRole();
+        beginTransferScript = new BeginTransferAdminRoleHarness();
+        acceptAdminScript = new AcceptAdminRoleHarness();
     }
 
     // ====== revert scenarios checks ======
