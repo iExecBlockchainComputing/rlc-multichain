@@ -119,6 +119,13 @@ contract Configure is Script {
         return bool1 || bool2 || bool3;
     }
 
+    /**
+     * Sets the bridge peer if it is not already set. Otherwise, do nothing.
+     * @dev see https://docs.layerzero.network/v2/developers/evm/technical-reference/integration-checklist#call-setpeer-on-every-oapp-deployment
+     * @param bridgeAddress The address of the LayerZero bridge contract.
+     * @param targetEndpointId The ID of the target LayerZero endpoint.
+     * @param targetBridgeAddress The address of the target LayerZero bridge contract.
+     */
     function setBridgePeerIfNeeded(address bridgeAddress, uint32 targetEndpointId, address targetBridgeAddress)
         public
         returns (bool)
@@ -136,6 +143,13 @@ contract Configure is Script {
         return true;
     }
 
+    /**
+     * Sets the enforced options for the LayerZero bridge if they are not already set.
+     * If the same options are already enforced on-chain, do nothing.
+     * @dev see https://docs.layerzero.network/v2/developers/evm/technical-reference/integration-checklist#implement-enforced-options
+     * @param bridgeAddress The address of the LayerZero bridge contract.
+     * @param targetEndpointId The ID of the target LayerZero endpoint.
+     */
     function setEnforcedOptionsIfNeeded(address bridgeAddress, uint32 targetEndpointId) public returns (bool) {
         IexecLayerZeroBridge bridge = IexecLayerZeroBridge(bridgeAddress);
         bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
@@ -157,6 +171,13 @@ contract Configure is Script {
         return true;
     }
 
+    /**
+     * Authorizes the bridge in the RLCLiquidityUnifier or RLCCrosschainToken contract if it
+     * is not already authorized. Otherwise, do nothing.
+     * @param bridge The address of the LayerZero bridge contract.
+     * @param authorizerAddress The address of the authorizer contract.
+     * @param roleId The role ID to grant to the bridge.
+     */
     function authorizeBridgeIfNeeded(address bridge, address authorizerAddress, bytes32 roleId) public returns (bool) {
         IAccessControl authorizer = IAccessControl(authorizerAddress);
         if (authorizer.hasRole(roleId, bridge)) {
