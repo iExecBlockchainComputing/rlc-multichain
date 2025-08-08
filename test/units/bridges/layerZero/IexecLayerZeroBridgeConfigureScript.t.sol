@@ -62,13 +62,15 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     }
 
     // ====== configure ======
-    // TODO
+    // TODO add configure function tests.
+
+    // ====== setBridgePeerIfNeeded ======
 
     function test_setBridgePeerIfNeeded_ShouldSetPeer() public {
         vm.startPrank(admin);
         vm.expectEmit(true, true, true, true, sourceBridgeAddress);
         emit IOAppCore.PeerSet(targetEndpointId, addressToBytes32(targetBridgeAddress));
-        bool result = setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
+        bool result = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
         assertTrue(result, "Expected setBridgePeerIfNeeded to return true");
         assertTrue(
             sourceBridge.isPeer(targetEndpointId, addressToBytes32(targetBridgeAddress)),
@@ -77,15 +79,13 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    // ====== setBridgePeerIfNeeded ======
-
     function test_setBridgePeerIfNeeded_ShouldOverridePeerWhenNewPeerIsDifferent() public {
         vm.startPrank(admin);
-        bool result = setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
+        bool result = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
         assertTrue(result, "Expected setBridgePeerIfNeeded to return true");
         // Second call should override the peer.
         address randomAddress = makeAddr("random");
-        bool secondCallResult = setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, randomAddress);
+        bool secondCallResult = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, randomAddress);
         assertTrue(secondCallResult, "Expected setBridgePeerIfNeeded to return true for second call");
         assertFalse(
             sourceBridge.isPeer(targetEndpointId, addressToBytes32(targetBridgeAddress)),
