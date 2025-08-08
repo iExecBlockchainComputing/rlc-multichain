@@ -147,6 +147,20 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
         assertEq(pendingAdmin, address(0));
     }
 
+    function test_AcceptAdminRole_RevertWhen_WrongAddressTriesToAcceptAdmin() public {
+        beginTransferScript.publicBeginTransferAsAdmin(
+            address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier", admin
+        );
+
+        // Try to accept with wrong address using the script wrapper
+        address wrongAddress = makeAddr("wrongAddress");
+
+        vm.expectRevert(); // Should revert because only pending admin can accept
+        acceptAdminScript.publicAcceptContractAdminAsUser(
+            address(rlcLiquidityUnifier), "RLCLiquidityUnifier", wrongAddress
+        );
+    }
+
     // ====== revert scenarios checks ======
     function test_RevertWhen_NewAdminIsZeroAddress() public {
         vm.startPrank(admin);
@@ -168,19 +182,5 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
         vm.expectRevert(); // Should revert with access control error
         beginTransferScript.publicBeginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
         vm.stopPrank();
-    }
-
-    function test_RevertWhen_WrongAddressTriesToAcceptAdmin() public {
-        beginTransferScript.publicBeginTransferAsAdmin(
-            address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier", admin
-        );
-
-        // Try to accept with wrong address using the script wrapper
-        address wrongAddress = makeAddr("wrongAddress");
-
-        vm.expectRevert(); // Should revert because only pending admin can accept
-        acceptAdminScript.publicAcceptContractAdminAsUser(
-            address(rlcLiquidityUnifier), "RLCLiquidityUnifier", wrongAddress
-        );
     }
 }
