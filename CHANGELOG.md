@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.0-rc.1](https://github.com/iExecBlockchainComputing/rlc-multichain/compare/v0.1.0-rc...v0.1.0-rc.1) (2025-08-08)
+
+
+### 🚀 Features
+
+* Deploy on Arbitrum mainnet ([#89](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/89)) ([0774e60](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/0774e606143bdf3e022c3c887ace0b0d638f6f19))
+* prepare mainnet ([#84](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/84)) ([67f1f54](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/67f1f5467eed743cc627afd6153f865e99977e91))
+* Refactor config script to prepare set bridge DVN task ([#92](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/92)) ([459e2ed](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/459e2ed493768aeee9e175a79201496633b3ae87))
+
+
+### ✨ Polish
+
+* Rename `lzChainId` to `lzEndpointId` ([#91](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/91)) ([6463463](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/6463463055d419dab6fedaf8ff640d612aaaee4d))
+
 ## [0.1.0-rc](https://github.com/iExecBlockchainComputing/rlc-multichain/compare/v0.1.0...v0.1.0-rc) (2025-07-30)
 
 ### 🚀 Features
