@@ -92,12 +92,6 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
 
         beginTransferScript = new TestableBeginTransferAdminRole();
         acceptAdminScript = new TestableAcceptAdminRole();
-
-        // Label contracts for better debugging
-        vm.label(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
-        vm.label(address(rlcCrosschainToken), "RLCCrosschainToken");
-        vm.label(admin, "admin");
-        vm.label(newAdmin, "newAdmin");
     }
 
     // ====== revert scenarios checks ======
