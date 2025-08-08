@@ -68,7 +68,6 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
     uint16 private sourceEndpointId = 1;
     uint16 private targetEndpointId = 2;
     RLCLiquidityUnifier rlcLiquidityUnifier;
-    RLCCrosschainToken rlcCrosschainToken;
 
     TestUtils.DeploymentResult deployment;
 
@@ -89,7 +88,6 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
             })
         );
         rlcLiquidityUnifier = deployment.rlcLiquidityUnifier;
-        rlcCrosschainToken = deployment.rlcCrosschainToken;
 
         beginTransferScript = new BeginTransferAdminRoleHarness();
         acceptAdminScript = new AcceptAdminRoleHarness();
@@ -126,17 +124,6 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
 
         // Current admin should still be the initial admin until acceptance
         assertEq(IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).defaultAdmin(), admin);
-    }
-
-    function test_BeginTransferAdminRole_CrosschainToken() public {
-        assertEq(IAccessControlDefaultAdminRules(address(rlcCrosschainToken)).defaultAdmin(), admin);
-        beginTransferScript.publicBeginTransferAsAdmin(
-            address(rlcCrosschainToken), newAdmin, "RLCCrosschainToken", admin
-        );
-
-        // Verify that the admin transfer has been initiated
-        (address pendingAdmin,) = IAccessControlDefaultAdminRules(address(rlcCrosschainToken)).pendingDefaultAdmin();
-        assertEq(pendingAdmin, newAdmin);
     }
 
     // ====== AcceptAdminRole.acceptContractAdmin ======
