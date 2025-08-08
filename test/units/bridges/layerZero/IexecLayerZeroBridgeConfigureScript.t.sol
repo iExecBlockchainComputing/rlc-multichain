@@ -65,13 +65,34 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     }
 
     // ====== configure ======
-    // TODO
+
+    function test_configure_ShouldConfigureBridgeCorrectly() public {
+        (ConfigLib.CommonConfigParams memory sourceParams, ConfigLib.CommonConfigParams memory targetParams) = _buildSourceAndTargetParams();
+        vm.startPrank(admin);
+        bool result = super.configure(sourceParams, targetParams);
+        assertTrue(result, "Expected configure to return true");
+        vm.stopPrank();
+    }
+
+    function test_configure_ShouldNotConfigureWhenAlreadyConfigured() public {
+        (ConfigLib.CommonConfigParams memory sourceParams, ConfigLib.CommonConfigParams memory targetParams) = _buildSourceAndTargetParams();
+        vm.startPrank(admin);
+        // Configure bridge with the first call.
+        bool firstCallResult = super.configure(sourceParams, targetParams);
+        assertTrue(firstCallResult, "Expected configure to return true for the first call");
+        // The second call does nothing.
+        bool secondCallResult = super.configure(sourceParams, targetParams);
+        assertFalse(secondCallResult, "Expected configure to return false for the second call");
+        vm.stopPrank();
+    }
+
+    // ====== setBridgePeerIfNeeded ======
 
     function test_setBridgePeerIfNeeded_ShouldSetPeer() public {
         vm.startPrank(admin);
         vm.expectEmit(true, true, true, true, sourceBridgeAddress);
         emit IOAppCore.PeerSet(targetEndpointId, addressToBytes32(targetBridgeAddress));
-        bool result = setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
+        bool result = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
         assertTrue(result, "Expected setBridgePeerIfNeeded to return true");
         assertTrue(
             sourceBridge.isPeer(targetEndpointId, addressToBytes32(targetBridgeAddress)),
@@ -80,15 +101,13 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    // ====== setBridgePeerIfNeeded ======
-
     function test_setBridgePeerIfNeeded_ShouldOverridePeerWhenNewPeerIsDifferent() public {
         vm.startPrank(admin);
-        bool result = setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
+        bool result = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
         assertTrue(result, "Expected setBridgePeerIfNeeded to return true");
         // Second call should override the peer.
         address randomAddress = makeAddr("random");
-        bool secondCallResult = setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, randomAddress);
+        bool secondCallResult = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, randomAddress);
         assertTrue(secondCallResult, "Expected setBridgePeerIfNeeded to return true for second call");
         assertFalse(
             sourceBridge.isPeer(targetEndpointId, addressToBytes32(targetBridgeAddress)),
@@ -148,7 +167,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "lzCompose enforced options are not equal"
         );
         // Second call should override the options.
-        bytes memory newOptions = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
+        bytes memory newOptions = LayerZeroUtils.buildLzReceiveExecutorConfig(GAS_LIMIT, 0);
         bool result = super.setEnforcedOptionsIfNeeded(sourceBridgeAddress, targetEndpointId);
         assertTrue(result, "Expected setEnforcedOptionsIfNeeded to return true");
         assertEq(
@@ -235,5 +254,22 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return false"
         );
         vm.stopPrank();
+    }
+
+    function _buildSourceAndTargetParams() private view returns (ConfigLib.CommonConfigParams memory, ConfigLib.CommonConfigParams memory) {
+        // Source chain params
+        ConfigLib.CommonConfigParams memory sourceParams;
+        ConfigLib.CommonConfigParams memory targetParams;
+        sourceParams.lzEndpointId = sourceEndpointId;
+        sourceParams.iexecLayerZeroBridgeAddress = sourceBridgeAddress;
+        sourceParams.approvalRequired = true;
+        sourceParams.rlcLiquidityUnifierAddress = address(deployment.rlcLiquidityUnifier);
+        sourceParams.rlcToken = address(deployment.rlcToken);
+        // Target chain params
+        targetParams.lzEndpointId = targetEndpointId;
+        targetParams.iexecLayerZeroBridgeAddress = targetBridgeAddress;
+        targetParams.approvalRequired = false;
+        targetParams.rlcCrosschainTokenAddress = address(deployment.rlcCrosschainToken);
+        return (sourceParams, targetParams);
     }
 }
