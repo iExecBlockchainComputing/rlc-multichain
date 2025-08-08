@@ -14,7 +14,8 @@ import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
 import {ConfigLib} from "../../script/lib/ConfigLib.sol";
 
-contract IexecLayerZeroBridgeScriptTest is Test {
+// TODO move to test/units/bridges/layerzero/
+contract IexecLayerZeroBridgeDeployScriptTest is Test {
     // The chain does not matter here as the LAYERZERO_ENDPOINT address is the same for both networks (Sepolia & Arbitrum Sepolia)
     ConfigLib.CommonConfigParams params = ConfigLib.readCommonConfig("sepolia");
 
@@ -67,8 +68,8 @@ contract IexecLayerZeroBridgeScriptTest is Test {
 
     function _test_Deployment(bool requireApproval, address bridgeableToken) internal {
         // Check that CreateX salt is used to deploy the contract.
-        vm.expectEmit(false, true, false, false);
         // CreateX uses a guarded salt (see CreateX._guard()), so we need to hash it to match the expected event.
+        vm.expectEmit(false, true, false, false);
         emit CreateX.ContractCreation(address(0), keccak256(abi.encode(salt)));
         IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(
             deployer.deploy(
@@ -97,7 +98,8 @@ contract IexecLayerZeroBridgeScriptTest is Test {
         // Make sure the contract has been initialized and cannot be re-initialized.
         vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
         iexecLayerZeroBridge.initialize(admin, upgrader, pauser);
-        // TODO check that the contract has the correct LayerZero endpoint.
+        // Make sure the contract has the correct LayerZero endpoint.
+        assertEq(address(iexecLayerZeroBridge.endpoint()), params.lzEndpoint, "Incorrect LayerZero endpoint address");
         // TODO check that the proxy address is saved.
     }
 
