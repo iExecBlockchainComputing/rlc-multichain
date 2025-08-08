@@ -27,6 +27,9 @@ import {LayerZeroUtils} from "../../../../script/utils/LayerZeroUtils.sol";
 contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroBridgeConfigureScript {
     using TestUtils for *;
 
+    // Hardcoding the value here to make sure tests fail when the value is changed in the script.
+    uint128 constant GAS_LIMIT = 90_000;
+
     address admin = makeAddr("admin");
     address upgrader = makeAddr("upgrader");
     address pauser = makeAddr("pauser");
@@ -112,8 +115,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     // ====== setEnforcedOptionsIfNeeded ======
 
     function test_setEnforcedOptionsIfNeeded_ShouldSetOptionsWhenEmpty() public {
-        // Hardcoding 90_000 here to make sure tests fail when the value is changed in the script.
-        bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
+        bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(GAS_LIMIT, 0);
         // TODO debug event emission.
         // vm.expectEmit(true, true, true, true, sourceBridgeAddress);
         // emit IOAppOptionsType3.EnforcedOptionSet(enforcedOptions);
