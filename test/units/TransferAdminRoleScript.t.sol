@@ -95,43 +95,6 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
         acceptAdminScript = new AcceptAdminRoleHarness();
     }
 
-    // ====== revert scenarios checks ======
-    function test_RevertWhen_NewAdminIsZeroAddress() public {
-        vm.startPrank(admin);
-        vm.expectRevert("BeginTransferAdminRole: new admin cannot be zero address");
-        beginTransferScript.publicBeginTransfer(address(rlcLiquidityUnifier), address(0), "RLCLiquidityUnifier");
-        vm.stopPrank();
-    }
-
-    function test_RevertWhen_NewAdminIsSameAsCurrentAdmin() public {
-        vm.startPrank(admin);
-        vm.expectRevert("BeginTransferAdminRole: New admin must be different from current admin");
-        beginTransferScript.publicBeginTransfer(address(rlcLiquidityUnifier), admin, "RLCLiquidityUnifier");
-        vm.stopPrank();
-    }
-
-    function test_RevertWhen_NotAuthorizedToTransferAdmin() public {
-        address unauthorizedUser = makeAddr("unauthorizedUser");
-        vm.startPrank(unauthorizedUser);
-        vm.expectRevert(); // Should revert with access control error
-        beginTransferScript.publicBeginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
-        vm.stopPrank();
-    }
-
-    function test_RevertWhen_WrongAddressTriesToAcceptAdmin() public {
-        beginTransferScript.publicBeginTransferAsAdmin(
-            address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier", admin
-        );
-
-        // Try to accept with wrong address using the script wrapper
-        address wrongAddress = makeAddr("wrongAddress");
-
-        vm.expectRevert(); // Should revert because only pending admin can accept
-        acceptAdminScript.publicAcceptContractAdminAsUser(
-            address(rlcLiquidityUnifier), "RLCLiquidityUnifier", wrongAddress
-        );
-    }
-
     // ====== BeginTransferAdminRole.validateAdminTransfer ======
     function test_ValidateAdminTransfer() public {
         // Test the validation function directly
@@ -195,5 +158,42 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
         // Pending admin should be reset to zero
         (address pendingAdmin,) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
         assertEq(pendingAdmin, address(0));
+    }
+
+    // ====== revert scenarios checks ======
+    function test_RevertWhen_NewAdminIsZeroAddress() public {
+        vm.startPrank(admin);
+        vm.expectRevert("BeginTransferAdminRole: new admin cannot be zero address");
+        beginTransferScript.publicBeginTransfer(address(rlcLiquidityUnifier), address(0), "RLCLiquidityUnifier");
+        vm.stopPrank();
+    }
+
+    function test_RevertWhen_NewAdminIsSameAsCurrentAdmin() public {
+        vm.startPrank(admin);
+        vm.expectRevert("BeginTransferAdminRole: New admin must be different from current admin");
+        beginTransferScript.publicBeginTransfer(address(rlcLiquidityUnifier), admin, "RLCLiquidityUnifier");
+        vm.stopPrank();
+    }
+
+    function test_RevertWhen_NotAuthorizedToTransferAdmin() public {
+        address unauthorizedUser = makeAddr("unauthorizedUser");
+        vm.startPrank(unauthorizedUser);
+        vm.expectRevert(); // Should revert with access control error
+        beginTransferScript.publicBeginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
+        vm.stopPrank();
+    }
+
+    function test_RevertWhen_WrongAddressTriesToAcceptAdmin() public {
+        beginTransferScript.publicBeginTransferAsAdmin(
+            address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier", admin
+        );
+
+        // Try to accept with wrong address using the script wrapper
+        address wrongAddress = makeAddr("wrongAddress");
+
+        vm.expectRevert(); // Should revert because only pending admin can accept
+        acceptAdminScript.publicAcceptContractAdminAsUser(
+            address(rlcLiquidityUnifier), "RLCLiquidityUnifier", wrongAddress
+        );
     }
 }
