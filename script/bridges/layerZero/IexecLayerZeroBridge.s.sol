@@ -72,7 +72,7 @@ contract Deploy is Script {
  * A script to configure the IexecLayerZeroBridge contract:
  * - Set the peer for the bridge (`setPeer`).
  * - Set enforced options for the bridge (`setEnforcedOptions`).
- * - Set DVNs config for the bridge (`setDvnConfig`).
+ * - Set DVNs config for the bridge (`setDvnConfig`). TODO
  * - Authorize the bridge in RLCLiquidityUnifier or RLCCrosschainToken contract (`grantRole`).
  * The script should be called at least once for each chain where the bridge is configured.
  */
