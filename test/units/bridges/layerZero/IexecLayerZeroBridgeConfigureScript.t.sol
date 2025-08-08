@@ -3,21 +3,12 @@
 
 pragma solidity ^0.8.22;
 
-// import "forge-std/Script.sol";
-import {console} from "forge-std/console.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {ILayerZeroEndpointV2} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
-import {UlnConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
-import {ExecutorConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/SendLibBase.sol";
-import {IOAppCore} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppCore.sol";
-import {IOAppOptionsType3} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppOptionsType3.sol";
 import {EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import {TestUtils} from "./../../utils/TestUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
 import {Configure as IexecLayerZeroBridgeConfigureScript} from
     "../../../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
-import {ConfigLib} from "../../../../script/lib/ConfigLib.sol";
 import {LayerZeroUtils} from "../../../../script/utils/LayerZeroUtils.sol";
 
 // This test contract inherits from `Configure` script because we need the `msg.sender` to be the admin
