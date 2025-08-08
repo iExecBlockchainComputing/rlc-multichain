@@ -9,7 +9,7 @@ import {UpgradeUtils} from "../../../../script/lib/UpgradeUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
 
-contract IexecLayerZeroBridgeUpgradeTest is TestHelperOz5 {
+contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5 {
     using TestUtils for *;
 
     IexecLayerZeroBridge public iexecLayerZeroBridgeV1;

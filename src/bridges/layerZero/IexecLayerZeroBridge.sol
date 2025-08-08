@@ -192,6 +192,7 @@ contract IexecLayerZeroBridge is
      * @dev Overridden to prevent ownership renouncement.
      * AccessControlDefaultAdminRulesUpgradeable is used to manage ownership.
      */
+    // TODO make this as a non-view function.
     function renounceOwnership() public pure override {
         revert OperationNotAllowed("Use AccessControlDefaultAdminRulesUpgradeable instead");
     }
@@ -200,6 +201,7 @@ contract IexecLayerZeroBridge is
      * @dev Overridden to prevent ownership transfer.
      * AccessControlDefaultAdminRulesUpgradeable is used to manage ownership.
      */
+    // TODO make this as a non-view function.
     function transferOwnership(address) public pure override {
         revert OperationNotAllowed("Use AccessControlDefaultAdminRulesUpgradeable instead");
     }
