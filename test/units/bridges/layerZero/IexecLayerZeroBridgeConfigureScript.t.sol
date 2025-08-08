@@ -61,34 +61,8 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         targetBridgeAddress = address(deployment.iexecLayerZeroBridgeWithoutApproval);
     }
 
-    function _configureSourceBridgeCorrectly() public {
-        // Source chain params
-        ConfigLib.CommonConfigParams memory sourceParams;
-        sourceParams.lzEndpointId = sourceEndpointId;
-        sourceParams.iexecLayerZeroBridgeAddress = sourceBridgeAddress;
-        sourceParams.approvalRequired = true;
-        sourceParams.rlcLiquidityUnifierAddress = address(deployment.rlcLiquidityUnifier);
-        sourceParams.rlcToken = address(deployment.rlcToken);
-        // Target chain params
-        ConfigLib.CommonConfigParams memory targetParams;
-        targetParams.lzEndpointId = targetEndpointId;
-        targetParams.iexecLayerZeroBridgeAddress = targetBridgeAddress;
-        targetParams.approvalRequired = false;
-        targetParams.rlcCrosschainTokenAddress = address(deployment.rlcCrosschainToken);
-
-        // Hardcoding 90_000 here to make sure tests fail when the value is changed in the script.
-        bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
-        EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(targetEndpointId, options);
-        // Check that setPeer event is emitted.
-        vm.expectEmit(true, true, true, true, sourceBridgeAddress);
-        emit IOAppCore.PeerSet(targetEndpointId, addressToBytes32(targetBridgeAddress));
-        // Check that setEnforcedOptions event is emitted.
-        vm.expectEmit(true, true, true, true, sourceBridgeAddress);
-        emit IOAppOptionsType3.EnforcedOptionSet(enforcedOptions);
-        vm.startPrank(admin);
-        super.configure(sourceParams, targetParams);
-        vm.stopPrank();
-    }
+    // ====== configure ======
+    // TODO
 
     function test_setBridgePeerIfNeeded_ShouldSetPeer() public {
         vm.startPrank(admin);
@@ -102,6 +76,8 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         );
         vm.stopPrank();
     }
+
+    // ====== setBridgePeerIfNeeded ======
 
     function test_setBridgePeerIfNeeded_ShouldOverridePeerWhenNewPeerIsDifferent() public {
         vm.startPrank(admin);
@@ -132,6 +108,8 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         assertFalse(secondCallResult, "Expected setBridgePeerIfNeeded to return false for second call");
         vm.stopPrank();
     }
+
+    // ====== setEnforcedOptionsIfNeeded ======
 
     function test_setEnforcedOptionsIfNeeded_ShouldSetOptionsWhenEmpty() public {
         // Hardcoding 90_000 here to make sure tests fail when the value is changed in the script.
@@ -193,6 +171,8 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
+    // ====== authorizeBridgeIfNeeded ======
+
     function test_authorizeBridgeIfNeeded_ShouldAuthorizeBridge() public {
         vm.startPrank(admin);
         // rlcLiquidityUnifier
@@ -253,77 +233,5 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return false"
         );
         vm.stopPrank();
-    }
-
-    function _abc() public {
-        getConfig(
-            vm.envString("SEPOLIA_RPC_URL"),
-            0x6EDCE65403992e310A62460808c4b910D972f10f, // Endpoint
-            0xA18e571f91ab58889C348E1764fBaBF622ab89b5, // OApp address
-            0xcc1ae8Cf5D3904Cef3360A9532B477529b177cCE, // Message Library
-            40231, // eid
-            1 // Executor
-        );
-        getConfig(
-            vm.envString("SEPOLIA_RPC_URL"),
-            0x6EDCE65403992e310A62460808c4b910D972f10f, // Endpoint
-            0xA18e571f91ab58889C348E1764fBaBF622ab89b5, // OApp address
-            0xcc1ae8Cf5D3904Cef3360A9532B477529b177cCE, // Message Library
-            40231, // eid
-            2 // ULN
-        );
-    }
-
-    /// @notice Calls getConfig on the specified LayerZero Endpoint.
-    /// @dev Decodes the returned bytes as a UlnConfig. Logs some of its fields.
-    /// @param _rpcUrl The RPC URL for the target chain.
-    /// @param _endpoint The LayerZero Endpoint address.
-    /// @param _oapp The address of your OApp.
-    /// @param _lib The address of the Message Library (send or receive).
-    /// @param _eid The remote endpoint identifier.
-    /// @param _configType The configuration type (1 = Executor, 2 = ULN).
-    function getConfig(
-        string memory _rpcUrl,
-        address _endpoint,
-        address _oapp,
-        address _lib,
-        uint32 _eid,
-        uint32 _configType
-    ) public {
-        // Create a fork from the specified RPC URL.
-        vm.createSelectFork(_rpcUrl);
-        vm.startBroadcast();
-
-        // Instantiate the LayerZero endpoint.
-        ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(_endpoint);
-        // Retrieve the raw configuration bytes.
-        bytes memory config = endpoint.getConfig(_oapp, _lib, _eid, _configType);
-
-        if (_configType == 1) {
-            console.log("###### Executor Config #####");
-            // Decode the Executor config (configType = 1)
-            ExecutorConfig memory execConfig = abi.decode(config, (ExecutorConfig));
-            // Log some key configuration parameters.
-            console.log("Executor Type:", execConfig.maxMessageSize);
-            console.log("Executor Address:", execConfig.executor);
-        }
-
-        if (_configType == 2) {
-            console.log("###### ULN Config #####");
-            // Decode the ULN config (configType = 2)
-            UlnConfig memory decodedConfig = abi.decode(config, (UlnConfig));
-            // Log some key configuration parameters.
-            console.log("Confirmations:", decodedConfig.confirmations);
-            console.log("Required DVN Count:", decodedConfig.requiredDVNCount);
-            for (uint256 i = 0; i < decodedConfig.requiredDVNs.length; i++) {
-                console.log("[", i, "] Required DVN", decodedConfig.requiredDVNs[i]);
-            }
-            console.log("Optional DVN Count:", decodedConfig.optionalDVNCount);
-            for (uint256 i = 0; i < decodedConfig.optionalDVNs.length; i++) {
-                console.log("[", i, "] Optional DVN", decodedConfig.optionalDVNs[i]);
-            }
-            console.log("Optional DVN Threshold:", decodedConfig.optionalDVNThreshold);
-        }
-        vm.stopBroadcast();
     }
 }
