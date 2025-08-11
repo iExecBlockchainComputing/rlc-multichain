@@ -30,27 +30,35 @@ contract BeginTransferAdminRole is Script {
         console.log("New admin address:", newAdmin);
 
         ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
-
         vm.startBroadcast();
+        beginTransferForAllContracts(params, newAdmin);
+        vm.stopBroadcast();
+    }
+    /**
+     * @notice Validates that the new admin is different from the current admin
+     * @param currentDefaultAdmin The current admin address
+     * @param newAdmin The new admin address
+     */
+
+    function validateAdminTransfer(address currentDefaultAdmin, address newAdmin) internal pure {
+        require(newAdmin != address(0), "BeginTransferAdminRole: new admin cannot be zero address");
+        require(
+            newAdmin != currentDefaultAdmin, "BeginTransferAdminRole: New admin must be different from current admin"
+        );
+    }
+
+    /**
+     * @notice Begins the admin transfer process for all relevant contracts
+     * @param params The configuration parameters for the current chain
+     * @param newAdmin The new admin address
+     */
+    function beginTransferForAllContracts(ConfigLib.CommonConfigParams memory params, address newAdmin) internal {
         if (params.approvalRequired) {
             beginTransfer(params.rlcLiquidityUnifierAddress, newAdmin, "RLCLiquidityUnifier");
         } else {
             beginTransfer(params.rlcCrosschainTokenAddress, newAdmin, "RLCCrosschainToken");
         }
         beginTransfer(params.iexecLayerZeroBridgeAddress, newAdmin, "IexecLayerZeroBridge");
-        vm.stopBroadcast();
-    }
-
-    /**
-     * @notice Validates that the new admin is different from the current admin
-     * @param currentDefaultAdmin The current admin address
-     * @param newAdmin The new admin address
-     */
-    function validateAdminTransfer(address currentDefaultAdmin, address newAdmin) internal pure {
-        require(newAdmin != address(0), "BeginTransferAdminRole: new admin cannot be zero address");
-        require(
-            newAdmin != currentDefaultAdmin, "BeginTransferAdminRole: New admin must be different from current admin"
-        );
     }
 
     /**
@@ -86,13 +94,21 @@ contract AcceptAdminRole is Script {
         ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
 
         vm.startBroadcast();
+        acceptAdminRoleTransfer(params);
+        vm.stopBroadcast();
+    }
+
+    /**
+     * @notice Accepts the default admin role transfer for all contracts on the current chain
+     * @dev This function should be called by the new admin to complete the transfer process
+     */
+    function acceptAdminRoleTransfer(ConfigLib.CommonConfigParams memory params) internal {
         if (params.approvalRequired) {
             acceptContractAdmin(params.rlcLiquidityUnifierAddress, "RLCLiquidityUnifier");
         } else {
             acceptContractAdmin(params.rlcCrosschainTokenAddress, "RLCCrosschainToken");
         }
         acceptContractAdmin(params.iexecLayerZeroBridgeAddress, "IexecLayerZeroBridge");
-        vm.stopBroadcast();
     }
 
     /**
