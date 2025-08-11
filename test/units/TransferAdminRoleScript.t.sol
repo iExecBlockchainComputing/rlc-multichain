@@ -5,6 +5,7 @@ pragma solidity ^0.8.22;
 
 import {BeginTransferAdminRole, AcceptAdminRole} from "../../script/TransferAdminRole.s.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
+import "forge-std/console.sol";
 
 import {IAccessControlDefaultAdminRules} from
     "@openzeppelin/contracts/access/extensions/IAccessControlDefaultAdminRules.sol";
@@ -13,13 +14,23 @@ import {TestUtils} from "./utils/TestUtils.sol";
 import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
 import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {Deploy as RLCLiquidityUnifierDeployScript} from "../../script/RLCLiquidityUnifier.s.sol";
-import {Deploy as RLCCrosschainTokenDeployScript} from "../../script/RLCCrosschainToken.s.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 
 // Test wrapper contract to expose internal functions
 
 contract BeginTransferAdminRoleHarness is BeginTransferAdminRole {
+
+    function run_beginTransfer(address rlcLiquidityUnifier, address rlcCrosschainToken, address iexecLayerZeroBridge, address newAdmin, bool approvalRequired) public {
+        // Replicate the logic from BeginTransferAdminRole.run() for testing without env dependencies
+        if (approvalRequired) {
+            beginTransfer(rlcLiquidityUnifier, newAdmin, "RLCLiquidityUnifier");
+        } else {
+            beginTransfer(rlcCrosschainToken, newAdmin, "RLCCrosschainToken");
+        }
+        beginTransfer(iexecLayerZeroBridge, newAdmin, "IexecLayerZeroBridge");
+
+    }
+    
     function exposed_beginTransfer(address contractAddress, address newAdmin, string memory contractName) public {
         beginTransfer(contractAddress, newAdmin, contractName);
     }
@@ -31,6 +42,18 @@ contract BeginTransferAdminRoleHarness is BeginTransferAdminRole {
 
 // Test wrapper contract to expose internal functions
 contract AcceptAdminRoleHarness is AcceptAdminRole {
+
+    function run_acceptAdmin(address rlcLiquidityUnifier, address rlcCrosschainToken, address iexecLayerZeroBridge, bool approvalRequired) public {
+        console.log("msg.sender:", msg.sender);
+        // Replicate the logic from AcceptAdminRole.run() for testing without env dependencies
+        if (approvalRequired) {
+            acceptContractAdmin(rlcLiquidityUnifier, "RLCLiquidityUnifier");
+        } else {
+            acceptContractAdmin(rlcCrosschainToken, "RLCCrosschainToken");
+        }
+        acceptContractAdmin(iexecLayerZeroBridge, "IexecLayerZeroBridge");
+    }
+    
     function exposed_acceptContractAdmin(address contractAddress, string memory contractName) public {
         acceptContractAdmin(contractAddress, contractName);
     }
@@ -47,11 +70,11 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     uint16 private sourceEndpointId = 1;
     uint16 private targetEndpointId = 2;
     RLCLiquidityUnifier rlcLiquidityUnifier;
+    RLCCrosschainToken rlcCrosschainToken;
+    IexecLayerZeroBridge iexecLayerZeroBridgeL1;
+    IexecLayerZeroBridge iexecLayerZeroBridgeL2;
 
     TestUtils.DeploymentResult deployment;
-
-    RLCLiquidityUnifierDeployScript private liquidityUnifierDeployer;
-    RLCCrosschainTokenDeployScript private crosschainTokenDeployer;
 
     function setUp() public virtual override {
         super.setUp();
@@ -67,10 +90,16 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
             })
         );
         rlcLiquidityUnifier = deployment.rlcLiquidityUnifier;
+        rlcCrosschainToken = deployment.rlcCrosschainToken;
+        iexecLayerZeroBridgeL1 = deployment.iexecLayerZeroBridgeWithApproval;
+        iexecLayerZeroBridgeL2 = deployment.iexecLayerZeroBridgeWithoutApproval;
+
     }
 
     // Override run functions to resolve inheritance conflict
     function run() external pure override(BeginTransferAdminRole, AcceptAdminRole) {
+        // This function should not be called directly in tests
+        // Use this.run_beginTransfer() or super.run_acceptAdmin() instead
         revert("Use specific test functions instead");
     }
 
@@ -101,6 +130,42 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
         // Current admin should still be the initial admin until acceptance
         assertEq(IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).defaultAdmin(), admin);
         vm.stopPrank();
+    }
+
+    function test_BeginTransferAdminRole_Run_ApprovalRequired() public {
+        vm.startPrank(admin);
+        super.run_beginTransfer(address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL1), newAdmin, true);
+        vm.stopPrank();
+
+        // Verify that the admin transfer has been initiated for approval required (RLCLiquidityUnifier)
+        (address pendingAdmin,) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
+        assertEq(pendingAdmin, newAdmin);
+
+        // RLCCrosschainToken should not have pending admin since approvalRequired = true
+        (pendingAdmin,) = IAccessControlDefaultAdminRules(address(rlcCrosschainToken)).pendingDefaultAdmin();
+        assertEq(pendingAdmin, address(0));
+
+        (pendingAdmin,) = IAccessControlDefaultAdminRules(address(iexecLayerZeroBridgeL1)).pendingDefaultAdmin();
+        assertEq(pendingAdmin, newAdmin);
+
+
+    }
+
+    function test_BeginTransferAdminRole_Run_AllContracts_NoApprovalRequired() public {
+        vm.startPrank(admin);
+        super.run_beginTransfer(address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL2), newAdmin, false);
+        vm.stopPrank();
+
+        // Verify that the admin transfer has been initiated for no approval required (RLCCrosschainToken)
+        (address pendingAdmin,) = IAccessControlDefaultAdminRules(address(rlcCrosschainToken)).pendingDefaultAdmin();
+        assertEq(pendingAdmin, newAdmin);
+
+        // RLCLiquidityUnifier should not have pending admin since approvalRequired = false
+        (pendingAdmin,) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
+        assertEq(pendingAdmin, address(0));
+
+        (pendingAdmin,) = IAccessControlDefaultAdminRules(address(iexecLayerZeroBridgeL2)).pendingDefaultAdmin();
+        assertEq(pendingAdmin, newAdmin);
     }
 
     // ====== revert scenarios checks ======
@@ -144,6 +209,49 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
 
         (address pendingAdmin,) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
         assertEq(pendingAdmin, address(0));
+    }
+
+    function test_AcceptAdminRole_Run_ApprovalRequired() public {
+        // Begin transfer first
+        vm.startPrank(admin);
+        super.run_beginTransfer(address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL1), newAdmin, true);
+        vm.stopPrank();
+
+        // Get the delay schedule and wait for it to pass
+        (, uint48 acceptSchedule) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
+        vm.warp(acceptSchedule + 1);
+
+        // Accept admin role with approval required = true
+        vm.startPrank(newAdmin);
+        super.run_acceptAdmin(address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL1), true);
+        vm.stopPrank();
+
+        assertEq(IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).defaultAdmin(), newAdmin);
+        assertEq(IAccessControlDefaultAdminRules(address(iexecLayerZeroBridgeL1)).defaultAdmin(), newAdmin);
+        
+        // Verify that RLCCrosschainToken admin was not affected
+        assertEq(IAccessControlDefaultAdminRules(address(rlcCrosschainToken)).defaultAdmin(), admin);
+    }
+
+    function test_AcceptAdminRole_Run_NoApprovalRequired() public {
+        // Begin transfer first
+        vm.startPrank(admin);
+        super.run_beginTransfer(address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL2), newAdmin, false);
+        vm.stopPrank();
+
+        // Get the delay schedule and wait for it to pass
+        (, uint48 acceptSchedule) = IAccessControlDefaultAdminRules(address(rlcCrosschainToken)).pendingDefaultAdmin();
+        vm.warp(acceptSchedule + 1);
+
+        // Accept admin role with approval required = false
+        vm.startPrank(newAdmin);
+        super.run_acceptAdmin(address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL2), false);
+        vm.stopPrank();
+        assertEq(IAccessControlDefaultAdminRules(address(rlcCrosschainToken)).defaultAdmin(), newAdmin);
+        assertEq(IAccessControlDefaultAdminRules(address(iexecLayerZeroBridgeL2)).defaultAdmin(), newAdmin);
+        
+        // Verify that RLCLiquidityUnifier admin was not affected
+        assertEq(IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).defaultAdmin(), admin);
     }
 
     function test_AcceptAdminRole_RevertWhen_WrongAddressTriesToAccept() public {
