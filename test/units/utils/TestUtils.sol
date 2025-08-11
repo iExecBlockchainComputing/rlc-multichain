@@ -15,6 +15,7 @@ import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
 import {Deploy as RLCLiquidityUnifierDeployScript} from "../../../script/RLCLiquidityUnifier.s.sol";
 import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
+import {ConfigLib} from "./../../../script/lib/ConfigLib.sol";
 
 library TestUtils {
     using OptionsBuilder for bytes;
@@ -151,5 +152,24 @@ library TestUtils {
             oftCmd: ""
         });
         fee = layerZeroContract.quoteSend(sendParam, false);
+    }
+
+    function emptyConfigParams() internal pure returns (ConfigLib.CommonConfigParams memory) {
+        return ConfigLib.CommonConfigParams({
+            initialAdmin: address(0),
+            initialPauser: address(0),
+            initialUpgrader: address(0),
+            createxFactory: address(0),
+            rlcToken: address(0),
+            rlcCrosschainTokenCreatexSalt: bytes32(0),
+            rlcLiquidityUnifierCreatexSalt: bytes32(0),
+            iexecLayerZeroBridgeCreatexSalt: bytes32(0),
+            rlcCrosschainTokenAddress: address(0),
+            rlcLiquidityUnifierAddress: address(0),
+            approvalRequired: false,
+            iexecLayerZeroBridgeAddress: address(0),
+            lzEndpoint: address(0),
+            lzEndpointId: 0
+        });
     }
 }
