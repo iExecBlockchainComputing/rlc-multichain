@@ -19,11 +19,11 @@ import {CreateX} from "@createx/contracts/CreateX.sol";
 // Test wrapper contract to expose internal functions and override msg.sender
 
 contract BeginTransferAdminRoleHarness is BeginTransferAdminRole {
-    function publicBeginTransfer(address contractAddress, address newAdmin, string memory contractName) public {
+    function exposed_beginTransfer(address contractAddress, address newAdmin, string memory contractName) public {
         beginTransfer(contractAddress, newAdmin, contractName);
     }
 
-    function publicBeginTransferAsAdmin(
+    function exposed_beginTransferAsAdmin(
         address contractAddress,
         address newAdmin,
         string memory contractName,
@@ -34,18 +34,18 @@ contract BeginTransferAdminRoleHarness is BeginTransferAdminRole {
         vm.stopPrank();
     }
 
-    function publicValidateAdminTransfer(address currentDefaultAdmin, address newAdmin) public pure {
+    function exposed_validateAdminTransfer(address currentDefaultAdmin, address newAdmin) public pure {
         validateAdminTransfer(currentDefaultAdmin, newAdmin);
     }
 }
 
 // Test wrapper contract to expose internal functions and override msg.sender
 contract AcceptAdminRoleHarness is AcceptAdminRole {
-    function publicAcceptContractAdmin(address contractAddress, string memory contractName) public {
+    function exposed_acceptContractAdmin(address contractAddress, string memory contractName) public {
         acceptContractAdmin(contractAddress, contractName);
     }
 
-    function publicAcceptContractAdminAsUser(address contractAddress, string memory contractName, address user)
+    function exposed_acceptContractAdminAsUser(address contractAddress, string memory contractName, address user)
         public
     {
         vm.startPrank(user);
@@ -99,15 +99,15 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
         vm.startPrank(admin);
 
         // Should not revert with valid inputs
-        beginTransferScript.publicValidateAdminTransfer(admin, newAdmin);
+        beginTransferScript.exposed_validateAdminTransfer(admin, newAdmin);
 
         // Should revert with zero address
         vm.expectRevert("BeginTransferAdminRole: new admin cannot be zero address");
-        beginTransferScript.publicValidateAdminTransfer(admin, address(0));
+        beginTransferScript.exposed_validateAdminTransfer(admin, address(0));
 
         // Should revert when new admin is same as current
         vm.expectRevert("BeginTransferAdminRole: New admin must be different from current admin");
-        beginTransferScript.publicValidateAdminTransfer(admin, admin);
+        beginTransferScript.exposed_validateAdminTransfer(admin, admin);
 
         vm.stopPrank();
     }
@@ -115,7 +115,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
     // ====== BeginTransferAdminRole.beginTransfer ======
     function test_BeginTransferAdminRole_LiquidityUnifier() public {
         assertEq(IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).defaultAdmin(), admin);
-        beginTransferScript.publicBeginTransferAsAdmin(
+        beginTransferScript.exposed_beginTransferAsAdmin(
             address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier", admin
         );
         // Verify that the admin transfer has been initiated
@@ -128,7 +128,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
 
     // ====== AcceptAdminRole.acceptContractAdmin ======
     function test_AcceptAdminRole_LiquidityUnifier() public {
-        beginTransferScript.publicBeginTransferAsAdmin(
+        beginTransferScript.exposed_beginTransferAsAdmin(
             address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier", admin
         );
 
@@ -137,7 +137,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
         vm.warp(acceptSchedule + 1); // Wait until after the scheduled time
 
         // Now accept as the new admin using the script wrapper
-        acceptAdminScript.publicAcceptContractAdminAsUser(address(rlcLiquidityUnifier), "RLCLiquidityUnifier", newAdmin);
+        acceptAdminScript.exposed_acceptContractAdminAsUser(address(rlcLiquidityUnifier), "RLCLiquidityUnifier", newAdmin);
 
         // Verify that the admin transfer has been completed
         assertEq(IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).defaultAdmin(), newAdmin);
@@ -148,7 +148,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
     }
 
     function test_AcceptAdminRole_RevertWhen_WrongAddressTriesToAcceptAdmin() public {
-        beginTransferScript.publicBeginTransferAsAdmin(
+        beginTransferScript.exposed_beginTransferAsAdmin(
             address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier", admin
         );
 
@@ -156,7 +156,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
         address wrongAddress = makeAddr("wrongAddress");
 
         vm.expectRevert(); // Should revert because only pending admin can accept
-        acceptAdminScript.publicAcceptContractAdminAsUser(
+        acceptAdminScript.exposed_acceptContractAdminAsUser(
             address(rlcLiquidityUnifier), "RLCLiquidityUnifier", wrongAddress
         );
     }
@@ -165,14 +165,14 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
     function test_RevertWhen_NewAdminIsZeroAddress() public {
         vm.startPrank(admin);
         vm.expectRevert("BeginTransferAdminRole: new admin cannot be zero address");
-        beginTransferScript.publicBeginTransfer(address(rlcLiquidityUnifier), address(0), "RLCLiquidityUnifier");
+        beginTransferScript.exposed_beginTransfer(address(rlcLiquidityUnifier), address(0), "RLCLiquidityUnifier");
         vm.stopPrank();
     }
 
     function test_RevertWhen_NewAdminIsSameAsCurrentAdmin() public {
         vm.startPrank(admin);
         vm.expectRevert("BeginTransferAdminRole: New admin must be different from current admin");
-        beginTransferScript.publicBeginTransfer(address(rlcLiquidityUnifier), admin, "RLCLiquidityUnifier");
+        beginTransferScript.exposed_beginTransfer(address(rlcLiquidityUnifier), admin, "RLCLiquidityUnifier");
         vm.stopPrank();
     }
 
@@ -180,7 +180,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5 {
         address unauthorizedUser = makeAddr("unauthorizedUser");
         vm.startPrank(unauthorizedUser);
         vm.expectRevert(); // Should revert with access control error
-        beginTransferScript.publicBeginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
+        beginTransferScript.exposed_beginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
         vm.stopPrank();
     }
 }
