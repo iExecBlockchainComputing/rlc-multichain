@@ -67,7 +67,7 @@ contract BeginTransferAdminRole is Script {
      * @param newAdmin The new admin address
      * @param contractName The name of the contract for logging purposes
      */
-    function beginTransfer(address contractAddress, address newAdmin, string memory contractName) internal virtual {
+    function beginTransfer(address contractAddress, address newAdmin, string memory contractName) public virtual {
         IAccessControlDefaultAdminRules contractInstance = IAccessControlDefaultAdminRules(contractAddress);
 
         address currentAdmin = contractInstance.defaultAdmin();
