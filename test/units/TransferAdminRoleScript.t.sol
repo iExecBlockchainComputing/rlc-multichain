@@ -5,7 +5,6 @@ pragma solidity ^0.8.22;
 
 import {BeginTransferAdminRole, AcceptAdminRole} from "../../script/TransferAdminRole.s.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import "forge-std/console.sol";
 
 import {IAccessControlDefaultAdminRules} from
     "@openzeppelin/contracts/access/extensions/IAccessControlDefaultAdminRules.sol";
@@ -52,7 +51,6 @@ contract AcceptAdminRoleHarness is AcceptAdminRole {
         address iexecLayerZeroBridge,
         bool approvalRequired
     ) public {
-        console.log("msg.sender:", msg.sender);
         // Replicate the logic from AcceptAdminRole.run() for testing without env dependencies
         if (approvalRequired) {
             acceptContractAdmin(rlcLiquidityUnifier, "RLCLiquidityUnifier");
