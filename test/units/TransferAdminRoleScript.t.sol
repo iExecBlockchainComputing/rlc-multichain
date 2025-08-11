@@ -106,7 +106,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     // Override run functions to resolve inheritance conflict
     function run() external pure override(BeginTransferAdminRole, AcceptAdminRole) {
         // This function should not be called directly in tests
-        // Use this.run_beginTransfer() or super.run_acceptAdmin() instead
+        // Use super.run_beginTransfer() or super.run_acceptAdmin() instead
         revert("Use specific test functions instead");
     }
 
@@ -204,13 +204,8 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
 
     // ====== AcceptAdminRole.acceptContractAdmin ======
     function test_AcceptAdminRole_LiquidityUnifier() public {
-        vm.startPrank(admin);
-        super.exposed_beginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
-        vm.stopPrank();
-
-        // Get the delay schedule and wait for it to pass
-        (, uint48 acceptSchedule) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
-        vm.warp(acceptSchedule + 1);
+        exposed_beginTransferAsAdmin(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
+        waitForAdminTransferDelay(address(rlcLiquidityUnifier));
 
         vm.prank(newAdmin);
         super.exposed_acceptContractAdmin(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
@@ -221,16 +216,13 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     }
 
     function test_AcceptAdminRole_Run_ApprovalRequired() public {
-        // Begin transfer first
-        vm.startPrank(admin);
-        super.run_beginTransfer(
+        run_beginTransferAsAdmin(
             address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL1), newAdmin, true
         );
         vm.stopPrank();
 
         // Get the delay schedule and wait for it to pass
-        (, uint48 acceptSchedule) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
-        vm.warp(acceptSchedule + 1);
+        waitForAdminTransferDelay(address(rlcLiquidityUnifier));
 
         // Accept admin role with approval required = true
         vm.startPrank(newAdmin);
@@ -247,16 +239,10 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     }
 
     function test_AcceptAdminRole_Run_NoApprovalRequired() public {
-        // Begin transfer first
-        vm.startPrank(admin);
-        super.run_beginTransfer(
+        run_beginTransferAsAdmin(
             address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL2), newAdmin, false
         );
-        vm.stopPrank();
-
-        // Get the delay schedule and wait for it to pass
-        (, uint48 acceptSchedule) = IAccessControlDefaultAdminRules(address(rlcCrosschainToken)).pendingDefaultAdmin();
-        vm.warp(acceptSchedule + 1);
+        waitForAdminTransferDelay(address(rlcCrosschainToken));
 
         // Accept admin role with approval required = false
         vm.startPrank(newAdmin);
@@ -272,11 +258,8 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     }
 
     function test_AcceptAdminRole_RevertWhen_WrongAddressTriesToAccept() public {
-        vm.startPrank(admin);
-        super.exposed_beginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
-        vm.stopPrank();
-        (, uint48 acceptSchedule) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
-        vm.warp(acceptSchedule + 1);
+        exposed_beginTransferAsAdmin(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
+        waitForAdminTransferDelay(address(rlcLiquidityUnifier));
 
         // Try to accept with wrong address
         address wrongAddress = makeAddr("wrongAddress");
@@ -291,9 +274,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     }
 
     function test_AcceptAdminRole_RevertWhen_DelayNotElapsed() public {
-        vm.startPrank(admin);
-        super.exposed_beginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
-        vm.stopPrank();
+        exposed_beginTransferAsAdmin(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
 
         // Try to accept immediately without waiting for the delay
         vm.startPrank(newAdmin);
@@ -302,5 +283,50 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
         );
         super.exposed_acceptContractAdmin(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
         vm.stopPrank();
+    }
+
+    /**
+     * @notice Helper function to initiate the admin transfer process
+     * @param _rlcLiquidityUnifier The address of the RLCLiquidityUnifier contract
+     * @param _rlcCrosschainToken The address of the RLCCrosschainToken contract
+     * @param _iexecLayerZeroBridgeL1 The address of the IExecLayerZeroBridgeL1 contract
+     * @param _newAdmin The address of the new admin
+     * @param _approvalRequired Whether approval is required for the transfer
+     */
+    function run_beginTransferAsAdmin(
+        address _rlcLiquidityUnifier,
+        address _rlcCrosschainToken,
+        address _iexecLayerZeroBridgeL1,
+        address _newAdmin,
+        bool _approvalRequired
+    ) internal {
+        vm.startPrank(admin);
+        super.run_beginTransfer(
+            _rlcLiquidityUnifier, _rlcCrosschainToken, _iexecLayerZeroBridgeL1, _newAdmin, _approvalRequired
+        );
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice Helper function to initiate the admin transfer process
+     * @param _contractAddress The address of the contract to transfer admin rights
+     * @param _newAdmin The address of the new admin
+     * @param _contractName The name of the contract
+     */
+    function exposed_beginTransferAsAdmin(address _contractAddress, address _newAdmin, string memory _contractName)
+        internal
+    {
+        vm.startPrank(admin);
+        super.exposed_beginTransfer(_contractAddress, _newAdmin, _contractName);
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice Helper function to wait for the admin transfer delay to pass
+     * @param contractAddress The contract address to check the pending admin schedule
+     */
+    function waitForAdminTransferDelay(address contractAddress) internal {
+        (, uint48 acceptSchedule) = IAccessControlDefaultAdminRules(contractAddress).pendingDefaultAdmin();
+        vm.warp(acceptSchedule + 1);
     }
 }
