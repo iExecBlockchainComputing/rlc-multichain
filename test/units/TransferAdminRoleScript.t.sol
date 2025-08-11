@@ -13,58 +13,10 @@ import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
 import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
+import {ConfigLib} from "./../../script/lib/ConfigLib.sol";
+import {console} from "forge-std/console.sol";
 
-// Test wrapper contract to expose internal functions
-
-contract BeginTransferAdminRoleHarness is BeginTransferAdminRole {
-    function run_beginTransfer(
-        address rlcLiquidityUnifier,
-        address rlcCrosschainToken,
-        address iexecLayerZeroBridge,
-        address newAdmin,
-        bool approvalRequired
-    ) public {
-        // Replicate the logic from BeginTransferAdminRole.run() for testing without env dependencies
-        if (approvalRequired) {
-            beginTransfer(rlcLiquidityUnifier, newAdmin, "RLCLiquidityUnifier");
-        } else {
-            beginTransfer(rlcCrosschainToken, newAdmin, "RLCCrosschainToken");
-        }
-        beginTransfer(iexecLayerZeroBridge, newAdmin, "IexecLayerZeroBridge");
-    }
-
-    function exposed_beginTransfer(address contractAddress, address newAdmin, string memory contractName) public {
-        beginTransfer(contractAddress, newAdmin, contractName);
-    }
-
-    function exposed_validateAdminTransfer(address currentDefaultAdmin, address newAdmin) public pure {
-        validateAdminTransfer(currentDefaultAdmin, newAdmin);
-    }
-}
-
-// Test wrapper contract to expose internal functions
-contract AcceptAdminRoleHarness is AcceptAdminRole {
-    function run_acceptAdmin(
-        address rlcLiquidityUnifier,
-        address rlcCrosschainToken,
-        address iexecLayerZeroBridge,
-        bool approvalRequired
-    ) public {
-        // Replicate the logic from AcceptAdminRole.run() for testing without env dependencies
-        if (approvalRequired) {
-            acceptContractAdmin(rlcLiquidityUnifier, "RLCLiquidityUnifier");
-        } else {
-            acceptContractAdmin(rlcCrosschainToken, "RLCCrosschainToken");
-        }
-        acceptContractAdmin(iexecLayerZeroBridge, "IexecLayerZeroBridge");
-    }
-
-    function exposed_acceptContractAdmin(address contractAddress, string memory contractName) public {
-        acceptContractAdmin(contractAddress, contractName);
-    }
-}
-
-contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHarness, AcceptAdminRoleHarness {
+contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRole, AcceptAdminRole {
     using TestUtils for *;
 
     // Test addresses
@@ -78,7 +30,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     RLCCrosschainToken rlcCrosschainToken;
     IexecLayerZeroBridge iexecLayerZeroBridgeL1;
     IexecLayerZeroBridge iexecLayerZeroBridgeL2;
-
+    ConfigLib.CommonConfigParams params;
     TestUtils.DeploymentResult deployment;
 
     function setUp() public virtual override {
@@ -98,35 +50,42 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
         rlcCrosschainToken = deployment.rlcCrosschainToken;
         iexecLayerZeroBridgeL1 = deployment.iexecLayerZeroBridgeWithApproval;
         iexecLayerZeroBridgeL2 = deployment.iexecLayerZeroBridgeWithoutApproval;
+        params = TestUtils.emptyConfigParams();
     }
 
     // Override run functions to resolve inheritance conflict
     function run() external pure override(BeginTransferAdminRole, AcceptAdminRole) {
         // This function should not be called directly in tests
-        // Use super.run_beginTransfer() or super.run_acceptAdmin() instead
+        // Use super.beginTransferForAllContracts() or super.run_acceptAdmin() instead
         revert("Use specific test functions instead");
     }
 
     // ====== BeginTransferAdminRole.validateAdminTransfer ======
-    function test_ValidateAdminTransfer() public view {
-        this.exposed_validateAdminTransfer(admin, newAdmin);
+    // Test validation through beginTransfer since validateAdminTransfer is internal
+    function test_ValidateAdminTransfer() public {
+        // This should succeed since validation passes and admin has permissions
+        beginTransferAsAdmin(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
     }
 
     function test_ValidateAdminTransfer_RevertWhen_NewAdminIsZeroAddress() public {
+        vm.startPrank(admin);
         vm.expectRevert("BeginTransferAdminRole: new admin cannot be zero address");
-        this.exposed_validateAdminTransfer(admin, address(0));
+        this.externalCallBeginTransfer(address(rlcLiquidityUnifier), address(0), "RLCLiquidityUnifier");
+        vm.stopPrank();
     }
 
     function test_ValidateAdminTransfer_RevertWhen_NewAdminIsSameAsCurrentAdmin() public {
+        vm.startPrank(admin);
         vm.expectRevert("BeginTransferAdminRole: New admin must be different from current admin");
-        this.exposed_validateAdminTransfer(admin, admin);
+        this.externalCallBeginTransfer(address(rlcLiquidityUnifier), admin, "RLCLiquidityUnifier");
+        vm.stopPrank();
     }
 
     // ====== BeginTransferAdminRole.beginTransfer ======
     function test_BeginTransfer_LiquidityUnifier() public {
         vm.startPrank(admin);
         assertEq(IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).defaultAdmin(), admin);
-        super.exposed_beginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
+        super.beginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
         // Verify that the admin transfer has been initiated
         (address pendingAdmin,) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
         assertEq(pendingAdmin, newAdmin);
@@ -137,10 +96,9 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     }
 
     function test_BeginTransferAdminRole_Run_ApprovalRequired() public {
+        configureParams(true);
         vm.startPrank(admin);
-        super.run_beginTransfer(
-            address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL1), newAdmin, true
-        );
+        super.beginTransferForAllContracts(params, newAdmin);
         vm.stopPrank();
 
         // Verify that the admin transfer has been initiated for approval required (RLCLiquidityUnifier)
@@ -156,10 +114,9 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     }
 
     function test_BeginTransferAdminRole_Run_AllContracts_NoApprovalRequired() public {
+        configureParams(false);
         vm.startPrank(admin);
-        super.run_beginTransfer(
-            address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL2), newAdmin, false
-        );
+        super.beginTransferForAllContracts(params, newAdmin);
         vm.stopPrank();
 
         // Verify that the admin transfer has been initiated for no approval required (RLCCrosschainToken)
@@ -178,14 +135,14 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     function test_BeginTransfer_RevertWhen_NewAdminIsZeroAddress() public {
         vm.startPrank(admin);
         vm.expectRevert("BeginTransferAdminRole: new admin cannot be zero address");
-        this.exposed_beginTransfer(address(rlcLiquidityUnifier), address(0), "RLCLiquidityUnifier");
+        this.externalCallBeginTransfer(address(rlcLiquidityUnifier), address(0), "RLCLiquidityUnifier");
         vm.stopPrank();
     }
 
     function test_BeginTransfer_RevertWhen_NewAdminIsSameAsCurrentAdmin() public {
         vm.startPrank(admin);
         vm.expectRevert("BeginTransferAdminRole: New admin must be different from current admin");
-        this.exposed_beginTransfer(address(rlcLiquidityUnifier), admin, "RLCLiquidityUnifier");
+        this.externalCallBeginTransfer(address(rlcLiquidityUnifier), admin, "RLCLiquidityUnifier");
         vm.stopPrank();
     }
 
@@ -195,17 +152,17 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
         vm.expectRevert(
             abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), bytes32(0))
         );
-        this.exposed_beginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
+        this.externalCallBeginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
         vm.stopPrank();
     }
 
     // ====== AcceptAdminRole.acceptContractAdmin ======
     function test_AcceptAdminRole_LiquidityUnifier() public {
-        exposed_beginTransferAsAdmin(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
+        beginTransferAsAdmin(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
         waitForAdminTransferDelay(address(rlcLiquidityUnifier));
 
         vm.prank(newAdmin);
-        super.exposed_acceptContractAdmin(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
+        super.acceptContractAdmin(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
         assertEq(IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).defaultAdmin(), newAdmin);
 
         (address pendingAdmin,) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
@@ -213,19 +170,16 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     }
 
     function test_AcceptAdminRole_Run_ApprovalRequired() public {
-        run_beginTransferAsAdmin(
-            address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL1), newAdmin, true
-        );
+        beginTransferForAllContractsAsAdmin(newAdmin, true);
         vm.stopPrank();
 
         // Get the delay schedule and wait for it to pass
         waitForAdminTransferDelay(address(rlcLiquidityUnifier));
 
         // Accept admin role with approval required = true
+        configureParams(true);
         vm.startPrank(newAdmin);
-        super.run_acceptAdmin(
-            address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL1), true
-        );
+        super.acceptAdminRoleTransfer(params);
         vm.stopPrank();
 
         assertEq(IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).defaultAdmin(), newAdmin);
@@ -236,16 +190,13 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     }
 
     function test_AcceptAdminRole_Run_NoApprovalRequired() public {
-        run_beginTransferAsAdmin(
-            address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL2), newAdmin, false
-        );
+        beginTransferForAllContractsAsAdmin(newAdmin, false);
         waitForAdminTransferDelay(address(rlcCrosschainToken));
 
         // Accept admin role with approval required = false
+        configureParams(false);
         vm.startPrank(newAdmin);
-        super.run_acceptAdmin(
-            address(rlcLiquidityUnifier), address(rlcCrosschainToken), address(iexecLayerZeroBridgeL2), false
-        );
+        super.acceptAdminRoleTransfer(params);
         vm.stopPrank();
         assertEq(IAccessControlDefaultAdminRules(address(rlcCrosschainToken)).defaultAdmin(), newAdmin);
         assertEq(IAccessControlDefaultAdminRules(address(iexecLayerZeroBridgeL2)).defaultAdmin(), newAdmin);
@@ -255,7 +206,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     }
 
     function test_AcceptAdminRole_RevertWhen_WrongAddressTriesToAccept() public {
-        exposed_beginTransferAsAdmin(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
+        beginTransferAsAdmin(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
         waitForAdminTransferDelay(address(rlcLiquidityUnifier));
 
         // Try to accept with wrong address
@@ -266,41 +217,67 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
                 IAccessControlDefaultAdminRules.AccessControlInvalidDefaultAdmin.selector, wrongAddress
             )
         );
-        super.exposed_acceptContractAdmin(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
+        super.acceptContractAdmin(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
         vm.stopPrank();
     }
 
     function test_AcceptAdminRole_RevertWhen_DelayNotElapsed() public {
-        exposed_beginTransferAsAdmin(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
+        beginTransferAsAdmin(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
 
         // Try to accept immediately without waiting for the delay
         vm.startPrank(newAdmin);
         vm.expectRevert(
             abi.encodeWithSelector(IAccessControlDefaultAdminRules.AccessControlEnforcedDefaultAdminDelay.selector, 1)
         );
-        super.exposed_acceptContractAdmin(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
+        super.acceptContractAdmin(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
         vm.stopPrank();
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            HELPER FUNCTION
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice External wrapper for beginTransfer to enable proper revert testing
+     * @dev This function is necessary for testing revert scenarios because:
+     * When testing internal functions that call `super`, 
+     *    Foundry's vm.expectRevert doesn't properly catch reverts from internal function calls.
+     *    This is because internal calls don't create new call frames that Foundry can intercept.
+     *
+     * This pattern allows vm.expectRevert to work correctly by ensuring the revert happens
+     * in a separate call frame that Foundry can detect and validate.
+     * 
+     * @param contractAddress The address of the contract to transfer admin rights
+     * @param _newAdminAddr The address of the new admin  
+     * @param contractName The name of the contract for logging purposes
+     */
+    function externalCallBeginTransfer(address contractAddress, address _newAdminAddr, string memory contractName)
+        external
+    {
+        super.beginTransfer(contractAddress, _newAdminAddr, contractName);
+    }
+
+    /**
+     * @notice Helper function to configure params based on approval requirement
+     * @param _approvalRequired Whether approval is required for the transfer
+     */
+    function configureParams(bool _approvalRequired) internal {
+        params.approvalRequired = _approvalRequired;
+        params.iexecLayerZeroBridgeAddress =
+            _approvalRequired ? address(iexecLayerZeroBridgeL1) : address(iexecLayerZeroBridgeL2);
+        params.rlcLiquidityUnifierAddress = _approvalRequired ? address(rlcLiquidityUnifier) : address(0);
+        params.rlcCrosschainTokenAddress = _approvalRequired ? address(0) : address(rlcCrosschainToken);
     }
 
     /**
      * @notice Helper function to initiate the admin transfer process
-     * @param _rlcLiquidityUnifier The address of the RLCLiquidityUnifier contract
-     * @param _rlcCrosschainToken The address of the RLCCrosschainToken contract
-     * @param _iexecLayerZeroBridgeL1 The address of the IExecLayerZeroBridgeL1 contract
      * @param _newAdmin The address of the new admin
      * @param _approvalRequired Whether approval is required for the transfer
      */
-    function run_beginTransferAsAdmin(
-        address _rlcLiquidityUnifier,
-        address _rlcCrosschainToken,
-        address _iexecLayerZeroBridgeL1,
-        address _newAdmin,
-        bool _approvalRequired
-    ) internal {
+    function beginTransferForAllContractsAsAdmin(address _newAdmin, bool _approvalRequired) internal {
+        configureParams(_approvalRequired);
         vm.startPrank(admin);
-        super.run_beginTransfer(
-            _rlcLiquidityUnifier, _rlcCrosschainToken, _iexecLayerZeroBridgeL1, _newAdmin, _approvalRequired
-        );
+        super.beginTransferForAllContracts(params, _newAdmin);
         vm.stopPrank();
     }
 
@@ -310,11 +287,9 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
      * @param _newAdmin The address of the new admin
      * @param _contractName The name of the contract
      */
-    function exposed_beginTransferAsAdmin(address _contractAddress, address _newAdmin, string memory _contractName)
-        internal
-    {
+    function beginTransferAsAdmin(address _contractAddress, address _newAdmin, string memory _contractName) internal {
         vm.startPrank(admin);
-        super.exposed_beginTransfer(_contractAddress, _newAdmin, _contractName);
+        super.beginTransfer(_contractAddress, _newAdmin, _contractName);
         vm.stopPrank();
     }
 
