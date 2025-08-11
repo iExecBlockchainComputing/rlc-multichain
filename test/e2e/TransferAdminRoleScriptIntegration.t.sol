@@ -26,17 +26,17 @@ contract BeginTransferAdminRoleWithMockedConfig is BeginTransferAdminRole {
     address public rlcLiquidityUnifierAddress;
     address public rlcCrosschainTokenAddress;
     address public iexecLayerZeroBridgeAddress;
-    
+
     function setApprovalRequired(bool _approvalRequired) public {
         approvalRequired = _approvalRequired;
     }
-    
+
     function setAddresses(address _rlcLU, address _rlcCT, address _bridge) public {
         rlcLiquidityUnifierAddress = _rlcLU;
         rlcCrosschainTokenAddress = _rlcCT;
         iexecLayerZeroBridgeAddress = _bridge;
     }
-    
+
     // Override run() to use mock values and track calls without actually doing admin operations
     function run() public override {
         if (approvalRequired) {
@@ -46,11 +46,11 @@ contract BeginTransferAdminRoleWithMockedConfig is BeginTransferAdminRole {
         }
         contractsTransferred.push(iexecLayerZeroBridgeAddress);
     }
-    
+
     function getContractsTransferred() public view returns (address[] memory) {
         return contractsTransferred;
     }
-    
+
     function clearContractsTransferred() public {
         delete contractsTransferred;
     }
@@ -63,17 +63,17 @@ contract AcceptAdminRoleWithMockedConfig is AcceptAdminRole {
     address public rlcLiquidityUnifierAddress;
     address public rlcCrosschainTokenAddress;
     address public iexecLayerZeroBridgeAddress;
-    
+
     function setApprovalRequired(bool _approvalRequired) public {
         approvalRequired = _approvalRequired;
     }
-    
+
     function setAddresses(address _rlcLU, address _rlcCT, address _bridge) public {
         rlcLiquidityUnifierAddress = _rlcLU;
         rlcCrosschainTokenAddress = _rlcCT;
         iexecLayerZeroBridgeAddress = _bridge;
     }
-    
+
     // Override run() to track calls without actually doing admin operations
     function run() public override {
         if (approvalRequired) {
@@ -83,11 +83,11 @@ contract AcceptAdminRoleWithMockedConfig is AcceptAdminRole {
         }
         contractsAccepted.push(iexecLayerZeroBridgeAddress);
     }
-    
+
     function getContractsAccepted() public view returns (address[] memory) {
         return contractsAccepted;
     }
-    
+
     function clearContractsAccepted() public {
         delete contractsAccepted;
     }
@@ -133,45 +133,55 @@ contract TransferAdminRoleScriptIntegrationTest is TestHelperOz5 {
     }
 
     // ====== Integration Tests for Script Logic ======
-    
+
     function test_BeginTransferScript_IdentifiesCorrectContracts_ApprovalRequired() public {
         beginTransferFullScript.clearContractsTransferred();
         // Setup mock config for approval required scenario (L1)
         beginTransferFullScript.setApprovalRequired(true);
         beginTransferFullScript.setAddresses(
-            address(deployment.rlcLiquidityUnifier),
-            address(0),
-            address(deployment.iexecLayerZeroBridgeWithApproval)
+            address(deployment.rlcLiquidityUnifier), address(0), address(deployment.iexecLayerZeroBridgeWithApproval)
         );
-        
+
         // Call the run() function to test the integration logic
         beginTransferFullScript.run();
-        
+
         // Verify that the correct contracts were processed
         address[] memory processedContracts = beginTransferFullScript.getContractsTransferred();
         assertEq(processedContracts.length, 2, "Should process exactly 2 contracts for L1");
-        assertEq(processedContracts[0], address(deployment.rlcLiquidityUnifier), "First contract should be RLCLiquidityUnifier");
-        assertEq(processedContracts[1], address(deployment.iexecLayerZeroBridgeWithApproval), "Second contract should be IexecLayerZeroBridge");
+        assertEq(
+            processedContracts[0],
+            address(deployment.rlcLiquidityUnifier),
+            "First contract should be RLCLiquidityUnifier"
+        );
+        assertEq(
+            processedContracts[1],
+            address(deployment.iexecLayerZeroBridgeWithApproval),
+            "Second contract should be IexecLayerZeroBridge"
+        );
     }
-    
+
     function test_BeginTransferScript_IdentifiesCorrectContracts_NoApprovalRequired() public {
         beginTransferFullScript.clearContractsTransferred();
         // Setup mock config for no approval required scenario (L2)
         beginTransferFullScript.setApprovalRequired(false);
         beginTransferFullScript.setAddresses(
-            address(0),
-            address(deployment.rlcCrosschainToken),
-            address(deployment.iexecLayerZeroBridgeWithoutApproval)
+            address(0), address(deployment.rlcCrosschainToken), address(deployment.iexecLayerZeroBridgeWithoutApproval)
         );
-        
+
         // Call the run() function to test the integration logic
         beginTransferFullScript.run();
-        
+
         // Verify that the correct contracts were processed
         address[] memory processedContracts = beginTransferFullScript.getContractsTransferred();
         assertEq(processedContracts.length, 2, "Should process exactly 2 contracts for L2");
-        assertEq(processedContracts[0], address(deployment.rlcCrosschainToken), "First contract should be RLCCrosschainToken");
-        assertEq(processedContracts[1], address(deployment.iexecLayerZeroBridgeWithoutApproval), "Second contract should be IexecLayerZeroBridge");
+        assertEq(
+            processedContracts[0], address(deployment.rlcCrosschainToken), "First contract should be RLCCrosschainToken"
+        );
+        assertEq(
+            processedContracts[1],
+            address(deployment.iexecLayerZeroBridgeWithoutApproval),
+            "Second contract should be IexecLayerZeroBridge"
+        );
     }
 
     function test_AcceptAdminScript_IdentifiesCorrectContracts_ApprovalRequired() public {
@@ -179,19 +189,25 @@ contract TransferAdminRoleScriptIntegrationTest is TestHelperOz5 {
         // Setup mock config for approval required scenario (L1)
         acceptAdminFullScript.setApprovalRequired(true);
         acceptAdminFullScript.setAddresses(
-            address(deployment.rlcLiquidityUnifier),
-            address(0),
-            address(deployment.iexecLayerZeroBridgeWithApproval)
+            address(deployment.rlcLiquidityUnifier), address(0), address(deployment.iexecLayerZeroBridgeWithApproval)
         );
-        
+
         // Call the run() function to test the integration logic
         acceptAdminFullScript.run();
-        
+
         // Verify that the correct contracts were processed (tracked in the override)
         address[] memory processedContracts = acceptAdminFullScript.getContractsAccepted();
         assertEq(processedContracts.length, 2, "Should process exactly 2 contracts for L1");
-        assertEq(processedContracts[0], address(deployment.rlcLiquidityUnifier), "First contract should be RLCLiquidityUnifier");
-        assertEq(processedContracts[1], address(deployment.iexecLayerZeroBridgeWithApproval), "Second contract should be IexecLayerZeroBridge");
+        assertEq(
+            processedContracts[0],
+            address(deployment.rlcLiquidityUnifier),
+            "First contract should be RLCLiquidityUnifier"
+        );
+        assertEq(
+            processedContracts[1],
+            address(deployment.iexecLayerZeroBridgeWithApproval),
+            "Second contract should be IexecLayerZeroBridge"
+        );
     }
 
     function test_AcceptAdminScript_IdentifiesCorrectContracts_NoApprovalRequired() public {
@@ -199,18 +215,22 @@ contract TransferAdminRoleScriptIntegrationTest is TestHelperOz5 {
         // Setup mock config for no approval required scenario (L2)
         acceptAdminFullScript.setApprovalRequired(false);
         acceptAdminFullScript.setAddresses(
-            address(0),
-            address(deployment.rlcCrosschainToken),
-            address(deployment.iexecLayerZeroBridgeWithoutApproval)
+            address(0), address(deployment.rlcCrosschainToken), address(deployment.iexecLayerZeroBridgeWithoutApproval)
         );
-        
+
         // Call the run() function to test the integration logic
         acceptAdminFullScript.run();
-        
+
         // Verify that the correct contracts were processed (tracked in the override)
         address[] memory processedContracts = acceptAdminFullScript.getContractsAccepted();
         assertEq(processedContracts.length, 2, "Should process exactly 2 contracts for L2");
-        assertEq(processedContracts[0], address(deployment.rlcCrosschainToken), "First contract should be RLCCrosschainToken");
-        assertEq(processedContracts[1], address(deployment.iexecLayerZeroBridgeWithoutApproval), "Second contract should be IexecLayerZeroBridge");
+        assertEq(
+            processedContracts[0], address(deployment.rlcCrosschainToken), "First contract should be RLCCrosschainToken"
+        );
+        assertEq(
+            processedContracts[1],
+            address(deployment.iexecLayerZeroBridgeWithoutApproval),
+            "Second contract should be IexecLayerZeroBridge"
+        );
     }
 }

@@ -24,7 +24,6 @@ contract BeginTransferAdminRoleHarness is BeginTransferAdminRole {
         beginTransfer(contractAddress, newAdmin, contractName);
     }
 
-
     function exposed_validateAdminTransfer(address currentDefaultAdmin, address newAdmin) public pure {
         validateAdminTransfer(currentDefaultAdmin, newAdmin);
     }
@@ -94,9 +93,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     function test_BeginTransfer_LiquidityUnifier() public {
         vm.startPrank(admin);
         assertEq(IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).defaultAdmin(), admin);
-        super.exposed_beginTransfer(
-            address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier"
-        );
+        super.exposed_beginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
         // Verify that the admin transfer has been initiated
         (address pendingAdmin,) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
         assertEq(pendingAdmin, newAdmin);
@@ -124,7 +121,9 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
     function test_BeginTransfer_RevertWhen_NotAuthorizedToTransferAdmin() public {
         address unauthorizedUser = makeAddr("unauthorizedUser");
         vm.startPrank(unauthorizedUser);
-        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), bytes32(0)));
+        vm.expectRevert(
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), bytes32(0))
+        );
         this.exposed_beginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
         vm.stopPrank();
     }
@@ -137,7 +136,7 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
 
         // Get the delay schedule and wait for it to pass
         (, uint48 acceptSchedule) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
-        vm.warp(acceptSchedule + 1); 
+        vm.warp(acceptSchedule + 1);
 
         vm.prank(newAdmin);
         super.exposed_acceptContractAdmin(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
@@ -152,12 +151,16 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
         super.exposed_beginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
         vm.stopPrank();
         (, uint48 acceptSchedule) = IAccessControlDefaultAdminRules(address(rlcLiquidityUnifier)).pendingDefaultAdmin();
-        vm.warp(acceptSchedule + 1); 
+        vm.warp(acceptSchedule + 1);
 
         // Try to accept with wrong address
         address wrongAddress = makeAddr("wrongAddress");
         vm.startPrank(wrongAddress);
-        vm.expectRevert(abi.encodeWithSelector(IAccessControlDefaultAdminRules.AccessControlInvalidDefaultAdmin.selector, wrongAddress));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControlDefaultAdminRules.AccessControlInvalidDefaultAdmin.selector, wrongAddress
+            )
+        );
         super.exposed_acceptContractAdmin(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
         vm.stopPrank();
     }
@@ -169,7 +172,9 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRoleHar
 
         // Try to accept immediately without waiting for the delay
         vm.startPrank(newAdmin);
-        vm.expectRevert(abi.encodeWithSelector(IAccessControlDefaultAdminRules.AccessControlEnforcedDefaultAdminDelay.selector, 1));
+        vm.expectRevert(
+            abi.encodeWithSelector(IAccessControlDefaultAdminRules.AccessControlEnforcedDefaultAdminDelay.selector, 1)
+        );
         super.exposed_acceptContractAdmin(address(rlcLiquidityUnifier), "RLCLiquidityUnifier");
         vm.stopPrank();
     }

@@ -23,7 +23,7 @@ contract BeginTransferAdminRole is Script {
      * @dev This function automatically detects which contracts are deployed on the current chain
      * based on the configuration and transfers admin roles accordingly
      */
-    function run() external {
+    function run() external virtual {
         address newAdmin = vm.envAddress("NEW_DEFAULT_ADMIN");
         string memory chain = vm.envString("CHAIN");
         console.log("Starting admin role transfer on chain:", chain);
@@ -59,7 +59,7 @@ contract BeginTransferAdminRole is Script {
      * @param newAdmin The new admin address
      * @param contractName The name of the contract for logging purposes
      */
-    function beginTransfer(address contractAddress, address newAdmin, string memory contractName) internal {
+    function beginTransfer(address contractAddress, address newAdmin, string memory contractName) internal virtual {
         IAccessControlDefaultAdminRules contractInstance = IAccessControlDefaultAdminRules(contractAddress);
 
         address currentAdmin = contractInstance.defaultAdmin();
@@ -80,7 +80,7 @@ contract AcceptAdminRole is Script {
      * @notice Accepts the default admin role transfer for all contracts on the current chain
      * @dev This function should be called by the new admin to complete the transfer process
      */
-    function run() external {
+    function run() external virtual {
         string memory chain = vm.envString("CHAIN");
         console.log("Accepting admin role transfer on chain:", chain);
         ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
@@ -100,7 +100,7 @@ contract AcceptAdminRole is Script {
      * @param contractAddress The address of the contract
      * @param contractName The name of the contract for logging purposes
      */
-    function acceptContractAdmin(address contractAddress, string memory contractName) internal {
+    function acceptContractAdmin(address contractAddress, string memory contractName) internal virtual {
         console.log("Accepting admin role for", contractName, "at:", contractAddress);
         IAccessControlDefaultAdminRules contractInstance = IAccessControlDefaultAdminRules(contractAddress);
         contractInstance.acceptDefaultAdminTransfer();
