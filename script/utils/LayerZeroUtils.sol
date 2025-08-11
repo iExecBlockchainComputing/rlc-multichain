@@ -8,6 +8,10 @@ import {console} from "forge-std/console.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
+import {ILayerZeroEndpointV2} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+import {UlnConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
+import {ExecutorConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/SendLibBase.sol";
+import {SetConfigParam} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
 import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 
 // TODO move script/lib/* utility files in this folder.
@@ -16,6 +20,10 @@ library LayerZeroUtils {
 
     uint16 constant LZ_RECEIVE_MESSAGE_TYPE = 1; // lzReceive()
     uint16 constant LZ_COMPOSE_MESSAGE_TYPE = 2; // lzCompose()
+
+    uint16 constant EXECUTOR_CONFIG_TYPE = 1;
+    uint16 constant ULN_CONFIG_TYPE = 2;
+    uint16 constant RECEIVE_CONFIG_TYPE = 2;
 
     /**
      * Builds the LayerZero receive configuration for the executor.
@@ -83,5 +91,100 @@ library LayerZeroUtils {
         enforcedOptions[0] = EnforcedOptionParam(targetEndpointId, LZ_RECEIVE_MESSAGE_TYPE, options);
         enforcedOptions[1] = EnforcedOptionParam(targetEndpointId, LZ_COMPOSE_MESSAGE_TYPE, options);
         return enforcedOptions;
+    }
+
+    /**
+     * Gets the bridge current configuration.
+     * @dev Values of the default configuration defined by LayerZero can be found here:
+     *   - https://docs.layerzero.network/v2/deployments/deployed-contracts
+     *   - https://layerzeroscan.com/tools/defaults
+     * @dev see https://docs.layerzero.network/v2/developers/evm/configuration/dvn-executor-config
+     * @param endpoint The LayerZero endpoint contract address.
+     * @param bridge The LayerZero bridge contract address.
+     * @param eid The LayerZero endpoint ID.
+     */
+    function getBridgeConfig(
+        ILayerZeroEndpointV2 endpoint,
+        address bridge,
+        uint32 eid
+    ) public view returns (address, address, ExecutorConfig memory, UlnConfig memory) {
+        // Get libraries.
+        address sendLibrary = endpoint.getSendLibrary(bridge, eid);
+        (address receiveLibrary,) = endpoint.getReceiveLibrary(bridge, eid);
+        bytes memory config;
+        // Get executor config.
+        config = endpoint.getConfig(bridge, sendLibrary, eid, EXECUTOR_CONFIG_TYPE);
+        ExecutorConfig memory execConfig = abi.decode(config, (ExecutorConfig));
+        // Get ULN config.
+        config = endpoint.getConfig(bridge, sendLibrary, eid, ULN_CONFIG_TYPE);
+        UlnConfig memory ulnConfig = abi.decode(config, (UlnConfig));
+        return (sendLibrary, receiveLibrary, execConfig, ulnConfig);
+    }
+
+    /**
+     * Sets the send config on the source chain. Configuration includes:
+     * - Send library address.
+     * - Receive library address.
+     * - Executor config.
+     * - ULN config.
+     * Note:
+     * - ULNConfig defines security parameters (DVNs + confirmation threshold).
+     * - 0 values will be interpretted as defaults, so to apply NIL settings, use:
+     *      - uint8 internal constant NIL_DVN_COUNT = type(uint8).max;
+     *      - uint64 internal constant NIL_CONFIRMATIONS = type(uint64).max;
+     * @dev see https://docs.layerzero.network/v2/developers/evm/configuration/dvn-executor-config
+     * @param endpoint The LayerZero endpoint contract on the source (sending) chain.
+     * @param destinationEid The LayerZero endpoint ID of the destination (receiving) chain.
+     * @param bridge The LayerZero bridge contract on the source (sending) chain.
+     * @param sendLibrary The send library address.
+     * @param receiveLibrary The receive library address.
+     * @param executorConfig The executor config to set.
+     * @param ulnConfig The ULN config to set.
+     */
+    function setBridgeSendConfig(
+        ILayerZeroEndpointV2 endpoint,
+        uint32 destinationEid,
+        address bridge,
+        address sendLibrary,
+        address receiveLibrary,
+        ExecutorConfig memory executorConfig,
+        UlnConfig memory ulnConfig
+    ) public returns (bool) {
+        endpoint.setSendLibrary(bridge, destinationEid, sendLibrary);
+        endpoint.setReceiveLibrary(bridge, destinationEid, receiveLibrary, 0);
+        bytes memory encodedExecutorConfig = abi.encode(executorConfig);
+        bytes memory encodedUlnConfig  = abi.encode(ulnConfig);
+        SetConfigParam[] memory sendParams = new SetConfigParam[](2);
+        sendParams[0] = SetConfigParam(destinationEid, EXECUTOR_CONFIG_TYPE, encodedExecutorConfig);
+        sendParams[1] = SetConfigParam(destinationEid, ULN_CONFIG_TYPE, encodedUlnConfig);
+        endpoint.setConfig(bridge, sendLibrary, sendParams);
+        return true;
+    }
+
+    /**
+     * Sets the receive config on the destination chain. It only sets the ULN config.
+     * Note:
+     * - ULNConfig defines security parameters (DVNs + confirmation threshold).
+     * - 0 values will be interpretted as defaults, so to apply NIL settings, use:
+     *      - uint8 internal constant NIL_DVN_COUNT = type(uint8).max;
+     *      - uint64 internal constant NIL_CONFIRMATIONS = type(uint64).max;
+     * @dev see https://docs.layerzero.network/v2/developers/evm/configuration/dvn-executor-config
+     * @param endpoint The LayerZero endpoint contract on the destination (receiving) chain.
+     * @param sourceEid The LayerZero endpoint ID of the source (sending) chain.
+     * @param bridge The LayerZero bridge contract on the destination (receiving) chain.
+     * @param receiveLibrary The receive library address.
+     * @param ulnConfig The ULN config to set.
+     */
+    function setBridgeReceiveConfig(
+        ILayerZeroEndpointV2 endpoint,
+        uint32 sourceEid,
+        address bridge,
+        address receiveLibrary,
+        UlnConfig memory ulnConfig
+    ) public {
+        bytes memory encodedUlnConfig  = abi.encode(ulnConfig);
+        SetConfigParam[] memory receiveParams = new SetConfigParam[](1);
+        receiveParams[0] = SetConfigParam(sourceEid, RECEIVE_CONFIG_TYPE, encodedUlnConfig);
+        ILayerZeroEndpointV2(endpoint).setConfig(bridge, receiveLibrary, receiveParams);
     }
 }
