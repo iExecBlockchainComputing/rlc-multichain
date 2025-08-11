@@ -13,6 +13,7 @@ import {UlnConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBa
 import {ExecutorConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/SendLibBase.sol";
 import {SetConfigParam} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
 import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {LzConfig} from "../lib/ConfigLib.sol";
 
 // TODO move script/lib/* utility files in this folder.
 library LayerZeroUtils {
@@ -20,7 +21,6 @@ library LayerZeroUtils {
 
     uint16 constant LZ_RECEIVE_MESSAGE_TYPE = 1; // lzReceive()
     uint16 constant LZ_COMPOSE_MESSAGE_TYPE = 2; // lzCompose()
-
     uint16 constant EXECUTOR_CONFIG_TYPE = 1;
     uint16 constant ULN_CONFIG_TYPE = 2;
     uint16 constant RECEIVE_CONFIG_TYPE = 2;
@@ -122,69 +122,69 @@ library LayerZeroUtils {
     }
 
     /**
-     * Sets the send config on the source chain. Configuration includes:
+     * Sets the send and receive config on the source chain. First, set the config of send
+     * operations targeting the destination chain then set the config of the receive operations
+     * for requests coming from the destination chain.
+     * Send configuration includes:
      * - Send library address.
      * - Receive library address.
      * - Executor config.
      * - ULN config.
-     * Note:
-     * - ULNConfig defines security parameters (DVNs + confirmation threshold).
-     * - 0 values will be interpretted as defaults, so to apply NIL settings, use:
-     *      - uint8 internal constant NIL_DVN_COUNT = type(uint8).max;
-     *      - uint64 internal constant NIL_CONFIRMATIONS = type(uint64).max;
+     * Receive configuration includes:
+     * - Only ULN config.
+     * Note: ULNConfig defines security parameters (DVNs + confirmation threshold).
      * @dev see https://docs.layerzero.network/v2/developers/evm/configuration/dvn-executor-config
-     * @param endpoint The LayerZero endpoint contract on the source (sending) chain.
-     * @param destinationEid The LayerZero endpoint ID of the destination (receiving) chain.
-     * @param bridge The LayerZero bridge contract on the source (sending) chain.
-     * @param sendLibrary The send library address.
-     * @param receiveLibrary The receive library address.
-     * @param executorConfig The executor config to set.
-     * @param ulnConfig The ULN config to set.
+     * @param srcChainConfig The LayerZero configuration parameters for the source chain.
+     * @param dstChainConfig The LayerZero configuration parameters for the destination chain.
      */
-    function setBridgeSendConfig(
-        ILayerZeroEndpointV2 endpoint,
-        uint32 destinationEid,
-        address bridge,
-        address sendLibrary,
-        address receiveLibrary,
-        ExecutorConfig memory executorConfig,
-        UlnConfig memory ulnConfig
+    function setBridgeConfig(
+        LzConfig memory srcChainConfig,
+        LzConfig memory dstChainConfig
     ) public returns (bool) {
-        endpoint.setSendLibrary(bridge, destinationEid, sendLibrary);
-        endpoint.setReceiveLibrary(bridge, destinationEid, receiveLibrary, 0);
-        bytes memory encodedExecutorConfig = abi.encode(executorConfig);
-        bytes memory encodedUlnConfig  = abi.encode(ulnConfig);
+        // Replace 0s with NIL values.
+        _sanitizeZeroValues(srcChainConfig);
+        _sanitizeZeroValues(dstChainConfig);
+        // Set the send config for the destination chain (eid).
+        uint256 gracePeriod = 0;
+        ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(srcChainConfig.endpoint);
+        endpoint.setSendLibrary(srcChainConfig.bridge, dstChainConfig.endpointId, srcChainConfig.sendLibrary);
+        endpoint.setReceiveLibrary(srcChainConfig.bridge, dstChainConfig.endpointId, srcChainConfig.receiveLibrary, gracePeriod);
+        bytes memory encodedExecutorConfig = abi.encode(srcChainConfig.executorConfig);
+        bytes memory encodedUlnConfig  = abi.encode(srcChainConfig.ulnConfig);
         SetConfigParam[] memory sendParams = new SetConfigParam[](2);
-        sendParams[0] = SetConfigParam(destinationEid, EXECUTOR_CONFIG_TYPE, encodedExecutorConfig);
-        sendParams[1] = SetConfigParam(destinationEid, ULN_CONFIG_TYPE, encodedUlnConfig);
-        endpoint.setConfig(bridge, sendLibrary, sendParams);
+        sendParams[0] = SetConfigParam(dstChainConfig.endpointId, EXECUTOR_CONFIG_TYPE, encodedExecutorConfig);
+        sendParams[1] = SetConfigParam(dstChainConfig.endpointId, ULN_CONFIG_TYPE, encodedUlnConfig);
+        endpoint.setConfig(srcChainConfig.bridge, srcChainConfig.sendLibrary, sendParams);
+        // Set only the receive config for requests coming from the destination chain.
+        SetConfigParam[] memory receiveParams = new SetConfigParam[](1);
+        receiveParams[0] = SetConfigParam(dstChainConfig.endpointId, RECEIVE_CONFIG_TYPE, abi.encode(dstChainConfig.ulnConfig));
+        endpoint.setConfig(dstChainConfig.bridge, dstChainConfig.receiveLibrary, receiveParams);
         return true;
     }
 
     /**
-     * Sets the receive config on the destination chain. It only sets the ULN config.
-     * Note:
-     * - ULNConfig defines security parameters (DVNs + confirmation threshold).
-     * - 0 values will be interpretted as defaults, so to apply NIL settings, use:
-     *      - uint8 internal constant NIL_DVN_COUNT = type(uint8).max;
-     *      - uint64 internal constant NIL_CONFIRMATIONS = type(uint64).max;
+     * Sanitizes the zero values in the LayerZero configuration by replacing
+     * them with NIL values because 0 values will be interpretted as defaults.
+     * To apply NIL settings, use:
+     *   - uint8 internal constant NIL_DVN_COUNT = type(uint8).max;
+     *   - uint64 internal constant NIL_CONFIRMATIONS = type(uint64).max;
      * @dev see https://docs.layerzero.network/v2/developers/evm/configuration/dvn-executor-config
-     * @param endpoint The LayerZero endpoint contract on the destination (receiving) chain.
-     * @param sourceEid The LayerZero endpoint ID of the source (sending) chain.
-     * @param bridge The LayerZero bridge contract on the destination (receiving) chain.
-     * @param receiveLibrary The receive library address.
-     * @param ulnConfig The ULN config to set.
+     * @param chainConfig The LayerZero configuration to sanitize.
      */
-    function setBridgeReceiveConfig(
-        ILayerZeroEndpointV2 endpoint,
-        uint32 sourceEid,
-        address bridge,
-        address receiveLibrary,
-        UlnConfig memory ulnConfig
-    ) public {
-        bytes memory encodedUlnConfig  = abi.encode(ulnConfig);
-        SetConfigParam[] memory receiveParams = new SetConfigParam[](1);
-        receiveParams[0] = SetConfigParam(sourceEid, RECEIVE_CONFIG_TYPE, encodedUlnConfig);
-        ILayerZeroEndpointV2(endpoint).setConfig(bridge, receiveLibrary, receiveParams);
+    function _sanitizeZeroValues(LzConfig memory chainConfig) private pure {
+        uint8 NIL_DVN_COUNT = type(uint8).max;
+        uint64 NIL_CONFIRMATIONS = type(uint64).max;
+        if (chainConfig.ulnConfig.confirmations == 0) {
+            chainConfig.ulnConfig.confirmations = NIL_CONFIRMATIONS;
+        }
+        if (chainConfig.ulnConfig.requiredDVNCount == 0) {
+            chainConfig.ulnConfig.requiredDVNCount = NIL_DVN_COUNT;
+        }
+        if (chainConfig.ulnConfig.optionalDVNCount == 0) {
+            chainConfig.ulnConfig.optionalDVNCount = NIL_DVN_COUNT;
+        }
+        if (chainConfig.ulnConfig.optionalDVNThreshold == 0) {
+            chainConfig.ulnConfig.optionalDVNThreshold = NIL_DVN_COUNT;
+        }
     }
 }

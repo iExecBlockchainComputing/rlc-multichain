@@ -5,6 +5,19 @@ pragma solidity ^0.8.22;
 import {Vm} from "forge-std/Vm.sol";
 import {console} from "forge-std/console.sol";
 import {stdJson} from "forge-std/StdJson.sol";
+import {StdConstants} from "forge-std/StdConstants.sol";
+import {UlnConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
+import {ExecutorConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/SendLibBase.sol";
+
+struct LzConfig {
+    address endpoint;
+    uint32 endpointId;
+    address bridge;
+    address sendLibrary;
+    address receiveLibrary;
+    ExecutorConfig executorConfig;
+    UlnConfig ulnConfig;
+}
 
 /**
  * @title ConfigLib
@@ -14,7 +27,8 @@ import {stdJson} from "forge-std/StdJson.sol";
 library ConfigLib {
     using stdJson for string;
 
-    Vm constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    Vm private constant vm = StdConstants.VM;
+    string constant CONFIG_FILE_PATH = "config/config.json";
 
     /**
      * @dev Common configuration parameters structure
@@ -101,7 +115,7 @@ library ConfigLib {
      * @return params Common configuration parameters
      */
     function readCommonConfig(string memory chain) internal view returns (CommonConfigParams memory params) {
-        string memory config = vm.readFile("config/config.json");
+        string memory config = vm.readFile(CONFIG_FILE_PATH);
         string memory prefix = string.concat(".chains.", chain);
         params.initialAdmin = config.readAddress(".initialAdmin");
         params.initialPauser = config.readAddress(".initialPauser");
@@ -122,13 +136,46 @@ library ConfigLib {
     }
 
     /**
+     * @dev Reads the LayerZero configuration from the config.json file for the specified chain.
+     * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia")
+     * @return lzConfig The LayerZero configuration parameters for the specified chain
+     */
+    function readLzConfig(string memory chain) internal view returns (LzConfig memory) {
+        string memory json = vm.readFile(CONFIG_FILE_PATH);
+        string memory prefix = string.concat(".chains.", chain);
+        LzConfig memory lzConfig;
+        lzConfig.endpoint = json.readAddress(string.concat(prefix, ".lzEndpointAddress"));
+        lzConfig.endpointId = uint32(json.readUint(string.concat(prefix, ".lzEndpointId")));
+        lzConfig.bridge = json.readAddress(string.concat(prefix, ".iexecLayerZeroBridgeAddress"));
+        lzConfig.sendLibrary = json.readAddress(string.concat(prefix, ".lzSendLibraryAddress"));
+        lzConfig.receiveLibrary = json.readAddress(string.concat(prefix, ".lzReceiveLibraryAddress"));
+        lzConfig.executorConfig = ExecutorConfig({
+            executor: json.readAddress(string.concat(prefix, ".lzExecutorConfig.executor")),
+            maxMessageSize: uint32(json.readUint(string.concat(prefix, ".lzExecutorConfig.maxMessageSize")))
+        });
+        lzConfig.ulnConfig = UlnConfig({
+            confirmations: uint64(json.readUint(string.concat(prefix, ".lzUlnConfig.confirmations"))),
+            requiredDVNCount: uint8(json.readUint(string.concat(prefix, ".lzUlnConfig.requiredDvnCount"))),
+            requiredDVNs: json.readAddressArray(
+                string.concat(prefix, ".lzUlnConfig.requiredDVNs")
+            ),
+            optionalDVNCount: uint8(json.readUint(string.concat(prefix, ".lzUlnConfig.optionalDVNCount"))),
+            optionalDVNs: json.readAddressArray(
+                string.concat(prefix, ".lzUlnConfig.optionalDVNs")
+            ),
+            optionalDVNThreshold: uint8(json.readUint(string.concat(prefix, ".lzUlnConfig.optionalDVNThreshold")))
+        });
+        return lzConfig;
+    }
+
+    /**
      * @dev Updates the config file with a new address for a specific chain
      * @param chain The chain identifier (e.g., "sepolia", "arbitrum_sepolia")
      * @param fieldName The field name to update (e.g., "iexecLayerZeroBridgeAddress")
      * @param value The address value to set
      */
     function updateConfigAddress(string memory chain, string memory fieldName, address value) internal {
-        string memory configPath = "config/config.json";
+        string memory configPath = CONFIG_FILE_PATH;
         // Check if file exists
         if (!vm.exists(configPath)) {
             console.log("Config file not found at:", configPath);
