@@ -14,7 +14,6 @@ import {RLCCrosschainToken} from "../../src/RLCCrosschainToken.sol";
 import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {ConfigLib} from "./../../script/lib/ConfigLib.sol";
-import {console} from "forge-std/console.sol";
 
 contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRole, AcceptAdminRole {
     using TestUtils for *;
@@ -61,10 +60,10 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRole, A
     }
 
     // ====== BeginTransferAdminRole.validateAdminTransfer ======
-    // Test validation through beginTransfer since validateAdminTransfer is internal
     function test_ValidateAdminTransfer() public {
-        // This should succeed since validation passes and admin has permissions
-        beginTransferAsAdmin(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
+        vm.startPrank(admin);
+        super.beginTransfer(address(rlcLiquidityUnifier), newAdmin, "RLCLiquidityUnifier");
+        vm.stopPrank();
     }
 
     function test_ValidateAdminTransfer_RevertWhen_NewAdminIsZeroAddress() public {
@@ -240,15 +239,15 @@ contract TransferAdminRoleScriptTest is TestHelperOz5, BeginTransferAdminRole, A
     /**
      * @notice External wrapper for beginTransfer to enable proper revert testing
      * @dev This function is necessary for testing revert scenarios because:
-     * When testing internal functions that call `super`, 
+     * When testing internal functions that call `super`,
      *    Foundry's vm.expectRevert doesn't properly catch reverts from internal function calls.
      *    This is because internal calls don't create new call frames that Foundry can intercept.
      *
      * This pattern allows vm.expectRevert to work correctly by ensuring the revert happens
      * in a separate call frame that Foundry can detect and validate.
-     * 
+     *
      * @param contractAddress The address of the contract to transfer admin rights
-     * @param _newAdminAddr The address of the new admin  
+     * @param _newAdminAddr The address of the new admin
      * @param contractName The name of the contract for logging purposes
      */
     function externalCallBeginTransfer(address contractAddress, address _newAdminAddr, string memory contractName)
