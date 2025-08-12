@@ -1,0 +1,75 @@
+name: Bridge Pause Operations - Safe 
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Pause operation to perform'
+        required: true
+        type: choice
+        options:
+          - 'pause-bridge'
+          - 'unpause-bridge'
+          - 'pause-outbound'
+          - 'unpause-outbound'
+      network:
+        description: 'Network'
+        required: true
+        type: choice
+        options:
+          - ethereum
+          - arbitrum
+          - sepolia
+          - arbitrum_sepolia
+        default: 'sepolia'
+
+jobs:
+  transfer-admin-role:
+    runs-on: ubuntu-latest
+    environment: 
+      name: ${{ inputs.network }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Build contracts
+        run: forge build
+
+      - name: Set operation details
+        id: operation-details
+        run: |
+          case "${{ github.event.inputs.operation }}" in
+            pause-bridge)
+              echo "foundry_script_target=PauseBridge" >> $GITHUB_OUTPUT
+              ;;
+            unpause-bridge)
+              echo "foundry_script_target=UnpauseBridgen" >> $GITHUB_OUTPUT
+              ;;
+            pause-outbound)
+              echo "foundry_script_target=PauseOutboundTransfers" >> $GITHUB_OUTPUT
+              ;;
+            unpause-outbound)
+              echo "foundry_script_target=UnpauseOutboundTransfers" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Execute Transfer Admin Role
+        id: transfer-admin
+        uses: iExecBlockchainComputing/safe-tx-proposer@feature/add-build
+        with:
+          safe-address: ${{ vars.SAFE_ADDRESS }}
+          safe-api-key: ${{ secrets.SAFE_API_KEY }}
+          rpc-url: ${{ secrets.RPC_URL }}
+          proposer-private-key: ${{ secrets.PROPOSER_PRIVATE_KEY }}
+          foundry-script-path: 'script/PauseBridge.s.sol:${{ steps.operation-details.outputs.foundry_script_target }}'
+        env:
+          CHAIN: ${{ inputs.network }}
