@@ -164,6 +164,7 @@ library LayerZeroUtils {
         //
         // Set only the receive config for requests in the opposite direction (coming from the destination chain).
         //
+        /// @dev note that the receive config must match the send config on the opposite chain.
         SetConfigParam[] memory receiveParams = new SetConfigParam[](1);
         receiveParams[0] = SetConfigParam(dstChainConfig.endpointId, RECEIVE_CONFIG_TYPE, abi.encode(dstChainConfig.ulnConfig));
         endpoint.setConfig(dstChainConfig.bridge, dstChainConfig.receiveLibrary, receiveParams);
