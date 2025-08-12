@@ -140,26 +140,33 @@ library LayerZeroUtils {
     function setBridgeConfig(
         LzConfig memory srcChainConfig,
         LzConfig memory dstChainConfig
-    ) public returns (bool) {
+    ) public {
         // Replace 0s with NIL values.
         _sanitizeZeroValues(srcChainConfig);
         _sanitizeZeroValues(dstChainConfig);
+        //
         // Set the send config for the destination chain (eid).
-        uint256 gracePeriod = 0;
+        //
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(srcChainConfig.endpoint);
+        // Set the send and receive libraries.
+        uint256 gracePeriod = 0;
         endpoint.setSendLibrary(srcChainConfig.bridge, dstChainConfig.endpointId, srcChainConfig.sendLibrary);
         endpoint.setReceiveLibrary(srcChainConfig.bridge, dstChainConfig.endpointId, srcChainConfig.receiveLibrary, gracePeriod);
+        // Set the executor and ULN config.
         bytes memory encodedExecutorConfig = abi.encode(srcChainConfig.executorConfig);
+        // ULNConfig defines security parameters (DVNs + confirmation threshold)
         bytes memory encodedUlnConfig  = abi.encode(srcChainConfig.ulnConfig);
         SetConfigParam[] memory sendParams = new SetConfigParam[](2);
+        // ExecutorConfig sets max bytes per cross-chain message & the address that pays destination execution fees
         sendParams[0] = SetConfigParam(dstChainConfig.endpointId, EXECUTOR_CONFIG_TYPE, encodedExecutorConfig);
         sendParams[1] = SetConfigParam(dstChainConfig.endpointId, ULN_CONFIG_TYPE, encodedUlnConfig);
         endpoint.setConfig(srcChainConfig.bridge, srcChainConfig.sendLibrary, sendParams);
-        // Set only the receive config for requests coming from the destination chain.
+        //
+        // Set only the receive config for requests in the opposite direction (coming from the destination chain).
+        //
         SetConfigParam[] memory receiveParams = new SetConfigParam[](1);
         receiveParams[0] = SetConfigParam(dstChainConfig.endpointId, RECEIVE_CONFIG_TYPE, abi.encode(dstChainConfig.ulnConfig));
         endpoint.setConfig(dstChainConfig.bridge, dstChainConfig.receiveLibrary, receiveParams);
-        return true;
     }
 
     /**

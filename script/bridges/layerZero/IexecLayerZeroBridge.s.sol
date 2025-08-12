@@ -9,6 +9,10 @@ import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
+import {UlnConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
+import {ExecutorConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/SendLibBase.sol";
+import {SetConfigParam} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
+import {ILayerZeroEndpointV2} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import {ConfigLib} from "./../../lib/ConfigLib.sol";
 import {IexecLayerZeroBridge} from "../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
@@ -16,6 +20,7 @@ import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {UUPSProxyDeployer} from "../../lib/UUPSProxyDeployer.sol";
 import {UpgradeUtils} from "../../lib/UpgradeUtils.sol";
 import {LayerZeroUtils} from "../../utils/LayerZeroUtils.sol";
+import {LzConfig} from "../../lib/ConfigLib.sol";
 
 /**
  * A script to deploy and initialize the IexecLayerZeroBridge contract.
@@ -88,9 +93,11 @@ contract Configure is Script {
         string memory targetChain = vm.envString("TARGET_CHAIN");
         ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(sourceChain);
         ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(targetChain);
+        LzConfig memory srcChainLzConfig = ConfigLib.readLzConfig(sourceChain);
+        LzConfig memory dstChainLzConfig = ConfigLib.readLzConfig(targetChain);
         console.log("Configuring bridge [chain:%s, address:%s]", sourceChain, sourceParams.iexecLayerZeroBridgeAddress);
         vm.startBroadcast();
-        configure(sourceParams, targetParams);
+        configure(sourceParams, targetParams, srcChainLzConfig, dstChainLzConfig);
         vm.stopBroadcast();
     }
 
@@ -102,21 +109,24 @@ contract Configure is Script {
      */
     function configure(
         ConfigLib.CommonConfigParams memory sourceParams,
-        ConfigLib.CommonConfigParams memory targetParams
+        ConfigLib.CommonConfigParams memory targetParams,
+        LzConfig memory srcChainLzConfig,
+        LzConfig memory dstChainLzConfig
     ) public returns (bool) {
         address bridge = sourceParams.iexecLayerZeroBridgeAddress;
         RLCLiquidityUnifier rlcLiquidityUnifier = RLCLiquidityUnifier(sourceParams.rlcLiquidityUnifierAddress);
         RLCCrosschainToken rlcCrosschainToken = RLCCrosschainToken(sourceParams.rlcCrosschainTokenAddress);
         bool bool1 = setBridgePeerIfNeeded(bridge, targetParams.lzEndpointId, targetParams.iexecLayerZeroBridgeAddress);
         bool bool2 = setEnforcedOptionsIfNeeded(bridge, targetParams.lzEndpointId);
-        bool bool3 = authorizeBridgeIfNeeded(
+        bool bool3 = setExecutorAndUlnConfigIfNeeded(srcChainLzConfig, dstChainLzConfig);
+        bool bool4 = authorizeBridgeIfNeeded(
             bridge,
             sourceParams.approvalRequired ? address(rlcLiquidityUnifier) : address(rlcCrosschainToken),
             sourceParams.approvalRequired
                 ? rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE()
                 : rlcCrosschainToken.TOKEN_BRIDGE_ROLE()
         );
-        return bool1 || bool2 || bool3;
+        return bool1 || bool2 || bool3 || bool4;
     }
 
     /**
@@ -168,6 +178,17 @@ contract Configure is Script {
             vm.toString(options)
         );
         bridge.setEnforcedOptions(enforcedOptions);
+        return true;
+    }
+
+    // TODO use LayerZero CLI:
+    // https://docs.layerzero.network/v2/get-started/create-lz-oapp/configuring-pathways
+    // More on DVNs https://docs.layerzero.network/v2/concepts/modular-security/security-stack-dvns
+    function setExecutorAndUlnConfigIfNeeded(
+        LzConfig memory srcChainLzConfig,
+        LzConfig memory dstChainLzConfig
+    ) public returns (bool) {
+        LayerZeroUtils.setBridgeConfig(srcChainLzConfig, dstChainLzConfig);
         return true;
     }
 
