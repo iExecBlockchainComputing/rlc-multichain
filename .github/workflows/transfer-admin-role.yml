@@ -19,6 +19,7 @@ on:
         type: string
 
 jobs:
+# TODO: check if setup-matrix is needed
   transfer-admin:
     runs-on: ubuntu-latest
     environment: ${{ inputs.network }}
