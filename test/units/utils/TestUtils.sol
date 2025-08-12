@@ -15,6 +15,7 @@ import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
 import {Deploy as RLCLiquidityUnifierDeployScript} from "../../../script/RLCLiquidityUnifier.s.sol";
 import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
+import {ConfigLib} from "./../../../script/lib/ConfigLib.sol";
 
 library TestUtils {
     using OptionsBuilder for bytes;
