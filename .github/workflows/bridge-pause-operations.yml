@@ -17,10 +17,10 @@ on:
         required: true
         type: choice
         options:
-          - sepolia
           - ethereum
-          - arbitrum_sepolia
           - arbitrum
+          - sepolia
+          - arbitrum_sepolia
         default: 'sepolia'
 
 jobs:
