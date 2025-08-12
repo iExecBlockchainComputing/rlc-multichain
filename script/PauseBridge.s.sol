@@ -156,7 +156,6 @@ contract UnpauseOutboundTransfers is Script {
     }
 }
 
-
 library PauseBridgeValidation {
     /**
      * @notice Validates that the bridge contract address is not zero
