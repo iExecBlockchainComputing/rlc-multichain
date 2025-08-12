@@ -12,24 +12,59 @@ on:
           - 'unpause-bridge'
           - 'pause-outbound'
           - 'unpause-outbound'
-      network:
-        description: 'Network'
+      network_type:
+        description: 'Network type to configure'
         required: true
         type: choice
         options:
-          - ethereum
-          - arbitrum
-          - sepolia
-          - arbitrum_sepolia
-        default: 'sepolia'
-
+          - testnets
+          - mainnets
+        default: 'testnets'
 jobs:
-  bridge-pause-operation:
+  setup-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set matrix based on network type
+        id: set-matrix
+        run: |
+          if [ "${{ github.event.inputs.network_type }}" == "testnets" ]; then
+            MATRIX='[
+              {
+                "chain": "sepolia",
+              },
+              {
+                "chain": "arbitrum_sepolia",
+              }
+            ]'
+          else
+            MATRIX='[
+              {
+                "chain": "ethereum",
+              },
+              {
+                "chain": "arbitrum"
+              }
+            ]'
+          fi
+          
+          # Convertir en une ligne pour GitHub Output
+          echo "matrix=$(echo "$MATRIX" | jq -c .)" >> $GITHUB_OUTPUT
+
+  bridge-pause-operation:
+    needs: setup-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+      fail-fast: false
+    concurrency:
+      group: pause-bridge-${{ matrix.chain }}
+      cancel-in-progress: true
     env:
       CI: true
-      PAUSER_PRIVATE_KEY: ${{ secrets.PAUSER_PRIVATE_KEY }}
-    environment: ${{ inputs.network }}
+    environment: ${{ matrix.chain }}
     
     steps:
       - name: Checkout repository
@@ -61,9 +96,10 @@ jobs:
               ;;
           esac
 
-      - name: Run pause operation (live)
+      - name: Run pause operation on bridge from ${{ matrix.chain }}
         if: ${{ github.event.inputs.dry_run == 'false' }}
         env:
-          CHAIN: ${{ inputs.network }}
+          CHAIN: ${{ matrix.chain }}
           RPC_URL: ${{ secrets.RPC_URL }}
+          PAUSER_PRIVATE_KEY: ${{ secrets.PAUSER_PRIVATE_KEY }}
         run: make ${{ steps.operation-details.outputs.make_target }}
