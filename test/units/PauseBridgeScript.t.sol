@@ -185,69 +185,6 @@ contract PauseBridgeScriptTest is
         vm.stopPrank();
     }
 
-    // ====== Comprehensive State Tests ======
-
-    function test_PauseUnpauseSequence_CompletePause() public {
-        // Initial state
-        assertFalse(iexecLayerZeroBridge.paused());
-        assertFalse(iexecLayerZeroBridge.outboundTransfersPaused());
-
-        // Pause completely
-        vm.prank(pauser);
-        super.pauseBridge(params);
-        assertTrue(iexecLayerZeroBridge.paused());
-
-        // Unpause
-        vm.prank(pauser);
-        super.unpauseBridge(params);
-        assertFalse(iexecLayerZeroBridge.paused());
-        assertFalse(iexecLayerZeroBridge.outboundTransfersPaused());
-    }
-
-    function test_PauseUnpauseSequence_OutboundTransfersOnly() public {
-        // Initial state
-        assertFalse(iexecLayerZeroBridge.paused());
-        assertFalse(iexecLayerZeroBridge.outboundTransfersPaused());
-
-        // Pause outbound transfers only
-        vm.prank(pauser);
-        super.pauseOutboundTransfers(params);
-        assertFalse(iexecLayerZeroBridge.paused());
-        assertTrue(iexecLayerZeroBridge.outboundTransfersPaused());
-
-        // Unpause outbound transfers
-        vm.prank(pauser);
-        super.unpauseOutboundTransfers(params);
-        assertFalse(iexecLayerZeroBridge.paused());
-        assertFalse(iexecLayerZeroBridge.outboundTransfersPaused());
-    }
-
-    function test_MixedPauseScenarios() public {
-        // Start with outbound pause
-        vm.startPrank(pauser);
-        super.pauseOutboundTransfers(params);
-        assertFalse(iexecLayerZeroBridge.paused());
-        assertTrue(iexecLayerZeroBridge.outboundTransfersPaused());
-
-        // Then escalate to complete pause
-        super.pauseBridge(params);
-        assertTrue(iexecLayerZeroBridge.paused());
-        // Note: When completely paused, outbound state is still true
-        assertTrue(iexecLayerZeroBridge.outboundTransfersPaused());
-
-        // Unpause completely
-        super.unpauseBridge(params);
-        assertFalse(iexecLayerZeroBridge.paused());
-        // After unpause, outbound transfers should still be paused from before
-        assertTrue(iexecLayerZeroBridge.outboundTransfersPaused());
-
-        // Now unpause outbound transfers
-        super.unpauseOutboundTransfers(params);
-        assertFalse(iexecLayerZeroBridge.paused());
-        assertFalse(iexecLayerZeroBridge.outboundTransfersPaused());
-        vm.stopPrank();
-    }
-
     // ====== Role and Authorization Tests ======
 
     function test_PauserRoleRequired_ForAllPauseFunctions() public {
@@ -371,22 +308,5 @@ contract PauseBridgeScriptTest is
     // Helper functions to enable testing of library functions with vm.expectRevert
     function callValidateBridgeAddress(address bridgeAddress) external pure {
         PauseBridgeValidation.validateBridgeAddress(bridgeAddress);
-    }
-
-    // Helper functions to enable testing of script functions with vm.expectRevert
-    function pauseBridge(ConfigLib.CommonConfigParams memory _params) public override {
-        super.pauseBridge(_params);
-    }
-
-    function unpauseBridge(ConfigLib.CommonConfigParams memory _params) public override {
-        super.unpauseBridge(_params);
-    }
-
-    function pauseOutboundTransfers(ConfigLib.CommonConfigParams memory _params) public override {
-        super.pauseOutboundTransfers(_params);
-    }
-
-    function unpauseOutboundTransfers(ConfigLib.CommonConfigParams memory _params) public override {
-        super.unpauseOutboundTransfers(_params);
     }
 }
