@@ -4,7 +4,7 @@
       "release-type": "simple",
       "changelog-path": "CHANGELOG.md",
       "include-v-in-tag": true,
-      "prerelease": true,
+      "prerelease": false,
       "prerelease-type": "rc",
       "versioning": "prerelease"
     }
