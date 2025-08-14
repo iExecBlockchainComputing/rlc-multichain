@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.0](https://github.com/iExecBlockchainComputing/rlc-multichain/compare/v0.1.0-rc...v0.1.0) (2025-08-14)
+
+### 🚀 Features
+
+* Add audit report ([#99](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/99)) ([96641c8](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/96641c823fdbcf11003d76179831b8b734cefbce))
+* Add transfer admin role workflow and scripts for multi-chain su… ([#90](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/90)) ([597ef5b](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/597ef5b5c22cef9787b5d2a4de6fb94a0fdb7818))
+* Deploy on Arbitrum mainnet ([#89](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/89)) ([0774e60](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/0774e606143bdf3e022c3c887ace0b0d638f6f19))
+* prepare mainnet ([#84](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/84)) ([67f1f54](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/67f1f5467eed743cc627afd6153f865e99977e91))
+* Refactor config script to prepare set bridge DVN task ([#92](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/92)) ([459e2ed](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/459e2ed493768aeee9e175a79201496633b3ae87))
+* remove unused params in release-please([#96](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/96)) ([97dba73](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/97dba73ae92577d7b9d0b55456a2c066459947b8))
+
+### ✨ Polish
+
+* Rename `lzChainId` to `lzEndpointId` ([#91](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/91)) ([6463463](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/6463463055d419dab6fedaf8ff640d612aaaee4d))
+
 ## [0.1.0-rc](https://github.com/iExecBlockchainComputing/rlc-multichain/compare/v0.1.0...v0.1.0-rc) (2025-07-30)
 
 ### 🚀 Features
