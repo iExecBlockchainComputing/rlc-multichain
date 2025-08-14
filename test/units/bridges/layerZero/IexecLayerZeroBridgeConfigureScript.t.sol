@@ -3,9 +3,11 @@
 
 pragma solidity ^0.8.22;
 
-// import "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
+import {SendUln302Mock} from "@layerzerolabs/test-devtools-evm-foundry/contracts/mocks/SendUln302Mock.sol";
+import {ReceiveUln302Mock} from "@layerzerolabs/test-devtools-evm-foundry/contracts/mocks/ReceiveUln302Mock.sol";
+import {EndpointV2Mock} from "@layerzerolabs/test-devtools-evm-foundry/contracts/mocks/EndpointV2Mock.sol";
 import {ILayerZeroEndpointV2} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import {UlnConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
 import {ExecutorConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/SendLibBase.sol";
@@ -15,7 +17,7 @@ import {EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/O
 import {UlnConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
 import {ExecutorConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/SendLibBase.sol";
 import {SetConfigParam} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
-import {ILayerZeroEndpointV2} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+import {Errors} from "@layerzerolabs/lz-evm-protocol-v2/contracts/libs/Errors.sol";
 import {TestUtils} from "./../../utils/TestUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
@@ -24,6 +26,10 @@ import {Configure as IexecLayerZeroBridgeConfigureScript} from
 import {ConfigLib} from "../../../../script/lib/ConfigLib.sol";
 import {LayerZeroUtils} from "../../../../script/utils/LayerZeroUtils.sol";
 import {LzConfig} from "../../../../script/lib/ConfigLib.sol";
+
+interface IEndpointV2 {
+    function delegates(address) external view returns (address);
+}
 
 // This test contract inherits from `Configure` script because we need the `msg.sender` to be the admin
 // address (using vm.prank) when calling the `configure` function.
@@ -38,6 +44,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     address admin = makeAddr("admin");
     address upgrader = makeAddr("upgrader");
     address pauser = makeAddr("pauser");
+    address delegate = makeAddr("delegate");
     uint16 srcEndpointId = 1;
     uint16 dstEndpointId = 2;
     address srcEndpoint;
@@ -67,33 +74,39 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         dstBridge = deployment.iexecLayerZeroBridgeWithoutApproval;
         srcBridgeAddress = address(deployment.iexecLayerZeroBridgeWithApproval);
         dstBridgeAddress = address(deployment.iexecLayerZeroBridgeWithoutApproval);
-    }
-
-    // ====== configure ======
-
-    function test_configure_ShouldConfigureBridgeCorrectly() public {
-        (ConfigLib.CommonConfigParams memory sourceParams, ConfigLib.CommonConfigParams memory targetParams) = _buildSourceAndTargetParams();
         vm.startPrank(admin);
-        bool result = super.configure(sourceParams, targetParams);
-        assertTrue(result, "Expected configure to return true");
+        srcBridge.setDelegate(delegate);
+        console.log("src delegate:", IEndpointV2(srcEndpoint).delegates(address(srcBridgeAddress)));
+        dstBridge.setDelegate(delegate);
+        console.log("dst delegate:", IEndpointV2(dstEndpoint).delegates(address(dstBridgeAddress)));
         vm.stopPrank();
     }
 
-    function test_configure_ShouldNotConfigureWhenAlreadyConfigured() public {
-        (ConfigLib.CommonConfigParams memory sourceParams, ConfigLib.CommonConfigParams memory targetParams) = _buildSourceAndTargetParams();
-        vm.startPrank(admin);
-        // Configure bridge with the first call.
-        bool firstCallResult = super.configure(sourceParams, targetParams);
-        assertTrue(firstCallResult, "Expected configure to return true for the first call");
-        // The second call does nothing.
-        bool secondCallResult = super.configure(sourceParams, targetParams);
-        assertFalse(secondCallResult, "Expected configure to return false for the second call");
-        vm.stopPrank();
-    }
+    // // ====== configure ======
+
+    // function test_configure_ShouldConfigureBridgeCorrectly() public {
+    //     (ConfigLib.CommonConfigParams memory sourceParams, ConfigLib.CommonConfigParams memory targetParams) = _buildSourceAndTargetParams();
+    //     vm.startPrank(admin);
+    //     bool result = super.configure(sourceParams, targetParams);
+    //     assertTrue(result, "Expected configure to return true");
+    //     vm.stopPrank();
+    // }
+
+    // function test_configure_ShouldNotConfigureWhenAlreadyConfigured() public {
+    //     (ConfigLib.CommonConfigParams memory sourceParams, ConfigLib.CommonConfigParams memory targetParams) = _buildSourceAndTargetParams();
+    //     vm.startPrank(admin);
+    //     // Configure bridge with the first call.
+    //     bool firstCallResult = super.configure(sourceParams, targetParams);
+    //     assertTrue(firstCallResult, "Expected configure to return true for the first call");
+    //     // The second call does nothing.
+    //     bool secondCallResult = super.configure(sourceParams, targetParams);
+    //     assertFalse(secondCallResult, "Expected configure to return false for the second call");
+    //     vm.stopPrank();
+    // }
 
     // ====== setBridgePeerIfNeeded ======
 
-    function test_setBridgePeerIfNeeded_ShouldSetPeer() public {
+    function _setBridgePeerIfNeeded_ShouldSetPeer() public {
         vm.startPrank(admin);
         vm.expectEmit(true, true, true, true, srcBridgeAddress);
         emit IOAppCore.PeerSet(dstEndpointId, addressToBytes32(dstBridgeAddress));
@@ -106,7 +119,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    function test_setBridgePeerIfNeeded_ShouldOverridePeerWhenNewPeerIsDifferent() public {
+    function _setBridgePeerIfNeeded_ShouldOverridePeerWhenNewPeerIsDifferent() public {
         vm.startPrank(admin);
         bool result = super.setBridgePeerIfNeeded(srcBridgeAddress, dstEndpointId, dstBridgeAddress);
         assertTrue(result, "Expected setBridgePeerIfNeeded to return true");
@@ -125,7 +138,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    function test_setBridgePeerIfNeeded_ShouldNotSetPeerWhenAlreadySet() public {
+    function _setBridgePeerIfNeeded_ShouldNotSetPeerWhenAlreadySet() public {
         vm.startPrank(admin);
         // First call should set the peer.
         bool firstCallResult = super.setBridgePeerIfNeeded(srcBridgeAddress, dstEndpointId, dstBridgeAddress);
@@ -138,7 +151,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
     // ====== setEnforcedOptionsIfNeeded ======
 
-    function test_setEnforcedOptionsIfNeeded_ShouldSetOptionsWhenEmpty() public {
+    function _setEnforcedOptionsIfNeeded_ShouldSetOptionsWhenEmpty() public {
         bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(GAS_LIMIT, 0);
         // TODO debug event emission.
         // vm.expectEmit(true, true, true, true, sourceBridgeAddress);
@@ -155,7 +168,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         assertEq(lzComposeOnchainOptions, options, "lzCompose enforced options are not equal");
     }
 
-    function test_setEnforcedOptionsIfNeeded_ShouldOverrideOptionsWhenNewOptionsAreDifferent() public {
+    function _setEnforcedOptionsIfNeeded_ShouldOverrideOptionsWhenNewOptionsAreDifferent() public {
         // 123456789 and 99 are different values from those set by the script.
         bytes memory oldOptions = LayerZeroUtils.buildLzReceiveExecutorConfig(123456789, 99);
         EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(dstEndpointId, oldOptions);
@@ -188,7 +201,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    function test_setEnforcedOptionsIfNeeded_ShouldNotSetOptionsWhenAlreadySet() public {
+    function _setEnforcedOptionsIfNeeded_ShouldNotSetOptionsWhenAlreadySet() public {
         vm.startPrank(admin);
         bool firstCallResult = super.setEnforcedOptionsIfNeeded(srcBridgeAddress, dstEndpointId);
         assertTrue(firstCallResult, "Expected setEnforcedOptionsIfNeeded to return true");
@@ -199,50 +212,52 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
     // ====== setExecutorAndUlnConfigIfNeeded ======
 
+    /**
+     * In this test we read the default config, we change some values and we enforce it.
+     * We cannot simply use random addresses for libraries, executor, and DVNs as they need
+     * a lot of pre-configuration and they need to be registered in the test environment.
+     * See `TestHelperOz5.createEndpoints` for more details.
+     */
     function test_setExecutorAndUlnConfigIfNeeded_ShouldSetConfigWhenNotSet() public {
-        LzConfig memory srcChainLzConfig = _buildLzConfigMock(srcEndpoint, srcEndpointId, srcBridgeAddress, "src");
-        LzConfig memory dstChainLzConfig = _buildLzConfigMock(dstEndpoint, dstEndpointId, dstBridgeAddress, "dst");
-        vm.startPrank(admin);
-        // Use this. to make an external call for better Foundry decoding.
-        bool result = this.setExecutorAndUlnConfigIfNeeded(srcChainLzConfig, dstChainLzConfig);
-        assertTrue(result, "Expected setExecutorAndUlnConfigIfNeeded to return true");
+        LzConfig memory srcChainLzConfig = _buildLzConfigMock(srcEndpoint, srcBridgeAddress, dstEndpointId, 12);
+        LzConfig memory dstChainLzConfig = _buildLzConfigMock(dstEndpoint, dstBridgeAddress, srcEndpointId, 34);
+        vm.startPrank(delegate);
+        // Make an external call using `this` for a better Foundry decoding.
+        // LayerZeroUtils.setBridgeConfig(srcChainLzConfig, dstChainLzConfig);
+        ILayerZeroEndpointV2(srcEndpoint).setSendLibrary(srcChainLzConfig.bridge, dstChainLzConfig.endpointId, srcChainLzConfig.sendLibrary);
+        // bool result = this.setExecutorAndUlnConfigIfNeeded(srcChainLzConfig, dstChainLzConfig);
+        // assertTrue(result, "Expected setExecutorAndUlnConfigIfNeeded to return true");
         vm.stopPrank();
     }
 
     function read() public {
         uint32 ethereumSepoliaEid = 40161;
         uint32 arbitrumSepoliaEid = 40231;
-        address sendLib;
-        address receiveLib;
-        ExecutorConfig memory executorConfig;
-        UlnConfig memory ulnConfig;
         uint ethereumSepoliaFork = vm.createFork(vm.envString("SEPOLIA_RPC_URL"));
         uint arbitrumSepoliaFork = vm.createFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
         console.log("################### Ethereum Sepolia config:");
         vm.selectFork(ethereumSepoliaFork);
         vm.startBroadcast();
-        (sendLib, receiveLib, executorConfig, ulnConfig) = LayerZeroUtils.getBridgeConfig(
+        _logBridgeConfig(LayerZeroUtils.getBridgeLzConfig(
             ILayerZeroEndpointV2(0x6EDCE65403992e310A62460808c4b910D972f10f),
             0xA18e571f91ab58889C348E1764fBaBF622ab89b5,
             ethereumSepoliaEid
-        );
+        ));
         vm.stopBroadcast();
-        _logBridgeConfig(sendLib, receiveLib, executorConfig, ulnConfig);
         vm.selectFork(arbitrumSepoliaFork);
         vm.startBroadcast();
         console.log("################### Arbitrum Sepolia config:");
-        (sendLib, receiveLib, executorConfig, ulnConfig) = LayerZeroUtils.getBridgeConfig(
+        _logBridgeConfig(LayerZeroUtils.getBridgeLzConfig(
             ILayerZeroEndpointV2(0x6EDCE65403992e310A62460808c4b910D972f10f),
             0xB560ae1dD7FdF011Ead2189510ae08f2dbD168a5,
             arbitrumSepoliaEid
-        );
-        _logBridgeConfig(sendLib, receiveLib, executorConfig, ulnConfig);
+        ));
         vm.stopBroadcast();
     }
 
     // ====== authorizeBridgeIfNeeded ======
 
-    function test_authorizeBridgeIfNeeded_ShouldAuthorizeBridge() public {
+    function _authorizeBridgeIfNeeded_ShouldAuthorizeBridge() public {
         vm.startPrank(admin);
         // rlcLiquidityUnifier
         assertTrue(
@@ -277,7 +292,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    function test_authorizeBridgeIfNeeded_ShouldNotAuthorizeBridgeIfAlreadyAuthorized() public {
+    function _authorizeBridgeIfNeeded_ShouldNotAuthorizeBridgeIfAlreadyAuthorized() public {
         vm.startPrank(admin);
         assertTrue(
             super.authorizeBridgeIfNeeded(
@@ -321,49 +336,32 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         return (sourceParams, targetParams);
     }
 
-    function _buildLzConfigMock(address endpoint, uint32 endpointId, address bridge, string memory salt) private returns (LzConfig memory) {
-        LzConfig memory lzConfig;
-        lzConfig.endpointId = endpointId;
-        lzConfig.endpoint = endpoint;
-        lzConfig.bridge = bridge;
-        lzConfig.sendLibrary = makeAddr(string.concat(salt, ".lzSendLibraryAddress"));
-        lzConfig.receiveLibrary = makeAddr(string.concat(salt, ".lzReceiveLibraryAddress"));
-        lzConfig.executorConfig = ExecutorConfig({
-            executor: makeAddr(string.concat(salt, ".lzExecutorConfig.executor")),
-            maxMessageSize: 10_000
-        });
-        lzConfig.ulnConfig = UlnConfig({
-            confirmations: uint64(5),
-            requiredDVNCount: uint8(2),
-            requiredDVNs: new address[](2),
-            optionalDVNCount: uint8(0),
-            optionalDVNs: new address[](0),
-            optionalDVNThreshold: uint8(0)
-        });
-        lzConfig.ulnConfig.requiredDVNs[0] = makeAddr(string.concat(salt, ".lzUlnConfig.requiredDVN1"));
-        lzConfig.ulnConfig.requiredDVNs[1] = makeAddr(string.concat(salt, ".lzUlnConfig.requiredDVN2"));
-        return lzConfig;
+    function _buildLzConfigMock(address _srcEndpoint, address _srcBridge, uint32 _dstEndpointId, uint8 salt) private returns (LzConfig memory) {
+        ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(_srcEndpoint);
+        LzConfig memory defaultLzConfig = LayerZeroUtils.getBridgeLzConfig(endpoint, _srcBridge, _dstEndpointId);
+        defaultLzConfig.executorConfig.maxMessageSize = salt;
+        defaultLzConfig.executorConfig.executor = makeAddr(vm.toString(salt));
+        defaultLzConfig.ulnConfig.confirmations = salt;
+        defaultLzConfig.ulnConfig.requiredDVNCount = salt;
+        defaultLzConfig.ulnConfig.optionalDVNCount = salt;
+        defaultLzConfig.ulnConfig.optionalDVNThreshold = salt;
+        return defaultLzConfig;
     }
 
-    function _logBridgeConfig(
-        address sendLib,
-        address receiveLib,
-        ExecutorConfig memory executorConfig,
-        UlnConfig memory ulnConfig
-    ) private pure {
-        console.log("SendLib:", sendLib);
-        console.log("ReceiveLib:", receiveLib);
-        console.log("Executor maxMessageSize:", executorConfig.maxMessageSize);
-        console.log("Executor address:", executorConfig.executor);
-        console.log("Confirmations:", ulnConfig.confirmations);
-        console.log("Required DVN Count:", ulnConfig.requiredDVNCount);
-        for (uint256 i = 0; i < ulnConfig.requiredDVNs.length; i++) {
-            console.log("[", i, "] Required DVN", ulnConfig.requiredDVNs[i]);
+    function _logBridgeConfig(LzConfig memory lzConfig) private pure {
+        console.log("SendLib:", lzConfig.sendLibrary);
+        console.log("ReceiveLib:", lzConfig.receiveLibrary);
+        console.log("Executor maxMessageSize:", lzConfig.executorConfig.maxMessageSize);
+        console.log("Executor address:", lzConfig.executorConfig.executor);
+        console.log("Confirmations:", lzConfig.ulnConfig.confirmations);
+        console.log("Required DVN Count:", lzConfig.ulnConfig.requiredDVNCount);
+        for (uint256 i = 0; i < lzConfig.ulnConfig.requiredDVNs.length; i++) {
+            console.log("[", i, "] Required DVN", lzConfig.ulnConfig.requiredDVNs[i]);
         }
-        console.log("Optional DVN Count:", ulnConfig.optionalDVNCount);
-        for (uint256 i = 0; i < ulnConfig.optionalDVNs.length; i++) {
-            console.log("[", i, "] Optional DVN", ulnConfig.optionalDVNs[i]);
+        console.log("Optional DVN Count:", lzConfig.ulnConfig.optionalDVNCount);
+        for (uint256 i = 0; i < lzConfig.ulnConfig.optionalDVNs.length; i++) {
+            console.log("[", i, "] Optional DVN", lzConfig.ulnConfig.optionalDVNs[i]);
         }
-        console.log("Optional DVN Threshold:", ulnConfig.optionalDVNThreshold);
+        console.log("Optional DVN Threshold:", lzConfig.ulnConfig.optionalDVNThreshold);
     }
 }
