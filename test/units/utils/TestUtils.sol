@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
+import {StdConstants} from "forge-std/StdConstants.sol";
+import {Vm} from "forge-std/Vm.sol";
 import {CreateX} from "@createx/contracts/CreateX.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {MessagingFee, SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
@@ -13,9 +15,12 @@ import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
 import {Deploy as RLCLiquidityUnifierDeployScript} from "../../../script/RLCLiquidityUnifier.s.sol";
 import {RLCCrosschainToken} from "../../../src/RLCCrosschainToken.sol";
 import {Deploy as RLCCrosschainTokenDeployScript} from "../../../script/RLCCrosschainToken.s.sol";
+import {ConfigLib} from "./../../../script/lib/ConfigLib.sol";
 
 library TestUtils {
     using OptionsBuilder for bytes;
+
+    Vm constant vm = StdConstants.VM;
 
     // Struct to hold deployment parameters and reduce stack depth
     struct DeploymentParams {
@@ -41,22 +46,28 @@ library TestUtils {
         string memory symbol = "RLC";
         address createXFactory = address(new CreateX());
         bytes32 salt = keccak256("salt");
-
         // Deploy RLC token mock for L1
         result.rlcToken = new RLCMock();
-
         // Deploy Liquidity Unifier
         result.rlcLiquidityUnifier = _deployLiquidityUnifier(params, result.rlcToken, createXFactory, salt);
-
         // Deploy IexecLayerZeroBridge for Sepolia
         result.iexecLayerZeroBridgeWithApproval =
             _deployBridge(params, true, address(result.rlcLiquidityUnifier), createXFactory, salt);
-
         // Deploy RLC Crosschain token and Bridge for ChainX
         result.rlcCrosschainToken = _deployCrosschainToken(params, name, symbol, createXFactory, salt);
-
         result.iexecLayerZeroBridgeWithoutApproval =
             _deployBridge(params, false, address(result.rlcCrosschainToken), createXFactory, salt);
+        // Label addresses for easier debugging.
+        vm.label(params.initialAdmin, "Admin");
+        vm.label(params.initialUpgrader, "Upgrader");
+        vm.label(params.initialPauser, "Pauser");
+        vm.label(params.lzEndpointSource, "lzEndpointSource");
+        vm.label(params.lzEndpointDestination, "lzEndpointDestination");
+        vm.label(address(result.rlcToken), "RLCMock");
+        vm.label(address(result.rlcLiquidityUnifier), "RLCLiquidityUnifier");
+        vm.label(address(result.rlcCrosschainToken), "RLCCrosschainToken");
+        vm.label(address(result.iexecLayerZeroBridgeWithoutApproval), "IexecLayerZeroBridgeWithoutApproval");
+        vm.label(address(result.iexecLayerZeroBridgeWithApproval), "IexecLayerZeroBridgeWithApproval");
     }
 
     function _deployLiquidityUnifier(
@@ -79,6 +90,9 @@ library TestUtils {
         address createXFactory,
         bytes32 salt
     ) private returns (IexecLayerZeroBridge) {
+        // `new IexecLayerZeroBridgeDeployScript().deploy()` is not used here because
+        // it deploys the contract `IexecLayerZeroBridge` by default, but in some tests
+        // we want to deploy `IexecLayerZeroBridgeHarness`.
         return IexecLayerZeroBridge(
             UUPSProxyDeployer.deployUsingCreateX(
                 params.iexecLayerZeroBridgeContractName,

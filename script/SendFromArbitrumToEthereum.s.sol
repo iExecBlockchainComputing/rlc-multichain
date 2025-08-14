@@ -3,12 +3,20 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
+import {ConfigLib} from "./lib/ConfigLib.sol";
+import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {ConfigLib} from "./lib/ConfigLib.sol";
 
-contract SendTokensFromArbitrumToEthereum is Script {
+/**
+ * Script to send tokens from Arbitrum Mainnet to Ethereum Mainnet.
+ * This script demonstrates cross-chain token transfers using LayerZero bridge.
+ */
+// TODO: fusion SendTokensFromArbitrumToEthereum and SendTokensFromEthereumToArbitrum into a single script with dynamic chain handling
+contract SendFromArbitrumToEthereum is Script {
+    uint256 private constant TRANSFER_AMOUNT = 1 * 10 ** 9; // 1 RLC token with 9 decimals
+
     /**
      * @dev Converts an address to bytes32.
      * @param _addr The address to convert.
@@ -18,6 +26,10 @@ contract SendTokensFromArbitrumToEthereum is Script {
         return bytes32(uint256(uint160(_addr)));
     }
 
+    /**
+     * Main function to execute the cross-chain transfer.
+     * Reads configuration and sends tokens from Arbitrum to Ethereum.
+     */
     function run() external {
         string memory sourceChain = vm.envString("SOURCE_CHAIN");
         string memory targetChain = vm.envString("TARGET_CHAIN");
@@ -25,38 +37,48 @@ contract SendTokensFromArbitrumToEthereum is Script {
         ConfigLib.CommonConfigParams memory sourceParams = ConfigLib.readCommonConfig(sourceChain);
         ConfigLib.CommonConfigParams memory targetParams = ConfigLib.readCommonConfig(targetChain);
 
-        // Contract addresses
-        address iexecLayerZeroBridgeAddress = sourceParams.iexecLayerZeroBridgeAddress;
+        IexecLayerZeroBridge sourceBridge = IexecLayerZeroBridge(sourceParams.iexecLayerZeroBridgeAddress);
+        IERC20 rlcToken = IERC20(sourceParams.rlcCrosschainTokenAddress);
 
-        // Transfer parameters
-        uint16 destinationChainId = uint16(targetParams.lzChainId); // LayerZero chain ID for Ethereum Sepolia
-        address recipientAddress = vm.envAddress("RECIPIENT_ADDRESS");
-        console.log("Recipient: %s", recipientAddress);
+        address sender = vm.envAddress("RECIPIENT_ADDRESS");
+        address recipient = vm.envAddress("RECIPIENT_ADDRESS");
 
-        uint256 amount = 5 * 10 ** 9; // RLC tokens (adjust the amount as needed)
+        // Check sender's balance
+        uint256 senderBalance = rlcToken.balanceOf(sender);
+        require(senderBalance >= TRANSFER_AMOUNT, "Insufficient RLC balance");
 
-        // Send tokens cross-chain
-        IexecLayerZeroBridge iexecLayerZeroBridge = IexecLayerZeroBridge(iexecLayerZeroBridgeAddress);
-        console.log("Sending %s RLC to Ethereum Sepolia", amount / 10 ** 9);
-
+        // Prepare send parameters
         SendParam memory sendParam = SendParam(
-            destinationChainId, // Destination endpoint ID.
-            addressToBytes32(recipientAddress), // Recipient address.
-            amount, // amount (in local decimals, e.g., 5 RLC = 5 * 10 ** 9)
-            amount * 99 / 100, // minAmount (allowing 1% slippage)
-            "", // Extra options, not used in this case, already setup using `setEnforcedOptions`
-            "", // Composed message, not used in this case
-            "" // OFT command to be executed, unused in default OFT implementations.
+            uint16(targetParams.lzEndpointId), // Destination endpoint ID
+            addressToBytes32(recipient), // Recipient address
+            TRANSFER_AMOUNT, // Amount to send in local decimals
+            TRANSFER_AMOUNT * 99 / 100, // Minimum amount to send (allowing 1% slippage)
+            "", // Extra options, already set via setEnforcedOptions
+            "", // Composed message for send() operation (unused)
+            "" // OFT command to be executed (unused in default OFT)
         );
 
-        // Get the fee for the transfer
-        MessagingFee memory fee = iexecLayerZeroBridge.quoteSend(sendParam, false);
-        console.log("Fee amount: ", fee.nativeFee);
-        vm.startBroadcast();
-        // Execute the cross-chain transfer
-        iexecLayerZeroBridge.send{value: fee.nativeFee}(sendParam, fee, msg.sender);
+        // Get quote for the transfer
+        MessagingFee memory fee = sourceBridge.quoteSend(sendParam, false);
 
-        console.log("Cross-chain transfer from Arbitrum to Ethereum initiated!");
+        console.log("=== Cross-Chain Transfer Details ===");
+        console.log("From: Arbitrum Mainnet");
+        console.log("To: Ethereum Mainnet");
+        console.log("Amount: %d RLC", TRANSFER_AMOUNT / 10 ** 9);
+        console.log("Fee: %d wei", fee.nativeFee);
+        console.log("Sender: %s", sender);
+        console.log("Recipient: %s", recipient);
+        console.log("Sender Balance: %d RLC", senderBalance / 10 ** 9);
+
+        vm.startBroadcast();
+
+        // Note: For crosschain tokens, no approval is needed as the bridge can burn directly
+        console.log("Initiating cross-chain transfer...");
+        sourceBridge.send{value: fee.nativeFee}(sendParam, fee, payable(sender));
+
         vm.stopBroadcast();
+
+        console.log("Transfer initiated successfully!");
+        console.log("Monitor the destination chain for token receipt.");
     }
 }

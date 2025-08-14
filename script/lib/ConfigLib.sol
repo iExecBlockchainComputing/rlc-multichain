@@ -25,7 +25,7 @@ library ConfigLib {
         address initialUpgrader;
         address createxFactory;
         address lzEndpoint;
-        uint32 lzChainId;
+        uint32 lzEndpointId;
         address rlcToken; // RLC token address (already deployed on L1)
         bytes32 rlcLiquidityUnifierCreatexSalt; // Salt for CreateX deployment of the RLC Liquidity Unifier
         address rlcLiquidityUnifierAddress; // RLC Liquidity Unifier address (only on L1)
@@ -118,7 +118,7 @@ library ConfigLib {
         params.approvalRequired = config.readBool(string.concat(prefix, ".approvalRequired"));
         params.iexecLayerZeroBridgeAddress = config.readAddress(string.concat(prefix, ".iexecLayerZeroBridgeAddress"));
         params.lzEndpoint = config.readAddress(string.concat(prefix, ".lzEndpointAddress"));
-        params.lzChainId = uint32(config.readUint(string.concat(prefix, ".lzChainId")));
+        params.lzEndpointId = uint32(config.readUint(string.concat(prefix, ".lzEndpointId")));
     }
 
     /**
