@@ -7,6 +7,10 @@ This project implements a cross-chain token bridge system for the RLC token usin
   - [Diagrams](docs/diagrams)
   - [Source code docs](docs/soldoc/src/SUMMARY.md)
 
+## Audits
+
+* [Halborn audit report](audits/Halborn_iExec-RLC-Multichain-Bridge-Smart-Contract-Security-Assessment-Report.pdf)
+
 ## Architecture
 
 The system consists of three main components that work together to enable cross-chain RLC transfers:

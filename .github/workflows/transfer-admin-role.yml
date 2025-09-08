@@ -1,0 +1,44 @@
+name: Transfer Default Admin Role
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network to transfer admin role on'
+        required: true
+        type: choice
+        options:
+          - ethereum
+          - arbitrum
+          - sepolia
+          - arbitrum_sepolia
+        default: sepolia
+      new_default_admin_address:
+        description: 'New admin address'
+        required: true
+        type: string
+
+jobs:
+# TODO: check if setup-matrix is needed
+  transfer-admin:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.network }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+          
+      - name: Transfer default admin role
+        env:
+          ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
+          CHAIN: ${{ inputs.network }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+          NEW_DEFAULT_ADMIN: ${{ inputs.new_default_admin_address }}
+        run: make begin-default-admin-transfer
