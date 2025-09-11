@@ -58,7 +58,7 @@ jobs:
       fail-fast: false
     concurrency:
       group: pause-bridge-${{ matrix.chain }}
-      cancel-in-progress: true
+      cancel-in-progress: false
     env:
       CI: true
     environment: ${{ matrix.chain }}
