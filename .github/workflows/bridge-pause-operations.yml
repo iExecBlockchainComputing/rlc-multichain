@@ -75,27 +75,9 @@ jobs:
           version: stable
           cache: true
 
-      - name: Set operation details
-        id: operation-details
-        run: |
-          case "${{ github.event.inputs.operation }}" in
-            pause-bridge)
-              echo "make_target=pause-bridge-single-chain" >> $GITHUB_OUTPUT
-              ;;
-            unpause-bridge)
-              echo "make_target=unpause-bridge-single-chain" >> $GITHUB_OUTPUT
-              ;;
-            pause-outbound)
-              echo "make_target=pause-outbound-single-chain" >> $GITHUB_OUTPUT
-              ;;
-            unpause-outbound)
-              echo "make_target=unpause-outbound-single-chain" >> $GITHUB_OUTPUT
-              ;;
-          esac
-
       - name: Run pause operation on bridge from ${{ matrix.chain }}
         env:
           CHAIN: ${{ matrix.chain }}
           RPC_URL: ${{ secrets.RPC_URL }}
           PAUSER_PRIVATE_KEY: ${{ secrets.PAUSER_PRIVATE_KEY }}
-        run: make ${{ steps.operation-details.outputs.make_target }}
+        run: make ${{ github.event.inputs.operation }}
