@@ -52,7 +52,7 @@ contract PauseBridgeScriptTest is
             })
         );
         iexecLayerZeroBridge = deployment.iexecLayerZeroBridgeWithApproval;
-        buildParams();
+        params.iexecLayerZeroBridgeAddress = address(iexecLayerZeroBridge);
     }
 
     // Override run functions to resolve inheritance conflict
@@ -74,7 +74,7 @@ contract PauseBridgeScriptTest is
 
     function test_ValidatesBridgeAddress_RevertWhen_BridgeIsZeroAddress() public {
         vm.expectRevert("Bridge address cannot be zero");
-        this.callValidateBridgeAddress(address(0));
+        PauseBridgeValidation.validateBridgeAddress(address(0));
     }
 
     // ====== PauseBridge.pauseBridge ======
@@ -292,21 +292,5 @@ contract PauseBridgeScriptTest is
         vm.expectRevert(DualPausableUpgradeable.ExpectedOutboundTransfersPause.selector);
         super.unpauseOutboundTransfers(params);
         vm.stopPrank();
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                            HELPER FUNCTIONS
-    //////////////////////////////////////////////////////////////*/
-
-    /**
-     * @notice Helper function to configure params for testing
-     */
-    function buildParams() internal {
-        params.iexecLayerZeroBridgeAddress = address(iexecLayerZeroBridge);
-    }
-
-    // Helper functions to enable testing of library functions with vm.expectRevert
-    function callValidateBridgeAddress(address bridgeAddress) external pure {
-        PauseBridgeValidation.validateBridgeAddress(bridgeAddress);
     }
 }
