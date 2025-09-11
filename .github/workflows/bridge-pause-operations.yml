@@ -32,16 +32,16 @@ jobs:
           if [ "${{ github.event.inputs.network_type }}" == "testnets" ]; then
             MATRIX='[
               {
-                "chain": "sepolia",
+                "chain": "sepolia"
               },
               {
-                "chain": "arbitrum_sepolia",
+                "chain": "arbitrum_sepolia"
               }
             ]'
           else
             MATRIX='[
               {
-                "chain": "ethereum",
+                "chain": "ethereum"
               },
               {
                 "chain": "arbitrum"
@@ -49,7 +49,7 @@ jobs:
             ]'
           fi
           
-          # Convertir en une ligne pour GitHub Output
+          # Convert to single line for GitHub Output
           echo "matrix=$(echo "$MATRIX" | jq -c .)" >> $GITHUB_OUTPUT
 
   bridge-pause-operation:
@@ -97,7 +97,6 @@ jobs:
           esac
 
       - name: Run pause operation on bridge from ${{ matrix.chain }}
-        if: ${{ github.event.inputs.dry_run == 'false' }}
         env:
           CHAIN: ${{ matrix.chain }}
           RPC_URL: ${{ secrets.RPC_URL }}
