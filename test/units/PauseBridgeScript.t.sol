@@ -8,7 +8,6 @@ import {
     UnpauseBridge,
     PauseOutboundTransfers,
     UnpauseOutboundTransfers,
-    PauseBridgeValidation
 } from "../../script/PauseBridge.s.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
