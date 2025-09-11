@@ -65,18 +65,6 @@ contract PauseBridgeScriptTest is
         // Use specific test functions instead
         revert("Use specific test functions instead");
     }
-
-    // ====== Test Library Validation Functions ======
-    function test_ValidateBridgeAddress() public pure {
-        // Should not revert with valid address
-        PauseBridgeValidation.validateBridgeAddress(address(0x123));
-    }
-
-    function test_ValidatesBridgeAddress_RevertWhen_BridgeIsZeroAddress() public {
-        vm.expectRevert("Bridge address cannot be zero");
-        PauseBridgeValidation.validateBridgeAddress(address(0));
-    }
-
     // ====== PauseBridge.pauseBridge ======
 
     function test_PauseBridge() public {
@@ -237,16 +225,6 @@ contract PauseBridgeScriptTest is
     }
 
     // ====== Edge Cases and Error Conditions ======
-
-    function test_ValidateBridgeAddress_RevertWhen_ZeroAddress() public {
-        ConfigLib.CommonConfigParams memory invalidParams;
-        invalidParams.iexecLayerZeroBridgeAddress = address(0);
-
-        vm.startPrank(pauser);
-        vm.expectRevert("Bridge address cannot be zero");
-        this.pauseBridge(invalidParams);
-        vm.stopPrank();
-    }
 
     function test_PauseWhenAlreadyPaused_ShouldRevert() public {
         // Pause the bridge

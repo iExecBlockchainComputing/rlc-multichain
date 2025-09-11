@@ -39,7 +39,6 @@ contract PauseBridge is Script {
      * @param params The configuration parameters for the current chain
      */
     function pauseBridge(ConfigLib.CommonConfigParams memory params) public virtual {
-        PauseBridgeValidation.validateBridgeAddress(params.iexecLayerZeroBridgeAddress);
         IexecLayerZeroBridge bridge = IexecLayerZeroBridge(params.iexecLayerZeroBridgeAddress);
 
         console.log("Executing complete pause on bridge at:", params.iexecLayerZeroBridgeAddress);
@@ -74,7 +73,6 @@ contract UnpauseBridge is Script {
      * @param params The configuration parameters for the current chain
      */
     function unpauseBridge(ConfigLib.CommonConfigParams memory params) public virtual {
-        PauseBridgeValidation.validateBridgeAddress(params.iexecLayerZeroBridgeAddress);
         IexecLayerZeroBridge bridge = IexecLayerZeroBridge(params.iexecLayerZeroBridgeAddress);
 
         console.log("Executing unpause on bridge at:", params.iexecLayerZeroBridgeAddress);
@@ -110,7 +108,6 @@ contract PauseOutboundTransfers is Script {
      * @param params The configuration parameters for the current chain
      */
     function pauseOutboundTransfers(ConfigLib.CommonConfigParams memory params) public virtual {
-        PauseBridgeValidation.validateBridgeAddress(params.iexecLayerZeroBridgeAddress);
         IexecLayerZeroBridge bridge = IexecLayerZeroBridge(params.iexecLayerZeroBridgeAddress);
 
         console.log("Executing outbound transfer pause on bridge at:", params.iexecLayerZeroBridgeAddress);
@@ -146,22 +143,11 @@ contract UnpauseOutboundTransfers is Script {
      * @param params The configuration parameters for the current chain
      */
     function unpauseOutboundTransfers(ConfigLib.CommonConfigParams memory params) public virtual {
-        PauseBridgeValidation.validateBridgeAddress(params.iexecLayerZeroBridgeAddress);
         IexecLayerZeroBridge bridge = IexecLayerZeroBridge(params.iexecLayerZeroBridgeAddress);
 
         console.log("Executing outbound transfer unpause on bridge at:", params.iexecLayerZeroBridgeAddress);
         bridge.unpauseOutboundTransfers();
         console.log("Outbound transfers unpaused");
         console.log("Both inbound and outbound transfers are now enabled");
-    }
-}
-
-library PauseBridgeValidation {
-    /**
-     * @notice Validates that the bridge contract address is not zero
-     * @param bridgeAddress The bridge contract address
-     */
-    function validateBridgeAddress(address bridgeAddress) internal pure {
-        require(bridgeAddress != address(0), "Bridge address cannot be zero");
     }
 }
