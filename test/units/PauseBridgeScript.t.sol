@@ -7,7 +7,7 @@ import {
     PauseBridge,
     UnpauseBridge,
     PauseOutboundTransfers,
-    UnpauseOutboundTransfers,
+    UnpauseOutboundTransfers
 } from "../../script/PauseBridge.s.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
