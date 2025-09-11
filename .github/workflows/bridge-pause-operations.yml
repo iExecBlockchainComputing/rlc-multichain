@@ -48,9 +48,6 @@ jobs:
               }
             ]'
           fi
-          
-          # Convert to single line for GitHub Output
-          echo "matrix=$(echo "$MATRIX" | jq -c .)" >> $GITHUB_OUTPUT
 
   bridge-pause-operation:
     needs: setup-matrix

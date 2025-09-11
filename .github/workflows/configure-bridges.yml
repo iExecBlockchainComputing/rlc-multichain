@@ -44,9 +44,6 @@ jobs:
               }
             ]'
           fi
-          
-          # Convertir en une ligne pour GitHub Output
-          echo "matrix=$(echo "$MATRIX" | jq -c .)" >> $GITHUB_OUTPUT
 
   configure-bridges:
     needs: setup-matrix
