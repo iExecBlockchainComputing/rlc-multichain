@@ -117,7 +117,7 @@ contract PauseOutboundTransfers is Script {
         bridge.pauseOutboundTransfers();
         console.log("Outbound transfers paused");
         console.log("Outbound transfers are blocked, inbound transfers still work");
-        console.log("Users can still receive funds and exit their positions");
+        console.log("Transfers triggered before this pause will be finalized");
     }
 }
 
