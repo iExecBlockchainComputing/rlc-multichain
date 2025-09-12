@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/iExecBlockchainComputing/rlc-multichain/compare/v0.1.0...v0.2.0) (2025-09-12)
+
+
+### 🚀 Features
+
+* pause scripts  ([#93](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/93)) ([727dd92](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/727dd9210283604cdbc552aab5bf5a357f9225eb))
+
+
+### 🐞 Bug Fixes
+
+* Fix release please version in manifest ([#101](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/101)) ([6c1d7c9](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/6c1d7c9156401a4499818789ecce0e86cb031544))
+
 ## [0.1.0](https://github.com/iExecBlockchainComputing/rlc-multichain/compare/v0.1.0-rc...v0.1.0) (2025-08-14)
 
 ### 🚀 Features
