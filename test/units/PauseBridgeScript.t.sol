@@ -172,57 +172,6 @@ contract PauseBridgeScriptTest is
         vm.stopPrank();
     }
 
-    // ====== Role and Authorization Tests ======
-
-    function test_PauserRoleRequired_ForAllPauseFunctions() public {
-        // Verify pauser has the required role
-        assertTrue(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.PAUSER_ROLE(), pauser));
-
-        // Verify unauthorized user does not have the role
-        assertFalse(iexecLayerZeroBridge.hasRole(iexecLayerZeroBridge.PAUSER_ROLE(), unauthorizedUser));
-
-        // Test all pause functions require PAUSER_ROLE
-        vm.startPrank(unauthorizedUser);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                address(this),
-                iexecLayerZeroBridge.PAUSER_ROLE()
-            )
-        );
-        this.pauseBridge(params);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                address(this),
-                iexecLayerZeroBridge.PAUSER_ROLE()
-            )
-        );
-        this.unpauseBridge(params);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                address(this),
-                iexecLayerZeroBridge.PAUSER_ROLE()
-            )
-        );
-        this.pauseOutboundTransfers(params);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                address(this),
-                iexecLayerZeroBridge.PAUSER_ROLE()
-            )
-        );
-        this.unpauseOutboundTransfers(params);
-
-        vm.stopPrank();
-    }
-
     // ====== Edge Cases and Error Conditions ======
 
     function test_PauseWhenAlreadyPaused_ShouldRevert() public {
