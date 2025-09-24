@@ -1,20 +1,14 @@
 {
-    "compileOnSave": true,
-    "compilerOptions": {
-        "module": "commonjs",
-        "skipLibCheck": true,
-        "noImplicitReturns": true,
-        "noUnusedLocals": true,
-        "outDir": "out",
-        "rootDir": "",
-        "sourceMap": true,
-        "strict": true,
-        "target": "es2020"
-    },
-    "exclude": [
-        "**/*.spec.ts"
-    ],
-    "include": [
-        "**/*"
-    ]
+  "compilerOptions": {
+    "module": "node16",
+    "target": "ES2022",
+    "declaration": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "moduleResolution": "nodenext",
+    "skipLibCheck": true
+  },
+  "exclude": ["**/*.spec.ts"],
+  "include": ["**/*"]
 }

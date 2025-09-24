@@ -1,6 +1,7 @@
 # Compiler files
 cache/
-out/
+out
+dist
 
 # Ignores development broadcast logs
 !/broadcast
@@ -22,6 +23,3 @@ lcov.src.info
 
 # Dependency directories
 node_modules
-
-# Ignore tsc output
-out
