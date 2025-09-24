@@ -13,7 +13,7 @@ This directory contains Tenderly Actions for monitoring and automating responses
 ### Installation
 
 ```bash
-cd actions
+cd tenderly-actions
 npm install
 ```
 
