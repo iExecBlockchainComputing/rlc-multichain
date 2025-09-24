@@ -21,19 +21,19 @@ npm install
 
 ```bash
 # Deploy all actions to Tenderly
-tenderly actions deploy
+npm run deploy
+```
 
 ## ⚠️ Important Notes
 
-- **Run commands from this directory**: All Tenderly commands must be executed from the folder containing `tenderly.yaml`
+- **Run Tenderly CLI commands**: All Tenderly CLI commands must be executed from the folder containing `tenderly.yaml`
 - **File references**: All files referenced in actions must be within this `tenderly-actions/` directory
-- **Project selection**: If multiple Tenderly projects are configured, you'll be prompted to select one during deployment
 - **Simultaneous deployment**: All actions for a project are deployed together
 
 ## 📚 Documentation
 
-- [Tenderly Actions Documentation](https://docs.tenderly.co/actions)
-- [Tenderly CLI Reference](https://docs.tenderly.co/tenderly-cli)
+- [Tenderly Actions Documentation](https://docs.tenderly.co/web3-actions/tutorials-and-quickstarts)
+- [Tenderly CLI Reference](https://docs.tenderly.co/web3-actions/references/cli-cheatsheet)
 
 ## 🔧 Configuration
 
