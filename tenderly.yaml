@@ -6,7 +6,7 @@ actions:
     sources: tenderly-actions
     specs:
       block-number-printer:
-        description: Example Web3 Action that logs block number once it is mined.
+        description: Example Web3 Action that logs the block number every 10 blocks once mined.
         function: src/example:blockHelloWorldFn
         trigger:
           type: block
