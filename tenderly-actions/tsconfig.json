@@ -2,6 +2,7 @@
     "compileOnSave": true,
     "compilerOptions": {
         "module": "commonjs",
+        "skipLibCheck": true,
         "noImplicitReturns": true,
         "noUnusedLocals": true,
         "outDir": "out",
