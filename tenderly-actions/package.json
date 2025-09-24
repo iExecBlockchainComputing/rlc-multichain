@@ -1,7 +1,9 @@
 {
     "name": "actions",
+    "private": true,
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "deploy": "tenderly actions deploy"
     },
     "devDependencies": {
         "typescript": "^4.3.5"
@@ -9,5 +11,4 @@
     "dependencies": {
         "@tenderly/actions": "^0.2.0"
     },
-    "private": true
 }
