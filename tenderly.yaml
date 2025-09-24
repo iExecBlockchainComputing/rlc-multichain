@@ -1,0 +1,13 @@
+account_id: ""
+actions:
+  iexec/arbitrum-testnet:
+    runtime: v2
+    sources: src/actions
+    specs:
+      example:
+        description: This is just an example, but you can publish this action.
+        function: example:blockHelloWorldFn
+        trigger:
+          type: block
+        execution_type: parallel
+project_slug: ""

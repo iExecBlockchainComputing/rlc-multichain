@@ -19,3 +19,9 @@ broadcast/*/*/run-*.json
 /coverage
 lcov.info
 lcov.src.info
+
+# Dependency directories
+node_modules
+
+# Ignore tsc output
+out
