@@ -1,5 +1,5 @@
 # RLCLiquidityUnifier
-[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/61326e3abe32aee8683989ab94220c30da0cb2e6/src/RLCLiquidityUnifier.sol)
+[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/9831a5d81f09ff463f49d410c2aa12b7da3abdfa/src/RLCLiquidityUnifier.sol)
 
 **Inherits:**
 UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, [IRLCLiquidityUnifier](/src/interfaces/IRLCLiquidityUnifier.sol/interface.IRLCLiquidityUnifier.md), IERC7802
@@ -9,7 +9,8 @@ the minting and burning of tokens on the RLC token contract. All bridges
 should interact with this contract to perform RLC transfers.
 The implementation is inspired by the OpenZeppelin ERC20Bridgeable contract
 without being an ERC20 token itself. Functions are overridden to lock/unlock
-tokens on an external ERC20 contract.*
+tokens on an external ERC20 contract. ERC20Bridgeable is not used directly
+because it embarks the ERC20 token logic, which is not needed here.*
 
 
 ## State Variables

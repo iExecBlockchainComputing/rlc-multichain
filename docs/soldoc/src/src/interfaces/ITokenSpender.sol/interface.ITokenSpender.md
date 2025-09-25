@@ -1,5 +1,5 @@
 # ITokenSpender
-[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/61326e3abe32aee8683989ab94220c30da0cb2e6/src/interfaces/ITokenSpender.sol)
+[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/9831a5d81f09ff463f49d410c2aa12b7da3abdfa/src/interfaces/ITokenSpender.sol)
 
 *See [RLCrosschainToken-approveAndCall](/src/RLCCrosschainToken.sol/contract.RLCCrosschainToken.md#approveandcall).
 An interface for a contract that can receive approval from an ERC20 token and execute

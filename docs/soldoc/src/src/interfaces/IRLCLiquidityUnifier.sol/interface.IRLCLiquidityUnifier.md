@@ -1,5 +1,5 @@
 # IRLCLiquidityUnifier
-[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/61326e3abe32aee8683989ab94220c30da0cb2e6/src/interfaces/IRLCLiquidityUnifier.sol)
+[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/9831a5d81f09ff463f49d410c2aa12b7da3abdfa/src/interfaces/IRLCLiquidityUnifier.sol)
 
 *Interface for the RLC Liquidity Unifier contract.
 This interface defines the contract that is used to centralize the RLC liquidity
