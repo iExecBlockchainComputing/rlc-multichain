@@ -1,5 +1,5 @@
 # IIexecLayerZeroBridge
-[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/61326e3abe32aee8683989ab94220c30da0cb2e6/src/interfaces/IIexecLayerZeroBridge.sol)
+[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/93b2d2b8fb41a03ccb6bc3a710204b628f122d69/src/interfaces/IIexecLayerZeroBridge.sol)
 
 
 ## Functions
@@ -45,5 +45,12 @@ Unpauses the `_debit` function, allowing outbound transfers again.
 
 ```solidity
 function unpauseOutboundTransfers() external;
+```
+
+## Errors
+### OperationNotAllowed
+
+```solidity
+error OperationNotAllowed(string message);
 ```
 
