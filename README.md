@@ -339,6 +339,7 @@ The scripts automatically calculate these fees and include them in the transacti
 
 ## How to release:
 
+<!-- TODO use main branch and create PR for artifacts -->
 * First, deploy on Testnets and make sure all tests are ok.
 * Create a release branch `release/X.X.X` that starts from the `main` branch.
    - Note that GitHub environments `arbitrum` and `ethereum` can only be used with `release/*` branches. The `main` branch cannot be used as the CI will not be able to commit deployment artifacts.
