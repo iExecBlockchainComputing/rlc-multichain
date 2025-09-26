@@ -1,5 +1,5 @@
 # IexecLayerZeroBridge
-[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/61326e3abe32aee8683989ab94220c30da0cb2e6/src/bridges/layerZero/IexecLayerZeroBridge.sol)
+[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/93b2d2b8fb41a03ccb6bc3a710204b628f122d69/src/bridges/layerZero/IexecLayerZeroBridge.sol)
 
 **Inherits:**
 UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, OFTCoreUpgradeable, [DualPausableUpgradeable](/src/bridges/utils/DualPausableUpgradeable.sol/abstract.DualPausableUpgradeable.md), [IIexecLayerZeroBridge](/src/interfaces/IIexecLayerZeroBridge.sol/interface.IIexecLayerZeroBridge.md)
@@ -205,13 +205,29 @@ function token() external view returns (address);
 |`<none>`|`address`|The address of the RLC token contract|
 
 
+### renounceOwnership
+
+*Overridden to prevent ownership renouncement.
+AccessControlDefaultAdminRulesUpgradeable is used to manage ownership.*
+
+
+```solidity
+function renounceOwnership() public pure override;
+```
+
+### transferOwnership
+
+*Overridden to prevent ownership transfer.
+AccessControlDefaultAdminRulesUpgradeable is used to manage ownership.*
+
+
+```solidity
+function transferOwnership(address) public pure override;
+```
+
 ### owner
 
-Returns the owner of the contract
-
-*This override resolves the conflict between OwnableUpgradeable and
-AccessControlDefaultAdminRulesUpgradeable, both of which define owner().
-We use the OwnableUpgradeable version for consistency.*
+Returns the owner of the contract which is also the default admin.
 
 
 ```solidity
@@ -225,8 +241,21 @@ function owner()
 
 |Name|Type|Description|
 |----|----|-----------|
-|`<none>`|`address`|The address of the current owner|
+|`<none>`|`address`|The address of the current owner and default admin|
 
+
+### _acceptDefaultAdminTransfer
+
+Accepts the default admin transfer and sets the owner to the new admin.
+
+*This ensures the state variable `OwnableUpgradeable._owner` is set correctly after the default
+admin transfer. Even though `OwnableUpgradeable._owner` is not used in `owner()` accessor, we chose
+to update it for consistency purposes.*
+
+
+```solidity
+function _acceptDefaultAdminTransfer() internal override;
+```
 
 ### _debit
 
