@@ -17,6 +17,7 @@ concurrency:
 
 env:
   FOUNDRY_PROFILE: ci
+  FOUNDRY_OUT: artifacts
 
 jobs:
   build-and-test:
