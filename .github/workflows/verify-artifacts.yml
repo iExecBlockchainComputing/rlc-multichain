@@ -20,6 +20,7 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+          cache: true
 
       - name: Build contracts
         run: forge build
