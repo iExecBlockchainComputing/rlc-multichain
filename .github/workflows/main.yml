@@ -60,6 +60,7 @@ jobs:
       - name: Run static analysis with slither
         uses: crytic/slither-action@v0.4.1
         with:
+          ignore-compile: true
           slither-args: --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
           fail-on: none
           sarif: results.sarif
