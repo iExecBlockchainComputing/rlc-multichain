@@ -32,7 +32,6 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-          cache: true
 
       - name: Show Forge version
         run: forge --version
@@ -41,7 +40,7 @@ jobs:
         run: forge fmt --check
 
       - name: Run Forge build
-        run: forge clean && forge build && forge build './src' --sizes
+        run: forge build && forge build './src' --sizes
 
       - name: Run Foundry coverage
         env:
