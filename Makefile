@@ -90,23 +90,23 @@ deploy-contract: # CONTRACT, CHAIN, RPC_URL
 # Upgrade targets
 #
 
-upgrade-on-anvil:
-	$(MAKE) upgrade-all \
+upgrade-bridge-on-anvil:
+	$(MAKE) upgrade-bridge \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
 		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
 
-upgrade-on-mainnets:
-	$(MAKE) upgrade-all \
+upgrade-bridge-on-mainnets:
+	$(MAKE) upgrade-bridge \
 		SOURCE_CHAIN=ethereum SOURCE_RPC=$(ETHEREUM_RPC_URL) \
 		TARGET_CHAIN=arbitrum TARGET_RPC=$(ARBITRUM_RPC_URL) \
 
 # TODO : RLCMultichain and RLCLiquidityUnifier upgrades
-upgrade-on-testnets:
-	$(MAKE) upgrade-all \
+upgrade-bridge-on-testnets:
+	$(MAKE) upgrade-bridge \
 		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
 		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
 
-upgrade-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC
+upgrade-bridge: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC
 	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC)
 	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC)
 

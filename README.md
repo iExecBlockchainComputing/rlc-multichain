@@ -229,7 +229,7 @@ Test upgrades locally before deploying to live networks:
 
 ```bash
 # Test upgrade process on local forks
-make upgrade-on-anvil
+make upgrade-bridge-on-anvil
 ```
 
 #### 2. Live Network Upgrades
@@ -237,7 +237,7 @@ make upgrade-on-anvil
 Execute upgrades on live networks:
 
 ```bash
-make upgrade-on-mainnets
+make upgrade-bridge-on-mainnets
 ```
 
 ### Upgrade Safety Features
@@ -310,7 +310,7 @@ Contracts are automatically verified on block explorers during deployment:
 make deploy-on-mainnets
 
 # Upgrades and verifies contracts on mainnet
-make upgrade-on-mainnets
+make upgrade-bridge-on-mainnets
 ```
 
 The verification is handled by Foundry's built-in `--verify` flag, which submits the source code and constructor arguments to the respective block explorers (Etherscan, Arbiscan, etc.).
