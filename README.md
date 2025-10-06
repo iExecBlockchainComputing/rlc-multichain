@@ -149,7 +149,7 @@ This will:
 B. To send RLC tokens from Arbitrum Sepolia back to Ethereum Sepolia:
 
 ```bash
-make send-tokens-to-sepolia
+make send-tokens-to-ethereum-sepolia
 ```
 
 This will:

@@ -10,10 +10,9 @@ import {SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 
 /**
- * Script to send tokens from Arbitrum Mainnet to Ethereum Mainnet.
+ * Script to send tokens from Arbitrum Mainnet/Testnet to Ethereum Mainnet/Testnet.
  * This script demonstrates cross-chain token transfers using LayerZero bridge.
  */
-// TODO: fusion SendTokensFromArbitrumToEthereum and SendTokensFromEthereumToArbitrum into a single script with dynamic chain handling
 contract SendFromArbitrumToEthereum is Script {
     uint256 private constant TRANSFER_AMOUNT = 1 * 10 ** 9; // 1 RLC token with 9 decimals
 
