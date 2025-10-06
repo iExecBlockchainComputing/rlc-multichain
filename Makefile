@@ -1,6 +1,6 @@
 MAKEFLAGS += --no-print-directory
 
-include tools/report.mk tools/verification.mk
+include tools/report.mk tools/verification.mk tools/pauser.mk
 -include .env
 
 

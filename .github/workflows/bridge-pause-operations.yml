@@ -1,8 +1,17 @@
-name: Configure Bridges
+name: Bridge Pause Operations
 
 on:
   workflow_dispatch:
     inputs:
+      operation:
+        description: 'Pause operation to perform'
+        required: true
+        type: choice
+        options:
+          - 'pause-bridge'
+          - 'unpause-bridge'
+          - 'pause-outbound'
+          - 'unpause-outbound'
       network_type:
         description: 'Network type to configure'
         required: true
@@ -11,7 +20,6 @@ on:
           - testnets
           - mainnets
         default: 'testnets'
-
 jobs:
   setup-matrix:
     runs-on: ubuntu-latest
@@ -24,28 +32,24 @@ jobs:
           if [ "${{ github.event.inputs.network_type }}" == "testnets" ]; then
             MATRIX='[
               {
-                "source_chain": "sepolia",
-                "target_chain": "arbitrum_sepolia"
+                "chain": "sepolia"
               },
               {
-                "source_chain": "arbitrum_sepolia",
-                "target_chain": "sepolia"
+                "chain": "arbitrum_sepolia"
               }
             ]'
           else
             MATRIX='[
               {
-                "source_chain": "ethereum",
-                "target_chain": "arbitrum"
+                "chain": "ethereum"
               },
               {
-                "source_chain": "arbitrum",
-                "target_chain": "ethereum"
+                "chain": "arbitrum"
               }
             ]'
           fi
 
-  configure-bridges:
+  bridge-pause-operation:
     needs: setup-matrix
     runs-on: ubuntu-latest
     strategy:
@@ -53,26 +57,27 @@ jobs:
         include: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
       fail-fast: false
     concurrency:
-      group: configure-bridges-${{ matrix.source_chain }}-${{ matrix.target_chain }}
-      cancel-in-progress: true
+      group: pause-bridge-${{ matrix.chain }}
+      cancel-in-progress: false
     env:
       CI: true
-    environment: ${{ matrix.source_chain }}
+    environment: ${{ matrix.chain }}
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-
+          
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
           cache: true
 
-      - name: Configure bridge from ${{ matrix.source_chain }} to ${{ matrix.target_chain }}
+      - name: Run pause operation on bridge from ${{ matrix.chain }}
         env:
-          ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
-          SOURCE_CHAIN: ${{ matrix.source_chain }} 
-          TARGET_CHAIN: ${{ matrix.target_chain }}
+          CHAIN: ${{ matrix.chain }}
           RPC_URL: ${{ secrets.RPC_URL }}
-        run: make configure-bridge
+          PAUSER_PRIVATE_KEY: ${{ secrets.PAUSER_PRIVATE_KEY }}
+        run: make ${{ github.event.inputs.operation }}
