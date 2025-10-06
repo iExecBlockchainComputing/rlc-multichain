@@ -1,0 +1,125 @@
+// SPDX-FileCopyrightText: 2025 IEXEC BLOCKCHAIN TECH <contact@iex.ec>
+// SPDX-License-Identifier: Apache-2.0
+
+pragma solidity ^0.8.22;
+
+import {Script} from "forge-std/Script.sol";
+import {console} from "forge-std/console.sol";
+import {IAccessControlDefaultAdminRules} from
+    "@openzeppelin/contracts/access/extensions/IAccessControlDefaultAdminRules.sol";
+import {ConfigLib} from "./lib/ConfigLib.sol";
+import {RLCLiquidityUnifier} from "../src/RLCLiquidityUnifier.sol";
+import {RLCCrosschainToken} from "../src/RLCCrosschainToken.sol";
+import {IexecLayerZeroBridge} from "../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+
+/**
+ * @title BeginTransferAdminRole
+ * @dev Script to transfer the default admin role to a new admin address
+ * for all deployed smart contracts on the current chain.
+ */
+contract BeginTransferAdminRole is Script {
+    /**
+     * @notice Transfers the default admin role to a new admin for all contracts on the current chain
+     * @dev This function automatically detects which contracts are deployed on the current chain
+     * based on the configuration and transfers admin roles accordingly
+     */
+    function run() external virtual {
+        address newAdmin = vm.envAddress("NEW_DEFAULT_ADMIN");
+        string memory chain = vm.envString("CHAIN");
+        console.log("Starting admin role transfer on chain:", chain);
+        console.log("New admin address:", newAdmin);
+
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
+        vm.startBroadcast();
+        beginTransferForAllContracts(params, newAdmin);
+        vm.stopBroadcast();
+    }
+    /**
+     * @notice Validates that the new admin is different from the current admin
+     * @param currentDefaultAdmin The current admin address
+     * @param newAdmin The new admin address
+     */
+
+    function validateAdminTransfer(address currentDefaultAdmin, address newAdmin) internal pure {
+        require(newAdmin != address(0), "BeginTransferAdminRole: new admin cannot be zero address");
+        require(
+            newAdmin != currentDefaultAdmin, "BeginTransferAdminRole: New admin must be different from current admin"
+        );
+    }
+
+    /**
+     * @notice Begins the admin transfer process for all relevant contracts
+     * @param params The configuration parameters for the current chain
+     * @param newAdmin The new admin address
+     */
+    function beginTransferForAllContracts(ConfigLib.CommonConfigParams memory params, address newAdmin) internal {
+        if (params.approvalRequired) {
+            beginTransfer(params.rlcLiquidityUnifierAddress, newAdmin, "RLCLiquidityUnifier");
+        } else {
+            beginTransfer(params.rlcCrosschainTokenAddress, newAdmin, "RLCCrosschainToken");
+        }
+        beginTransfer(params.iexecLayerZeroBridgeAddress, newAdmin, "IexecLayerZeroBridge");
+    }
+
+    /**
+     * @notice Transfers the default admin role for any contract implementing IAccessControlDefaultAdminRules
+     * @param contractAddress The address of the contract
+     * @param newAdmin The new admin address
+     * @param contractName The name of the contract for logging purposes
+     */
+    function beginTransfer(address contractAddress, address newAdmin, string memory contractName) public virtual {
+        IAccessControlDefaultAdminRules contractInstance = IAccessControlDefaultAdminRules(contractAddress);
+
+        address currentAdmin = contractInstance.defaultAdmin();
+        console.log("Current admin for", contractName, ":", currentAdmin);
+        validateAdminTransfer(currentAdmin, newAdmin);
+        contractInstance.beginDefaultAdminTransfer(newAdmin);
+        console.log("Admin transfer initiated for", contractName, "at:", contractAddress);
+    }
+}
+
+/**
+ * @title AcceptAdminRole
+ * @dev Script to accept the default admin role transfer for all contracts on the current chain.
+ * This script should be run by the new admin after the BeginTransferAdminRole script has been executed.
+ */
+contract AcceptAdminRole is Script {
+    /**
+     * @notice Accepts the default admin role transfer for all contracts on the current chain
+     * @dev This function should be called by the new admin to complete the transfer process
+     */
+    function run() external virtual {
+        string memory chain = vm.envString("CHAIN");
+        console.log("Accepting admin role transfer on chain:", chain);
+        ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
+
+        vm.startBroadcast();
+        acceptAdminRoleTransfer(params);
+        vm.stopBroadcast();
+    }
+
+    /**
+     * @notice Accepts the default admin role transfer for all contracts on the current chain
+     * @dev This function should be called by the new admin to complete the transfer process
+     */
+    function acceptAdminRoleTransfer(ConfigLib.CommonConfigParams memory params) internal {
+        if (params.approvalRequired) {
+            acceptContractAdmin(params.rlcLiquidityUnifierAddress, "RLCLiquidityUnifier");
+        } else {
+            acceptContractAdmin(params.rlcCrosschainTokenAddress, "RLCCrosschainToken");
+        }
+        acceptContractAdmin(params.iexecLayerZeroBridgeAddress, "IexecLayerZeroBridge");
+    }
+
+    /**
+     * @notice Accepts the default admin role transfer for any contract implementing IAccessControlDefaultAdminRules
+     * @param contractAddress The address of the contract
+     * @param contractName The name of the contract for logging purposes
+     */
+    function acceptContractAdmin(address contractAddress, string memory contractName) internal virtual {
+        console.log("Accepting admin role for", contractName, "at:", contractAddress);
+        IAccessControlDefaultAdminRules contractInstance = IAccessControlDefaultAdminRules(contractAddress);
+        contractInstance.acceptDefaultAdminTransfer();
+        console.log("New admin for", contractName, ":", contractInstance.defaultAdmin());
+    }
+}

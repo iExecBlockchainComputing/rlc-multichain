@@ -1,0 +1,93 @@
+name: Deploy contracts
+
+on:
+  workflow_dispatch: # Manual trigger
+    inputs:
+      network:
+        description: 'Network'
+        required: true
+        type: choice
+        options:
+          - anvil
+          - sepolia
+          - ethereum
+          - arbitrum_sepolia
+          - arbitrum
+        default: 'anvil'
+
+jobs:
+
+  # Build and test before deploying.
+  build-and-test:
+    uses: ./.github/workflows/main.yml
+    with:
+      SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
+      ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
+
+  # Deploy and verify contract.
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    permissions:
+      contents: write # Required to commit deployment files.
+    environment: ${{ inputs.network }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+
+      - name: Deploy contracts on Anvil (All networks)
+        if: inputs.network == 'anvil'
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ vars.ANVIL_PRIVATE_KEY }}
+          SEPOLIA_RPC_URL: ${{ vars.SEPOLIA_RPC_URL }}
+          ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ARBITRUM_SEPOLIA_RPC_URL }}
+          ANVIL_SEPOLIA_RPC_URL: ${{ vars.ANVIL_SEPOLIA_RPC_URL }}
+          ANVIL_ARBITRUM_SEPOLIA_RPC_URL: ${{ vars.ANVIL_ARBITRUM_SEPOLIA_RPC_URL }}
+        run: |
+          make fork-sepolia & make fork-arbitrum-sepolia & sleep 10 && make deploy-on-anvil
+
+      - name: Deploy contracts on Sepolia/EthereumMainnet
+        if: inputs.network == 'sepolia' || inputs.network == 'ethereum'
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          CHAIN: ${{ inputs.network }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+        run: |
+          make deploy-liquidity-unifier-and-bridge
+
+      - name: Deploy contracts on ChainX
+        if: inputs.network != 'sepolia' && inputs.network != 'ethereum' && inputs.network != 'anvil'
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          CHAIN: ${{ inputs.network }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+        run: |
+          make deploy-crosschain-token-and-bridge
+
+      - name: Save deployment artifacts
+        if: inputs.network != 'anvil'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: save deployment artifacts for ${{ inputs.network }} (Github run_id: ${{ github.run_id }})'
+          file_pattern: 'config/config.json broadcast/'
+          commit_user_name: 'GitHub Actions Bot'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_author: 'GitHub Actions Bot <github-actions[bot]@users.noreply.github.com>'
+          
+      - name: Verify contracts
+        if: inputs.network != 'anvil'
+        continue-on-error: true
+        env:
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+        run: |
+          make verify-all-${{ inputs.network }}

@@ -2,6 +2,14 @@ name: Default
 
 on:
   pull_request:
+  workflow_call:
+    inputs:
+      SEPOLIA_RPC_URL:
+        required: true
+        type: string
+      ARBITRUM_SEPOLIA_RPC_URL:
+        required: true
+        type: string
 
 concurrency:
   group: ${{ github.ref }}-ci
@@ -9,8 +17,6 @@ concurrency:
 
 env:
   FOUNDRY_PROFILE: ci
-  SEPOLIA_RPC_URL: secrets.SEPOLIA_RPC_URL
-  ARBITRUM_SEPOLIA_RPC_URL: secrets.ARBITRUM_SEPOLIA_RPC_URL
 
 jobs:
   build-and-test:
@@ -23,6 +29,9 @@ jobs:
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
 
       - name: Show Forge version
         run: forge --version
@@ -31,12 +40,14 @@ jobs:
         run: forge fmt --check
 
       - name: Run Forge build
-        run: forge build --sizes && cp .env.template .env
+        run: forge build && forge build './src' --sizes
 
       - name: Run Foundry coverage
-        run: make generate-coverage
         env:
           CI: true
+          SEPOLIA_RPC_URL: ${{ inputs.SEPOLIA_RPC_URL || vars.SEPOLIA_RPC_URL }}
+          ARBITRUM_SEPOLIA_RPC_URL: ${{ inputs.ARBITRUM_SEPOLIA_RPC_URL || vars.ARBITRUM_SEPOLIA_RPC_URL }}
+        run: make generate-coverage
         
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5

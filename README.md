@@ -7,6 +7,10 @@ This project implements a cross-chain token bridge system for the RLC token usin
   - [Diagrams](docs/diagrams)
   - [Source code docs](docs/soldoc/src/SUMMARY.md)
 
+## Audits
+
+* [Halborn audit report](audits/Halborn_iExec-RLC-Multichain-Bridge-Smart-Contract-Security-Assessment-Report.pdf)
+
 ## Architecture
 
 The system consists of three main components that work together to enable cross-chain RLC transfers:
@@ -116,7 +120,17 @@ The core contracts of the multichain bridge system:
 
 ## Usage
 
-### Bridge RLC
+### Network Support
+
+The bridge currently supports:
+
+#### **Testnets**
+- **Ethereum Sepolia** ↔ **Arbitrum Sepolia**
+
+#### **Mainnets**
+- **Ethereum Mainnet** ↔ **Arbitrum Mainnet**
+
+### Bridge RLC on Testnets
 
 A. To send RLC tokens from Ethereum Sepolia to Arbitrum Sepolia:
 
@@ -143,6 +157,20 @@ This will:
 1. Burn RLCCrosschainToken tokens on Arbitrum
 2. Send a cross-chain message via LayerZero to Ethereum
 3. Release the original RLC tokens from the RLCLiquidityUnifier on Ethereum
+
+### Bridge RLC on Mainnets
+
+A. To send RLC tokens from Ethereum Mainnet to Arbitrum Mainnet:
+
+```bash
+make send-tokens-to-arbitrum-mainnet
+```
+
+B. To send RLC tokens from Arbitrum Mainnet back to Ethereum Mainnet:
+
+```bash
+make send-tokens-to-ethereum-mainnet
+```
 
 ## 📊 Code Coverage Analysis
 
@@ -309,8 +337,25 @@ The scripts automatically calculate these fees and include them in the transacti
 - [Forge Coverage](https://book.getfoundry.sh/reference/forge/forge-coverage)
 - [iExec Platform Documentation](https://docs.iex.ec/)
 
+## How to release:
+
+<!-- TODO use main branch and create PR for artifacts -->
+* First, deploy on Testnets and make sure all tests are ok.
+* Create a release branch `release/X.X.X` that starts from the `main` branch.
+   - Note that GitHub environments `arbitrum` and `ethereum` can only be used with `release/*` branches. The `main` branch cannot be used as the CI will not be able to commit deployment artifacts.
+* Commit required changes (salt, ...)
+* Go to "Actions" section on GitHub
+* Trigger `Deploy contracts` job and choose the correct release branch and the target Github environment.
+
 ## TODO
 
 - Use an enterprise RPC URL for `secrets.SEPOLIA_RPC_URL` in Github environment `ci`.
 - Add git pre-commit hook to format code locally.
 - Testing Documentation
+- Parametrize the following addresses by chain in `config.json`:
+```
+  "initialAdmin": "0x111165a109feca14e4ad4d805f6460c7d206ead1",
+  "initialUpgrader": "0x111121e2ec2557f484f65d5b1ad2b6b07b8acd23",
+  "initialPauser": "0x11113fe3513787f5a4f5f19690700e2736b3056e",
+```
+- Clean README.md

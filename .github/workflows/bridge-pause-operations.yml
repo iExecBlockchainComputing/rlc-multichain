@@ -1,0 +1,83 @@
+name: Bridge Pause Operations
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Pause operation to perform'
+        required: true
+        type: choice
+        options:
+          - 'pause-bridge'
+          - 'unpause-bridge'
+          - 'pause-outbound'
+          - 'unpause-outbound'
+      network_type:
+        description: 'Network type to configure'
+        required: true
+        type: choice
+        options:
+          - testnets
+          - mainnets
+        default: 'testnets'
+jobs:
+  setup-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set matrix based on network type
+        id: set-matrix
+        run: |
+          if [ "${{ github.event.inputs.network_type }}" == "testnets" ]; then
+            MATRIX='[
+              {
+                "chain": "sepolia"
+              },
+              {
+                "chain": "arbitrum_sepolia"
+              }
+            ]'
+          else
+            MATRIX='[
+              {
+                "chain": "ethereum"
+              },
+              {
+                "chain": "arbitrum"
+              }
+            ]'
+          fi
+
+  bridge-pause-operation:
+    needs: setup-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+      fail-fast: false
+    concurrency:
+      group: pause-bridge-${{ matrix.chain }}
+      cancel-in-progress: false
+    env:
+      CI: true
+    environment: ${{ matrix.chain }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+
+      - name: Run pause operation on bridge from ${{ matrix.chain }}
+        env:
+          CHAIN: ${{ matrix.chain }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+          PAUSER_PRIVATE_KEY: ${{ secrets.PAUSER_PRIVATE_KEY }}
+        run: make ${{ github.event.inputs.operation }}

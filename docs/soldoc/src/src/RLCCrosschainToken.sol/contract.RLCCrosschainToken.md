@@ -1,5 +1,5 @@
 # RLCCrosschainToken
-[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/61326e3abe32aee8683989ab94220c30da0cb2e6/src/RLCCrosschainToken.sol)
+[Git Source](https://github.com/iExecBlockchainComputing/rlc-multichain/blob/93b2d2b8fb41a03ccb6bc3a710204b628f122d69/src/RLCCrosschainToken.sol)
 
 **Inherits:**
 UUPSUpgradeable, AccessControlDefaultAdminRulesUpgradeable, ERC20PermitUpgradeable, ERC20BridgeableUpgradeable
@@ -11,8 +11,6 @@ by permitted bridge contracts.
 To whitelist a token bridge contract, the admin (with `DEFAULT_ADMIN_ROLE`) sends
 a transaction to grant the role `TOKEN_BRIDGE_ROLE` to the bridge contract address
 using `grantRole` function.
-TODO upgrade openzeppelin packages when the audited version of ERC20BridgeableUpgradeable
-is released.
 
 
 ## State Variables
@@ -116,7 +114,7 @@ an account with the UPGRADER_ROLE.*
 
 
 ```solidity
-function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE);
+function _authorizeUpgrade(address) internal override onlyRole(UPGRADER_ROLE);
 ```
 
 ### _checkTokenBridge
@@ -129,12 +127,6 @@ Checks if the caller is a trusted token bridge that is allowed by iExec to call
 
 
 ```solidity
-function _checkTokenBridge(address caller) internal view override;
+function _checkTokenBridge(address) internal view override onlyRole(TOKEN_BRIDGE_ROLE);
 ```
-**Parameters**
-
-|Name|Type|Description|
-|----|----|-----------|
-|`caller`|`address`|The address of the caller that is trying to mint or burn tokens.|
-
 

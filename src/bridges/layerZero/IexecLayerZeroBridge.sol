@@ -146,7 +146,7 @@ contract IexecLayerZeroBridge is
      * @notice LEVEL 2: Pauses only outbound transfers.
      * @dev Can only be called by accounts with PAUSER_ROLE
      *
-     * When outbount transfers are paused:
+     * When outbound transfers are paused:
      * - All _debit operations (outbound transfers) are blocked
      * - All _credit operations (inbound transfers) still work
      * - Users can still receive funds and "exit" their positions
@@ -189,12 +189,26 @@ contract IexecLayerZeroBridge is
     // ============ ACCESS CONTROL OVERRIDES ============
 
     /**
-     * @notice Returns the owner of the contract
-     * @return The address of the current owner
-     *
-     * @dev This override resolves the conflict between OwnableUpgradeable and
-     * AccessControlDefaultAdminRulesUpgradeable, both of which define owner().
-     * We use the OwnableUpgradeable version for consistency.
+     * @dev Overridden to prevent ownership renouncement.
+     * AccessControlDefaultAdminRulesUpgradeable is used to manage ownership.
+     */
+    // TODO make this as a non-view function.
+    function renounceOwnership() public pure override {
+        revert OperationNotAllowed("Use AccessControlDefaultAdminRulesUpgradeable instead");
+    }
+
+    /**
+     * @dev Overridden to prevent ownership transfer.
+     * AccessControlDefaultAdminRulesUpgradeable is used to manage ownership.
+     */
+    // TODO make this as a non-view function.
+    function transferOwnership(address) public pure override {
+        revert OperationNotAllowed("Use AccessControlDefaultAdminRulesUpgradeable instead");
+    }
+
+    /**
+     * Returns the owner of the contract which is also the default admin.
+     * @return The address of the current owner and default admin
      */
     function owner()
         public
@@ -202,7 +216,18 @@ contract IexecLayerZeroBridge is
         override(OwnableUpgradeable, AccessControlDefaultAdminRulesUpgradeable)
         returns (address)
     {
-        return OwnableUpgradeable.owner();
+        return AccessControlDefaultAdminRulesUpgradeable.owner();
+    }
+
+    /**
+     * Accepts the default admin transfer and sets the owner to the new admin.
+     * @dev This ensures the state variable `OwnableUpgradeable._owner` is set correctly after the default
+     * admin transfer. Even though `OwnableUpgradeable._owner` is not used in `owner()` accessor, we chose
+     * to update it for consistency purposes.
+     */
+    function _acceptDefaultAdminTransfer() internal override {
+        super._acceptDefaultAdminTransfer();
+        _transferOwnership(defaultAdmin());
     }
 
     // ============ CORE BRIDGE FUNCTIONS ============
