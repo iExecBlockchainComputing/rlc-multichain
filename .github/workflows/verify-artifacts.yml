@@ -1,0 +1,41 @@
+name: Verify Build Artifacts
+
+on:
+  pull_request:
+    paths:
+      - 'src/**/*.sol'
+      - '.github/workflows/verify-artifacts.yml'
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  verify-artifacts:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+
+      - name: Build contracts
+        run: forge build
+
+      - name: Check artifacts are up to date
+        run: |
+            if ! git diff --quiet HEAD -- artifacts/; then
+            echo "❌ Build artifacts in artifacts/ directory are not up to date!"
+            echo ""
+            git diff --name-only HEAD -- artifacts/
+            echo ""
+            echo "Please run 'forge build' locally and commit the updated artifacts."
+            exit 1
+            fi
+            echo "✅ Build artifacts are up to date!"

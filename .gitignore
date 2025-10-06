@@ -1,6 +1,5 @@
 # Compiler files
 cache/
-out/
 
 # Ignores development broadcast logs
 !/broadcast
@@ -19,3 +18,13 @@ broadcast/*/*/run-*.json
 /coverage
 lcov.info
 lcov.src.info
+
+# Ignore all artifacts except some files.
+!/artifacts/
+/artifacts/**
+!/artifacts/*IexecLayerZeroBridge.sol
+!/artifacts/*IexecLayerZeroBridge.sol/*
+!/artifacts/*RLCCrosschainToken.sol
+!/artifacts/*RLCCrosschainToken.sol/*
+!/artifacts/*RLCLiquidityUnifier.sol
+!/artifacts/*RLCLiquidityUnifier.sol/*
