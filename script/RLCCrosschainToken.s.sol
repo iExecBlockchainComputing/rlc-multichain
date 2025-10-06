@@ -62,4 +62,8 @@ contract Deploy is Script {
     }
 }
 
-// TODO add upgrade script.
+contract Upgrade is Script {
+    function run() external pure {
+        revert('Not implemented!');
+    }
+}
