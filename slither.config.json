@@ -1,4 +1,5 @@
 {
   "filter_paths": "(lib/|test/|script/|src/interfaces/|src/mocks/)",
-  "solc_args": "--optimize --via-ir"
+  "solc_args": "--optimize --via-ir",
+  "foundry_out_directory": "artifacts"
 }
