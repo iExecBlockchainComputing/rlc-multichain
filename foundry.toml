@@ -8,6 +8,7 @@ optimizer = true
 optimizer_runs = 200
 optimizer_details = { yul = true }
 # TODO: Add via_ir = true and solve issues when building with it
+bytecode_hash = "none"
 
 ## Needed by openzepplin upgrade plugin
 ffi = true
