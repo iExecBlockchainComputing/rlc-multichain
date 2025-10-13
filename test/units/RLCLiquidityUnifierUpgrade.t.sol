@@ -3,11 +3,11 @@
 pragma solidity ^0.8.22;
 
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {RLCLiquidityUnifierV2} from "../../src/mocks/RLCLiquidityUnifierV2Mock.sol";
 import {RLCLiquidityUnifier} from "../../src/RLCLiquidityUnifier.sol";
 import {TestUtils} from "./utils/TestUtils.sol";
 import {UpgradeUtils} from "../../script/lib/UpgradeUtils.sol";
 import {RLCMock} from "./mocks/RLCMock.sol";
+import {RLCLiquidityUnifierV2} from "./mocks/RLCLiquidityUnifierV2Mock.sol";
 
 contract RLCLiquidityUnifierUpgradeTest is TestHelperOz5 {
     using TestUtils for *;

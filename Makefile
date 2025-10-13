@@ -45,7 +45,7 @@ clean:
 	forge clean
 
 #
-# High-level deployment targets
+# Deployment targets
 #
 
 deploy-on-anvil:
@@ -78,39 +78,6 @@ deploy-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC
 	@echo "⚠️ Run 'make configure-all' to configure bridges."
 	@echo "⚠️ Please configure the bridges. Do not forget to authorize the RLCLiquidityUnifier and RLCCrosschainToken contracts on the bridges."
 
-configure-all: # SOURCE_CHAIN, TARGET_CHAIN, SOURCE_RPC, TARGET_RPC
-	$(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
-	$(MAKE) configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
-	@echo "Bridge configuration completed."
-
-#
-# High-level upgrade targets
-#
-
-upgrade-on-anvil:
-	$(MAKE) upgrade-all \
-		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
-
-upgrade-on-mainnets:
-	$(MAKE) upgrade-all \
-		SOURCE_CHAIN=ethereum SOURCE_RPC=$(ETHEREUM_RPC_URL) \
-		TARGET_CHAIN=arbitrum TARGET_RPC=$(ARBITRUM_RPC_URL) \
-
-# TODO : RLCMultichain and RLCLiquidityUnifier upgrades
-upgrade-on-testnets:
-	$(MAKE) upgrade-all \
-		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
-		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
-
-upgrade-all: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC
-	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC)
-	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC)
-
-#
-# Generic deployment targets
-#
-
 deploy-contract: # CONTRACT, CHAIN, RPC_URL
 	@echo "Deploying $(CONTRACT) on $(CHAIN)"
 	CHAIN=$(CHAIN) forge script script/$(CONTRACT).s.sol:Deploy \
@@ -120,8 +87,28 @@ deploy-contract: # CONTRACT, CHAIN, RPC_URL
 		-vvv
 
 #
-# Generic upgrade targets
+# Upgrade targets
 #
+
+upgrade-bridge-on-anvil:
+	$(MAKE) upgrade-bridge \
+		SOURCE_CHAIN=sepolia SOURCE_RPC=$(ANVIL_SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ANVIL_ARBITRUM_SEPOLIA_RPC_URL)
+
+upgrade-bridge-on-mainnets:
+	$(MAKE) upgrade-bridge \
+		SOURCE_CHAIN=ethereum SOURCE_RPC=$(ETHEREUM_RPC_URL) \
+		TARGET_CHAIN=arbitrum TARGET_RPC=$(ARBITRUM_RPC_URL) \
+
+# TODO : RLCMultichain and RLCLiquidityUnifier upgrades
+upgrade-bridge-on-testnets:
+	$(MAKE) upgrade-bridge \
+		SOURCE_CHAIN=sepolia SOURCE_RPC=$(SEPOLIA_RPC_URL) \
+		TARGET_CHAIN=arbitrum_sepolia TARGET_RPC=$(ARBITRUM_SEPOLIA_RPC_URL) \
+
+upgrade-bridge: # SOURCE_CHAIN, SOURCE_RPC, TARGET_CHAIN, TARGET_RPC
+	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(SOURCE_CHAIN) RPC_URL=$(SOURCE_RPC)
+	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(TARGET_CHAIN) RPC_URL=$(TARGET_RPC)
 
 upgrade-contract: # CONTRACT, CHAIN, RPC_URL
 	@echo "Upgrading $(CONTRACT) on $(CHAIN)"
@@ -132,8 +119,13 @@ upgrade-contract: # CONTRACT, CHAIN, RPC_URL
 		-vvv
 
 #
-# Generic configuration targets
+# Configuration targets
 #
+
+configure-all: # SOURCE_CHAIN, TARGET_CHAIN, SOURCE_RPC, TARGET_RPC
+	$(MAKE) configure-bridge SOURCE_CHAIN=$(SOURCE_CHAIN) TARGET_CHAIN=$(TARGET_CHAIN) RPC_URL=$(SOURCE_RPC)
+	$(MAKE) configure-bridge SOURCE_CHAIN=$(TARGET_CHAIN) TARGET_CHAIN=$(SOURCE_CHAIN) RPC_URL=$(TARGET_RPC)
+	@echo "Bridge configuration completed."
 
 configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 	@echo "Configuring LayerZero Bridge $(SOURCE_CHAIN) -> $(TARGET_CHAIN)"
@@ -145,37 +137,31 @@ configure-bridge: # SOURCE_CHAIN, TARGET_CHAIN, RPC_URL
 		-vvv
 
 #
-# Individual upgrade targets
-#
-
-upgrade-layerzero-bridge: # CHAIN, RPC_URL
-	$(MAKE) upgrade-contract CONTRACT=bridges/layerZero/IexecLayerZeroBridge CHAIN=$(CHAIN) RPC_URL=$(RPC_URL)
-
-#
-# Bridge operations.
-#
-
 # Testnet bridge operations
+#
 
 send-tokens-to-arbitrum-sepolia:
 	@echo "Sending tokens cross-chain... from SEPOLIA to Arbitrum SEPOLIA"
 	SOURCE_CHAIN=sepolia TARGET_CHAIN=arbitrum_sepolia \
-	forge script script/SendFromEthereumToArbitrum.s.sol:SendTokensFromEthereumToArbitrum \
+	forge script script/SendFromEthereumToArbitrum.s.sol:SendFromEthereumToArbitrum \
 		--rpc-url $(SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 
-send-tokens-to-sepolia:
+send-tokens-to-ethereum-sepolia:
 	@echo "Sending tokens cross-chain... from Arbitrum SEPOLIA to SEPOLIA"
 	SOURCE_CHAIN=arbitrum_sepolia TARGET_CHAIN=sepolia \
-	forge script script/SendFromArbitrumToEthereum.s.sol:SendTokensFromArbitrumToEthereum \
+	forge script script/SendFromArbitrumToEthereum.s.sol:SendFromArbitrumToEthereum \
 		--rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) \
 		--account $(ACCOUNT) \
 		--broadcast \
 		-vvv
 
+#
 # Mainnet bridge operations
+#
+
 send-tokens-to-arbitrum-mainnet:
 	@echo "Sending tokens cross-chain... from ETHEREUM to Arbitrum MAINNET"
 	SOURCE_CHAIN=ethereum TARGET_CHAIN=arbitrum \
