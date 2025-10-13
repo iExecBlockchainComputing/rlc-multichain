@@ -5,6 +5,7 @@ on:
     paths:
       - 'src/**/*.sol'
       - '.github/workflows/verify-artifacts.yml'
+      - 'artifacts/**'
 
 env:
   FOUNDRY_PROFILE: ci
@@ -22,7 +23,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          version: nightly
           cache: true
 
       - name: Build contracts
