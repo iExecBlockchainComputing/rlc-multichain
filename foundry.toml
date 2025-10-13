@@ -1,7 +1,7 @@
 [profile.default]
 solc = "0.8.23"
 src = "src"
-out = "artifacts"
+out = "out"
 libs = ["lib"]
 fs_permissions = [{ access = "read-write", path = "./" }]
 optimizer = true

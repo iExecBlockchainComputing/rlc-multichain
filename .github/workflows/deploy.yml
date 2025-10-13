@@ -30,7 +30,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CI: true
-      FOUNDRY_OUT: artifacts
     permissions:
       contents: write # Required to commit deployment files.
     environment: ${{ inputs.network }}
