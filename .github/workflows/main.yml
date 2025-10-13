@@ -17,7 +17,6 @@ concurrency:
 
 env:
   FOUNDRY_PROFILE: ci
-  FOUNDRY_OUT: artifacts
 
 jobs:
   build-and-test:
@@ -41,7 +40,7 @@ jobs:
         run: forge fmt --check
 
       - name: Run Forge build
-        run: forge clean && forge build && forge build './src' --sizes
+        run: forge build && forge build './src' --sizes
 
       - name: Run Foundry coverage
         env:
