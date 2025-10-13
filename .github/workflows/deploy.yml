@@ -34,7 +34,6 @@ jobs:
       pull-requests: write # Required to create pull requests.
     env:
       CI: true
-      FOUNDRY_OUT: artifacts
       # For commit action
       COMMIT_MESSAGE: 'chore: Save artifacts - ${{ inputs.network }} (runId:${{ github.run_id }})'
       GHA_BOT_NAME: 'GitHub Actions Bot'
