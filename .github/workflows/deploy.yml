@@ -92,7 +92,7 @@ jobs:
 
       # Since the `main` branch is protected, create a PR to push artifacts.
       - name: Push artifacts through a pull request
-        if: inputs.network != 'hardhat' && github.ref == 'refs/heads/main'
+        if: inputs.network != 'anvil' && github.ref == 'refs/heads/main'
         uses: peter-evans/create-pull-request@v7
         with:
           add-paths: |
