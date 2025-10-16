@@ -1,6 +1,9 @@
 name: Default
 
 on:
+  push:
+    branches:
+      - main # To trigger coverage updates of `main` on Codecov
   pull_request:
   workflow_call:
     inputs:
@@ -48,7 +51,7 @@ jobs:
           SEPOLIA_RPC_URL: ${{ inputs.SEPOLIA_RPC_URL || vars.SEPOLIA_RPC_URL }}
           ARBITRUM_SEPOLIA_RPC_URL: ${{ inputs.ARBITRUM_SEPOLIA_RPC_URL || vars.ARBITRUM_SEPOLIA_RPC_URL }}
         run: make generate-coverage
-        
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:

@@ -41,15 +41,13 @@ contract IexecLayerZeroBridgeDeployScriptTest is Test {
 
         // Setup Ethereum Mainnet fork
         vm.selectFork(sepoliaFork);
-        rlcLiquidityUnifier = new RLCLiquidityUnifierDeployScript().deploy(
-            params.rlcToken, admin, upgrader, params.createxFactory, keccak256("salt")
-        );
+        rlcLiquidityUnifier = new RLCLiquidityUnifierDeployScript()
+            .deploy(params.rlcToken, admin, upgrader, params.createxFactory, keccak256("salt"));
 
         // Setup Arbitrum Sepolia fork
         vm.selectFork(arbitrumSepoliaFork);
-        rlcCrosschainToken = new RLCCrosschainTokenDeployScript().deploy(
-            "iEx.ec Network Token", "RLC", admin, admin, params.createxFactory, salt
-        );
+        rlcCrosschainToken = new RLCCrosschainTokenDeployScript()
+            .deploy("iEx.ec Network Token", "RLC", admin, admin, params.createxFactory, salt);
 
         //Add label to make logs more readable
         vm.label(address(rlcCrosschainToken), "rlcCrosschainToken");
