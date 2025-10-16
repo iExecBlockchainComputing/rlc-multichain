@@ -345,7 +345,7 @@ The scripts automatically calculate these fees and include them in the transacti
 * Go to "Actions" section on GitHub.
 * Trigger the `Deploy contracts` job then choose the correct deployment branch and the target GitHub environment.
 
-Note that production GitHub environments `arbitrum` and `ethereum` can only be used with the `main` branche.
+Note that production GitHub environments `arbitrum` and `ethereum` can only be used with the `main` branch.
 
 ## TODO
 
