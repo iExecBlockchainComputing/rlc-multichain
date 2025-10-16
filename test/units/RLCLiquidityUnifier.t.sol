@@ -38,9 +38,8 @@ contract LiquidityUnifierTest is Test {
     function setUp() public {
         rlcToken = new RLCMock();
         rlcLiquidityUnifier = RLCLiquidityUnifier(
-            new RLCLiquidityUnifierDeployScript().deploy(
-                address(rlcToken), admin, upgrader, address(new CreateX()), keccak256("salt")
-            )
+            new RLCLiquidityUnifierDeployScript()
+                .deploy(address(rlcToken), admin, upgrader, address(new CreateX()), keccak256("salt"))
         );
         rlcLiquidityUnifierAddress = address(rlcLiquidityUnifier);
         bridgeTokenRoleId = rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE();
