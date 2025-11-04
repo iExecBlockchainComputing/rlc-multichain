@@ -98,6 +98,7 @@ jobs:
             # Create transaction for bridge contract
             TRANSACTIONS=$(echo "$TRANSACTIONS" | jq --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
               '. += [{"to": $to, "value": "0", "data": $data}]')
+          fi
           
           echo "transactions=$TRANSACTIONS" >> $GITHUB_OUTPUT
           echo "safe-address=${{ secrets.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
