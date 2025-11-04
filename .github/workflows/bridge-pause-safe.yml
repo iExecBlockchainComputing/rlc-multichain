@@ -55,7 +55,7 @@ jobs:
           CHAIN: ${{ inputs.network }}
         run: |
           # Get bridge address from config
-          BRIDGE_ADDRESS=$(jq -r ".${CHAIN}.iexecLayerZeroBridgeAddress" config/config.json)
+          BRIDGE_ADDRESS=$(jq -r ".chains.${CHAIN}.iexecLayerZeroBridgeAddress" config/config.json)
           echo "bridge-address=$BRIDGE_ADDRESS" >> $GITHUB_OUTPUT
           
           # Determine the function selector and name based on operation
