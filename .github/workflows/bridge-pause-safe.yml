@@ -1,0 +1,90 @@
+name: Bridge Pause/Unpause via Safe Multisig
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Pause operation to perform'
+        required: true
+        type: choice
+        options:
+          - pause-bridge
+          - unpause-bridge
+          - pause-outbound
+          - unpause-outbound
+      network:
+        description: 'Network to perform operation on'
+        required: true
+        type: choice
+        options:
+          - ethereum
+          - arbitrum
+          - sepolia
+          - arbitrum_sepolia
+        default: sepolia
+
+jobs:
+  prepare-pause-operation:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.network }}
+    outputs:
+      transaction-data: ${{ steps.prepare.outputs.transaction-data }}
+      safe-address: ${{ steps.prepare.outputs.safe-address }}
+      bridge-address: ${{ steps.prepare.outputs.bridge-address }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+
+      - name: Prepare pause/unpause transaction calldata
+        id: prepare
+        env:
+          CHAIN: ${{ inputs.network }}
+        run: |
+          # Get bridge address from config
+          BRIDGE_ADDRESS=$(jq -r ".${CHAIN}.iexecLayerZeroBridgeAddress" config/config.json)
+          echo "bridge-address=$BRIDGE_ADDRESS" >> $GITHUB_OUTPUT
+          
+          # Determine the function selector based on operation
+          case "${{ inputs.operation }}" in
+            "pause-bridge")
+              # pause() function selector
+              SELECTOR="0x8456cb59"
+              ;;
+            "unpause-bridge")
+              # unpause() function selector
+              SELECTOR="0x3f4ba83a"
+              ;;
+            "pause-outbound")
+              # pauseOutboundTransfers() function selector
+              SELECTOR="0x47e7ef24"
+              ;;
+            "unpause-outbound")
+              # unpauseOutboundTransfers() function selector  
+              SELECTOR="0x63ba0d00"
+              ;;
+          esac
+          
+          echo "transaction-data=$SELECTOR" >> $GITHUB_OUTPUT
+          echo "safe-address=${{ secrets.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
+
+  propose-to-safe:
+    needs: prepare-pause-operation
+    uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
+    secrets:
+      safe-proposer-private-key: ${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}
+      safe-api-key: ${{ secrets.SAFE_API_KEY }}
+    with:
+      rpc-url: ${{ secrets.RPC_URL }}
+      safe-address: ${{ needs.prepare-pause-operation.outputs.safe-address }}
+      transaction-to: ${{ needs.prepare-pause-operation.outputs.bridge-address }}
+      transaction-value: '0'
+      transaction-data: ${{ needs.prepare-pause-operation.outputs.transaction-data }}
