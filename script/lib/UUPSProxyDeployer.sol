@@ -32,16 +32,14 @@ library UUPSProxyDeployer {
         address createxFactory,
         bytes32 createxSalt
     ) internal returns (address) {
-        address implementation = deployImplementationUsingCreateX(
-            contractName, constructorData, createxFactory, createxSalt
+        address implementation =
+            deployImplementationUsingCreateX(contractName, constructorData, createxFactory, createxSalt);
+        address proxy = ICreateX(createxFactory).deployCreate2AndInit(
+            createxSalt,
+            abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(implementation, "")), // initCode
+            initializeData,
+            ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
         );
-        address proxy = ICreateX(createxFactory)
-            .deployCreate2AndInit(
-                createxSalt,
-                abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(implementation, "")), // initCode
-                initializeData,
-                ICreateX.Values({constructorAmount: 0, initCallAmount: 0}) // values for CreateX
-            );
         console.log("UUPS Proxy deployed at:", proxy);
         return proxy;
     }
