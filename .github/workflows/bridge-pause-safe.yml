@@ -22,6 +22,11 @@ on:
           - sepolia
           - arbitrum_sepolia
         default: sepolia
+      dry_run:
+        description: 'Dry run mode (only prepare and display transaction, do not propose to Safe)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   prepare-pause-operation:
@@ -53,31 +58,56 @@ jobs:
           BRIDGE_ADDRESS=$(jq -r ".${CHAIN}.iexecLayerZeroBridgeAddress" config/config.json)
           echo "bridge-address=$BRIDGE_ADDRESS" >> $GITHUB_OUTPUT
           
-          # Determine the function selector based on operation
+          # Determine the function selector and name based on operation
           case "${{ inputs.operation }}" in
             "pause-bridge")
               # pause() function selector
-              SELECTOR="0x8456cb59"
+              TRANSACTION_DATA=$(cast calldata "pause()")
+              FUNCTION_NAME="pause()"
               ;;
             "unpause-bridge")
               # unpause() function selector
-              SELECTOR="0x3f4ba83a"
+              TRANSACTION_DATA=$(cast calldata "unpause()")
+              FUNCTION_NAME="unpause()"
               ;;
             "pause-outbound")
               # pauseOutboundTransfers() function selector
-              SELECTOR="0x47e7ef24"
+              TRANSACTION_DATA=$(cast calldata "pauseOutboundTransfers()")
+              FUNCTION_NAME="pauseOutboundTransfers()"
               ;;
             "unpause-outbound")
               # unpauseOutboundTransfers() function selector  
-              SELECTOR="0x63ba0d00"
+              TRANSACTION_DATA=$(cast calldata "unpauseOutboundTransfers()")
+              FUNCTION_NAME="unpauseOutboundTransfers()"
               ;;
           esac
           
-          echo "transaction-data=$SELECTOR" >> $GITHUB_OUTPUT
+          echo "transaction-data=$TRANSACTION_DATA" >> $GITHUB_OUTPUT
           echo "safe-address=${{ secrets.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
+          
+          # Display transaction details for dry-run or verification
+          echo "=========================================="
+          echo "Transaction Details"
+          echo "=========================================="
+          echo "Network: ${{ inputs.network }}"
+          echo "Operation: ${{ inputs.operation }}"
+          echo "Function: $FUNCTION_NAME"
+          echo "Target Contract: $BRIDGE_ADDRESS"
+          echo "Transaction Data: $TRANSACTION_DATA"
+          echo "Transaction Value: 0"
+          echo "Safe Address: ${{ secrets.SAFE_ADDRESS }}"
+          echo "Dry Run: ${{ inputs.dry_run }}"
+          echo "=========================================="
+          
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            echo "✅ DRY RUN MODE: Transaction prepared successfully"
+            echo "ℹ️  This transaction would be proposed to Safe multisig"
+            echo "ℹ️  Re-run with dry_run=false to actually propose to Safe"
+          fi
 
   propose-to-safe:
     needs: prepare-pause-operation
+    if: ${{ inputs.dry_run == false }}
     uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
     secrets:
       safe-proposer-private-key: ${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}
