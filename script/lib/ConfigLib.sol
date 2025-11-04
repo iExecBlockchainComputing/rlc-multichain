@@ -161,8 +161,9 @@ library ConfigLib {
      */
     function _validateJsonContent(string memory content) private pure {
         try vm.parseJson(content) {
-            // JSON is valid, proceed
-        } catch {
+        // JSON is valid, proceed
+        }
+        catch {
             console.log("Invalid JSON in config file");
             revert("Invalid JSON format");
         }
