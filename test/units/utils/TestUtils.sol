@@ -77,8 +77,9 @@ library TestUtils {
         bytes32 salt
     ) private returns (RLCLiquidityUnifier) {
         return RLCLiquidityUnifier(
-            new RLCLiquidityUnifierDeployScript()
-                .deploy(address(rlcToken), params.initialAdmin, params.initialUpgrader, createXFactory, salt)
+            new RLCLiquidityUnifierDeployScript().deploy(
+                address(rlcToken), params.initialAdmin, params.initialUpgrader, createXFactory, salt
+            )
         );
     }
 
@@ -120,8 +121,9 @@ library TestUtils {
         bytes32 salt
     ) private returns (RLCCrosschainToken) {
         return RLCCrosschainToken(
-            new RLCCrosschainTokenDeployScript()
-                .deploy(name, symbol, params.initialAdmin, params.initialUpgrader, createXFactory, salt)
+            new RLCCrosschainTokenDeployScript().deploy(
+                name, symbol, params.initialAdmin, params.initialUpgrader, createXFactory, salt
+            )
         );
     }
 

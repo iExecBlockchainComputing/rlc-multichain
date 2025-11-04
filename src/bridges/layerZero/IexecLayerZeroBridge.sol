@@ -7,9 +7,8 @@ import {OFTCoreUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/o
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {
-    AccessControlDefaultAdminRulesUpgradeable
-} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
+import {AccessControlDefaultAdminRulesUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {DualPausableUpgradeable} from "../utils/DualPausableUpgradeable.sol";
 import {IIexecLayerZeroBridge} from "../../interfaces/IIexecLayerZeroBridge.sol";
@@ -313,11 +312,7 @@ contract IexecLayerZeroBridge is
      * @param amountLD The amount of tokens to mint (in local decimals)
      * @return amountReceivedLD The amount of tokens actually minted
      */
-    function _credit(
-        address to,
-        uint256 amountLD,
-        uint32 /*_srcEid*/
-    )
+    function _credit(address to, uint256 amountLD, uint32 /*_srcEid*/ )
         internal
         override
         whenNotPaused

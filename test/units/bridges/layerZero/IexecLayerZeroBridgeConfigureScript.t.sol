@@ -9,9 +9,8 @@ import {IOAppCore} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOApp
 import {IOAppOptionsType3} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppOptionsType3.sol";
 import {TestUtils} from "./../../utils/TestUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
-import {
-    Configure as IexecLayerZeroBridgeConfigureScript
-} from "../../../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
+import {Configure as IexecLayerZeroBridgeConfigureScript} from
+    "../../../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
 import {LayerZeroUtils} from "../../../../script/utils/LayerZeroUtils.sol";
 
 // This test contract inherits from `Configure` script because we need the `msg.sender` to be the admin
@@ -179,8 +178,9 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return true"
         );
         assertTrue(
-            deployment.rlcLiquidityUnifier
-                .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress),
+            deployment.rlcLiquidityUnifier.hasRole(
+                deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress
+            ),
             "Expected bridge to have the role"
         );
         // rlcCrosschainToken
@@ -193,8 +193,9 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return true"
         );
         assertTrue(
-            deployment.rlcCrosschainToken
-            .hasRole(deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), targetBridgeAddress),
+            deployment.rlcCrosschainToken.hasRole(
+                deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), targetBridgeAddress
+            ),
             "Expected bridge to have the role"
         );
         vm.stopPrank();
@@ -211,8 +212,9 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return true"
         );
         assertTrue(
-            deployment.rlcLiquidityUnifier
-                .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress),
+            deployment.rlcLiquidityUnifier.hasRole(
+                deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress
+            ),
             "Expected bridge to have the role"
         );
         assertFalse(
