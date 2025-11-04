@@ -354,10 +354,12 @@ All critical administrative operations are secured using Safe (Gnosis Safe) mult
 ### Supported Operations
 
 - **Pause/Unpause**: Control bridge operations with different pause levels
+- **Role Management**: Grant or revoke TOKEN_BRIDGE_ROLE
 
 ### GitHub Actions Workflows
 
 - `.github/workflows/bridge-pause-safe.yml` - Propose pause/unpause transactions
+- `.github/workflows/manage-token-bridge-role-safe.yml` - Propose role management transactions
 
 All workflows use the reusable Safe multisig workflow from [iExecBlockchainComputing/github-actions-workflows](https://github.com/iExecBlockchainComputing/github-actions-workflows).
 
