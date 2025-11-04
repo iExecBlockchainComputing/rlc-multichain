@@ -80,11 +80,11 @@ jobs:
             FUNCTION_NAME="beginDefaultAdminTransfer(address)"
             
             # Create transaction for token contract
-            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
+            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
               '. += [{"to": $to, "value": "0", "data": $data}]')
             
             # Create transaction for bridge contract
-            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
+            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
               '. += [{"to": $to, "value": "0", "data": $data}]')
           else
             # acceptDefaultAdminTransfer()
@@ -92,15 +92,15 @@ jobs:
             FUNCTION_NAME="acceptDefaultAdminTransfer()"
             
             # Create transaction for token contract
-            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
+            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
               '. += [{"to": $to, "value": "0", "data": $data}]')
             
             # Create transaction for bridge contract
-            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
+            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
               '. += [{"to": $to, "value": "0", "data": $data}]')
           fi
           
-          echo "transactions=$TRANSACTIONS" >> $GITHUB_OUTPUT
+          echo "transactions=$(echo $TRANSACTIONS | jq -c .)" >> $GITHUB_OUTPUT
           echo "safe-address=${{ secrets.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
           
           # Display transaction details for dry-run or verification
