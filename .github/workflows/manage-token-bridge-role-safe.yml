@@ -79,7 +79,6 @@ jobs:
             # revokeRole(bytes32 role, address account)
             TRANSACTION_DATA=$(cast calldata "revokeRole(bytes32,address)" "$ROLE_HASH" "${{ inputs.bridge_address }}")
             FUNCTION_NAME="revokeRole(bytes32,address)"
-          fi
           
           echo "transaction-data=$TRANSACTION_DATA" >> $GITHUB_OUTPUT
           echo "safe-address=${{ secrets.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
@@ -88,17 +87,24 @@ jobs:
           echo "=========================================="
           echo "Transaction Details"
           echo "=========================================="
-          echo "Network: ${{ inputs.network }}"
-          echo "Operation: ${{ inputs.operation }}"
-          echo "Function: $FUNCTION_NAME"
-          echo "Target Contract: $TARGET_CONTRACT"
-          echo "Bridge Address: ${{ inputs.bridge_address }}"
-          echo "Role Hash: $ROLE_HASH"
-          echo "Transaction Data: $TRANSACTION_DATA"
-          echo "Transaction Value: 0"
-          echo "Safe Address: ${{ secrets.SAFE_ADDRESS }}"
-          echo "Dry Run: ${{ inputs.dry_run }}"
-          echo "=========================================="
+          echo "Workflow Configuration:"
+          echo "   • Network:        ${{ inputs.network }}"
+          echo "   • Operation:      ${{ inputs.operation }}"
+          echo "   • Function:       $FUNCTION_NAME"
+          echo "   • Safe Address:   ${{ secrets.SAFE_ADDRESS }}"
+          echo "   • Dry Run:        ${{ inputs.dry_run }}"
+          echo ""
+          echo "────────────────────────────────────────────────────────────────────────────────"
+          echo ""
+          echo "Transaction Details:"
+          echo "   • Target:         $TARGET_CONTRACT"
+          echo "   • Bridge:         ${{ inputs.bridge_address }}"
+          echo "   • Role Hash:      $ROLE_HASH"
+          echo "   • Value:          0 ETH"
+          echo "   • Data:           $TRANSACTION_DATA"
+          echo ""
+          echo "────────────────────────────────────────────────────────────────────────────────"
+          echo ""
           
           if [ "${{ inputs.dry_run }}" == "true" ]; then
             echo "✅ DRY RUN MODE: Transaction prepared successfully"
@@ -114,7 +120,7 @@ jobs:
       safe-proposer-private-key: ${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}
       safe-api-key: ${{ secrets.SAFE_API_KEY }}
     with:
-      rpc-url: ${{ github.secrets.RPC_URL }}
+      rpc-url: ${{ secrets.RPC_URL }}
       safe-address: ${{ needs.prepare-role-operation.outputs.safe-address }}
       transaction-to: ${{ needs.prepare-role-operation.outputs.target-contract }}
       transaction-value: '0'
