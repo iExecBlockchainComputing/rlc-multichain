@@ -26,7 +26,7 @@ on:
         description: 'Dry run mode (only prepare and display transaction, do not propose to Safe)'
         required: false
         type: boolean
-        default: false
+        default: true
 
 jobs:
   prepare-pause-operation:
@@ -113,7 +113,7 @@ jobs:
       safe-proposer-private-key: ${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}
       safe-api-key: ${{ secrets.SAFE_API_KEY }}
     with:
-      rpc-url: ${{ secrets.RPC_URL }}
+      rpc-url: ${{ github.secrets.RPC_URL }}
       safe-address: ${{ needs.prepare-pause-operation.outputs.safe-address }}
       transaction-to: ${{ needs.prepare-pause-operation.outputs.bridge-address }}
       transaction-value: '0'
