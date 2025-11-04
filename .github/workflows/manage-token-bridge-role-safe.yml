@@ -79,6 +79,7 @@ jobs:
             # revokeRole(bytes32 role, address account)
             TRANSACTION_DATA=$(cast calldata "revokeRole(bytes32,address)" "$ROLE_HASH" "${{ inputs.bridge_address }}")
             FUNCTION_NAME="revokeRole(bytes32,address)"
+          fi
           
           echo "transaction-data=$TRANSACTION_DATA" >> $GITHUB_OUTPUT
           echo "safe-address=${{ secrets.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
