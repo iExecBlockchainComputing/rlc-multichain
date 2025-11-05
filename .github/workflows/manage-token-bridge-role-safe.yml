@@ -1,4 +1,4 @@
-name: Manage Token Bridge Role via Safe Multisig
+name: Manage Contract Roles via Safe Multisig
 
 on:
   workflow_dispatch:
@@ -10,6 +10,15 @@ on:
         options:
           - grant
           - revoke
+      role:
+        description: 'Role to grant or revoke'
+        required: true
+        type: choice
+        options:
+          - TOKEN_BRIDGE_ROLE
+          - PAUSER_ROLE
+          - UPGRADER_ROLE
+        default: TOKEN_BRIDGE_ROLE
       network:
         description: 'Network to perform operation on'
         required: true
@@ -20,8 +29,8 @@ on:
           - sepolia
           - arbitrum_sepolia
         default: sepolia
-      bridge_address:
-        description: 'Bridge address to grant/revoke role to/from'
+      target_address:
+        description: 'Address to grant/revoke role to/from'
         required: true
         type: string
       dry_run:
@@ -35,9 +44,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.network }}
     outputs:
-      transaction-data: ${{ steps.prepare.outputs.transaction-data }}
+      transactions: ${{ steps.prepare.outputs.transactions }}
       safe-address: ${{ steps.prepare.outputs.safe-address }}
-      target-contract: ${{ steps.prepare.outputs.target-contract }}
     
     steps:
       - name: Checkout repository
@@ -55,33 +63,60 @@ jobs:
         id: prepare
         env:
           CHAIN: ${{ inputs.network }}
+          ROLE_NAME: ${{ inputs.role }}
         run: |
-          # Read config to determine which contract to use
+          # Determine which contract to use based on role and network config
           APPROVAL_REQUIRED=$(jq -r ".chains.${CHAIN}.approvalRequired" config/config.json)
+          BRIDGE_ADDRESS=$(jq -r ".chains.${CHAIN}.iexecLayerZeroBridgeAddress" config/config.json)
           
           if [ "$APPROVAL_REQUIRED" = "true" ]; then
-            TARGET_CONTRACT=$(jq -r ".chains.${CHAIN}.rlcLiquidityUnifierAddress" config/config.json)
+            TOKEN_CONTRACT=$(jq -r ".chains.${CHAIN}.rlcLiquidityUnifierAddress" config/config.json)
           else
-            TARGET_CONTRACT=$(jq -r ".chains.${CHAIN}.rlcCrosschainTokenAddress" config/config.json)
+            TOKEN_CONTRACT=$(jq -r ".chains.${CHAIN}.rlcCrosschainTokenAddress" config/config.json)
           fi
           
-          echo "target-contract=$TARGET_CONTRACT" >> $GITHUB_OUTPUT
-          
-          # Calculate TOKEN_BRIDGE_ROLE = keccak256("TOKEN_BRIDGE_ROLE")
-          ROLE_HASH=$(cast keccak "TOKEN_BRIDGE_ROLE")
+          # Calculate role hash: keccak256("ROLE_NAME")
+          ROLE_HASH=$(cast keccak "$ROLE_NAME")
           
           # Determine the function selector and encode calldata
           if [ "${{ inputs.operation }}" = "grant" ]; then
-            # grantRole(bytes32 role, address account)
-            TRANSACTION_DATA=$(cast calldata "grantRole(bytes32,address)" "$ROLE_HASH" "${{ inputs.bridge_address }}")
+            TRANSACTION_DATA=$(cast calldata "grantRole(bytes32,address)" "$ROLE_HASH" "${{ inputs.target_address }}")
             FUNCTION_NAME="grantRole(bytes32,address)"
           else
-            # revokeRole(bytes32 role, address account)
-            TRANSACTION_DATA=$(cast calldata "revokeRole(bytes32,address)" "$ROLE_HASH" "${{ inputs.bridge_address }}")
+            TRANSACTION_DATA=$(cast calldata "revokeRole(bytes32,address)" "$ROLE_HASH" "${{ inputs.target_address }}")
             FUNCTION_NAME="revokeRole(bytes32,address)"
           fi
           
-          echo "transaction-data=$TRANSACTION_DATA" >> $GITHUB_OUTPUT
+          # Prepare transactions array based on role type
+          TRANSACTIONS='[]'
+          
+          case "$ROLE_NAME" in
+            TOKEN_BRIDGE_ROLE)
+              # TOKEN_BRIDGE_ROLE is only on token contract (RLCLiquidityUnifier or RLCCrosschainToken)
+              TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
+                '. += [{"to": $to, "value": "0", "data": $data, "contract": "token"}]')
+              ;;
+            PAUSER_ROLE)
+              # PAUSER_ROLE is only on bridge contract
+              TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
+                '. += [{"to": $to, "value": "0", "data": $data, "contract": "bridge"}]')
+              ;;
+            UPGRADER_ROLE)
+              # UPGRADER_ROLE is on both bridge and token contracts
+              # Add transaction for token contract
+              TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
+                '. += [{"to": $to, "value": "0", "data": $data, "contract": "token"}]')
+              # Add transaction for bridge contract
+              TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
+                '. += [{"to": $to, "value": "0", "data": $data, "contract": "bridge"}]')
+              ;;
+            *)
+              echo "❌ Error: Unknown role $ROLE_NAME"
+              exit 1
+              ;;
+          esac
+          
+          echo "transactions=$(echo $TRANSACTIONS | jq -c .)" >> $GITHUB_OUTPUT
           echo "safe-address=${{ secrets.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
           
           # Display transaction details for dry-run or verification
@@ -90,6 +125,7 @@ jobs:
           echo "=========================================="
           echo "Workflow Configuration:"
           echo "   • Network:        ${{ inputs.network }}"
+          echo "   • Role:           $ROLE_NAME"
           echo "   • Operation:      ${{ inputs.operation }}"
           echo "   • Function:       $FUNCTION_NAME"
           echo "   • Safe Address:   ${{ secrets.SAFE_ADDRESS }}"
@@ -97,25 +133,40 @@ jobs:
           echo ""
           echo "────────────────────────────────────────────────────────────────────────────────"
           echo ""
-          echo "Transaction Details:"
-          echo "   • Target:         $TARGET_CONTRACT"
-          echo "   • Bridge:         ${{ inputs.bridge_address }}"
-          echo "   • Role Hash:      $ROLE_HASH"
-          echo "   • Value:          0 ETH"
-          echo "   • Data:           $TRANSACTION_DATA"
-          echo ""
+          
+          # Display each transaction
+          TX_COUNT=$(echo $TRANSACTIONS | jq 'length')
+          for i in $(seq 0 $(($TX_COUNT - 1))); do
+            TX=$(echo $TRANSACTIONS | jq -r ".[$i]")
+            TX_TO=$(echo $TX | jq -r '.to')
+            TX_DATA=$(echo $TX | jq -r '.data')
+            TX_CONTRACT=$(echo $TX | jq -r '.contract')
+            
+            echo "Transaction #$((i + 1)) - ${TX_CONTRACT^} Contract:"
+            echo "   • Target:         $TX_TO"
+            echo "   • Address:        ${{ inputs.target_address }}"
+            echo "   • Role Name:      $ROLE_NAME"
+            echo "   • Role Hash:      $ROLE_HASH"
+            echo "   • Value:          0 ETH"
+            echo "   • Data:           $TX_DATA"
+            echo ""
+          done
+          
           echo "────────────────────────────────────────────────────────────────────────────────"
           echo ""
           
           if [ "${{ inputs.dry_run }}" == "true" ]; then
-            echo "✅ DRY RUN MODE: Transaction prepared successfully"
-            echo "ℹ️  This transaction would be proposed to Safe multisig"
+            echo "✅ DRY RUN MODE: Transaction(s) prepared successfully"
+            echo "ℹ️  These transaction(s) would be proposed to Safe multisig"
             echo "ℹ️  Re-run with dry_run=false to actually propose to Safe"
           fi
 
   propose-to-safe:
     needs: prepare-role-operation
     if: ${{ inputs.dry_run == false }}
+    strategy:
+      matrix:
+        transaction: ${{ fromJson(needs.prepare-role-operation.outputs.transactions) }}
     uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
     secrets:
       safe-proposer-private-key: ${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}
@@ -123,6 +174,6 @@ jobs:
     with:
       rpc-url: ${{ github.secrets.RPC_URL }}
       safe-address: ${{ needs.prepare-role-operation.outputs.safe-address }}
-      transaction-to: ${{ needs.prepare-role-operation.outputs.target-contract }}
-      transaction-value: '0'
-      transaction-data: ${{ needs.prepare-role-operation.outputs.transaction-data }}
+      transaction-to: ${{ matrix.transaction.to }}
+      transaction-value: ${{ matrix.transaction.value }}
+      transaction-data: ${{ matrix.transaction.data }}
