@@ -109,10 +109,10 @@ library ConfigLib {
         params.createxFactory = config.readAddress(".createxFactory");
         params.rlcToken = getRLCTokenAddress(config, prefix);
         (
-                params.rlcCrosschainTokenCreatexSalt,
-                params.rlcLiquidityUnifierCreatexSalt,
-                params.iexecLayerZeroBridgeCreatexSalt
-            ) = getAllCreatexParams(config, prefix);
+            params.rlcCrosschainTokenCreatexSalt,
+            params.rlcLiquidityUnifierCreatexSalt,
+            params.iexecLayerZeroBridgeCreatexSalt
+        ) = getAllCreatexParams(config, prefix);
         params.rlcCrosschainTokenAddress = getRLCCrosschainTokenAddress(config, prefix);
         params.rlcLiquidityUnifierAddress = getLiquidityUnifierAddress(config, prefix);
         params.approvalRequired = config.readBool(string.concat(prefix, ".approvalRequired"));
