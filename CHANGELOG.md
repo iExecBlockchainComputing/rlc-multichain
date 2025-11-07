@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.2.0](https://github.com/iExecBlockchainComputing/rlc-multichain/compare/v0.1.0...v0.2.0) (2025-11-07)
+
+
+### 🚀 Features
+
+* commit artifacts ([#106](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/106)) ([b670d26](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/b670d26e7354c8fc213fa0012937f6ba82887634))
+* pause scripts  ([#93](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/93)) ([727dd92](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/727dd9210283604cdbc552aab5bf5a357f9225eb))
+
+
+### 🐞 Bug Fixes
+
+* Fix release please version in manifest ([#101](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/101)) ([6c1d7c9](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/6c1d7c9156401a4499818789ecce0e86cb031544))
+
+
+### ✨ Polish
+
+* Improve code formatting and readability across multiple files ([#113](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/113)) ([ac493df](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/ac493df516592f38273c8b859191aed81b472cb3))
+* Move mock files to test folder ([#73](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/73)) ([627c937](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/627c937f41b3ad706ffcc48da217df4684f0d3f4))
+
+
+### 🧰 Other
+
+* Add forge lock file ([#114](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/114)) ([7dcf930](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/7dcf9303aed98ea94506e9a649a8a987845e4b5f))
+* Push artifacts using PRs on the protected branch ([#110](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/110)) ([c246169](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/c24616908a9c8c189dedafa9ba87502beb20b6bb))
+* Revert "feat: commit artifacts ([#106](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/106))" ([#109](https://github.com/iExecBlockchainComputing/rlc-multichain/issues/109)) ([03ba891](https://github.com/iExecBlockchainComputing/rlc-multichain/commit/03ba891b4ac349236a5e2903611bfb5754d4ed5c))
+
 ## [0.1.0](https://github.com/iExecBlockchainComputing/rlc-multichain/compare/v0.1.0-rc...v0.1.0) (2025-08-14)
 
 ### 🚀 Features
