@@ -31,7 +31,7 @@ on:
         default: true
 
 jobs:
-  prepare-admin-transfer:
+  prepare-transaction-calldata:
     runs-on: ubuntu-latest
     environment: ${{ inputs.network }}
     outputs:
@@ -56,7 +56,7 @@ jobs:
           echo "Error: new_admin_address is required for begin-transfer operation"
           exit 1
 
-      - name: Prepare admin transfer transaction calldata
+      - name: Prepare transaction calldata
         id: prepare
         env:
           CHAIN: ${{ inputs.network }}
@@ -136,7 +136,7 @@ jobs:
           fi
 
   propose-token-contract-to-safe:
-    needs: prepare-admin-transfer
+    needs: prepare-transaction-calldata
     if: ${{ inputs.dry_run == false }}
     uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
     secrets:
@@ -144,13 +144,13 @@ jobs:
       safe-api-key: ${{ secrets.SAFE_API_KEY }}
     with:
       rpc-url: ${{ github.secrets.RPC_URL }}
-      safe-address: ${{ needs.prepare-admin-transfer.outputs.safe-address }}
-      transaction-to: ${{ fromJson(needs.prepare-admin-transfer.outputs.transactions)[0].to }}
-      transaction-value: ${{ fromJson(needs.prepare-admin-transfer.outputs.transactions)[0].value }}
-      transaction-data: ${{ fromJson(needs.prepare-admin-transfer.outputs.transactions)[0].data }}
+      safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
+      transaction-to: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[0].to }}
+      transaction-value: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[0].value }}
+      transaction-data: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[0].data }}
 
   propose-bridge-to-safe:
-    needs: prepare-admin-transfer
+    needs: prepare-transaction-calldata
     if: ${{ inputs.dry_run == false }}
     uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
     secrets:
@@ -158,7 +158,7 @@ jobs:
       safe-api-key: ${{ secrets.SAFE_API_KEY }}
     with:
       rpc-url: ${{ github.secrets.RPC_URL }}
-      safe-address: ${{ needs.prepare-admin-transfer.outputs.safe-address }}
-      transaction-to: ${{ fromJson(needs.prepare-admin-transfer.outputs.transactions)[1].to }}
-      transaction-value: ${{ fromJson(needs.prepare-admin-transfer.outputs.transactions)[1].value }}
-      transaction-data: ${{ fromJson(needs.prepare-admin-transfer.outputs.transactions)[1].data }}
+      safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
+      transaction-to: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[1].to }}
+      transaction-value: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[1].value }}
+      transaction-data: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[1].data }}

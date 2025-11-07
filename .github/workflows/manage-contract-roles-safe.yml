@@ -40,7 +40,7 @@ on:
         default: true
 
 jobs:
-  prepare-role-operation:
+  prepare-transaction-calldata:
     runs-on: ubuntu-latest
     environment: ${{ inputs.network }}
     outputs:
@@ -59,7 +59,7 @@ jobs:
           version: stable
           cache: true
 
-      - name: Prepare role management transaction calldata
+      - name: Prepare transaction calldata
         id: prepare
         env:
           CHAIN: ${{ inputs.network }}
@@ -162,18 +162,18 @@ jobs:
           fi
 
   propose-to-safe:
-    needs: prepare-role-operation
+    needs: prepare-transaction-calldata
     if: ${{ inputs.dry_run == false }}
     strategy:
       matrix:
-        transaction: ${{ fromJson(needs.prepare-role-operation.outputs.transactions) }}
+        transaction: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions) }}
     uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
     secrets:
       safe-proposer-private-key: ${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}
       safe-api-key: ${{ secrets.SAFE_API_KEY }}
     with:
       rpc-url: ${{ github.secrets.RPC_URL }}
-      safe-address: ${{ needs.prepare-role-operation.outputs.safe-address }}
+      safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
       transaction-to: ${{ matrix.transaction.to }}
       transaction-value: ${{ matrix.transaction.value }}
       transaction-data: ${{ matrix.transaction.data }}
