@@ -81,6 +81,10 @@ The architecture is designed to support additional networks in the future with m
 - RLC tokens for bridge testing
 - [LCOV](https://wiki.documentfoundation.org/Development/Lcov) for coverage report generation (install via `brew install lcov` on macOS)
 
+## Go to production
+
+Read [how to make the bridge production-ready](./docs/LayerZeroSetup.md).
+
 ## Installation
 
 1. Clone the repository

@@ -3,16 +3,28 @@
 
 pragma solidity ^0.8.22;
 
+import {console} from "forge-std/console.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-import {EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
+import {SendUln302Mock} from "@layerzerolabs/test-devtools-evm-foundry/contracts/mocks/SendUln302Mock.sol";
+import {ReceiveUln302Mock} from "@layerzerolabs/test-devtools-evm-foundry/contracts/mocks/ReceiveUln302Mock.sol";
+import {EndpointV2Mock} from "@layerzerolabs/test-devtools-evm-foundry/contracts/mocks/EndpointV2Mock.sol";
+import {ILayerZeroEndpointV2} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+import {UlnConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/UlnBase.sol";
+import {ExecutorConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/SendLibBase.sol";
 import {IOAppCore} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppCore.sol";
 import {IOAppOptionsType3} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppOptionsType3.sol";
+import {EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
+import {SetConfigParam} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
+import {Errors} from "@layerzerolabs/lz-evm-protocol-v2/contracts/libs/Errors.sol";
 import {TestUtils} from "./../../utils/TestUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
+import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
 import {
     Configure as IexecLayerZeroBridgeConfigureScript
 } from "../../../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
+import {ConfigLib} from "../../../../script/lib/ConfigLib.sol";
 import {LayerZeroUtils} from "../../../../script/utils/LayerZeroUtils.sol";
+import {LzConfig} from "../../../../script/lib/ConfigLib.sol";
 
 // This test contract inherits from `Configure` script because we need the `msg.sender` to be the admin
 // address (using vm.prank) when calling the `configure` function.
@@ -21,9 +33,13 @@ import {LayerZeroUtils} from "../../../../script/utils/LayerZeroUtils.sol";
 contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroBridgeConfigureScript {
     using TestUtils for *;
 
+    // Hardcoding the value here to make sure tests fail when the value is changed in the script.
+    uint128 constant GAS_LIMIT = 90_000;
+
     address admin = makeAddr("admin");
     address upgrader = makeAddr("upgrader");
     address pauser = makeAddr("pauser");
+    address delegate = makeAddr("delegate");
     uint16 sourceEndpointId = 1;
     uint16 targetEndpointId = 2;
     address sourceEndpoint;
@@ -53,6 +69,10 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         targetBridge = deployment.iexecLayerZeroBridgeWithoutApproval;
         sourceBridgeAddress = address(deployment.iexecLayerZeroBridgeWithApproval);
         targetBridgeAddress = address(deployment.iexecLayerZeroBridgeWithoutApproval);
+        vm.startPrank(admin);
+        sourceBridge.setDelegate(delegate);
+        targetBridge.setDelegate(delegate);
+        vm.stopPrank();
     }
 
     // ====== configure ======
@@ -106,8 +126,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     // ====== setEnforcedOptionsIfNeeded ======
 
     function test_setEnforcedOptionsIfNeeded_ShouldSetOptionsWhenEmpty() public {
-        // Hardcoding 90_000 here to make sure tests fail when the value is changed in the script.
-        bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
+        bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(GAS_LIMIT, 0);
         // TODO debug event emission.
         // vm.expectEmit(true, true, true, true, sourceBridgeAddress);
         // emit IOAppOptionsType3.EnforcedOptionSet(enforcedOptions);
@@ -140,7 +159,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "lzCompose enforced options are not equal"
         );
         // Second call should override the options.
-        bytes memory newOptions = LayerZeroUtils.buildLzReceiveExecutorConfig(90_000, 0);
+        bytes memory newOptions = LayerZeroUtils.buildLzReceiveExecutorConfig(GAS_LIMIT, 0);
         bool result = super.setEnforcedOptionsIfNeeded(sourceBridgeAddress, targetEndpointId);
         assertTrue(result, "Expected setEnforcedOptionsIfNeeded to return true");
         assertEq(
@@ -164,6 +183,19 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         assertFalse(secondCallResult, "Expected setEnforcedOptionsIfNeeded to return false");
         vm.stopPrank();
     }
+
+    // ====== setExecutorAndUlnConfigIfNeeded ======
+
+    function test_setExecutorAndUlnConfigIfNeeded_ShouldSetConfigWhenNotSet() public {
+        LzConfig memory sourceChainLzConfig = _buildLzConfigMock(sourceEndpoint, sourceBridgeAddress, targetEndpointId);
+        LzConfig memory targetChainLzConfig = _buildLzConfigMock(targetEndpoint, targetBridgeAddress, sourceEndpointId);
+        vm.startPrank(delegate);
+        bool result = setExecutorAndUlnConfigIfNeeded(sourceChainLzConfig, targetChainLzConfig);
+        assertTrue(result, "Expected setExecutorAndUlnConfigIfNeeded to return true");
+        vm.stopPrank();
+    }
+
+    // TODO implement other tests.
 
     // ====== authorizeBridgeIfNeeded ======
 
@@ -224,5 +256,34 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return false"
         );
         vm.stopPrank();
+    }
+
+    /**
+     * Read the default config, change some values, then return the new config.
+     * Library addresses cannot be changed because they need to be registered.
+     * See `TestHelperOz5.createEndpoints` for more details.
+     */
+    function _buildLzConfigMock(address _sourceEndpoint, address _sourceBridge, uint32 _targetEndpointId)
+        private
+        returns (LzConfig memory)
+    {
+        ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(_sourceEndpoint);
+        LzConfig memory lzConfig = LayerZeroUtils.getBridgeLzConfig(endpoint, _sourceBridge, _targetEndpointId);
+        lzConfig.executorConfig.maxMessageSize = 123;
+        lzConfig.executorConfig.executor = makeAddr("executor");
+        lzConfig.ulnConfig.confirmations = 456;
+        uint8 size = 3;
+        lzConfig.ulnConfig.requiredDVNCount = size;
+        lzConfig.ulnConfig.requiredDVNs = new address[](size);
+        lzConfig.ulnConfig.requiredDVNs[0] = 0x00000000000000000000000000000000000000AA;
+        lzConfig.ulnConfig.requiredDVNs[1] = 0x00000000000000000000000000000000000000bb;
+        lzConfig.ulnConfig.requiredDVNs[2] = 0x00000000000000000000000000000000000000cc;
+        lzConfig.ulnConfig.optionalDVNCount = size;
+        lzConfig.ulnConfig.optionalDVNs = new address[](size);
+        lzConfig.ulnConfig.optionalDVNs[0] = 0x00000000000000000000000000000000000000dd;
+        lzConfig.ulnConfig.optionalDVNs[1] = 0x00000000000000000000000000000000000000eE;
+        lzConfig.ulnConfig.optionalDVNs[2] = 0x00000000000000000000000000000000000000ff;
+        lzConfig.ulnConfig.optionalDVNThreshold = size;
+        return lzConfig;
     }
 }
