@@ -223,7 +223,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         LzConfig memory dstChainLzConfig = _buildLzConfigMock(dstEndpoint, dstBridgeAddress, srcEndpointId, 34);
         vm.startPrank(delegate);
         // Make an external call using `this` for a better Foundry decoding.
-        // LayerZeroUtils.setBridgeConfig(srcChainLzConfig, dstChainLzConfig);
+        // LayerZeroUtils.setBridgeLzConfig(srcChainLzConfig, dstChainLzConfig);
         ILayerZeroEndpointV2(srcEndpoint)
             .setSendLibrary(srcChainLzConfig.bridge, dstChainLzConfig.endpointId, srcChainLzConfig.sendLibrary);
         // bool result = this.setExecutorAndUlnConfigIfNeeded(srcChainLzConfig, dstChainLzConfig);

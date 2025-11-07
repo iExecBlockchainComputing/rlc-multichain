@@ -141,7 +141,7 @@ library LayerZeroUtils {
      * @param srcChainConfig The LayerZero configuration parameters for the source chain.
      * @param dstChainConfig The LayerZero configuration parameters for the destination chain.
      */
-    function setBridgeConfig(LzConfig memory srcChainConfig, LzConfig memory dstChainConfig) public {
+    function setBridgeLzConfig(LzConfig memory srcChainConfig, LzConfig memory dstChainConfig) public {
         // Replace 0s with NIL values.
         _sanitizeZeroValues(srcChainConfig);
         _sanitizeZeroValues(dstChainConfig);

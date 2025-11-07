@@ -188,7 +188,7 @@ contract Configure is Script {
         public
         returns (bool)
     {
-        LayerZeroUtils.setBridgeConfig(srcChainLzConfig, dstChainLzConfig);
+        LayerZeroUtils.setBridgeLzConfig(srcChainLzConfig, dstChainLzConfig);
         return true;
     }
 
