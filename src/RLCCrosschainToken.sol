@@ -3,7 +3,6 @@
 
 pragma solidity ^0.8.22;
 
-import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {
     AccessControlDefaultAdminRulesUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlDefaultAdminRulesUpgradeable.sol";
