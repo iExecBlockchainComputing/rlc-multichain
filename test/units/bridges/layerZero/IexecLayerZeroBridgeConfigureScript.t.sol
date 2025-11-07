@@ -214,9 +214,9 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     // ====== setExecutorAndUlnConfigIfNeeded ======
 
     /**
-     * In this test we read the default config, we change some values and we enforce it.
-     * We cannot simply use random addresses for libraries, executor, and DVNs as they need
-     * a lot of pre-configuration and they need to be registered in the test environment.
+     * In this test we read the default config, we change some values, then we enforce the new config.
+     * We cannot simply use random addresses for libraries, executor, and DVNs as they need a lot of
+     * pre-configuration and they need to be registered in the test environment.
      * See `TestHelperOz5.createEndpoints` for more details.
      */
     function test_setExecutorAndUlnConfigIfNeeded_ShouldSetConfigWhenNotSet() public {

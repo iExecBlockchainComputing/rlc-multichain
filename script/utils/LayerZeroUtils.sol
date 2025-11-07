@@ -16,6 +16,8 @@ import {IexecLayerZeroBridge} from "../../src/bridges/layerZero/IexecLayerZeroBr
 import {LzConfig} from "../lib/ConfigLib.sol";
 
 // TODO move script/lib/* utility files in this folder.
+// TODO test functions of this lib in a dedicated test file.
+
 library LayerZeroUtils {
     using OptionsBuilder for bytes;
 
@@ -30,7 +32,7 @@ library LayerZeroUtils {
      * @param gasLimit The gas limit for the lzReceive() function.
      * @param value The msg.value for the lzReceive() function.
      */
-    function buildLzReceiveExecutorConfig(uint128 gasLimit, uint128 value) public pure returns (bytes memory) {
+    function buildLzReceiveExecutorConfig(uint128 gasLimit, uint128 value) internal pure returns (bytes memory) {
         return OptionsBuilder.newOptions().addExecutorLzReceiveOption(gasLimit, value);
     }
 
@@ -40,7 +42,7 @@ library LayerZeroUtils {
      * @param endpointId The LayerZero endpoint ID of the target chain.
      */
     function getOnchainLzReceiveEnforcedOptions(IexecLayerZeroBridge bridge, uint32 endpointId)
-        public
+        internal
         view
         returns (bytes memory)
     {
@@ -53,7 +55,7 @@ library LayerZeroUtils {
      * @param endpointId The LayerZero endpoint ID of the target chain.
      */
     function getOnchainLzComposeEnforcedOptions(IexecLayerZeroBridge bridge, uint32 endpointId)
-        public
+        internal
         view
         returns (bytes memory)
     {
@@ -67,7 +69,7 @@ library LayerZeroUtils {
      * @param options The options to compare against.
      */
     function matchesOnchainEnforcedOptions(IexecLayerZeroBridge bridge, uint32 endpointId, bytes memory options)
-        public
+        internal
         view
         returns (bool)
     {
@@ -83,7 +85,7 @@ library LayerZeroUtils {
      * @param options The options to enforce.
      */
     function buildEnforcedOptions(uint32 targetEndpointId, bytes memory options)
-        public
+        internal
         pure
         returns (EnforcedOptionParam[] memory)
     {
@@ -104,7 +106,7 @@ library LayerZeroUtils {
      * @param destinationChainEid The LayerZero endpoint ID of the destination chain.
      */
     function getBridgeLzConfig(ILayerZeroEndpointV2 endpoint, address bridge, uint32 destinationChainEid)
-        public
+        internal
         view
         returns (LzConfig memory)
     {
@@ -137,11 +139,13 @@ library LayerZeroUtils {
      * Receive configuration includes:
      * - Only ULN config.
      * Note: ULNConfig defines security parameters (DVNs + confirmation threshold).
+     * @dev this lib function must be `internal` because the caller (msg.sender) is defined
+     * by the calling contract (`vm.prank` or `vm.startBroadcast`).
      * @dev see https://docs.layerzero.network/v2/developers/evm/configuration/dvn-executor-config
      * @param srcChainConfig The LayerZero configuration parameters for the source chain.
      * @param dstChainConfig The LayerZero configuration parameters for the destination chain.
      */
-    function setBridgeLzConfig(LzConfig memory srcChainConfig, LzConfig memory dstChainConfig) public {
+    function setBridgeLzConfig(LzConfig memory srcChainConfig, LzConfig memory dstChainConfig) internal {
         // Replace 0s with NIL values.
         _sanitizeZeroValues(srcChainConfig);
         _sanitizeZeroValues(dstChainConfig);
@@ -176,7 +180,7 @@ library LayerZeroUtils {
      * Logs the provided LayerZero bridge configuration.
      * @param lzConfig The LayerZero configuration to log.
      */
-    function logBridgeLzConfig(LzConfig memory lzConfig) public pure {
+    function logBridgeLzConfig(LzConfig memory lzConfig) internal pure {
         console.log("Bridge:", lzConfig.bridge);
         console.log("- SendLib:", lzConfig.sendLibrary);
         console.log("- ReceiveLib:", lzConfig.receiveLibrary);
