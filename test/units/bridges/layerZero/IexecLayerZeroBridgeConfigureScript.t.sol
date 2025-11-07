@@ -239,7 +239,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         console.log("################### Ethereum Sepolia config:");
         vm.selectFork(ethereumSepoliaFork);
         vm.startBroadcast();
-        _logBridgeConfig(
+        LayerZeroUtils.logBridgeLzConfig(
             LayerZeroUtils.getBridgeLzConfig(
                 ILayerZeroEndpointV2(0x6EDCE65403992e310A62460808c4b910D972f10f),
                 0xA18e571f91ab58889C348E1764fBaBF622ab89b5,
@@ -250,7 +250,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.selectFork(arbitrumSepoliaFork);
         vm.startBroadcast();
         console.log("################### Arbitrum Sepolia config:");
-        _logBridgeConfig(
+        LayerZeroUtils.logBridgeLzConfig(
             LayerZeroUtils.getBridgeLzConfig(
                 ILayerZeroEndpointV2(0x6EDCE65403992e310A62460808c4b910D972f10f),
                 0xB560ae1dD7FdF011Ead2189510ae08f2dbD168a5,
@@ -354,22 +354,5 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         defaultLzConfig.ulnConfig.optionalDVNCount = salt;
         defaultLzConfig.ulnConfig.optionalDVNThreshold = salt;
         return defaultLzConfig;
-    }
-
-    function _logBridgeConfig(LzConfig memory lzConfig) private pure {
-        console.log("SendLib:", lzConfig.sendLibrary);
-        console.log("ReceiveLib:", lzConfig.receiveLibrary);
-        console.log("Executor maxMessageSize:", lzConfig.executorConfig.maxMessageSize);
-        console.log("Executor address:", lzConfig.executorConfig.executor);
-        console.log("Confirmations:", lzConfig.ulnConfig.confirmations);
-        console.log("Required DVN Count:", lzConfig.ulnConfig.requiredDVNCount);
-        for (uint256 i = 0; i < lzConfig.ulnConfig.requiredDVNs.length; i++) {
-            console.log("[", i, "] Required DVN", lzConfig.ulnConfig.requiredDVNs[i]);
-        }
-        console.log("Optional DVN Count:", lzConfig.ulnConfig.optionalDVNCount);
-        for (uint256 i = 0; i < lzConfig.ulnConfig.optionalDVNs.length; i++) {
-            console.log("[", i, "] Optional DVN", lzConfig.ulnConfig.optionalDVNs[i]);
-        }
-        console.log("Optional DVN Threshold:", lzConfig.ulnConfig.optionalDVNThreshold);
     }
 }

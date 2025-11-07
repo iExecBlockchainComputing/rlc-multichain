@@ -173,6 +173,28 @@ library LayerZeroUtils {
     }
 
     /**
+     * Logs the provided LayerZero bridge configuration.
+     * @param lzConfig The LayerZero configuration to log.
+     */
+    function logBridgeLzConfig(LzConfig memory lzConfig) public pure {
+        console.log("Bridge:", lzConfig.bridge);
+        console.log("- SendLib:", lzConfig.sendLibrary);
+        console.log("- ReceiveLib:", lzConfig.receiveLibrary);
+        console.log("- Executor maxMessageSize:", lzConfig.executorConfig.maxMessageSize);
+        console.log("- Executor address:", lzConfig.executorConfig.executor);
+        console.log("- Confirmations:", lzConfig.ulnConfig.confirmations);
+        console.log("- Required DVN Count:", lzConfig.ulnConfig.requiredDVNCount);
+        for (uint256 i = 0; i < lzConfig.ulnConfig.requiredDVNs.length; i++) {
+            console.log("  [", i, "] Required DVN", lzConfig.ulnConfig.requiredDVNs[i]);
+        }
+        console.log("- Optional DVN Count:", lzConfig.ulnConfig.optionalDVNCount);
+        for (uint256 i = 0; i < lzConfig.ulnConfig.optionalDVNs.length; i++) {
+            console.log("  [", i, "] Optional DVN", lzConfig.ulnConfig.optionalDVNs[i]);
+        }
+        console.log("- Optional DVN Threshold:", lzConfig.ulnConfig.optionalDVNThreshold);
+    }
+
+    /**
      * Sanitizes the zero values in the LayerZero configuration by replacing
      * them with NIL values because 0 values will be interpretted as defaults.
      * To apply NIL settings, use:
