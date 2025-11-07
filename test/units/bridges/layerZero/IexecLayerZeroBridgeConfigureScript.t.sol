@@ -77,27 +77,8 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    // // ====== configure ======
-
-    // function test_configure_ShouldConfigureBridgeCorrectly() public {
-    //     (ConfigLib.CommonConfigParams memory sourceParams, ConfigLib.CommonConfigParams memory targetParams) = _buildSourceAndTargetParams();
-    //     vm.startPrank(admin);
-    //     bool result = super.configure(sourceParams, targetParams);
-    //     assertTrue(result, "Expected configure to return true");
-    //     vm.stopPrank();
-    // }
-
-    // function test_configure_ShouldNotConfigureWhenAlreadyConfigured() public {
-    //     (ConfigLib.CommonConfigParams memory sourceParams, ConfigLib.CommonConfigParams memory targetParams) = _buildSourceAndTargetParams();
-    //     vm.startPrank(admin);
-    //     // Configure bridge with the first call.
-    //     bool firstCallResult = super.configure(sourceParams, targetParams);
-    //     assertTrue(firstCallResult, "Expected configure to return true for the first call");
-    //     // The second call does nothing.
-    //     bool secondCallResult = super.configure(sourceParams, targetParams);
-    //     assertFalse(secondCallResult, "Expected configure to return false for the second call");
-    //     vm.stopPrank();
-    // }
+    // ====== configure ======
+    // TODO add configure function tests.
 
     // ====== setBridgePeerIfNeeded ======
 
@@ -218,35 +199,6 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
     // TODO implement other tests.
 
-    function read() public {
-        uint32 ethereumSepoliaEid = 40161;
-        uint32 arbitrumSepoliaEid = 40231;
-        uint256 ethereumSepoliaFork = vm.createFork(vm.envString("SEPOLIA_RPC_URL"));
-        uint256 arbitrumSepoliaFork = vm.createFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
-        console.log("################### Ethereum Sepolia config:");
-        vm.selectFork(ethereumSepoliaFork);
-        vm.startBroadcast();
-        LayerZeroUtils.logBridgeLzConfig(
-            LayerZeroUtils.getBridgeLzConfig(
-                ILayerZeroEndpointV2(0x6EDCE65403992e310A62460808c4b910D972f10f),
-                0xA18e571f91ab58889C348E1764fBaBF622ab89b5,
-                ethereumSepoliaEid
-            )
-        );
-        vm.stopBroadcast();
-        vm.selectFork(arbitrumSepoliaFork);
-        vm.startBroadcast();
-        console.log("################### Arbitrum Sepolia config:");
-        LayerZeroUtils.logBridgeLzConfig(
-            LayerZeroUtils.getBridgeLzConfig(
-                ILayerZeroEndpointV2(0x6EDCE65403992e310A62460808c4b910D972f10f),
-                0xB560ae1dD7FdF011Ead2189510ae08f2dbD168a5,
-                arbitrumSepoliaEid
-            )
-        );
-        vm.stopBroadcast();
-    }
-
     // ====== authorizeBridgeIfNeeded ======
 
     function test_authorizeBridgeIfNeeded_ShouldAuthorizeBridge() public {
@@ -306,27 +258,6 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return false"
         );
         vm.stopPrank();
-    }
-
-    function _buildSourceAndTargetParams()
-        private
-        view
-        returns (ConfigLib.CommonConfigParams memory, ConfigLib.CommonConfigParams memory)
-    {
-        // Source chain params
-        ConfigLib.CommonConfigParams memory sourceParams;
-        ConfigLib.CommonConfigParams memory targetParams;
-        sourceParams.lzEndpointId = sourceEndpointId;
-        sourceParams.iexecLayerZeroBridgeAddress = sourceBridgeAddress;
-        sourceParams.approvalRequired = true;
-        sourceParams.rlcLiquidityUnifierAddress = address(deployment.rlcLiquidityUnifier);
-        sourceParams.rlcToken = address(deployment.rlcToken);
-        // Target chain params
-        targetParams.lzEndpointId = targetEndpointId;
-        targetParams.iexecLayerZeroBridgeAddress = targetBridgeAddress;
-        targetParams.approvalRequired = false;
-        targetParams.rlcCrosschainTokenAddress = address(deployment.rlcCrosschainToken);
-        return (sourceParams, targetParams);
     }
 
     /**

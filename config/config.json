@@ -52,7 +52,7 @@
       }
     },
     "ethereum": {
-      "__sourceUrl": "https://layerzeroscan.com/tools/defaults?version=V2&srcChainKey[0]=ethereum&dstChainKey[0]=arbitrum",
+      "__dvnConfigSourceUrl": "https://layerzeroscan.com/tools/defaults?version=V2&srcChainKey[0]=ethereum&dstChainKey[0]=arbitrum",
       "approvalRequired": true,
       "rlcAddress": "0x607F4C5BB672230e8672085532f7e901544a7375",
       "rlcLiquidityUnifierAddress": "0x329F9f984B1364d4E01c6F9f63a1326b7E420b38",
@@ -80,7 +80,7 @@
       }
     },
     "arbitrum": {
-      "__sourceUrl": "https://layerzeroscan.com/tools/defaults?version=V2&srcChainKey[0]=arbitrum&dstChainKey[0]=ethereum",
+      "__dvnConfigSourceUrl": "https://layerzeroscan.com/tools/defaults?version=V2&srcChainKey[0]=arbitrum&dstChainKey[0]=ethereum",
       "approvalRequired": false,
       "rlcCrosschainTokenAddress": "0xe649e6a1F2afc63ca268C2363691ceCAF75CF47C",
       "rlcCrosschainTokenCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000001",
