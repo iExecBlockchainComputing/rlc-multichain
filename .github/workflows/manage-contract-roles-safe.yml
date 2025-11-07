@@ -161,7 +161,7 @@ jobs:
             echo "ℹ️  Re-run with dry_run=false to actually propose to Safe"
           fi
 
-  propose-to-safe:
+  propose-to-safe-tx:
     needs: prepare-transaction-calldata
     if: ${{ inputs.dry_run == false }}
     strategy:

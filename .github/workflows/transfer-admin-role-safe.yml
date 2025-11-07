@@ -148,7 +148,7 @@ jobs:
       transaction-to: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[0].to }}
       transaction-data: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[0].data }}
 
-  propose-bridge-to-safe:
+  propose-to-safe-tx:
     needs: prepare-transaction-calldata
     if: ${{ inputs.dry_run == false }}
     uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
