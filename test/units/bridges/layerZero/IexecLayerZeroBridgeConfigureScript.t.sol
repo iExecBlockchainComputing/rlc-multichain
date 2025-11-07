@@ -42,10 +42,10 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     // Hardcoding the value here to make sure tests fail when the value is changed in the script.
     uint128 constant GAS_LIMIT = 90_000;
 
+    address delegate = makeAddr("delegate");
     address admin = makeAddr("admin");
     address upgrader = makeAddr("upgrader");
     address pauser = makeAddr("pauser");
-    address delegate = makeAddr("delegate");
     uint16 srcEndpointId = 1;
     uint16 dstEndpointId = 2;
     address srcEndpoint;
