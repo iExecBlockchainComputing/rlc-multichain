@@ -141,7 +141,7 @@ jobs:
             echo "ℹ️  Re-run with dry_run=false to actually propose to Safe"
           fi
 
-  propose-token-contract-to-safe:
+  propose-token-to-safe-tx:
     needs: prepare-transaction-calldata
     if: ${{ inputs.dry_run == false }}
     uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
@@ -154,7 +154,7 @@ jobs:
       transaction-to: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[0].to }}
       transaction-data: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[0].data }}
 
-  propose-to-safe-tx:
+  propose-bridge-to-safe-tx:
     needs: prepare-transaction-calldata
     if: ${{ inputs.dry_run == false }}
     uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
