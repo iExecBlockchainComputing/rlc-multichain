@@ -114,7 +114,8 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         bool result = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
         assertTrue(result, "Expected setBridgePeerIfNeeded to return true");
         assertTrue(
-            sourceBridge.isPeer(targetEndpointId, addressToBytes32(targetBridgeAddress)), "Expected bridge to have the peer set"
+            sourceBridge.isPeer(targetEndpointId, addressToBytes32(targetBridgeAddress)),
+            "Expected bridge to have the peer set"
         );
         vm.stopPrank();
     }
@@ -275,7 +276,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         );
         assertTrue(
             deployment.rlcLiquidityUnifier
-            .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress),
+                .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress),
             "Expected bridge to have the role"
         );
         // rlcCrosschainToken
@@ -288,7 +289,8 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return true"
         );
         assertTrue(
-            deployment.rlcCrosschainToken.hasRole(deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), targetBridgeAddress),
+            deployment.rlcCrosschainToken
+            .hasRole(deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), targetBridgeAddress),
             "Expected bridge to have the role"
         );
         vm.stopPrank();
@@ -306,7 +308,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         );
         assertTrue(
             deployment.rlcLiquidityUnifier
-            .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress),
+                .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress),
             "Expected bridge to have the role"
         );
         assertFalse(
