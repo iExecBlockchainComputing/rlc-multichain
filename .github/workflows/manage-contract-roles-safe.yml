@@ -94,21 +94,21 @@ jobs:
             TOKEN_BRIDGE_ROLE)
               # TOKEN_BRIDGE_ROLE is only on token contract (RLCLiquidityUnifier or RLCCrosschainToken)
               TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
-                '. += [{"to": $to, "value": "0", "data": $data, "contract": "token"}]')
+                '. += [{"to": $to, "data": $data, "contract": "token"}]')
               ;;
             PAUSER_ROLE)
               # PAUSER_ROLE is only on bridge contract
               TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
-                '. += [{"to": $to, "value": "0", "data": $data, "contract": "bridge"}]')
+                '. += [{"to": $to, "data": $data, "contract": "bridge"}]')
               ;;
             UPGRADER_ROLE)
               # UPGRADER_ROLE is on both bridge and token contracts
               # Add transaction for token contract
               TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
-                '. += [{"to": $to, "value": "0", "data": $data, "contract": "token"}]')
+                '. += [{"to": $to, "data": $data, "contract": "token"}]')
               # Add transaction for bridge contract
               TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
-                '. += [{"to": $to, "value": "0", "data": $data, "contract": "bridge"}]')
+                '. += [{"to": $to, "data": $data, "contract": "bridge"}]')
               ;;
             *)
               echo "❌ Error: Unknown role $ROLE_NAME"
@@ -175,5 +175,4 @@ jobs:
       rpc-url: ${{ github.secrets.RPC_URL }}
       safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
       transaction-to: ${{ matrix.transaction.to }}
-      transaction-value: ${{ matrix.transaction.value }}
       transaction-data: ${{ matrix.transaction.data }}

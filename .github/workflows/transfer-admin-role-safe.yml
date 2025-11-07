@@ -81,11 +81,11 @@ jobs:
             
             # Create transaction for token contract
             TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
-              '. += [{"to": $to, "value": "0", "data": $data}]')
+              '. += [{"to": $to, "data": $data}]')
             
             # Create transaction for bridge contract
             TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
-              '. += [{"to": $to, "value": "0", "data": $data}]')
+              '. += [{"to": $to, "data": $data}]')
           else
             # acceptDefaultAdminTransfer()
             TRANSACTION_DATA=$(cast calldata "acceptDefaultAdminTransfer()")
@@ -93,11 +93,11 @@ jobs:
             
             # Create transaction for token contract
             TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
-              '. += [{"to": $to, "value": "0", "data": $data}]')
+              '. += [{"to": $to, "data": $data}]')
             
             # Create transaction for bridge contract
             TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
-              '. += [{"to": $to, "value": "0", "data": $data}]')
+              '. += [{"to": $to, "data": $data}]')
           fi
           
           echo "transactions=$(echo $TRANSACTIONS | jq -c .)" >> $GITHUB_OUTPUT
@@ -146,7 +146,6 @@ jobs:
       rpc-url: ${{ github.secrets.RPC_URL }}
       safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
       transaction-to: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[0].to }}
-      transaction-value: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[0].value }}
       transaction-data: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[0].data }}
 
   propose-bridge-to-safe:
@@ -160,5 +159,4 @@ jobs:
       rpc-url: ${{ github.secrets.RPC_URL }}
       safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
       transaction-to: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[1].to }}
-      transaction-value: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[1].value }}
       transaction-data: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[1].data }}

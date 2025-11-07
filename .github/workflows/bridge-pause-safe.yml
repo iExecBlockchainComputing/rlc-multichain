@@ -123,5 +123,4 @@ jobs:
       rpc-url: ${{ github.secrets.RPC_URL }}
       safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
       transaction-to: ${{ needs.prepare-transaction-calldata.outputs.bridge-address }}
-      transaction-value: '0'
       transaction-data: ${{ needs.prepare-transaction-calldata.outputs.transaction-data }}
