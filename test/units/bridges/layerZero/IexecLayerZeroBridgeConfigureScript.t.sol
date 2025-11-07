@@ -46,40 +46,40 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     address admin = makeAddr("admin");
     address upgrader = makeAddr("upgrader");
     address pauser = makeAddr("pauser");
-    uint16 srcEndpointId = 1;
-    uint16 dstEndpointId = 2;
-    address srcEndpoint;
-    address dstEndpoint;
-    IexecLayerZeroBridge srcBridge;
-    IexecLayerZeroBridge dstBridge;
-    address srcBridgeAddress;
-    address dstBridgeAddress;
+    uint16 sourceEndpointId = 1;
+    uint16 targetEndpointId = 2;
+    address sourceEndpoint;
+    address targetEndpoint;
+    IexecLayerZeroBridge sourceBridge;
+    IexecLayerZeroBridge targetBridge;
+    address sourceBridgeAddress;
+    address targetBridgeAddress;
     TestUtils.DeploymentResult deployment;
 
     function setUp() public virtual override {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
-        srcEndpoint = endpoints[srcEndpointId];
-        dstEndpoint = endpoints[dstEndpointId];
+        sourceEndpoint = endpoints[sourceEndpointId];
+        targetEndpoint = endpoints[targetEndpointId];
         deployment = TestUtils.setupDeployment(
             TestUtils.DeploymentParams({
                 iexecLayerZeroBridgeContractName: "IexecLayerZeroBridge",
-                lzEndpointSource: srcEndpoint,
-                lzEndpointDestination: dstEndpoint,
+                lzEndpointSource: sourceEndpoint,
+                lzEndpointDestination: targetEndpoint,
                 initialAdmin: admin,
                 initialUpgrader: upgrader,
                 initialPauser: pauser
             })
         );
-        srcBridge = deployment.iexecLayerZeroBridgeWithApproval;
-        dstBridge = deployment.iexecLayerZeroBridgeWithoutApproval;
-        srcBridgeAddress = address(deployment.iexecLayerZeroBridgeWithApproval);
-        dstBridgeAddress = address(deployment.iexecLayerZeroBridgeWithoutApproval);
+        sourceBridge = deployment.iexecLayerZeroBridgeWithApproval;
+        targetBridge = deployment.iexecLayerZeroBridgeWithoutApproval;
+        sourceBridgeAddress = address(deployment.iexecLayerZeroBridgeWithApproval);
+        targetBridgeAddress = address(deployment.iexecLayerZeroBridgeWithoutApproval);
         vm.startPrank(admin);
-        srcBridge.setDelegate(delegate);
-        console.log("src delegate:", IEndpointV2(srcEndpoint).delegates(address(srcBridgeAddress)));
-        dstBridge.setDelegate(delegate);
-        console.log("dst delegate:", IEndpointV2(dstEndpoint).delegates(address(dstBridgeAddress)));
+        sourceBridge.setDelegate(delegate);
+        console.log("src delegate:", IEndpointV2(sourceEndpoint).delegates(address(sourceBridgeAddress)));
+        targetBridge.setDelegate(delegate);
+        console.log("dst delegate:", IEndpointV2(targetEndpoint).delegates(address(targetBridgeAddress)));
         vm.stopPrank();
     }
 
@@ -109,30 +109,30 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
     function _setBridgePeerIfNeeded_ShouldSetPeer() public {
         vm.startPrank(admin);
-        vm.expectEmit(true, true, true, true, srcBridgeAddress);
-        emit IOAppCore.PeerSet(dstEndpointId, addressToBytes32(dstBridgeAddress));
-        bool result = super.setBridgePeerIfNeeded(srcBridgeAddress, dstEndpointId, dstBridgeAddress);
+        vm.expectEmit(true, true, true, true, sourceBridgeAddress);
+        emit IOAppCore.PeerSet(targetEndpointId, addressToBytes32(targetBridgeAddress));
+        bool result = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
         assertTrue(result, "Expected setBridgePeerIfNeeded to return true");
         assertTrue(
-            srcBridge.isPeer(dstEndpointId, addressToBytes32(dstBridgeAddress)), "Expected bridge to have the peer set"
+            sourceBridge.isPeer(targetEndpointId, addressToBytes32(targetBridgeAddress)), "Expected bridge to have the peer set"
         );
         vm.stopPrank();
     }
 
     function _setBridgePeerIfNeeded_ShouldOverridePeerWhenNewPeerIsDifferent() public {
         vm.startPrank(admin);
-        bool result = super.setBridgePeerIfNeeded(srcBridgeAddress, dstEndpointId, dstBridgeAddress);
+        bool result = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
         assertTrue(result, "Expected setBridgePeerIfNeeded to return true");
         // Second call should override the peer.
         address randomAddress = makeAddr("random");
-        bool secondCallResult = super.setBridgePeerIfNeeded(srcBridgeAddress, dstEndpointId, randomAddress);
+        bool secondCallResult = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, randomAddress);
         assertTrue(secondCallResult, "Expected setBridgePeerIfNeeded to return true for second call");
         assertFalse(
-            srcBridge.isPeer(dstEndpointId, addressToBytes32(dstBridgeAddress)),
+            sourceBridge.isPeer(targetEndpointId, addressToBytes32(targetBridgeAddress)),
             "Expected bridge to not have the old peer"
         );
         assertTrue(
-            srcBridge.isPeer(dstEndpointId, addressToBytes32(randomAddress)),
+            sourceBridge.isPeer(targetEndpointId, addressToBytes32(randomAddress)),
             "Expected bridge to have the peer overridden"
         );
         vm.stopPrank();
@@ -141,10 +141,10 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     function _setBridgePeerIfNeeded_ShouldNotSetPeerWhenAlreadySet() public {
         vm.startPrank(admin);
         // First call should set the peer.
-        bool firstCallResult = super.setBridgePeerIfNeeded(srcBridgeAddress, dstEndpointId, dstBridgeAddress);
+        bool firstCallResult = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
         assertTrue(firstCallResult, "Expected setBridgePeerIfNeeded to return true for first call");
         // Second call should not change anything.
-        bool secondCallResult = super.setBridgePeerIfNeeded(srcBridgeAddress, dstEndpointId, dstBridgeAddress);
+        bool secondCallResult = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
         assertFalse(secondCallResult, "Expected setBridgePeerIfNeeded to return false for second call");
         vm.stopPrank();
     }
@@ -157,13 +157,13 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         // vm.expectEmit(true, true, true, true, sourceBridgeAddress);
         // emit IOAppOptionsType3.EnforcedOptionSet(enforcedOptions);
         vm.startPrank(admin);
-        bool result = super.setEnforcedOptionsIfNeeded(srcBridgeAddress, dstEndpointId);
+        bool result = super.setEnforcedOptionsIfNeeded(sourceBridgeAddress, targetEndpointId);
         vm.stopPrank();
         assertTrue(result, "Expected setEnforcedOptionsIfNeeded to return true");
         bytes memory lzReceiveOnchainOptions =
-            LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(srcBridge, dstEndpointId);
+            LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(sourceBridge, targetEndpointId);
         bytes memory lzComposeOnchainOptions =
-            LayerZeroUtils.getOnchainLzComposeEnforcedOptions(srcBridge, dstEndpointId);
+            LayerZeroUtils.getOnchainLzComposeEnforcedOptions(sourceBridge, targetEndpointId);
         assertEq(lzReceiveOnchainOptions, options, "lzReceive enforced options are not equal");
         assertEq(lzComposeOnchainOptions, options, "lzCompose enforced options are not equal");
     }
@@ -171,30 +171,30 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     function _setEnforcedOptionsIfNeeded_ShouldOverrideOptionsWhenNewOptionsAreDifferent() public {
         // 123456789 and 99 are different values from those set by the script.
         bytes memory oldOptions = LayerZeroUtils.buildLzReceiveExecutorConfig(123456789, 99);
-        EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(dstEndpointId, oldOptions);
+        EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(targetEndpointId, oldOptions);
         vm.startPrank(admin);
-        srcBridge.setEnforcedOptions(enforcedOptions);
+        sourceBridge.setEnforcedOptions(enforcedOptions);
         assertEq(
-            LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(srcBridge, dstEndpointId),
+            LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(sourceBridge, targetEndpointId),
             oldOptions,
             "lzReceive enforced options are not equal"
         );
         assertEq(
-            LayerZeroUtils.getOnchainLzComposeEnforcedOptions(srcBridge, dstEndpointId),
+            LayerZeroUtils.getOnchainLzComposeEnforcedOptions(sourceBridge, targetEndpointId),
             oldOptions,
             "lzCompose enforced options are not equal"
         );
         // Second call should override the options.
         bytes memory newOptions = LayerZeroUtils.buildLzReceiveExecutorConfig(GAS_LIMIT, 0);
-        bool result = super.setEnforcedOptionsIfNeeded(srcBridgeAddress, dstEndpointId);
+        bool result = super.setEnforcedOptionsIfNeeded(sourceBridgeAddress, targetEndpointId);
         assertTrue(result, "Expected setEnforcedOptionsIfNeeded to return true");
         assertEq(
-            LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(srcBridge, dstEndpointId),
+            LayerZeroUtils.getOnchainLzReceiveEnforcedOptions(sourceBridge, targetEndpointId),
             newOptions,
             "lzReceive enforced options are not equal"
         );
         assertEq(
-            LayerZeroUtils.getOnchainLzComposeEnforcedOptions(srcBridge, dstEndpointId),
+            LayerZeroUtils.getOnchainLzComposeEnforcedOptions(sourceBridge, targetEndpointId),
             newOptions,
             "lzCompose enforced options are not equal"
         );
@@ -203,9 +203,9 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
     function _setEnforcedOptionsIfNeeded_ShouldNotSetOptionsWhenAlreadySet() public {
         vm.startPrank(admin);
-        bool firstCallResult = super.setEnforcedOptionsIfNeeded(srcBridgeAddress, dstEndpointId);
+        bool firstCallResult = super.setEnforcedOptionsIfNeeded(sourceBridgeAddress, targetEndpointId);
         assertTrue(firstCallResult, "Expected setEnforcedOptionsIfNeeded to return true");
-        bool secondCallResult = super.setEnforcedOptionsIfNeeded(srcBridgeAddress, dstEndpointId);
+        bool secondCallResult = super.setEnforcedOptionsIfNeeded(sourceBridgeAddress, targetEndpointId);
         assertFalse(secondCallResult, "Expected setEnforcedOptionsIfNeeded to return false");
         vm.stopPrank();
     }
@@ -219,12 +219,12 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
      * See `TestHelperOz5.createEndpoints` for more details.
      */
     function test_setExecutorAndUlnConfigIfNeeded_ShouldSetConfigWhenNotSet() public {
-        LzConfig memory srcChainLzConfig = _buildLzConfigMock(srcEndpoint, srcBridgeAddress, dstEndpointId, 12);
-        LzConfig memory dstChainLzConfig = _buildLzConfigMock(dstEndpoint, dstBridgeAddress, srcEndpointId, 34);
+        LzConfig memory srcChainLzConfig = _buildLzConfigMock(sourceEndpoint, sourceBridgeAddress, targetEndpointId, 12);
+        LzConfig memory dstChainLzConfig = _buildLzConfigMock(targetEndpoint, targetBridgeAddress, sourceEndpointId, 34);
         vm.startPrank(delegate);
         // Make an external call using `this` for a better Foundry decoding.
         // LayerZeroUtils.setBridgeLzConfig(srcChainLzConfig, dstChainLzConfig);
-        ILayerZeroEndpointV2(srcEndpoint)
+        ILayerZeroEndpointV2(sourceEndpoint)
             .setSendLibrary(srcChainLzConfig.bridge, dstChainLzConfig.endpointId, srcChainLzConfig.sendLibrary);
         // bool result = this.setExecutorAndUlnConfigIfNeeded(srcChainLzConfig, dstChainLzConfig);
         // assertTrue(result, "Expected setExecutorAndUlnConfigIfNeeded to return true");
@@ -267,7 +267,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         // rlcLiquidityUnifier
         assertTrue(
             super.authorizeBridgeIfNeeded(
-                srcBridgeAddress,
+                sourceBridgeAddress,
                 address(deployment.rlcLiquidityUnifier),
                 deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE()
             ),
@@ -275,20 +275,20 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         );
         assertTrue(
             deployment.rlcLiquidityUnifier
-            .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), srcBridgeAddress),
+            .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress),
             "Expected bridge to have the role"
         );
         // rlcCrosschainToken
         assertTrue(
             super.authorizeBridgeIfNeeded(
-                dstBridgeAddress,
+                targetBridgeAddress,
                 address(deployment.rlcCrosschainToken),
                 deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE()
             ),
             "Expected authorizeBridgeIfNeeded to return true"
         );
         assertTrue(
-            deployment.rlcCrosschainToken.hasRole(deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), dstBridgeAddress),
+            deployment.rlcCrosschainToken.hasRole(deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), targetBridgeAddress),
             "Expected bridge to have the role"
         );
         vm.stopPrank();
@@ -298,7 +298,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.startPrank(admin);
         assertTrue(
             super.authorizeBridgeIfNeeded(
-                srcBridgeAddress,
+                sourceBridgeAddress,
                 address(deployment.rlcLiquidityUnifier),
                 deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE()
             ),
@@ -306,12 +306,12 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         );
         assertTrue(
             deployment.rlcLiquidityUnifier
-            .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), srcBridgeAddress),
+            .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), sourceBridgeAddress),
             "Expected bridge to have the role"
         );
         assertFalse(
             super.authorizeBridgeIfNeeded(
-                srcBridgeAddress,
+                sourceBridgeAddress,
                 address(deployment.rlcLiquidityUnifier),
                 deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE()
             ),
@@ -328,25 +328,25 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         // Source chain params
         ConfigLib.CommonConfigParams memory sourceParams;
         ConfigLib.CommonConfigParams memory targetParams;
-        sourceParams.lzEndpointId = srcEndpointId;
-        sourceParams.iexecLayerZeroBridgeAddress = srcBridgeAddress;
+        sourceParams.lzEndpointId = sourceEndpointId;
+        sourceParams.iexecLayerZeroBridgeAddress = sourceBridgeAddress;
         sourceParams.approvalRequired = true;
         sourceParams.rlcLiquidityUnifierAddress = address(deployment.rlcLiquidityUnifier);
         sourceParams.rlcToken = address(deployment.rlcToken);
         // Target chain params
-        targetParams.lzEndpointId = dstEndpointId;
-        targetParams.iexecLayerZeroBridgeAddress = dstBridgeAddress;
+        targetParams.lzEndpointId = targetEndpointId;
+        targetParams.iexecLayerZeroBridgeAddress = targetBridgeAddress;
         targetParams.approvalRequired = false;
         targetParams.rlcCrosschainTokenAddress = address(deployment.rlcCrosschainToken);
         return (sourceParams, targetParams);
     }
 
-    function _buildLzConfigMock(address _srcEndpoint, address _srcBridge, uint32 _dstEndpointId, uint8 salt)
+    function _buildLzConfigMock(address _sourceEndpoint, address _sourceBridge, uint32 _targetEndpointId, uint8 salt)
         private
         returns (LzConfig memory)
     {
-        ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(_srcEndpoint);
-        LzConfig memory defaultLzConfig = LayerZeroUtils.getBridgeLzConfig(endpoint, _srcBridge, _dstEndpointId);
+        ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(_sourceEndpoint);
+        LzConfig memory defaultLzConfig = LayerZeroUtils.getBridgeLzConfig(endpoint, _sourceBridge, _targetEndpointId);
         defaultLzConfig.executorConfig.maxMessageSize = salt;
         defaultLzConfig.executorConfig.executor = makeAddr(vm.toString(salt));
         defaultLzConfig.ulnConfig.confirmations = salt;
