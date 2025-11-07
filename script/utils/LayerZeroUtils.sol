@@ -156,11 +156,13 @@ library LayerZeroUtils {
         // Set the send and receive libraries.
         uint256 gracePeriod = 0;
         srcEndpoint.setSendLibrary(srcChainConfig.bridge, dstChainConfig.endpointId, srcChainConfig.sendLibrary);
-        srcEndpoint.setReceiveLibrary(srcChainConfig.bridge, dstChainConfig.endpointId, srcChainConfig.receiveLibrary, gracePeriod);
+        srcEndpoint.setReceiveLibrary(
+            srcChainConfig.bridge, dstChainConfig.endpointId, srcChainConfig.receiveLibrary, gracePeriod
+        );
         // Set the executor and ULN config.
         bytes memory encodedExecutorConfig = abi.encode(srcChainConfig.executorConfig);
         // ULNConfig defines security parameters (DVNs + confirmation threshold)
-        bytes memory encodedUlnConfig  = abi.encode(srcChainConfig.ulnConfig);
+        bytes memory encodedUlnConfig = abi.encode(srcChainConfig.ulnConfig);
         SetConfigParam[] memory sendParams = new SetConfigParam[](2);
         // ExecutorConfig sets max bytes per cross-chain message & the address that pays destination execution fees
         sendParams[0] = SetConfigParam(dstChainConfig.endpointId, EXECUTOR_CONFIG_TYPE, encodedExecutorConfig);
