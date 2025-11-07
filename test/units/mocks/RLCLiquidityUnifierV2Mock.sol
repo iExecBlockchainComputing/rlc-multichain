@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.22;
 
-import {RLCLiquidityUnifier} from "../RLCLiquidityUnifier.sol";
+import {RLCLiquidityUnifier} from "../../../src/RLCLiquidityUnifier.sol";
 
 /**
  * @title RLCLiquidityUnifierV2 - V2 implementation with additional features

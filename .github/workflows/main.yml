@@ -1,6 +1,9 @@
 name: Default
 
 on:
+  push:
+    branches:
+      - main # To trigger coverage updates of `main` on Codecov
   pull_request:
   workflow_call:
     inputs:
@@ -17,7 +20,6 @@ concurrency:
 
 env:
   FOUNDRY_PROFILE: ci
-  FOUNDRY_OUT: artifacts
 
 jobs:
   build-and-test:
@@ -31,7 +33,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          version: v1.4.4
           cache: true
 
       - name: Show Forge version
@@ -41,7 +43,7 @@ jobs:
         run: forge fmt --check
 
       - name: Run Forge build
-        run: forge clean && forge build && forge build './src' --sizes
+        run: forge build && forge build './src' --sizes
 
       - name: Run Foundry coverage
         env:
@@ -49,7 +51,7 @@ jobs:
           SEPOLIA_RPC_URL: ${{ inputs.SEPOLIA_RPC_URL || vars.SEPOLIA_RPC_URL }}
           ARBITRUM_SEPOLIA_RPC_URL: ${{ inputs.ARBITRUM_SEPOLIA_RPC_URL || vars.ARBITRUM_SEPOLIA_RPC_URL }}
         run: make generate-coverage
-        
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
