@@ -79,13 +79,20 @@ jobs:
           ROLE_HASH=$(cast keccak "$ROLE_NAME")
           
           # Determine the function selector and encode calldata
-          if [ "${{ inputs.operation }}" = "grant" ]; then
-            TRANSACTION_DATA=$(cast calldata "grantRole(bytes32,address)" "$ROLE_HASH" "${{ inputs.target_address }}")
-            FUNCTION_NAME="grantRole(bytes32,address)"
-          else
-            TRANSACTION_DATA=$(cast calldata "revokeRole(bytes32,address)" "$ROLE_HASH" "${{ inputs.target_address }}")
-            FUNCTION_NAME="revokeRole(bytes32,address)"
-          fi
+          case "${{ inputs.operation }}" in
+            grant)
+              TRANSACTION_DATA=$(cast calldata "grantRole(bytes32,address)" "$ROLE_HASH" "${{ inputs.target_address }}")
+              FUNCTION_NAME="grantRole(bytes32,address)"
+              ;;
+            revoke)
+              TRANSACTION_DATA=$(cast calldata "revokeRole(bytes32,address)" "$ROLE_HASH" "${{ inputs.target_address }}")
+              FUNCTION_NAME="revokeRole(bytes32,address)"
+              ;;
+            *)
+              echo "❌ Error: Unknown operation ${{ inputs.operation }}"
+              exit 1
+              ;;
+          esac
           
           # Prepare transactions array based on role type
           TRANSACTIONS='[]'

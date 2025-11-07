@@ -73,32 +73,38 @@ jobs:
           
           # Prepare transactions array for both contracts
           TRANSACTIONS='[]'
-          
-          if [ "${{ inputs.operation }}" = "begin-transfer" ]; then
-            # beginDefaultAdminTransfer(address newAdmin)
-            TRANSACTION_DATA=$(cast calldata "beginDefaultAdminTransfer(address)" "${{ inputs.new_admin_address }}")
-            FUNCTION_NAME="beginDefaultAdminTransfer(address)"
-            
-            # Create transaction for token contract
-            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
-              '. += [{"to": $to, "data": $data}]')
-            
-            # Create transaction for bridge contract
-            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
-              '. += [{"to": $to, "data": $data}]')
-          else
-            # acceptDefaultAdminTransfer()
-            TRANSACTION_DATA=$(cast calldata "acceptDefaultAdminTransfer()")
-            FUNCTION_NAME="acceptDefaultAdminTransfer()"
-            
-            # Create transaction for token contract
-            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
-              '. += [{"to": $to, "data": $data}]')
-            
-            # Create transaction for bridge contract
-            TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
-              '. += [{"to": $to, "data": $data}]')
-          fi
+          case "${{ inputs.operation }}" in
+            begin-transfer)
+              # beginDefaultAdminTransfer(address newAdmin)
+              TRANSACTION_DATA=$(cast calldata "beginDefaultAdminTransfer(address)" "${{ inputs.new_admin_address }}")
+              FUNCTION_NAME="beginDefaultAdminTransfer(address)"
+              
+              # Create transaction for token contract
+              TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
+                '. += [{"to": $to, "data": $data}]')
+              
+              # Create transaction for bridge contract
+              TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
+                '. += [{"to": $to, "data": $data}]')
+              ;;
+            accept-transfer)
+              # acceptDefaultAdminTransfer()
+              TRANSACTION_DATA=$(cast calldata "acceptDefaultAdminTransfer()")
+              FUNCTION_NAME="acceptDefaultAdminTransfer()"
+              
+              # Create transaction for token contract
+              TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$TOKEN_CONTRACT" --arg data "$TRANSACTION_DATA" \
+                '. += [{"to": $to, "data": $data}]')
+              
+              # Create transaction for bridge contract
+              TRANSACTIONS=$(echo "$TRANSACTIONS" | jq -c --arg to "$BRIDGE_ADDRESS" --arg data "$TRANSACTION_DATA" \
+                '. += [{"to": $to, "data": $data}]')
+              ;;
+            *)
+              echo "❌ Error: Unknown operation ${{ inputs.operation }}"
+              exit 1
+              ;;
+          esac
           
           echo "transactions=$(echo $TRANSACTIONS | jq -c .)" >> $GITHUB_OUTPUT
           echo "safe-address=${{ secrets.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
