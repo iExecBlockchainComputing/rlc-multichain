@@ -81,7 +81,7 @@ contract Deploy is Script {
  * - Authorize the bridge in RLCLiquidityUnifier or RLCCrosschainToken contract (`grantRole`).
  * The script should be called at least once for each chain where the bridge is configured.
  */
-// TODO configure `delegate` role for bridges to maange config in endpoints.
+// TODO configure `delegate` role for bridges to manage config in endpoints.
 // See tests and https://docs.layerzero.network/v2/concepts/glossary#delegate
 contract Configure is Script {
     using OptionsBuilder for bytes;

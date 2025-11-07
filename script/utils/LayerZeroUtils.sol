@@ -202,7 +202,7 @@ library LayerZeroUtils {
 
     /**
      * Sanitizes the zero values in the LayerZero configuration by replacing
-     * them with NIL values because 0 values will be interpretted as defaults.
+     * them with NIL values because 0 values will be interpreted as defaults.
      * To apply NIL settings, use:
      *   - uint8 internal constant NIL_DVN_COUNT = type(uint8).max;
      *   - uint64 internal constant NIL_CONFIRMATIONS = type(uint64).max;
