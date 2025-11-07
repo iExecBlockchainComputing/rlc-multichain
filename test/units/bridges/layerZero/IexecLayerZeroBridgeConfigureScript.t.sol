@@ -28,10 +28,6 @@ import {ConfigLib} from "../../../../script/lib/ConfigLib.sol";
 import {LayerZeroUtils} from "../../../../script/utils/LayerZeroUtils.sol";
 import {LzConfig} from "../../../../script/lib/ConfigLib.sol";
 
-interface IEndpointV2 {
-    function delegates(address) external view returns (address);
-}
-
 // This test contract inherits from `Configure` script because we need the `msg.sender` to be the admin
 // address (using vm.prank) when calling the `configure` function.
 // Using `new IexecLayerZeroBridgeConfigureScript().configure(<params>)` sets the `msg.sender` to the
@@ -77,9 +73,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         targetBridgeAddress = address(deployment.iexecLayerZeroBridgeWithoutApproval);
         vm.startPrank(admin);
         sourceBridge.setDelegate(delegate);
-        console.log("src delegate:", IEndpointV2(sourceEndpoint).delegates(address(sourceBridgeAddress)));
         targetBridge.setDelegate(delegate);
-        console.log("dst delegate:", IEndpointV2(targetEndpoint).delegates(address(targetBridgeAddress)));
         vm.stopPrank();
     }
 
@@ -213,24 +207,16 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
     // ====== setExecutorAndUlnConfigIfNeeded ======
 
-    /**
-     * In this test we read the default config, we change some values, then we enforce the new config.
-     * We cannot simply use random addresses for libraries, executor, and DVNs as they need a lot of
-     * pre-configuration and they need to be registered in the test environment.
-     * See `TestHelperOz5.createEndpoints` for more details.
-     */
     function test_setExecutorAndUlnConfigIfNeeded_ShouldSetConfigWhenNotSet() public {
-        LzConfig memory sourceChainLzConfig = _buildLzConfigMock(sourceEndpoint, sourceBridgeAddress, targetEndpointId, 12);
-        LzConfig memory targetChainLzConfig = _buildLzConfigMock(targetEndpoint, targetBridgeAddress, sourceEndpointId, 34);
+        LzConfig memory sourceChainLzConfig = _buildLzConfigMock(sourceEndpoint, sourceBridgeAddress, targetEndpointId);
+        LzConfig memory targetChainLzConfig = _buildLzConfigMock(targetEndpoint, targetBridgeAddress, sourceEndpointId);
         vm.startPrank(delegate);
-        // Make an external call using `this` for a better Foundry decoding.
-        // LayerZeroUtils.setBridgeLzConfig(sourceChainLzConfig, targetChainLzConfig);
-        ILayerZeroEndpointV2(sourceEndpoint)
-            .setSendLibrary(sourceChainLzConfig.bridge, targetChainLzConfig.endpointId, sourceChainLzConfig.sendLibrary);
-        // bool result = this.setExecutorAndUlnConfigIfNeeded(sourceChainLzConfig, targetChainLzConfig);
-        // assertTrue(result, "Expected setExecutorAndUlnConfigIfNeeded to return true");
+        bool result = setExecutorAndUlnConfigIfNeeded(sourceChainLzConfig, targetChainLzConfig);
+        assertTrue(result, "Expected setExecutorAndUlnConfigIfNeeded to return true");
         vm.stopPrank();
     }
+
+    // TODO implement other tests.
 
     function read() public {
         uint32 ethereumSepoliaEid = 40161;
@@ -343,18 +329,32 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         return (sourceParams, targetParams);
     }
 
-    function _buildLzConfigMock(address _sourceEndpoint, address _sourceBridge, uint32 _targetEndpointId, uint8 salt)
+    /**
+     * Read the default config, change some values, then return the new config.
+     * Library addresses cannot be changed because they need to be registered.
+     * See `TestHelperOz5.createEndpoints` for more details.
+     */
+    function _buildLzConfigMock(address _sourceEndpoint, address _sourceBridge, uint32 _targetEndpointId)
         private
         returns (LzConfig memory)
     {
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(_sourceEndpoint);
-        LzConfig memory defaultLzConfig = LayerZeroUtils.getBridgeLzConfig(endpoint, _sourceBridge, _targetEndpointId);
-        defaultLzConfig.executorConfig.maxMessageSize = salt;
-        defaultLzConfig.executorConfig.executor = makeAddr(vm.toString(salt));
-        defaultLzConfig.ulnConfig.confirmations = salt;
-        defaultLzConfig.ulnConfig.requiredDVNCount = salt;
-        defaultLzConfig.ulnConfig.optionalDVNCount = salt;
-        defaultLzConfig.ulnConfig.optionalDVNThreshold = salt;
-        return defaultLzConfig;
+        LzConfig memory lzConfig = LayerZeroUtils.getBridgeLzConfig(endpoint, _sourceBridge, _targetEndpointId);
+        lzConfig.executorConfig.maxMessageSize = 123;
+        lzConfig.executorConfig.executor = makeAddr("executor");
+        lzConfig.ulnConfig.confirmations = 456;
+        uint8 size = 3;
+        lzConfig.ulnConfig.requiredDVNCount = size;
+        lzConfig.ulnConfig.requiredDVNs = new address[](size);
+        lzConfig.ulnConfig.requiredDVNs[0] = 0x00000000000000000000000000000000000000AA;
+        lzConfig.ulnConfig.requiredDVNs[1] = 0x00000000000000000000000000000000000000bb;
+        lzConfig.ulnConfig.requiredDVNs[2] = 0x00000000000000000000000000000000000000cc;
+        lzConfig.ulnConfig.optionalDVNCount = size;
+        lzConfig.ulnConfig.optionalDVNs = new address[](size);
+        lzConfig.ulnConfig.optionalDVNs[0] = 0x00000000000000000000000000000000000000dd;
+        lzConfig.ulnConfig.optionalDVNs[1] = 0x00000000000000000000000000000000000000eE;
+        lzConfig.ulnConfig.optionalDVNs[2] = 0x00000000000000000000000000000000000000ff;
+        lzConfig.ulnConfig.optionalDVNThreshold = size;
+        return lzConfig;
     }
 }

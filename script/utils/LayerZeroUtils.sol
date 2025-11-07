@@ -124,6 +124,7 @@ library LayerZeroUtils {
         // Get ULN config.
         configBytes = endpoint.getConfig(bridge, lzConfig.sendLibrary, destinationChainEid, ULN_CONFIG_TYPE);
         lzConfig.ulnConfig = abi.decode(configBytes, (UlnConfig));
+        // TODO add receive config.
         return lzConfig;
     }
 
@@ -146,34 +147,33 @@ library LayerZeroUtils {
      * @param dstChainConfig The LayerZero configuration parameters for the destination chain.
      */
     function setBridgeLzConfig(LzConfig memory srcChainConfig, LzConfig memory dstChainConfig) internal {
-        // Replace 0s with NIL values.
         _sanitizeZeroValues(srcChainConfig);
         _sanitizeZeroValues(dstChainConfig);
         //
         // Set the send config for the destination chain (eid).
         //
-        ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(srcChainConfig.endpoint);
+        ILayerZeroEndpointV2 srcEndpoint = ILayerZeroEndpointV2(srcChainConfig.endpoint);
         // Set the send and receive libraries.
-        // uint256 gracePeriod = 0;
-        endpoint.setSendLibrary(srcChainConfig.bridge, dstChainConfig.endpointId, srcChainConfig.sendLibrary);
-        // endpoint.setReceiveLibrary(srcChainConfig.bridge, dstChainConfig.endpointId, srcChainConfig.receiveLibrary, gracePeriod);
-        // // Set the executor and ULN config.
-        // bytes memory encodedExecutorConfig = abi.encode(srcChainConfig.executorConfig);
-        // // ULNConfig defines security parameters (DVNs + confirmation threshold)
-        // bytes memory encodedUlnConfig  = abi.encode(srcChainConfig.ulnConfig);
-        // SetConfigParam[] memory sendParams = new SetConfigParam[](2);
-        // // ExecutorConfig sets max bytes per cross-chain message & the address that pays destination execution fees
-        // sendParams[0] = SetConfigParam(dstChainConfig.endpointId, EXECUTOR_CONFIG_TYPE, encodedExecutorConfig);
-        // sendParams[1] = SetConfigParam(dstChainConfig.endpointId, ULN_CONFIG_TYPE, encodedUlnConfig);
-        // endpoint.setConfig(srcChainConfig.bridge, srcChainConfig.sendLibrary, sendParams);
-        // //
-        // // Set only the receive config for requests in the opposite direction (coming from the destination chain).
-        // //
-        // /// @dev note that the receive config must match the send config on the opposite chain.
+        uint256 gracePeriod = 0;
+        srcEndpoint.setSendLibrary(srcChainConfig.bridge, dstChainConfig.endpointId, srcChainConfig.sendLibrary);
+        srcEndpoint.setReceiveLibrary(srcChainConfig.bridge, dstChainConfig.endpointId, srcChainConfig.receiveLibrary, gracePeriod);
+        // Set the executor and ULN config.
+        bytes memory encodedExecutorConfig = abi.encode(srcChainConfig.executorConfig);
+        // ULNConfig defines security parameters (DVNs + confirmation threshold)
+        bytes memory encodedUlnConfig  = abi.encode(srcChainConfig.ulnConfig);
+        SetConfigParam[] memory sendParams = new SetConfigParam[](2);
+        // ExecutorConfig sets max bytes per cross-chain message & the address that pays destination execution fees
+        sendParams[0] = SetConfigParam(dstChainConfig.endpointId, EXECUTOR_CONFIG_TYPE, encodedExecutorConfig);
+        sendParams[1] = SetConfigParam(dstChainConfig.endpointId, ULN_CONFIG_TYPE, encodedUlnConfig);
+        srcEndpoint.setConfig(srcChainConfig.bridge, srcChainConfig.sendLibrary, sendParams);
+        //
+        // Set only the receive config for requests in the opposite direction (coming from the destination chain).
+        //
+        /// @dev note that the receive config must match the send config on the opposite chain.
+        // TODO implement set receive config.
         // SetConfigParam[] memory receiveParams = new SetConfigParam[](1);
-        // receiveParams[0] = SetConfigParam(dstChainConfig.endpointId, RECEIVE_CONFIG_TYPE, abi.encode(dstChainConfig.ulnConfig));
-        // endpoint.setConfig(dstChainConfig.bridge, dstChainConfig.receiveLibrary, receiveParams);
-        // // EndpointV2.setDelegate(delegate)
+        // receiveParams[0] = SetConfigParam(dstChainConfig.endpointId, RECEIVE_CONFIG_TYPE, abi.encode(ulnConfig));
+        // srcEndpoint.setConfig(srcChainConfig.bridge, srcChainConfig.receiveLibrary, receiveParams);
     }
 
     /**
@@ -219,8 +219,7 @@ library LayerZeroUtils {
         if (chainConfig.ulnConfig.optionalDVNCount == 0) {
             chainConfig.ulnConfig.optionalDVNCount = NIL_DVN_COUNT;
         }
-        if (chainConfig.ulnConfig.optionalDVNThreshold == 0) {
-            chainConfig.ulnConfig.optionalDVNThreshold = NIL_DVN_COUNT;
-        }
+        // chainConfig.ulnConfig.optionalDVNThreshold needs to be 0
+        // when optionalDVNCount is 0 (default) or NIL so we don't change it.
     }
 }
