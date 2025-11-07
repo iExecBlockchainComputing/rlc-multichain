@@ -42,10 +42,10 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     // Hardcoding the value here to make sure tests fail when the value is changed in the script.
     uint128 constant GAS_LIMIT = 90_000;
 
-    address delegate = makeAddr("delegate");
     address admin = makeAddr("admin");
     address upgrader = makeAddr("upgrader");
     address pauser = makeAddr("pauser");
+    address delegate = makeAddr("delegate");
     uint16 sourceEndpointId = 1;
     uint16 targetEndpointId = 2;
     address sourceEndpoint;
@@ -107,7 +107,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
     // ====== setBridgePeerIfNeeded ======
 
-    function _setBridgePeerIfNeeded_ShouldSetPeer() public {
+    function test_setBridgePeerIfNeeded_ShouldSetPeer() public {
         vm.startPrank(admin);
         vm.expectEmit(true, true, true, true, sourceBridgeAddress);
         emit IOAppCore.PeerSet(targetEndpointId, addressToBytes32(targetBridgeAddress));
@@ -119,7 +119,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    function _setBridgePeerIfNeeded_ShouldOverridePeerWhenNewPeerIsDifferent() public {
+    function test_setBridgePeerIfNeeded_ShouldOverridePeerWhenNewPeerIsDifferent() public {
         vm.startPrank(admin);
         bool result = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
         assertTrue(result, "Expected setBridgePeerIfNeeded to return true");
@@ -138,7 +138,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    function _setBridgePeerIfNeeded_ShouldNotSetPeerWhenAlreadySet() public {
+    function test_setBridgePeerIfNeeded_ShouldNotSetPeerWhenAlreadySet() public {
         vm.startPrank(admin);
         // First call should set the peer.
         bool firstCallResult = super.setBridgePeerIfNeeded(sourceBridgeAddress, targetEndpointId, targetBridgeAddress);
@@ -151,7 +151,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
     // ====== setEnforcedOptionsIfNeeded ======
 
-    function _setEnforcedOptionsIfNeeded_ShouldSetOptionsWhenEmpty() public {
+    function test_setEnforcedOptionsIfNeeded_ShouldSetOptionsWhenEmpty() public {
         bytes memory options = LayerZeroUtils.buildLzReceiveExecutorConfig(GAS_LIMIT, 0);
         // TODO debug event emission.
         // vm.expectEmit(true, true, true, true, sourceBridgeAddress);
@@ -168,7 +168,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         assertEq(lzComposeOnchainOptions, options, "lzCompose enforced options are not equal");
     }
 
-    function _setEnforcedOptionsIfNeeded_ShouldOverrideOptionsWhenNewOptionsAreDifferent() public {
+    function test_setEnforcedOptionsIfNeeded_ShouldOverrideOptionsWhenNewOptionsAreDifferent() public {
         // 123456789 and 99 are different values from those set by the script.
         bytes memory oldOptions = LayerZeroUtils.buildLzReceiveExecutorConfig(123456789, 99);
         EnforcedOptionParam[] memory enforcedOptions = LayerZeroUtils.buildEnforcedOptions(targetEndpointId, oldOptions);
@@ -201,7 +201,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    function _setEnforcedOptionsIfNeeded_ShouldNotSetOptionsWhenAlreadySet() public {
+    function test_setEnforcedOptionsIfNeeded_ShouldNotSetOptionsWhenAlreadySet() public {
         vm.startPrank(admin);
         bool firstCallResult = super.setEnforcedOptionsIfNeeded(sourceBridgeAddress, targetEndpointId);
         assertTrue(firstCallResult, "Expected setEnforcedOptionsIfNeeded to return true");
@@ -262,7 +262,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
 
     // ====== authorizeBridgeIfNeeded ======
 
-    function _authorizeBridgeIfNeeded_ShouldAuthorizeBridge() public {
+    function test_authorizeBridgeIfNeeded_ShouldAuthorizeBridge() public {
         vm.startPrank(admin);
         // rlcLiquidityUnifier
         assertTrue(
@@ -294,7 +294,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    function _authorizeBridgeIfNeeded_ShouldNotAuthorizeBridgeIfAlreadyAuthorized() public {
+    function test_authorizeBridgeIfNeeded_ShouldNotAuthorizeBridgeIfAlreadyAuthorized() public {
         vm.startPrank(admin);
         assertTrue(
             super.authorizeBridgeIfNeeded(
@@ -320,7 +320,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    function _buildSourceAndTargetParams()
+    function test_buildSourceAndTargetParams()
         private
         view
         returns (ConfigLib.CommonConfigParams memory, ConfigLib.CommonConfigParams memory)
