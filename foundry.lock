@@ -1,0 +1,32 @@
+{
+  "lib/createx": {
+    "rev": "cbac803268835138f86a69bfe01fcf05a50e0447"
+  },
+  "lib/devtools": {
+    "rev": "fbb37ae13677973f97045702af24301c7e8443aa"
+  },
+  "lib/forge-std": {
+    "rev": "77041d2ce690e692d6e03cc812b57d1ddaa4d505"
+  },
+  "lib/layerzero-v1": {
+    "rev": "a1fb11a3b9c0ac449291816e71eacede4e36613e"
+  },
+  "lib/layerzero-v2": {
+    "rev": "88428755be6caa71cb1d2926141d73c8989296b5"
+  },
+  "lib/openzeppelin-contracts": {
+    "rev": "56fe41c5882fa05348e0abd87d3501fce7a94b15"
+  },
+  "lib/openzeppelin-contracts-upgradeable": {
+    "rev": "bf26ba7e7a71222254580ab7c55c9b1db1bac742"
+  },
+  "lib/openzeppelin-foundry-upgrades": {
+    "rev": "cbce1e00305e943aa1661d43f41e5ac72c662b07"
+  },
+  "lib/rlc-faucet-contract": {
+    "rev": "8f3847d906cdce50666f59504e3321dcbd6d4fc7"
+  },
+  "lib/solidity-bytes-utils": {
+    "rev": "f4413cd6137b78403e3a1156bee6aceab46b46fa"
+  }
+}
