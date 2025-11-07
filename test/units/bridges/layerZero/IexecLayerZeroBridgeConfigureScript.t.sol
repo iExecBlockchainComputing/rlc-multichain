@@ -220,14 +220,14 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
      * See `TestHelperOz5.createEndpoints` for more details.
      */
     function test_setExecutorAndUlnConfigIfNeeded_ShouldSetConfigWhenNotSet() public {
-        LzConfig memory srcChainLzConfig = _buildLzConfigMock(sourceEndpoint, sourceBridgeAddress, targetEndpointId, 12);
-        LzConfig memory dstChainLzConfig = _buildLzConfigMock(targetEndpoint, targetBridgeAddress, sourceEndpointId, 34);
+        LzConfig memory sourceChainLzConfig = _buildLzConfigMock(sourceEndpoint, sourceBridgeAddress, targetEndpointId, 12);
+        LzConfig memory targetChainLzConfig = _buildLzConfigMock(targetEndpoint, targetBridgeAddress, sourceEndpointId, 34);
         vm.startPrank(delegate);
         // Make an external call using `this` for a better Foundry decoding.
-        // LayerZeroUtils.setBridgeLzConfig(srcChainLzConfig, dstChainLzConfig);
+        // LayerZeroUtils.setBridgeLzConfig(sourceChainLzConfig, targetChainLzConfig);
         ILayerZeroEndpointV2(sourceEndpoint)
-            .setSendLibrary(srcChainLzConfig.bridge, dstChainLzConfig.endpointId, srcChainLzConfig.sendLibrary);
-        // bool result = this.setExecutorAndUlnConfigIfNeeded(srcChainLzConfig, dstChainLzConfig);
+            .setSendLibrary(sourceChainLzConfig.bridge, targetChainLzConfig.endpointId, sourceChainLzConfig.sendLibrary);
+        // bool result = this.setExecutorAndUlnConfigIfNeeded(sourceChainLzConfig, targetChainLzConfig);
         // assertTrue(result, "Expected setExecutorAndUlnConfigIfNeeded to return true");
         vm.stopPrank();
     }
@@ -322,7 +322,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    function test_buildSourceAndTargetParams()
+    function _buildSourceAndTargetParams()
         private
         view
         returns (ConfigLib.CommonConfigParams memory, ConfigLib.CommonConfigParams memory)
