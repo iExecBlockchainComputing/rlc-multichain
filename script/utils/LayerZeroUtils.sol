@@ -103,11 +103,11 @@ library LayerZeroUtils {
      * @param bridge The LayerZero bridge contract address.
      * @param destinationChainEid The LayerZero endpoint ID of the destination chain.
      */
-    function getBridgeLzConfig(
-        ILayerZeroEndpointV2 endpoint,
-        address bridge,
-        uint32 destinationChainEid
-    ) public view returns (LzConfig memory) {
+    function getBridgeLzConfig(ILayerZeroEndpointV2 endpoint, address bridge, uint32 destinationChainEid)
+        public
+        view
+        returns (LzConfig memory)
+    {
         LzConfig memory lzConfig;
         lzConfig.endpoint = address(endpoint);
         lzConfig.endpointId = endpoint.eid();
@@ -141,10 +141,7 @@ library LayerZeroUtils {
      * @param srcChainConfig The LayerZero configuration parameters for the source chain.
      * @param dstChainConfig The LayerZero configuration parameters for the destination chain.
      */
-    function setBridgeConfig(
-        LzConfig memory srcChainConfig,
-        LzConfig memory dstChainConfig
-    ) public {
+    function setBridgeConfig(LzConfig memory srcChainConfig, LzConfig memory dstChainConfig) public {
         // Replace 0s with NIL values.
         _sanitizeZeroValues(srcChainConfig);
         _sanitizeZeroValues(dstChainConfig);

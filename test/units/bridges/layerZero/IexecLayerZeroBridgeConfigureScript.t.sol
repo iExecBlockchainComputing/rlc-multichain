@@ -21,8 +21,9 @@ import {Errors} from "@layerzerolabs/lz-evm-protocol-v2/contracts/libs/Errors.so
 import {TestUtils} from "./../../utils/TestUtils.sol";
 import {IexecLayerZeroBridge} from "../../../../src/bridges/layerZero/IexecLayerZeroBridge.sol";
 import {RLCCrosschainToken} from "../../../../src/RLCCrosschainToken.sol";
-import {Configure as IexecLayerZeroBridgeConfigureScript} from
-    "../../../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
+import {
+    Configure as IexecLayerZeroBridgeConfigureScript
+} from "../../../../script/bridges/layerZero/IexecLayerZeroBridge.s.sol";
 import {ConfigLib} from "../../../../script/lib/ConfigLib.sol";
 import {LayerZeroUtils} from "../../../../script/utils/LayerZeroUtils.sol";
 import {LzConfig} from "../../../../script/lib/ConfigLib.sol";
@@ -113,8 +114,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         bool result = super.setBridgePeerIfNeeded(srcBridgeAddress, dstEndpointId, dstBridgeAddress);
         assertTrue(result, "Expected setBridgePeerIfNeeded to return true");
         assertTrue(
-            srcBridge.isPeer(dstEndpointId, addressToBytes32(dstBridgeAddress)),
-            "Expected bridge to have the peer set"
+            srcBridge.isPeer(dstEndpointId, addressToBytes32(dstBridgeAddress)), "Expected bridge to have the peer set"
         );
         vm.stopPrank();
     }
@@ -224,7 +224,8 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.startPrank(delegate);
         // Make an external call using `this` for a better Foundry decoding.
         // LayerZeroUtils.setBridgeConfig(srcChainLzConfig, dstChainLzConfig);
-        ILayerZeroEndpointV2(srcEndpoint).setSendLibrary(srcChainLzConfig.bridge, dstChainLzConfig.endpointId, srcChainLzConfig.sendLibrary);
+        ILayerZeroEndpointV2(srcEndpoint)
+            .setSendLibrary(srcChainLzConfig.bridge, dstChainLzConfig.endpointId, srcChainLzConfig.sendLibrary);
         // bool result = this.setExecutorAndUlnConfigIfNeeded(srcChainLzConfig, dstChainLzConfig);
         // assertTrue(result, "Expected setExecutorAndUlnConfigIfNeeded to return true");
         vm.stopPrank();
@@ -233,25 +234,29 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
     function read() public {
         uint32 ethereumSepoliaEid = 40161;
         uint32 arbitrumSepoliaEid = 40231;
-        uint ethereumSepoliaFork = vm.createFork(vm.envString("SEPOLIA_RPC_URL"));
-        uint arbitrumSepoliaFork = vm.createFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
+        uint256 ethereumSepoliaFork = vm.createFork(vm.envString("SEPOLIA_RPC_URL"));
+        uint256 arbitrumSepoliaFork = vm.createFork(vm.envString("ARBITRUM_SEPOLIA_RPC_URL"));
         console.log("################### Ethereum Sepolia config:");
         vm.selectFork(ethereumSepoliaFork);
         vm.startBroadcast();
-        _logBridgeConfig(LayerZeroUtils.getBridgeLzConfig(
-            ILayerZeroEndpointV2(0x6EDCE65403992e310A62460808c4b910D972f10f),
-            0xA18e571f91ab58889C348E1764fBaBF622ab89b5,
-            ethereumSepoliaEid
-        ));
+        _logBridgeConfig(
+            LayerZeroUtils.getBridgeLzConfig(
+                ILayerZeroEndpointV2(0x6EDCE65403992e310A62460808c4b910D972f10f),
+                0xA18e571f91ab58889C348E1764fBaBF622ab89b5,
+                ethereumSepoliaEid
+            )
+        );
         vm.stopBroadcast();
         vm.selectFork(arbitrumSepoliaFork);
         vm.startBroadcast();
         console.log("################### Arbitrum Sepolia config:");
-        _logBridgeConfig(LayerZeroUtils.getBridgeLzConfig(
-            ILayerZeroEndpointV2(0x6EDCE65403992e310A62460808c4b910D972f10f),
-            0xB560ae1dD7FdF011Ead2189510ae08f2dbD168a5,
-            arbitrumSepoliaEid
-        ));
+        _logBridgeConfig(
+            LayerZeroUtils.getBridgeLzConfig(
+                ILayerZeroEndpointV2(0x6EDCE65403992e310A62460808c4b910D972f10f),
+                0xB560ae1dD7FdF011Ead2189510ae08f2dbD168a5,
+                arbitrumSepoliaEid
+            )
+        );
         vm.stopBroadcast();
     }
 
@@ -269,9 +274,8 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return true"
         );
         assertTrue(
-            deployment.rlcLiquidityUnifier.hasRole(
-                deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), srcBridgeAddress
-            ),
+            deployment.rlcLiquidityUnifier
+            .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), srcBridgeAddress),
             "Expected bridge to have the role"
         );
         // rlcCrosschainToken
@@ -284,9 +288,7 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return true"
         );
         assertTrue(
-            deployment.rlcCrosschainToken.hasRole(
-                deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), dstBridgeAddress
-            ),
+            deployment.rlcCrosschainToken.hasRole(deployment.rlcCrosschainToken.TOKEN_BRIDGE_ROLE(), dstBridgeAddress),
             "Expected bridge to have the role"
         );
         vm.stopPrank();
@@ -303,9 +305,8 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
             "Expected authorizeBridgeIfNeeded to return true"
         );
         assertTrue(
-            deployment.rlcLiquidityUnifier.hasRole(
-                deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), srcBridgeAddress
-            ),
+            deployment.rlcLiquidityUnifier
+            .hasRole(deployment.rlcLiquidityUnifier.TOKEN_BRIDGE_ROLE(), srcBridgeAddress),
             "Expected bridge to have the role"
         );
         assertFalse(
@@ -319,7 +320,11 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         vm.stopPrank();
     }
 
-    function _buildSourceAndTargetParams() private view returns (ConfigLib.CommonConfigParams memory, ConfigLib.CommonConfigParams memory) {
+    function _buildSourceAndTargetParams()
+        private
+        view
+        returns (ConfigLib.CommonConfigParams memory, ConfigLib.CommonConfigParams memory)
+    {
         // Source chain params
         ConfigLib.CommonConfigParams memory sourceParams;
         ConfigLib.CommonConfigParams memory targetParams;
@@ -336,7 +341,10 @@ contract IexecLayerZeroBridgeUpgradeScriptTest is TestHelperOz5, IexecLayerZeroB
         return (sourceParams, targetParams);
     }
 
-    function _buildLzConfigMock(address _srcEndpoint, address _srcBridge, uint32 _dstEndpointId, uint8 salt) private returns (LzConfig memory) {
+    function _buildLzConfigMock(address _srcEndpoint, address _srcBridge, uint32 _dstEndpointId, uint8 salt)
+        private
+        returns (LzConfig memory)
+    {
         ILayerZeroEndpointV2 endpoint = ILayerZeroEndpointV2(_srcEndpoint);
         LzConfig memory defaultLzConfig = LayerZeroUtils.getBridgeLzConfig(endpoint, _srcBridge, _dstEndpointId);
         defaultLzConfig.executorConfig.maxMessageSize = salt;

@@ -184,10 +184,10 @@ contract Configure is Script {
     // TODO use LayerZero CLI:
     // https://docs.layerzero.network/v2/get-started/create-lz-oapp/configuring-pathways
     // More on DVNs https://docs.layerzero.network/v2/concepts/modular-security/security-stack-dvns
-    function setExecutorAndUlnConfigIfNeeded(
-        LzConfig memory srcChainLzConfig,
-        LzConfig memory dstChainLzConfig
-    ) public returns (bool) {
+    function setExecutorAndUlnConfigIfNeeded(LzConfig memory srcChainLzConfig, LzConfig memory dstChainLzConfig)
+        public
+        returns (bool)
+    {
         LayerZeroUtils.setBridgeConfig(srcChainLzConfig, dstChainLzConfig);
         return true;
     }

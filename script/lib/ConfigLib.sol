@@ -156,13 +156,9 @@ library ConfigLib {
         lzConfig.ulnConfig = UlnConfig({
             confirmations: uint64(json.readUint(string.concat(prefix, ".lzUlnConfig.confirmations"))),
             requiredDVNCount: uint8(json.readUint(string.concat(prefix, ".lzUlnConfig.requiredDvnCount"))),
-            requiredDVNs: json.readAddressArray(
-                string.concat(prefix, ".lzUlnConfig.requiredDVNs")
-            ),
+            requiredDVNs: json.readAddressArray(string.concat(prefix, ".lzUlnConfig.requiredDVNs")),
             optionalDVNCount: uint8(json.readUint(string.concat(prefix, ".lzUlnConfig.optionalDVNCount"))),
-            optionalDVNs: json.readAddressArray(
-                string.concat(prefix, ".lzUlnConfig.optionalDVNs")
-            ),
+            optionalDVNs: json.readAddressArray(string.concat(prefix, ".lzUlnConfig.optionalDVNs")),
             optionalDVNThreshold: uint8(json.readUint(string.concat(prefix, ".lzUlnConfig.optionalDVNThreshold")))
         });
         return lzConfig;
