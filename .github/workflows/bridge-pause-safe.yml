@@ -1,0 +1,129 @@
+name: Bridge Pause/Unpause via Safe Multisig
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Pause operation to perform'
+        required: true
+        type: choice
+        options:
+          - pause-bridge
+          - unpause-bridge
+          - pause-outbound
+          - unpause-outbound
+      network:
+        description: 'Network to perform operation on'
+        required: true
+        type: choice
+        options:
+          - ethereum
+          - arbitrum
+          - sepolia
+          - arbitrum_sepolia
+        default: sepolia
+      dry-run:
+        description: 'Dry run mode (only prepare and display transaction, do not propose to Safe)'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  prepare-transaction-calldata:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.network }}
+    outputs:
+      transaction-data: ${{ steps.prepare.outputs.transaction-data }}
+      safe-address: ${{ steps.prepare.outputs.safe-address }}
+      bridge-address: ${{ steps.prepare.outputs.bridge-address }}
+      rpc-url: ${{ secrets.RPC_URL }}
+      safe-proposer-private-key: ${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}
+      safe-api-key: ${{ secrets.SAFE_API_KEY }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+          cache: true
+
+      - name: Prepare transaction calldata
+        id: prepare
+        env:
+          CHAIN: ${{ inputs.network }}
+        run: |
+          # Get bridge address from config
+          BRIDGE_ADDRESS=$(jq -r ".chains.${CHAIN}.iexecLayerZeroBridgeAddress" config/config.json)
+          echo "bridge-address=$BRIDGE_ADDRESS" >> $GITHUB_OUTPUT
+          
+          # Determine the function selector and name based on operation
+          case "${{ inputs.operation }}" in
+            "pause-bridge")
+              # pause() function selector
+              TRANSACTION_DATA=$(cast calldata "pause()")
+              FUNCTION_NAME="pause()"
+              ;;
+            "unpause-bridge")
+              # unpause() function selector
+              TRANSACTION_DATA=$(cast calldata "unpause()")
+              FUNCTION_NAME="unpause()"
+              ;;
+            "pause-outbound")
+              # pauseOutboundTransfers() function selector
+              TRANSACTION_DATA=$(cast calldata "pauseOutboundTransfers()")
+              FUNCTION_NAME="pauseOutboundTransfers()"
+              ;;
+            "unpause-outbound")
+              # unpauseOutboundTransfers() function selector  
+              TRANSACTION_DATA=$(cast calldata "unpauseOutboundTransfers()")
+              FUNCTION_NAME="unpauseOutboundTransfers()"
+              ;;
+          esac
+          
+          echo "transaction-data=$TRANSACTION_DATA" >> $GITHUB_OUTPUT
+          echo "safe-address=${{ vars.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
+          
+          # Display transaction details for dry-run or verification
+          echo "=========================================="
+          echo "Transaction Details"
+          echo "=========================================="
+          echo "Workflow Configuration:"
+          echo "   • Network:        ${{ inputs.network }}"
+          echo "   • Operation:      ${{ inputs.operation }}"
+          echo "   • Function:       $FUNCTION_NAME"
+          echo "   • Safe Address:   ${{ vars.SAFE_ADDRESS }}"
+          echo "   • Dry Run:        ${{ inputs.dry-run }}"
+          echo ""
+          echo "────────────────────────────────────────────────────────────────────────────────"
+          echo ""
+          echo "Transaction Details:"
+          echo "   • Target:         $BRIDGE_ADDRESS"
+          echo "   • Value:          0 ETH"
+          echo "   • Data:           $TRANSACTION_DATA"
+          echo ""
+          echo "────────────────────────────────────────────────────────────────────────────────"
+          echo ""
+          
+          if [ "${{ inputs.dry-run }}" == "true" ]; then
+            echo "✅ DRY RUN MODE: Transaction prepared successfully"
+            echo "ℹ️  This transaction would be proposed to Safe multisig"
+            echo "ℹ️  Re-run with dry-run=false to actually propose to Safe"
+          fi
+
+  propose-to-safe-tx:
+    needs: prepare-transaction-calldata
+    uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
+    secrets:
+      safe-proposer-private-key: ${{ needs.prepare-transaction-calldata.outputs.safe-proposer-private-key }}
+      safe-api-key: ${{ needs.prepare-transaction-calldata.outputs.safe-api-key }}
+    with:
+      rpc-url: ${{ needs.prepare-transaction-calldata.outputs.rpc-url }}
+      safe-address: ${{ vars.SAFE_ADDRESS}}
+      transaction-to: ${{ needs.prepare-transaction-calldata.outputs.bridge-address }}
+      transaction-data: ${{ needs.prepare-transaction-calldata.outputs.transaction-data }}
+      dry-run: ${{ inputs.dry-run }}
