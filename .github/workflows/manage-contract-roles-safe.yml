@@ -170,7 +170,6 @@ jobs:
 
   propose-to-safe-tx:
     needs: prepare-transaction-calldata
-    if: ${{ inputs.dry_run == false }}
     strategy:
       matrix:
         transaction: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions) }}
@@ -183,3 +182,4 @@ jobs:
       safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
       transaction-to: ${{ matrix.transaction.to }}
       transaction-data: ${{ matrix.transaction.data }}
+      dry-run: ${{ inputs.dry_run }}

@@ -114,7 +114,6 @@ jobs:
 
   propose-to-safe-tx:
     needs: prepare-transaction-calldata
-    if: ${{ inputs.dry_run == false }}
     uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
     secrets:
       safe-proposer-private-key: ${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}
@@ -124,3 +123,4 @@ jobs:
       safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
       transaction-to: ${{ needs.prepare-transaction-calldata.outputs.bridge-address }}
       transaction-data: ${{ needs.prepare-transaction-calldata.outputs.transaction-data }}
+      dry-run: ${{ inputs.dry_run }}
