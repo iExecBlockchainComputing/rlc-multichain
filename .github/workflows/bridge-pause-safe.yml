@@ -22,7 +22,7 @@ on:
           - sepolia
           - arbitrum_sepolia
         default: sepolia
-      dry_run:
+      dry-run:
         description: 'Dry run mode (only prepare and display transaction, do not propose to Safe)'
         required: false
         type: boolean
@@ -94,7 +94,7 @@ jobs:
           echo "   • Operation:      ${{ inputs.operation }}"
           echo "   • Function:       $FUNCTION_NAME"
           echo "   • Safe Address:   ${{ secrets.SAFE_ADDRESS }}"
-          echo "   • Dry Run:        ${{ inputs.dry_run }}"
+          echo "   • Dry Run:        ${{ inputs.dry-run }}"
           echo ""
           echo "────────────────────────────────────────────────────────────────────────────────"
           echo ""
@@ -106,10 +106,10 @@ jobs:
           echo "────────────────────────────────────────────────────────────────────────────────"
           echo ""
           
-          if [ "${{ inputs.dry_run }}" == "true" ]; then
+          if [ "${{ inputs.dry-run }}" == "true" ]; then
             echo "✅ DRY RUN MODE: Transaction prepared successfully"
             echo "ℹ️  This transaction would be proposed to Safe multisig"
-            echo "ℹ️  Re-run with dry_run=false to actually propose to Safe"
+            echo "ℹ️  Re-run with dry-run=false to actually propose to Safe"
           fi
 
   propose-to-safe-tx:
@@ -123,4 +123,4 @@ jobs:
       safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
       transaction-to: ${{ needs.prepare-transaction-calldata.outputs.bridge-address }}
       transaction-data: ${{ needs.prepare-transaction-calldata.outputs.transaction-data }}
-      dry-run: ${{ inputs.dry_run }}
+      dry-run: ${{ inputs.dry-run }}

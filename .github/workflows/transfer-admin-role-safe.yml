@@ -24,7 +24,7 @@ on:
         description: 'New admin address (required for begin-transfer)'
         required: false
         type: string
-      dry_run:
+      dry-run:
         description: 'Dry run mode (only prepare and display transaction, do not propose to Safe)'
         required: false
         type: boolean
@@ -118,7 +118,7 @@ jobs:
           echo "   • Function:       $FUNCTION_NAME"
           echo "   • New Admin:      ${{ inputs.new_admin_address }}"
           echo "   • Safe Address:   ${{ secrets.SAFE_ADDRESS }}"
-          echo "   • Dry Run:        ${{ inputs.dry_run }}"
+          echo "   • Dry Run:        ${{ inputs.dry-run }}"
           echo ""
           echo "────────────────────────────────────────────────────────────────────────────────"
           echo ""
@@ -135,10 +135,10 @@ jobs:
           echo "────────────────────────────────────────────────────────────────────────────────"
           echo ""
           
-          if [ "${{ inputs.dry_run }}" == "true" ]; then
+          if [ "${{ inputs.dry-run }}" == "true" ]; then
             echo "✅ DRY RUN MODE: Transactions prepared successfully"
             echo "ℹ️  These transactions would be proposed to Safe multisig"
-            echo "ℹ️  Re-run with dry_run=false to actually propose to Safe"
+            echo "ℹ️  Re-run with dry-run=false to actually propose to Safe"
           fi
 
   propose-to-safe-tx:
@@ -160,4 +160,4 @@ jobs:
       safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
       transaction-to: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[matrix.transaction-index].to }}
       transaction-data: ${{ fromJson(needs.prepare-transaction-calldata.outputs.transactions)[matrix.transaction-index].data }}
-      dry-run: ${{ inputs.dry_run }}
+      dry-run: ${{ inputs.dry-run }}
