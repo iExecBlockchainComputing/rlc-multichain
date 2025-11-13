@@ -37,6 +37,8 @@ jobs:
       safe-address: ${{ steps.prepare.outputs.safe-address }}
       bridge-address: ${{ steps.prepare.outputs.bridge-address }}
       rpc-url: ${{ steps.prepare.outputs.rpc-url }}
+      safe-proposer-private-key: ${{ steps.prepare.outputs.safe-proposer-private-key }}
+      safe-api-key: ${{ steps.prepare.outputs.safe-api-key }}
     
     steps:
       - name: Checkout repository
@@ -86,6 +88,8 @@ jobs:
           echo "transaction-data=$TRANSACTION_DATA" >> $GITHUB_OUTPUT
           echo "safe-address=${{ vars.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
           echo "rpc-url=${{ secrets.RPC_URL }}" >> $GITHUB_OUTPUT
+          echo "safe-proposer-private-key=${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}" >> $GITHUB_OUTPUT
+          echo "safe-api-key=${{ secrets.SAFE_API_KEY }}" >> $GITHUB_OUTPUT
           
           # Display transaction details for dry-run or verification
           echo "=========================================="
@@ -117,7 +121,9 @@ jobs:
   propose-to-safe-tx:
     needs: prepare-transaction-calldata
     uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@main
-    secrets: inherit
+    secrets:
+      safe-proposer-private-key: ${{ needs.prepare-transaction-calldata.outputs.safe-proposer-private-key }}
+      safe-api-key: ${{ needs.prepare-transaction-calldata.outputs.safe-api-key }}
     with:
       rpc-url: ${{ needs.prepare-transaction-calldata.outputs.rpc-url }}
       safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
