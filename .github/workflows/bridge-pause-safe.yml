@@ -83,7 +83,7 @@ jobs:
           esac
           
           echo "transaction-data=$TRANSACTION_DATA" >> $GITHUB_OUTPUT
-          echo "safe-address=${{ secrets.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
+          echo "safe-address=${{ vars.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
           
           # Display transaction details for dry-run or verification
           echo "=========================================="
@@ -93,7 +93,7 @@ jobs:
           echo "   • Network:        ${{ inputs.network }}"
           echo "   • Operation:      ${{ inputs.operation }}"
           echo "   • Function:       $FUNCTION_NAME"
-          echo "   • Safe Address:   ${{ secrets.SAFE_ADDRESS }}"
+          echo "   • Safe Address:   ${{ vars.SAFE_ADDRESS }}"
           echo "   • Dry Run:        ${{ inputs.dry-run }}"
           echo ""
           echo "────────────────────────────────────────────────────────────────────────────────"
