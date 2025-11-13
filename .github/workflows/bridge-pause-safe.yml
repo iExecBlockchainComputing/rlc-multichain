@@ -123,7 +123,7 @@ jobs:
       safe-api-key: ${{ needs.prepare-transaction-calldata.outputs.safe-api-key }}
     with:
       rpc-url: ${{ needs.prepare-transaction-calldata.outputs.rpc-url }}
-      safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
+      safe-address: ${{ vars.SAFE_ADDRESS}}
       transaction-to: ${{ needs.prepare-transaction-calldata.outputs.bridge-address }}
       transaction-data: ${{ needs.prepare-transaction-calldata.outputs.transaction-data }}
       dry-run: ${{ inputs.dry-run }}
