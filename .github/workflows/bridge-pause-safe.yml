@@ -36,7 +36,6 @@ jobs:
       transaction-data: ${{ steps.prepare.outputs.transaction-data }}
       safe-address: ${{ steps.prepare.outputs.safe-address }}
       bridge-address: ${{ steps.prepare.outputs.bridge-address }}
-      # Note: We'll pass secrets through the next job
     
     steps:
       - name: Checkout repository
@@ -103,20 +102,36 @@ jobs:
             echo "✅ DRY RUN MODE: Transaction prepared successfully"
           fi
 
-  # ✅ NEW: Wrapper job that bridges the environment secrets to the reusable workflow
   propose-to-safe-tx:
     needs: prepare-transaction-calldata
     runs-on: ubuntu-latest
-    environment: ${{ inputs.network }}  # ✅ This gives access to environment secrets
+    environment: ${{ inputs.network }}
     steps:
-      - name: Call reusable workflow with secrets
-        uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@fix/multisig-rpc-secrets
+      - name: Checkout Safe proposal repository
+        uses: actions/checkout@v4
         with:
-          safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
-          transaction-to: ${{ needs.prepare-transaction-calldata.outputs.bridge-address }}
-          transaction-data: ${{ needs.prepare-transaction-calldata.outputs.transaction-data }}
-          dry-run: ${{ inputs.dry-run }}
+          repository: iExecBlockchainComputing/github-actions-workflows
+          ref: fix/multisig-rpc-secrets
+          path: .github-actions
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: .github-actions/propose-safe-multisig-tx
+        run: npm ci
+
+      - name: Propose transaction to Safe
+        working-directory: .github-actions/propose-safe-multisig-tx
         env:
+          SAFE_ADDRESS: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
+          TRANSACTION_TO: ${{ needs.prepare-transaction-calldata.outputs.bridge-address }}
+          TRANSACTION_VALUE: "0"
+          TRANSACTION_DATA: ${{ needs.prepare-transaction-calldata.outputs.transaction-data }}
           RPC_URL: ${{ secrets.RPC_URL }}
           SAFE_PROPOSER_PRIVATE_KEY: ${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}
           SAFE_API_KEY: ${{ secrets.SAFE_API_KEY }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: npm run propose
