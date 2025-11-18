@@ -117,11 +117,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         working-directory: .github-actions/propose-safe-multisig-tx
         run: npm ci
+
+      - name: Build the action
+        working-directory: .github-actions/propose-safe-multisig-tx
+        run: npm run build
 
       - name: Propose transaction to Safe
         working-directory: .github-actions/propose-safe-multisig-tx
