@@ -111,7 +111,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: iExecBlockchainComputing/github-actions-workflows
-          ref: main
           path: .github-actions
 
       - name: Setup Node.js
