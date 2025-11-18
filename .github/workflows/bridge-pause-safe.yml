@@ -36,6 +36,7 @@ jobs:
       transaction-data: ${{ steps.prepare.outputs.transaction-data }}
       safe-address: ${{ steps.prepare.outputs.safe-address }}
       bridge-address: ${{ steps.prepare.outputs.bridge-address }}
+      # Note: We'll pass secrets through the next job
     
     steps:
       - name: Checkout repository
@@ -61,22 +62,18 @@ jobs:
           # Determine the function selector and name based on operation
           case "${{ inputs.operation }}" in
             "pause-bridge")
-              # pause() function selector
               TRANSACTION_DATA=$(cast calldata "pause()")
               FUNCTION_NAME="pause()"
               ;;
             "unpause-bridge")
-              # unpause() function selector
               TRANSACTION_DATA=$(cast calldata "unpause()")
               FUNCTION_NAME="unpause()"
               ;;
             "pause-outbound")
-              # pauseOutboundTransfers() function selector
               TRANSACTION_DATA=$(cast calldata "pauseOutboundTransfers()")
               FUNCTION_NAME="pauseOutboundTransfers()"
               ;;
             "unpause-outbound")
-              # unpauseOutboundTransfers() function selector  
               TRANSACTION_DATA=$(cast calldata "unpauseOutboundTransfers()")
               FUNCTION_NAME="unpauseOutboundTransfers()"
               ;;
@@ -85,7 +82,7 @@ jobs:
           echo "transaction-data=$TRANSACTION_DATA" >> $GITHUB_OUTPUT
           echo "safe-address=${{ vars.SAFE_ADDRESS }}" >> $GITHUB_OUTPUT
           
-          # Display transaction details for dry-run or verification
+          # Display transaction details
           echo "=========================================="
           echo "Transaction Details"
           echo "=========================================="
@@ -96,28 +93,30 @@ jobs:
           echo "   • Safe Address:   ${{ vars.SAFE_ADDRESS }}"
           echo "   • Dry Run:        ${{ inputs.dry-run }}"
           echo ""
-          echo "────────────────────────────────────────────────────────────────────────────────"
-          echo ""
           echo "Transaction Details:"
           echo "   • Target:         $BRIDGE_ADDRESS"
           echo "   • Value:          0 ETH"
           echo "   • Data:           $TRANSACTION_DATA"
           echo ""
-          echo "────────────────────────────────────────────────────────────────────────────────"
-          echo ""
           
           if [ "${{ inputs.dry-run }}" == "true" ]; then
             echo "✅ DRY RUN MODE: Transaction prepared successfully"
-            echo "ℹ️  This transaction would be proposed to Safe multisig"
-            echo "ℹ️  Re-run with dry-run=false to actually propose to Safe"
           fi
 
+  # ✅ NEW: Wrapper job that bridges the environment secrets to the reusable workflow
   propose-to-safe-tx:
     needs: prepare-transaction-calldata
-    uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@fix/multisig-rpc-secrets
-    secrets: inherit 
-    with:
-      safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
-      transaction-to: ${{ needs.prepare-transaction-calldata.outputs.bridge-address }}
-      transaction-data: ${{ needs.prepare-transaction-calldata.outputs.transaction-data }}
-      dry-run: ${{ inputs.dry-run }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.network }}  # ✅ This gives access to environment secrets
+    steps:
+      - name: Call reusable workflow with secrets
+        uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@fix/multisig-rpc-secrets
+        with:
+          safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
+          transaction-to: ${{ needs.prepare-transaction-calldata.outputs.bridge-address }}
+          transaction-data: ${{ needs.prepare-transaction-calldata.outputs.transaction-data }}
+          dry-run: ${{ inputs.dry-run }}
+        env:
+          RPC_URL: ${{ secrets.RPC_URL }}
+          SAFE_PROPOSER_PRIVATE_KEY: ${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}
+          SAFE_API_KEY: ${{ secrets.SAFE_API_KEY }}
