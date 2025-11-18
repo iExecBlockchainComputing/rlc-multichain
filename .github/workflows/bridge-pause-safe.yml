@@ -115,10 +115,7 @@ jobs:
   propose-to-safe-tx:
     needs: prepare-transaction-calldata
     uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/propose-safe-multisig-tx.yml@fix/multisig-rpc-secrets
-    secrets:
-      safe-proposer-private-key: ${{ secrets.SAFE_PROPOSER_PRIVATE_KEY }}
-      safe-api-key: ${{ secrets.SAFE_API_KEY }}
-      rpc-url:  ${{ secrets.RPC_URL }}
+    secrets: inherit 
     with:
       safe-address: ${{ needs.prepare-transaction-calldata.outputs.safe-address }}
       transaction-to: ${{ needs.prepare-transaction-calldata.outputs.bridge-address }}
