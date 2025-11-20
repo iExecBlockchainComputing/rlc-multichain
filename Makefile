@@ -201,3 +201,43 @@ accept-default-admin-transfer: # CHAIN, RPC_URL
 		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(NEW_DEFAULT_ADMIN_PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
 		--broadcast \
 		-vvv
+
+#
+# Emergency role transfer operations (for compromised addresses)
+#
+
+# Step 1: Grant all roles to new address and begin admin transfer (run with compromised/old address)
+grant-roles-begin-transfer: # CHAIN, RPC_URL, OLD_ADDRESS, NEW_ADDRESS
+	@echo "Step 1: Granting all roles to new address and beginning admin transfer on $(CHAIN)"
+	@echo "Old address: $(OLD_ADDRESS)"
+	@echo "New address: $(NEW_ADDRESS)"
+	CHAIN=$(CHAIN) OLD_ADDRESS=$(OLD_ADDRESS) NEW_ADDRESS=$(NEW_ADDRESS) \
+	forge script script/TransferAllRoles.s.sol:GrantRolesAndBeginAdminTransfer \
+		--rpc-url $(RPC_URL) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(ADMIN_PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
+		--broadcast \
+		-vvv
+
+# Step 2: Accept admin role and revoke all roles from old address (run with NEW address)
+accept-admin-revoke-old: # CHAIN, RPC_URL, OLD_ADDRESS
+	@echo "Step 2: Accepting admin role and revoking all roles from old address on $(CHAIN)"
+	@echo "Old address to revoke: $(OLD_ADDRESS)"
+	CHAIN=$(CHAIN) OLD_ADDRESS=$(OLD_ADDRESS) \
+	forge script script/TransferAllRoles.s.sol:AcceptAdminRoleAndRevokeOldRoles \
+		--rpc-url $(RPC_URL) \
+		$$(if [ "$(CI)" = "true" ]; then echo "--private-key $(NEW_ADMIN_PRIVATE_KEY)"; else echo "--account $(ACCOUNT)"; fi) \
+		--broadcast \
+		-vvv
+
+#
+# Testing emergency role transfer on fork
+#
+
+# Test the complete emergency role transfer process on a fork
+test-emergency-transfer-on-fork:
+	@echo "Testing emergency role transfer on Arbitrum Sepolia fork..."
+	@echo "Make sure you have a fork running: anvil --fork-url \$$ARBITRUM_SEPOLIA_RPC_URL --port 8546"
+	forge script script/TestEmergencyRoleTransferOnFork.s.sol:TestEmergencyRoleTransferOnFork \
+		--rpc-url http://localhost:8546 \
+		--broadcast \
+		-vvvv

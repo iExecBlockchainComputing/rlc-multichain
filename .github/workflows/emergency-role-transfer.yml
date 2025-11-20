@@ -1,0 +1,120 @@
+name: Emergency Role Transfer
+
+on:
+  workflow_dispatch:
+    inputs:
+      step:
+        description: 'Transfer step to execute'
+        required: true
+        type: choice
+        options:
+          - grant-roles-begin-transfer
+          - accept-admin-revoke-old
+        default: grant-roles-begin-transfer
+      network_type:
+        description: 'Network type to transfer roles on'
+        required: true
+        type: choice
+        options:
+          - testnets
+          - sepolia-only
+          - arbitrum_sepolia-only
+        default: testnets
+      old_address:
+        description: 'Old/compromised address (for both steps)'
+        required: true
+        type: string
+        default: '0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3'
+      new_address:
+        description: 'New secure address (only needed for step 1)'
+        required: false
+        type: string
+
+jobs:
+  setup-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set matrix based on network type
+        id: set-matrix
+        run: |
+          case "${{ github.event.inputs.network_type }}" in
+            testnets)
+              MATRIX='["sepolia", "arbitrum_sepolia"]'
+              ;;
+            sepolia-only)
+              MATRIX='["sepolia"]'
+              ;;
+            arbitrum_sepolia-only)
+              MATRIX='["arbitrum_sepolia"]'
+              ;;
+          esac
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+  transfer-roles:
+    needs: setup-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        network: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+      fail-fast: false
+    environment: ${{ matrix.network }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.4.4
+          cache: true
+      
+      - name: Validate inputs
+        run: |
+          if [ "${{ inputs.step }}" = "grant-roles-begin-transfer" ] && [ -z "${{ inputs.new_address }}" ]; then
+            echo "Error: new_address is required for grant-roles-begin-transfer step"
+            exit 1
+          fi
+          
+      - name: Execute Step 1 - Grant Roles and Begin Transfer
+        if: inputs.step == 'grant-roles-begin-transfer'
+        env:
+          ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
+          CHAIN: ${{ matrix.network }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+          OLD_ADDRESS: ${{ inputs.old_address }}
+          NEW_ADDRESS: ${{ inputs.new_address }}
+        run: |
+          echo "Executing Step 1: Grant roles and begin admin transfer"
+          echo "Chain: $CHAIN"
+          echo "Old address: $OLD_ADDRESS"
+          echo "New address: $NEW_ADDRESS"
+          make grant-roles-begin-transfer
+          
+      - name: Execute Step 2 - Accept Admin and Revoke Old Roles
+        if: inputs.step == 'accept-admin-revoke-old'
+        env:
+          NEW_ADMIN_PRIVATE_KEY: ${{ secrets.NEW_ADMIN_PRIVATE_KEY }}
+          CHAIN: ${{ matrix.network }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+          OLD_ADDRESS: ${{ inputs.old_address }}
+        run: |
+          echo "Executing Step 2: Accept admin role and revoke old roles"
+          echo "Chain: $CHAIN"
+          echo "Old address to revoke: $OLD_ADDRESS"
+          make accept-admin-revoke-old
+          
+      - name: Summary
+        run: |
+          if [ "${{ inputs.step }}" = "grant-roles-begin-transfer" ]; then
+            echo "✅ Step 1 Complete on ${{ matrix.network }}"
+            echo "⏰ Wait for the delay period to pass before running Step 2"
+            echo "📝 Next: Run this workflow again with step=accept-admin-revoke-old"
+          else
+            echo "✅ Step 2 Complete on ${{ matrix.network }}"
+            echo "🎉 All roles have been transferred!"
+            echo "🔒 Old address has been completely removed from all contracts"
+          fi
