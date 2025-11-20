@@ -3,14 +3,15 @@ name: Emergency Role Transfer
 on:
   workflow_dispatch:
     inputs:
-      step:
-        description: 'Transfer step to execute'
+      execution_mode:
+        description: 'Execution mode'
         required: true
         type: choice
         options:
-          - grant-roles-begin-transfer
-          - accept-admin-revoke-old
-        default: grant-roles-begin-transfer
+          - full-transfer-with-delay
+          - step-1-only
+          - step-2-only
+        default: full-transfer-with-delay
       network_type:
         description: 'Network type to transfer roles on'
         required: true
@@ -20,15 +21,6 @@ on:
           - sepolia-only
           - arbitrum_sepolia-only
         default: testnets
-      old_address:
-        description: 'Old/compromised address (for both steps)'
-        required: true
-        type: string
-        default: '0x9990cfb1Feb7f47297F54bef4d4EbeDf6c5463a3'
-      new_address:
-        description: 'New secure address (only needed for step 1)'
-        required: false
-        type: string
 
 jobs:
   setup-matrix:
@@ -74,47 +66,169 @@ jobs:
       
       - name: Validate inputs
         run: |
-          if [ "${{ inputs.step }}" = "grant-roles-begin-transfer" ] && [ -z "${{ inputs.new_address }}" ]; then
-            echo "Error: new_address is required for grant-roles-begin-transfer step"
+          echo "Using addresses from GitHub Variables:"
+          echo "  OLD_ADDRESS: ${{ vars.OLD_ADDRESS }}"
+          echo "  NEW_ADDRESS: ${{ vars.NEW_ADDRESS }}"
+          echo ""
+          
+          if [ "${{ inputs.execution_mode }}" = "step-1-only" ] || [ "${{ inputs.execution_mode }}" = "full-transfer-with-delay" ]; then
+            if [ -z "${{ vars.NEW_ADDRESS }}" ]; then
+              echo "Error: NEW_ADDRESS variable is not set in GitHub Variables"
+              echo "Please configure NEW_ADDRESS in repository settings -> Variables"
+              exit 1
+            fi
+          fi
+          
+          if [ -z "${{ vars.OLD_ADDRESS }}" ]; then
+            echo "Error: OLD_ADDRESS variable is not set in GitHub Variables"
+            echo "Please configure OLD_ADDRESS in repository settings -> Variables"
             exit 1
           fi
           
       - name: Execute Step 1 - Grant Roles and Begin Transfer
-        if: inputs.step == 'grant-roles-begin-transfer'
+        if: inputs.execution_mode == 'step-1-only' || inputs.execution_mode == 'full-transfer-with-delay'
         env:
           ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
           CHAIN: ${{ matrix.network }}
           RPC_URL: ${{ secrets.RPC_URL }}
-          OLD_ADDRESS: ${{ inputs.old_address }}
-          NEW_ADDRESS: ${{ inputs.new_address }}
+          OLD_ADDRESS: ${{ vars.OLD_ADDRESS }}
+          NEW_ADDRESS: ${{ vars.NEW_ADDRESS }}
         run: |
-          echo "Executing Step 1: Grant roles and begin admin transfer"
+          echo "========================================="
+          echo "STEP 1: Grant Roles and Begin Transfer"
+          echo "========================================="
           echo "Chain: $CHAIN"
           echo "Old address: $OLD_ADDRESS"
           echo "New address: $NEW_ADDRESS"
+          echo ""
           make grant-roles-begin-transfer
           
+      - name: Wait for Delay Period
+        if: inputs.execution_mode == 'full-transfer-with-delay'
+        env:
+          CHAIN: ${{ matrix.network }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+        run: |
+          echo "========================================="
+          echo "WAITING FOR DELAY PERIOD"
+          echo "========================================="
+          echo "Querying contract for delay schedule..."
+          
+          # Get the scheduled timestamp from the contract
+          # This script will query the pendingDefaultAdmin and calculate wait time
+          cat > get_delay.sh << 'EOF'
+          #!/bin/bash
+          
+          # Query RLCCrosschainToken or RLCLiquidityUnifier
+          if [ "$CHAIN" = "sepolia" ]; then
+            CONTRACT_ADDRESS="0x7198CA5eAeFE7416d4f3900b58Ff1bEA33771A65"
+            CONTRACT_NAME="RLCLiquidityUnifier"
+          else
+            CONTRACT_ADDRESS="0x9923eD3cbd90CD78b910c475f9A731A6e0b8C963"
+            CONTRACT_NAME="RLCCrosschainToken"
+          fi
+          
+          echo "Contract: $CONTRACT_NAME at $CONTRACT_ADDRESS"
+          
+          # Get pending admin info (returns address and uint48 schedule)
+          RESULT=$(cast call $CONTRACT_ADDRESS "pendingDefaultAdmin()(address,uint48)" --rpc-url $RPC_URL)
+          
+          # Extract the timestamp (second value)
+          SCHEDULED_TIME=$(echo $RESULT | awk '{print $2}')
+          CURRENT_TIME=$(date +%s)
+          
+          echo "Current timestamp: $CURRENT_TIME"
+          echo "Scheduled timestamp: $SCHEDULED_TIME"
+          
+          # Calculate wait time (minimum required by contract)
+          WAIT_SECONDS=$((SCHEDULED_TIME - CURRENT_TIME))
+          
+          # Add 1 second to ensure we're past the scheduled time
+          TOTAL_WAIT=$((WAIT_SECONDS + 1))
+          
+          if [ $TOTAL_WAIT -le 0 ]; then
+            echo "✅ Delay period has already passed!"
+            echo "Proceeding immediately with Step 2..."
+            exit 0
+          fi
+          
+          echo ""
+          echo "⏰ Delay period:"
+          echo "  - Required wait: $WAIT_SECONDS seconds ($((WAIT_SECONDS / 60)) minutes)"
+          echo "  - Safety buffer: 1 second"
+          echo "  - Total wait: $TOTAL_WAIT seconds ($((TOTAL_WAIT / 60)) minutes)"
+          echo ""
+          echo "Waiting until: $(date -u -r $((SCHEDULED_TIME + 1)) '+%Y-%m-%d %H:%M:%S UTC')"
+          echo ""
+          
+          # Sleep in chunks to show progress
+          INTERVAL=60  # Show progress every minute
+          ELAPSED=0
+          
+          while [ $ELAPSED -lt $TOTAL_WAIT ]; do
+            REMAINING=$((TOTAL_WAIT - ELAPSED))
+            if [ $REMAINING -lt $INTERVAL ]; then
+              sleep $REMAINING
+              ELAPSED=$TOTAL_WAIT
+            else
+              sleep $INTERVAL
+              ELAPSED=$((ELAPSED + INTERVAL))
+              echo "⏳ Progress: $((ELAPSED / 60))/$((TOTAL_WAIT / 60)) minutes elapsed..."
+            fi
+          done
+          
+          echo ""
+          echo "✅ Delay period complete! Proceeding to Step 2..."
+          EOF
+          
+          chmod +x get_delay.sh
+          ./get_delay.sh
+          
       - name: Execute Step 2 - Accept Admin and Revoke Old Roles
-        if: inputs.step == 'accept-admin-revoke-old'
+        if: inputs.execution_mode == 'step-2-only' || inputs.execution_mode == 'full-transfer-with-delay'
         env:
           NEW_ADMIN_PRIVATE_KEY: ${{ secrets.NEW_ADMIN_PRIVATE_KEY }}
           CHAIN: ${{ matrix.network }}
           RPC_URL: ${{ secrets.RPC_URL }}
-          OLD_ADDRESS: ${{ inputs.old_address }}
+          OLD_ADDRESS: ${{ vars.OLD_ADDRESS }}
         run: |
-          echo "Executing Step 2: Accept admin role and revoke old roles"
+          echo "========================================="
+          echo "STEP 2: Accept Admin and Revoke Old Roles"
+          echo "========================================="
           echo "Chain: $CHAIN"
           echo "Old address to revoke: $OLD_ADDRESS"
+          echo ""
           make accept-admin-revoke-old
           
       - name: Summary
         run: |
-          if [ "${{ inputs.step }}" = "grant-roles-begin-transfer" ]; then
-            echo "✅ Step 1 Complete on ${{ matrix.network }}"
+          echo ""
+          echo "========================================="
+          echo "SUMMARY"
+          echo "========================================="
+          
+          if [ "${{ inputs.execution_mode }}" = "full-transfer-with-delay" ]; then
+            echo "✅ FULL TRANSFER COMPLETE on ${{ matrix.network }}"
+            echo ""
+            echo "Steps completed:"
+            echo "  1. ✅ Granted operational roles to new address"
+            echo "  2. ✅ Began admin transfer with delay period"
+            echo "  3. ✅ Waited for minimum contract delay period"
+            echo "  4. ✅ Accepted admin role with new address"
+            echo "  5. ✅ Revoked all roles from old address"
+            echo ""
+            echo "🎉 All roles have been transferred!"
+            echo "🔒 Old address has been completely removed from all contracts"
+            
+          elif [ "${{ inputs.execution_mode }}" = "step-1-only" ]; then
+            echo "✅ STEP 1 COMPLETE on ${{ matrix.network }}"
+            echo ""
             echo "⏰ Wait for the delay period to pass before running Step 2"
-            echo "📝 Next: Run this workflow again with step=accept-admin-revoke-old"
+            echo "📝 Next: Run this workflow again with execution_mode=step-2-only"
+            
           else
-            echo "✅ Step 2 Complete on ${{ matrix.network }}"
+            echo "✅ STEP 2 COMPLETE on ${{ matrix.network }}"
+            echo ""
             echo "🎉 All roles have been transferred!"
             echo "🔒 Old address has been completely removed from all contracts"
           fi
