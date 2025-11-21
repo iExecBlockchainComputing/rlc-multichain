@@ -17,29 +17,29 @@ import {ConfigLib} from "./lib/ConfigLib.sol";
 /**
  * @title TestEmergencyRoleTransferOnFork
  * @dev Script to test the emergency role transfer on a fork of Ethereum Sepolia or Arbitrum Sepolia
- * 
+ *
  * This script simulates the complete role transfer process on a local fork:
  * 1. Verifies compromised address has all roles
  * 2. Grants roles to new address and begins admin transfer
  * 3. Fast forwards past delay period
  * 4. Accepts admin role and revokes old roles
  * 5. Verifies new address has all roles and old address has none
- * 
+ *
  * Usage:
  *   # For Arbitrum Sepolia:
  *   # Start fork in terminal 1:
  *   anvil --fork-url $ARBITRUM_SEPOLIA_RPC_URL --port 8546
- *   
+ *
  *   # Run test in terminal 2:
  *   CHAIN=arbitrum_sepolia forge script script/TestEmergencyRoleTransferOnFork.s.sol:TestEmergencyRoleTransferOnFork \
  *     --rpc-url http://localhost:8546 \
  *     --broadcast \
  *     -vv
- * 
+ *
  *   # For Ethereum Sepolia:
  *   # Start fork in terminal 1:
  *   anvil --fork-url $SEPOLIA_RPC_URL --port 8546
- *   
+ *
  *   # Run test in terminal 2:
  *   CHAIN=sepolia forge script script/TestEmergencyRoleTransferOnFork.s.sol:TestEmergencyRoleTransferOnFork \
  *     --rpc-url http://localhost:8546 \
@@ -70,11 +70,11 @@ contract TestEmergencyRoleTransferOnFork is Script {
     function run() external {
         // Get chain from environment (defaults to arbitrum_sepolia for backward compatibility)
         chain = vm.envOr("CHAIN", string("arbitrum_sepolia"));
-        
+
         // Load config
         ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
         isApprovalRequired = params.approvalRequired;
-        
+
         // Initialize contracts based on chain
         if (isApprovalRequired) {
             // Ethereum Sepolia: Use RLCLiquidityUnifier
@@ -85,10 +85,10 @@ contract TestEmergencyRoleTransferOnFork is Script {
             tokenContract = IAccessControlDefaultAdminRules(params.rlcCrosschainTokenAddress);
             console.log("Using RLCCrosschainToken at:", params.rlcCrosschainTokenAddress);
         }
-        
+
         iexecLayerZeroBridge = IexecLayerZeroBridge(params.iexecLayerZeroBridgeAddress);
         console.log("Using IexecLayerZeroBridge at:", params.iexecLayerZeroBridgeAddress);
-        
+
         // Generate a new address for testing
         newAddress = makeAddr("newSecureAddress");
 
@@ -182,9 +182,7 @@ contract TestEmergencyRoleTransferOnFork is Script {
         require(
             !iexecLayerZeroBridge.hasRole(DEFAULT_ADMIN_ROLE, newAddress), "New address already has admin on bridge"
         );
-        require(
-            !iexecLayerZeroBridge.hasRole(UPGRADER_ROLE, newAddress), "New address already has upgrader on bridge"
-        );
+        require(!iexecLayerZeroBridge.hasRole(UPGRADER_ROLE, newAddress), "New address already has upgrader on bridge");
         require(!iexecLayerZeroBridge.hasRole(PAUSER_ROLE, newAddress), "New address already has pauser on bridge");
 
         console.log("OK New address has no roles (as expected)");
@@ -198,7 +196,7 @@ contract TestEmergencyRoleTransferOnFork is Script {
         // Grant roles on Token Contract
         string memory tokenName = isApprovalRequired ? "RLCLiquidityUnifier" : "RLCCrosschainToken";
         console.log(string(abi.encodePacked("Granting roles on ", tokenName, "...")));
-        
+
         tokenContract.grantRole(UPGRADER_ROLE, newAddress);
         console.log("  - UPGRADER_ROLE granted");
 
@@ -252,7 +250,7 @@ contract TestEmergencyRoleTransferOnFork is Script {
         // New address should have non-admin roles
         console.log("Checking new address has operational roles...");
         require(tokenContract.hasRole(UPGRADER_ROLE, newAddress), "New address missing UPGRADER_ROLE on token");
-        
+
         // TOKEN_BRIDGE_ROLE only exists on RLCCrosschainToken (not RLCLiquidityUnifier)
         if (!isApprovalRequired) {
             require(
@@ -260,9 +258,7 @@ contract TestEmergencyRoleTransferOnFork is Script {
             );
         }
 
-        require(
-            iexecLayerZeroBridge.hasRole(UPGRADER_ROLE, newAddress), "New address missing UPGRADER_ROLE on bridge"
-        );
+        require(iexecLayerZeroBridge.hasRole(UPGRADER_ROLE, newAddress), "New address missing UPGRADER_ROLE on bridge");
 
         // New address should NOT have admin role yet
         require(
@@ -363,18 +359,18 @@ contract TestEmergencyRoleTransferOnFork is Script {
         // New address should have all roles
         console.log("Checking new address has all transferred roles...");
         require(
-            tokenContract.hasRole(DEFAULT_ADMIN_ROLE, newAddress), 
+            tokenContract.hasRole(DEFAULT_ADMIN_ROLE, newAddress),
             string(abi.encodePacked("New address missing DEFAULT_ADMIN_ROLE on ", tokenName))
         );
         require(
-            tokenContract.hasRole(UPGRADER_ROLE, newAddress), 
+            tokenContract.hasRole(UPGRADER_ROLE, newAddress),
             string(abi.encodePacked("New address missing UPGRADER_ROLE on ", tokenName))
         );
-        
+
         // TOKEN_BRIDGE_ROLE only exists on RLCCrosschainToken
         if (!isApprovalRequired) {
             require(
-                tokenContract.hasRole(TOKEN_BRIDGE_ROLE, newAddress), 
+                tokenContract.hasRole(TOKEN_BRIDGE_ROLE, newAddress),
                 string(abi.encodePacked("New address missing TOKEN_BRIDGE_ROLE on ", tokenName))
             );
         }
@@ -383,9 +379,7 @@ contract TestEmergencyRoleTransferOnFork is Script {
             iexecLayerZeroBridge.hasRole(DEFAULT_ADMIN_ROLE, newAddress),
             "New address missing DEFAULT_ADMIN_ROLE on bridge"
         );
-        require(
-            iexecLayerZeroBridge.hasRole(UPGRADER_ROLE, newAddress), "New address missing UPGRADER_ROLE on bridge"
-        );
+        require(iexecLayerZeroBridge.hasRole(UPGRADER_ROLE, newAddress), "New address missing UPGRADER_ROLE on bridge");
 
         console.log(string(abi.encodePacked(tokenName, " - New address:")));
         console.log("  DEFAULT_ADMIN_ROLE: OK");
@@ -405,7 +399,7 @@ contract TestEmergencyRoleTransferOnFork is Script {
             string(abi.encodePacked("Old address still has DEFAULT_ADMIN_ROLE on ", tokenName))
         );
         require(
-            !tokenContract.hasRole(UPGRADER_ROLE, OLD_ADDRESS), 
+            !tokenContract.hasRole(UPGRADER_ROLE, OLD_ADDRESS),
             string(abi.encodePacked("Old address still has UPGRADER_ROLE on ", tokenName))
         );
 

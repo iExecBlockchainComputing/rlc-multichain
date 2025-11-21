@@ -49,8 +49,8 @@ contract TransferAllRolesScriptTest is TestHelperOz5 {
         // Token roles
         rlcCrosschainToken.grantRole(PAUSER_ROLE, oldAdmin);
         rlcCrosschainToken.grantRole(TOKEN_BRIDGE_ROLE, address(iexecLayerZeroBridge));
-        
-        // Bridge roles  
+
+        // Bridge roles
         iexecLayerZeroBridge.grantRole(PAUSER_ROLE, oldAdmin);
         vm.stopPrank();
     }

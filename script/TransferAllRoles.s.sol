@@ -46,23 +46,17 @@ contract GrantRolesAndBeginAdminTransfer is Script {
         ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
 
         vm.startBroadcast();
-        
+
         if (!params.approvalRequired) {
             console.log("Processing RLCCrosschainToken...");
             grantRolesAndBeginAdminTransfer(
-                params.rlcCrosschainTokenAddress,
-                oldAddress,
-                newAddress,
-                "RLCCrosschainToken"
+                params.rlcCrosschainTokenAddress, oldAddress, newAddress, "RLCCrosschainToken"
             );
             console.log("");
         } else {
             console.log("Processing RLCLiquidityUnifier...");
             grantRolesAndBeginAdminTransfer(
-                params.rlcLiquidityUnifierAddress,
-                oldAddress,
-                newAddress,
-                "RLCLiquidityUnifier"
+                params.rlcLiquidityUnifierAddress, oldAddress, newAddress, "RLCLiquidityUnifier"
             );
             console.log("");
         }
@@ -70,14 +64,11 @@ contract GrantRolesAndBeginAdminTransfer is Script {
         // Process IexecLayerZeroBridge
         console.log("Processing IexecLayerZeroBridge...");
         grantRolesAndBeginAdminTransfer(
-            params.iexecLayerZeroBridgeAddress,
-            oldAddress,
-            newAddress,
-            "IexecLayerZeroBridge"
+            params.iexecLayerZeroBridgeAddress, oldAddress, newAddress, "IexecLayerZeroBridge"
         );
 
         vm.stopBroadcast();
-        
+
         console.log("");
         console.log("=== Step 1 Complete ===");
         console.log("Next steps:");
@@ -99,7 +90,7 @@ contract GrantRolesAndBeginAdminTransfer is Script {
         string memory contractName
     ) internal {
         IAccessControlDefaultAdminRules contractInstance = IAccessControlDefaultAdminRules(contractAddress);
-        
+
         // Verify old address has admin role
         bytes32 defaultAdminRole = 0x00;
         require(
@@ -110,7 +101,7 @@ contract GrantRolesAndBeginAdminTransfer is Script {
         // Get role identifiers
         bytes32 upgraderRole = keccak256("UPGRADER_ROLE");
         bytes32 pauserRole = keccak256("PAUSER_ROLE");
-        
+
         console.log("  Granting roles to new address...");
         if (contractInstance.hasRole(upgraderRole, oldAddress)) {
             contractInstance.grantRole(upgraderRole, newAddress);
@@ -123,7 +114,7 @@ contract GrantRolesAndBeginAdminTransfer is Script {
 
         console.log("  Beginning DEFAULT_ADMIN_ROLE transfer...");
         contractInstance.beginDefaultAdminTransfer(newAddress);
-        
+
         (address pendingAdmin, uint48 schedule) = contractInstance.pendingDefaultAdmin();
         console.log("    - Pending admin:", pendingAdmin);
         console.log("    - Transfer scheduled for:", uint256(schedule));
@@ -164,33 +155,21 @@ contract AcceptAdminRoleAndRevokeOldRoles is Script {
         ConfigLib.CommonConfigParams memory params = ConfigLib.readCommonConfig(chain);
 
         vm.startBroadcast();
-        
+
         if (!params.approvalRequired) {
             console.log("Processing RLCCrosschainToken...");
-            acceptAdminAndRevokeOldRoles(
-                params.rlcCrosschainTokenAddress,
-                oldAddress,
-                "RLCCrosschainToken"
-            );
+            acceptAdminAndRevokeOldRoles(params.rlcCrosschainTokenAddress, oldAddress, "RLCCrosschainToken");
             console.log("");
         } else {
             console.log("Processing RLCLiquidityUnifier...");
-            acceptAdminAndRevokeOldRoles(
-                params.rlcLiquidityUnifierAddress,
-                oldAddress,
-                "RLCLiquidityUnifier"
-            );
+            acceptAdminAndRevokeOldRoles(params.rlcLiquidityUnifierAddress, oldAddress, "RLCLiquidityUnifier");
             console.log("");
         }
         console.log("Processing IexecLayerZeroBridge...");
-        acceptAdminAndRevokeOldRoles(
-            params.iexecLayerZeroBridgeAddress,
-            oldAddress,
-            "IexecLayerZeroBridge"
-        );
+        acceptAdminAndRevokeOldRoles(params.iexecLayerZeroBridgeAddress, oldAddress, "IexecLayerZeroBridge");
 
         vm.stopBroadcast();
-        
+
         console.log("");
         console.log("=== Step 2 Complete ===");
         console.log("All roles have been transferred to the new address!");
@@ -203,28 +182,26 @@ contract AcceptAdminRoleAndRevokeOldRoles is Script {
      * @param oldAddress The old (compromised) address to revoke roles from
      * @param contractName The name of the contract for logging
      */
-    function acceptAdminAndRevokeOldRoles(
-        address contractAddress,
-        address oldAddress,
-        string memory contractName
-    ) internal {
+    function acceptAdminAndRevokeOldRoles(address contractAddress, address oldAddress, string memory contractName)
+        internal
+    {
         IAccessControlDefaultAdminRules contractInstance = IAccessControlDefaultAdminRules(contractAddress);
-        
+
         // Accept admin role
         console.log("  Accepting DEFAULT_ADMIN_ROLE...");
         contractInstance.acceptDefaultAdminTransfer();
-        
+
         address newAdmin = contractInstance.defaultAdmin();
         console.log("    - New admin confirmed:", newAdmin);
         require(newAdmin != oldAddress, string(abi.encodePacked(contractName, ": Admin not transferred")));
-        
+
         // Revoke all roles from old address
         console.log("  Revoking all roles from old address...");
-        
+
         bytes32 upgraderRole = keccak256("UPGRADER_ROLE");
         bytes32 pauserRole = keccak256("PAUSER_ROLE");
         bytes32 defaultAdminRole = 0x00;
-        
+
         if (contractInstance.hasRole(upgraderRole, oldAddress)) {
             contractInstance.revokeRole(upgraderRole, oldAddress);
             console.log("    - UPGRADER_ROLE revoked");
@@ -233,15 +210,17 @@ contract AcceptAdminRoleAndRevokeOldRoles is Script {
             contractInstance.revokeRole(pauserRole, oldAddress);
             console.log("    - PAUSER_ROLE revoked");
         }
-        
+
         // Verify old address no longer has any roles
         bool hasUpgrader = contractInstance.hasRole(upgraderRole, oldAddress);
         bool hasPauser = contractInstance.hasRole(pauserRole, oldAddress);
         bool hasAdmin = contractInstance.hasRole(defaultAdminRole, oldAddress);
-        
-        require(!hasUpgrader && !hasPauser && !hasAdmin, 
-            string(abi.encodePacked(contractName, ": Old address still has roles")));
-        
+
+        require(
+            !hasUpgrader && !hasPauser && !hasAdmin,
+            string(abi.encodePacked(contractName, ": Old address still has roles"))
+        );
+
         console.log("    - All roles successfully revoked from old address");
     }
 }
