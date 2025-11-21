@@ -47,7 +47,6 @@ contract GrantRolesAndBeginAdminTransfer is Script {
 
         vm.startBroadcast();
         
-        // Process RLCCrosschainToken (for non-mainnet chains)
         if (!params.approvalRequired) {
             console.log("Processing RLCCrosschainToken...");
             grantRolesAndBeginAdminTransfer(
@@ -55,20 +54,30 @@ contract GrantRolesAndBeginAdminTransfer is Script {
                 oldAddress,
                 newAddress,
                 "RLCCrosschainToken",
-                true // has TOKEN_BRIDGE_ROLE
+                false // has TOKEN_BRIDGE_ROLE
+            );
+            console.log("");
+        } else {
+            console.log("Processing RLCLiquidityUnifier...");
+            grantRolesAndBeginAdminTransfer(
+                params.rlcLiquidityUnifierAddress,
+                oldAddress,
+                newAddress,
+                "RLCLiquidityUnifier",
+                false // has TOKEN_BRIDGE_ROLE
             );
             console.log("");
         }
 
         // Process IexecLayerZeroBridge
-        console.log("Processing IexecLayerZeroBridge...");
-        grantRolesAndBeginAdminTransfer(
-            params.iexecLayerZeroBridgeAddress,
-            oldAddress,
-            newAddress,
-            "IexecLayerZeroBridge",
-            false // no TOKEN_BRIDGE_ROLE on bridge
-        );
+        // console.log("Processing IexecLayerZeroBridge...");
+        // grantRolesAndBeginAdminTransfer(
+        //     params.iexecLayerZeroBridgeAddress,
+        //     oldAddress,
+        //     newAddress,
+        //     "IexecLayerZeroBridge",
+        //     false // no TOKEN_BRIDGE_ROLE on bridge
+        // );
 
         vm.stopBroadcast();
         
@@ -175,14 +184,22 @@ contract AcceptAdminRoleAndRevokeOldRoles is Script {
 
         vm.startBroadcast();
         
-        // Process RLCCrosschainToken (for non-mainnet chains)
         if (!params.approvalRequired) {
             console.log("Processing RLCCrosschainToken...");
             acceptAdminAndRevokeOldRoles(
                 params.rlcCrosschainTokenAddress,
                 oldAddress,
                 "RLCCrosschainToken",
-                true // has TOKEN_BRIDGE_ROLE
+                false // has TOKEN_BRIDGE_ROLE
+            );
+            console.log("");
+        } else {
+            console.log("Processing RLCLiquidityUnifier...");
+            acceptAdminAndRevokeOldRoles(
+                params.rlcLiquidityUnifierAddress,
+                oldAddress,
+                "RLCLiquidityUnifier",
+                false // has TOKEN_BRIDGE_ROLE
             );
             console.log("");
         }
