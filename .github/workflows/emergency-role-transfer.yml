@@ -1,7 +1,7 @@
 name: Emergency Role Transfer
 
 on:
-        workflow_dispatch:
+  workflow_dispatch:
     inputs:
       execution_mode:
         description: 'Execution mode'
