@@ -53,8 +53,7 @@ contract GrantRolesAndBeginAdminTransfer is Script {
                 params.rlcCrosschainTokenAddress,
                 oldAddress,
                 newAddress,
-                "RLCCrosschainToken",
-                false // has TOKEN_BRIDGE_ROLE
+                "RLCCrosschainToken"
             );
             console.log("");
         } else {
@@ -63,21 +62,19 @@ contract GrantRolesAndBeginAdminTransfer is Script {
                 params.rlcLiquidityUnifierAddress,
                 oldAddress,
                 newAddress,
-                "RLCLiquidityUnifier",
-                false // has TOKEN_BRIDGE_ROLE
+                "RLCLiquidityUnifier"
             );
             console.log("");
         }
 
         // Process IexecLayerZeroBridge
-        // console.log("Processing IexecLayerZeroBridge...");
-        // grantRolesAndBeginAdminTransfer(
-        //     params.iexecLayerZeroBridgeAddress,
-        //     oldAddress,
-        //     newAddress,
-        //     "IexecLayerZeroBridge",
-        //     false // no TOKEN_BRIDGE_ROLE on bridge
-        // );
+        console.log("Processing IexecLayerZeroBridge...");
+        grantRolesAndBeginAdminTransfer(
+            params.iexecLayerZeroBridgeAddress,
+            oldAddress,
+            newAddress,
+            "IexecLayerZeroBridge"
+        );
 
         vm.stopBroadcast();
         
@@ -94,14 +91,12 @@ contract GrantRolesAndBeginAdminTransfer is Script {
      * @param oldAddress The old (compromised) address
      * @param newAddress The new (secure) address
      * @param contractName The name of the contract for logging
-     * @param hasTokenBridgeRole Whether this contract has TOKEN_BRIDGE_ROLE
      */
     function grantRolesAndBeginAdminTransfer(
         address contractAddress,
         address oldAddress,
         address newAddress,
-        string memory contractName,
-        bool hasTokenBridgeRole
+        string memory contractName
     ) internal {
         IAccessControlDefaultAdminRules contractInstance = IAccessControlDefaultAdminRules(contractAddress);
         
@@ -117,29 +112,15 @@ contract GrantRolesAndBeginAdminTransfer is Script {
         bytes32 pauserRole = keccak256("PAUSER_ROLE");
         
         console.log("  Granting roles to new address...");
-        
-        // Grant UPGRADER_ROLE
         if (contractInstance.hasRole(upgraderRole, oldAddress)) {
             contractInstance.grantRole(upgraderRole, newAddress);
             console.log("    - UPGRADER_ROLE granted");
         }
-        
-        // Grant PAUSER_ROLE
         if (contractInstance.hasRole(pauserRole, oldAddress)) {
             contractInstance.grantRole(pauserRole, newAddress);
             console.log("    - PAUSER_ROLE granted");
         }
-        
-        // Grant TOKEN_BRIDGE_ROLE (only for RLCCrosschainToken)
-        if (hasTokenBridgeRole) {
-            bytes32 tokenBridgeRole = keccak256("TOKEN_BRIDGE_ROLE");
-            if (contractInstance.hasRole(tokenBridgeRole, oldAddress)) {
-                contractInstance.grantRole(tokenBridgeRole, newAddress);
-                console.log("    - TOKEN_BRIDGE_ROLE granted");
-            }
-        }
-        
-        // Begin admin transfer
+
         console.log("  Beginning DEFAULT_ADMIN_ROLE transfer...");
         contractInstance.beginDefaultAdminTransfer(newAddress);
         
@@ -189,8 +170,7 @@ contract AcceptAdminRoleAndRevokeOldRoles is Script {
             acceptAdminAndRevokeOldRoles(
                 params.rlcCrosschainTokenAddress,
                 oldAddress,
-                "RLCCrosschainToken",
-                false // has TOKEN_BRIDGE_ROLE
+                "RLCCrosschainToken"
             );
             console.log("");
         } else {
@@ -198,19 +178,15 @@ contract AcceptAdminRoleAndRevokeOldRoles is Script {
             acceptAdminAndRevokeOldRoles(
                 params.rlcLiquidityUnifierAddress,
                 oldAddress,
-                "RLCLiquidityUnifier",
-                false // has TOKEN_BRIDGE_ROLE
+                "RLCLiquidityUnifier"
             );
             console.log("");
         }
-
-        // Process IexecLayerZeroBridge
         console.log("Processing IexecLayerZeroBridge...");
         acceptAdminAndRevokeOldRoles(
             params.iexecLayerZeroBridgeAddress,
             oldAddress,
-            "IexecLayerZeroBridge",
-            false // no TOKEN_BRIDGE_ROLE on bridge
+            "IexecLayerZeroBridge"
         );
 
         vm.stopBroadcast();
@@ -226,13 +202,11 @@ contract AcceptAdminRoleAndRevokeOldRoles is Script {
      * @param contractAddress The address of the contract
      * @param oldAddress The old (compromised) address to revoke roles from
      * @param contractName The name of the contract for logging
-     * @param hasTokenBridgeRole Whether this contract has TOKEN_BRIDGE_ROLE
      */
     function acceptAdminAndRevokeOldRoles(
         address contractAddress,
         address oldAddress,
-        string memory contractName,
-        bool hasTokenBridgeRole
+        string memory contractName
     ) internal {
         IAccessControlDefaultAdminRules contractInstance = IAccessControlDefaultAdminRules(contractAddress);
         
@@ -251,25 +225,13 @@ contract AcceptAdminRoleAndRevokeOldRoles is Script {
         bytes32 pauserRole = keccak256("PAUSER_ROLE");
         bytes32 defaultAdminRole = 0x00;
         
-        // Revoke UPGRADER_ROLE
         if (contractInstance.hasRole(upgraderRole, oldAddress)) {
             contractInstance.revokeRole(upgraderRole, oldAddress);
             console.log("    - UPGRADER_ROLE revoked");
         }
-        
-        // Revoke PAUSER_ROLE
         if (contractInstance.hasRole(pauserRole, oldAddress)) {
             contractInstance.revokeRole(pauserRole, oldAddress);
             console.log("    - PAUSER_ROLE revoked");
-        }
-        
-        // Revoke TOKEN_BRIDGE_ROLE (only for RLCCrosschainToken)
-        if (hasTokenBridgeRole) {
-            bytes32 tokenBridgeRole = keccak256("TOKEN_BRIDGE_ROLE");
-            if (contractInstance.hasRole(tokenBridgeRole, oldAddress)) {
-                contractInstance.revokeRole(tokenBridgeRole, oldAddress);
-                console.log("    - TOKEN_BRIDGE_ROLE revoked");
-            }
         }
         
         // Verify old address no longer has any roles
