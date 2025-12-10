@@ -1,0 +1,78 @@
+name: Propose Safe Transaction (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      network:
+        description: 'Network environment'
+        required: true
+        type: string
+      safe-address:
+        description: 'Safe multisig address'
+        required: true
+        type: string
+      transaction-to:
+        description: 'Transaction target address'
+        required: true
+        type: string
+      transaction-data:
+        description: 'Transaction calldata'
+        required: true
+        type: string
+      transaction-value:
+        description: 'Transaction value in wei'
+        required: false
+        type: string
+        default: "0"
+      dry-run:
+        description: 'Dry run mode'
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      rpc-url:
+        description: 'RPC URL for the network'
+        required: true
+      safe-proposer-private-key:
+        description: 'Private key of the Safe proposer'
+        required: true
+      safe-api-key:
+        description: 'Safe API key'
+        required: true
+
+jobs:
+  propose-transaction:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.network }}
+    steps:
+      - name: Checkout Safe proposal repository
+        uses: actions/checkout@v4
+        with:
+          repository: iExecBlockchainComputing/github-actions-workflows
+          path: .github-actions
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: .github-actions/propose-safe-multisig-tx
+        run: npm ci
+
+      - name: Build the action
+        working-directory: .github-actions/propose-safe-multisig-tx
+        run: npm run build
+
+      - name: Propose transaction to Safe
+        working-directory: .github-actions/propose-safe-multisig-tx
+        env:
+          SAFE_ADDRESS: ${{ inputs.safe-address }}
+          TRANSACTION_TO: ${{ inputs.transaction-to }}
+          TRANSACTION_VALUE: ${{ inputs.transaction-value }}
+          TRANSACTION_DATA: ${{ inputs.transaction-data }}
+          RPC_URL: ${{ secrets.rpc-url }}
+          SAFE_PROPOSER_PRIVATE_KEY: ${{ secrets.safe-proposer-private-key }}
+          SAFE_API_KEY: ${{ secrets.safe-api-key }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: npm run propose

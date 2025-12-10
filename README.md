@@ -347,6 +347,24 @@ The scripts automatically calculate these fees and include them in the transacti
 
 Note that production GitHub environments `arbitrum` and `ethereum` can only be used with the `main` branch.
 
+## Safe Multisig Integration
+
+All critical administrative operations are secured using Safe (Gnosis Safe) multisig wallets. This ensures that important actions like contract upgrades, role management, and pause operations require approval from multiple authorized signers.
+
+### Supported Operations
+
+- **Pause/Unpause**: Control bridge operations with different pause levels
+- **Role Management**: Grant or revoke TOKEN_BRIDGE_ROLE
+- **Admin Transfer**: Transfer admin role to new addresses
+
+### GitHub Actions Workflows
+
+- `.github/workflows/bridge-pause-safe.yml` - Propose pause/unpause transactions
+- `.github/workflows/manage-contract-roles-safe.yml` - Propose role management transactions
+- `.github/workflows/transfer-admin-role-safe.yml` - Propose admin role transfer transactions
+
+All workflows use the reusable Safe multisig workflow from [iExecBlockchainComputing/github-actions-workflows](https://github.com/iExecBlockchainComputing/github-actions-workflows).
+
 ## TODO
 
 - Use an enterprise RPC URL for `secrets.SEPOLIA_RPC_URL` in Github environment `ci`.
