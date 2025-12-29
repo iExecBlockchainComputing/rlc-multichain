@@ -12,7 +12,21 @@
       "iexecLayerZeroBridgeAddress": "0xA18e571f91ab58889C348E1764fBaBF622ab89b5",
       "iexecLayerZeroBridgeCreatexSalt": "0x4f2784ad07b2be2a5c5e466c91d758133f4aa33bd4cf09ddba1a1e1035e57875",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-      "lzEndpointId": 40161
+      "lzEndpointId": 40161,
+      "lzSendLibraryAddress": "0xcc1ae8Cf5D3904Cef3360A9532B477529b177cCE",
+      "lzReceiveLibraryAddress": "0xdAf00F5eE2158dD58E0d3857851c432E34A3A851",
+      "lzExecutorConfig": {
+        "maxMessageSize": 10000,
+        "executor": "0x718B92b5CB0a5552039B593faF724D182A881eDA"
+      },
+      "lzUlnConfig": {
+        "confirmations": 2,
+        "requiredDVNCount": 1,
+        "requiredDVNs": ["0x8eebf8b423B73bFCa51a1Db4B7354AA0bFCA9193"],
+        "optionalDVNCount": 0,
+        "optionalDVNs": [],
+        "optionalDVNThreshold": 0
+      }
     },
     "arbitrum_sepolia": {
       "approvalRequired": false,
@@ -21,9 +35,24 @@
       "iexecLayerZeroBridgeAddress": "0xB560ae1dD7FdF011Ead2189510ae08f2dbD168a5",
       "iexecLayerZeroBridgeCreatexSalt": "0x4f2784ad07b2be2a5c5e466c91d758133f4aa33bd4cf09ddba1a1e1035e57875",
       "lzEndpointAddress": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-      "lzEndpointId": 40231
+      "lzEndpointId": 40231,
+      "lzSendLibraryAddress": "0x4f7cd4DA19ABB31b0eC98b9066B9e857B1bf9C0E",
+      "lzReceiveLibraryAddress": "0x75Db67CDab2824970131D5aa9CECfC9F69c69636",
+      "lzExecutorConfig": {
+        "maxMessageSize": 10000,
+        "executor": "0x5Df3a1cEbBD9c8BA7F8dF51Fd632A9aef8308897"
+      },
+      "lzDvnConfig": {
+        "confirmations": 1,
+        "requiredDvnCount": 1,
+        "requiredDvnList": ["0x53f488E93b4f1b60E8E83aa374dBe1780A1EE8a8"],
+        "optionalDvnCount": 0,
+        "optionalDvnList": [],
+        "optionalDvnThreshold": 0
+      }
     },
     "ethereum": {
+      "__dvnConfigSourceUrl": "https://layerzeroscan.com/tools/defaults?version=V2&srcChainKey[0]=ethereum&dstChainKey[0]=arbitrum",
       "approvalRequired": true,
       "rlcAddress": "0x607F4C5BB672230e8672085532f7e901544a7375",
       "rlcLiquidityUnifierAddress": "0x329F9f984B1364d4E01c6F9f63a1326b7E420b38",
@@ -31,16 +60,51 @@
       "iexecLayerZeroBridgeAddress": "0xA8Bc0B19b955c8AC38C8Cbc9383866b834Cd33d8",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000000",
       "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
-      "lzEndpointId": 30101
+      "lzEndpointId": 30101,
+      "lzSendLibraryAddress": "0xbB2Ea70C9E858123480642Cf96acbcCE1372dCe1",
+      "lzReceiveLibraryAddress": "0xc02Ab410f0734EFa3F14628780e6e695156024C2",
+      "lzExecutorConfig": {
+        "maxMessageSize": 10000,
+        "executor": "0x173272739Bd7Aa6e4e214714048a9fE699453059"
+      },
+      "lzDvnConfig": {
+        "confirmations": 15,
+        "requiredDvnCount": 2,
+        "requiredDvnList": [
+          "0x589dEDbD617e0CBcB916A9223F4d1300c294236b",
+          "0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc"
+        ],
+        "optionalDvnCount": 0,
+        "optionalDvnList": [],
+        "optionalDvnThreshold": 0
+      }
     },
     "arbitrum": {
+      "__dvnConfigSourceUrl": "https://layerzeroscan.com/tools/defaults?version=V2&srcChainKey[0]=arbitrum&dstChainKey[0]=ethereum",
       "approvalRequired": false,
       "rlcCrosschainTokenAddress": "0xe649e6a1F2afc63ca268C2363691ceCAF75CF47C",
       "rlcCrosschainTokenCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000001",
       "iexecLayerZeroBridgeAddress": "0x7000e96D0Bfc74cf5259aEDaE6065B39B3888699",
       "iexecLayerZeroBridgeCreatexSalt": "0x0000000000000000000000000000000000000000000000000000000000000001",
       "lzEndpointAddress": "0x1a44076050125825900e736c501f859c50fE728c",
-      "lzEndpointId": 30110
+      "lzEndpointId": 30110,
+      "lzSendLibraryAddress": "0x975bcD720be66659e3EB3C0e4F1866a3020E493A",
+      "lzReceiveLibraryAddress": "0x7B9E184e07a6EE1aC23eAe0fe8D6Be2f663f05e6",
+      "lzExecutorConfig": {
+        "maxMessageSize": 10000,
+        "executor": "0x31CAe3B7fB82d847621859fb1585353c5720660D"
+      },
+      "lzDvnConfig": {
+        "confirmations": 20,
+        "requiredDvnCount": 2,
+        "requiredDvnList": [
+          "0x2f55C492897526677C5B68fb199ea31E2c126416",
+          "0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc"
+        ],
+        "optionalDvnCount": 0,
+        "optionalDvnList": [],
+        "optionalDvnThreshold": 0
+      }
     }
   }
 }
